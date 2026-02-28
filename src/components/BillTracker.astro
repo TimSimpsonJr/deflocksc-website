@@ -1,0 +1,161 @@
+---
+import bills from '../data/bills.json';
+---
+
+<section class="bg-[#1e293b] py-20 md:py-28">
+  <div class="max-w-4xl mx-auto px-6">
+    <h2 class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-6">
+      Three Bills. All Stalled. Your Legislators Need to Hear From You.
+    </h2>
+
+    <p class="text-[#cbd5e1] text-base leading-relaxed mb-10">
+      Three bills to rein in license plate cameras are sitting in SC committee right now. None have had a hearing. As of February 2026, they're just waiting. That changes when legislators hear from you.
+    </p>
+
+    <!-- Bill cards -->
+    <div class="space-y-4 mb-10">
+      {bills.map((bill: any, i: number) => (
+        <div
+          class="bill-card bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#263548] hover:translate-x-1 hover:shadow-lg"
+          data-bill={i}
+        >
+          <div class="flex items-start justify-between gap-4 mb-2">
+            <span class="text-[#ef4444] font-extrabold text-lg">{bill.bill}</span>
+            <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase tracking-[0.05em] bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded whitespace-nowrap">
+              In Committee
+            </span>
+          </div>
+          <p class="text-[#cbd5e1] text-sm mb-2">{bill.title}</p>
+          <p class="text-[#475569] text-xs font-medium">Click for details</p>
+        </div>
+      ))}
+    </div>
+
+    <!-- Last updated + status note -->
+    <p class="text-[#64748b] text-sm mb-4">Last updated: February 2026</p>
+    <div class="text-[#94a3b8] text-sm leading-relaxed space-y-3">
+      <p>
+        <em>S447 has gotten the furthest: it cleared a Senate Judiciary subcommittee, but the full committee hasn't acted. H3155 and H4013 haven't had any committee action at all. Meanwhile, a separate lawsuit (SCPIF v. SLED) is challenging the state's existing license plate database in court. How that turns out may affect how urgently legislators move.</em>
+      </p>
+      <p>
+        <em>Bill status is checked automatically each week during the legislative session.</em>
+      </p>
+    </div>
+  </div>
+
+  <!-- Modal backdrop -->
+  <div id="bill-modal-backdrop" class="fixed inset-0 z-[100] bg-[rgba(2,6,23,0.85)] hidden opacity-0 transition-opacity duration-200">
+    <!-- Modal card -->
+    <div id="bill-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-[90vw] max-w-[560px] bg-[#1e293b] border-l-4 border-[#ef4444] rounded-lg p-6 md:p-8 opacity-0 translate-y-5 transition-all duration-250 ease-out">
+      <!-- Close button -->
+      <button id="bill-modal-close" class="absolute top-4 right-4 text-[#64748b] hover:text-white transition-colors text-xl leading-none cursor-pointer" aria-label="Close">&times;</button>
+
+      <!-- Bill ID -->
+      <h3 id="modal-bill-id" class="text-[#ef4444] font-black text-2xl tracking-[-0.02em] mb-2"></h3>
+
+      <!-- Title -->
+      <p id="modal-bill-title" class="text-white font-bold text-lg mb-4"></p>
+
+      <!-- Metadata row -->
+      <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-6">
+        <div>
+          <span class="text-[#64748b]">Status:</span>
+          <span id="modal-bill-status" class="text-[#fbbf24] font-bold ml-1"></span>
+        </div>
+        <div id="modal-last-action-row">
+          <span class="text-[#64748b]">Last Action:</span>
+          <span id="modal-bill-last-action" class="text-[#94a3b8] ml-1"></span>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <p id="modal-bill-description" class="text-[#94a3b8] text-sm leading-relaxed mb-8"></p>
+
+      <!-- Actions footer -->
+      <div class="flex flex-col items-start gap-3 min-[520px]:flex-row-reverse min-[520px]:justify-between min-[520px]:items-center">
+        <a href="#take-action" id="modal-cta" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.05em] px-6 py-3 rounded transition-colors">
+          Email Your Legislators
+        </a>
+        <a id="modal-bill-link" href="#" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] text-sm font-medium transition-colors">
+          Read full text on scstatehouse.gov &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ bills }}>
+  const backdrop = document.getElementById('bill-modal-backdrop');
+  const modal = document.getElementById('bill-modal');
+  const closeBtn = document.getElementById('bill-modal-close');
+
+  function openModal(index) {
+    const bill = bills[index];
+    if (!bill) return;
+
+    document.getElementById('modal-bill-id').textContent = bill.bill;
+    document.getElementById('modal-bill-title').textContent = bill.title;
+    document.getElementById('modal-bill-status').textContent = bill.status;
+    document.getElementById('modal-bill-description').textContent = bill.description;
+    document.getElementById('modal-bill-link').href = bill.url;
+
+    const lastActionRow = document.getElementById('modal-last-action-row');
+    const lastAction = document.getElementById('modal-bill-last-action');
+    if (bill.lastAction) {
+      lastAction.textContent = bill.lastAction;
+      lastActionRow.style.display = '';
+    } else {
+      lastActionRow.style.display = 'none';
+    }
+
+    // Show backdrop
+    backdrop.classList.remove('hidden');
+    // Trigger reflow for animation
+    backdrop.offsetHeight;
+    backdrop.classList.add('opacity-100');
+    backdrop.classList.remove('opacity-0');
+
+    // Animate modal in
+    modal.classList.add('opacity-100', 'translate-y-0');
+    modal.classList.remove('opacity-0', 'translate-y-5');
+
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    // Animate modal out (fade down)
+    modal.classList.remove('opacity-100', 'translate-y-0');
+    modal.classList.add('opacity-0', 'translate-y-5');
+
+    // Fade backdrop
+    backdrop.classList.remove('opacity-100');
+    backdrop.classList.add('opacity-0');
+
+    setTimeout(() => {
+      backdrop.classList.add('hidden');
+      document.body.style.overflow = '';
+    }, 200);
+  }
+
+  // Card click handlers
+  document.querySelectorAll('.bill-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const index = parseInt(card.getAttribute('data-bill'));
+      openModal(index);
+    });
+  });
+
+  // Close handlers
+  closeBtn?.addEventListener('click', closeModal);
+  backdrop?.addEventListener('click', (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !backdrop?.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
+  // Close modal when clicking CTA (since it navigates to #take-action)
+  document.getElementById('modal-cta')?.addEventListener('click', closeModal);
+</script>
