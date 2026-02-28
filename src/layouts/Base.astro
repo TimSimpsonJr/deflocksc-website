@@ -1,0 +1,129 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "DeflockSC", description = "Bringing transparency to license plate surveillance in Upstate South Carolina." } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+  </head>
+  <body class="bg-[#0f172a] text-[#cbd5e1] font-['Inter',sans-serif] leading-[1.7] min-h-screen">
+    <!-- Nav -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-[#0f172a] border-b border-[#1e293b]">
+      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="text-white font-black text-xl tracking-[-0.02em]">DeflockSC</a>
+
+        <!-- Desktop nav -->
+        <div class="hidden md:flex items-center gap-8">
+          <a href="/" class="text-[#94a3b8] font-bold text-xs uppercase tracking-[0.1em] hover:text-white transition-colors">Home</a>
+          <a href="/blog" class="text-[#94a3b8] font-bold text-xs uppercase tracking-[0.1em] hover:text-white transition-colors">Blog</a>
+          <a href="/#take-action" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors">Take Action</a>
+        </div>
+
+        <!-- Mobile hamburger -->
+        <button id="menu-toggle" class="md:hidden text-white p-2" aria-label="Toggle menu" aria-expanded="false">
+          <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mobile menu -->
+      <div id="mobile-menu" class="hidden md:hidden border-t border-[#1e293b] bg-[#0f172a]">
+        <div class="px-6 py-4 flex flex-col gap-4">
+          <a href="/" class="text-[#94a3b8] font-bold text-sm uppercase tracking-[0.1em] hover:text-white transition-colors">Home</a>
+          <a href="/blog" class="text-[#94a3b8] font-bold text-sm uppercase tracking-[0.1em] hover:text-white transition-colors">Blog</a>
+          <a href="/#take-action" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors text-center">Take Action</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="pt-16">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#0f172a] border-t border-[#1e293b] py-16">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="grid md:grid-cols-3 gap-12">
+          <!-- About -->
+          <div>
+            <h3 class="text-white font-extrabold text-sm uppercase tracking-[0.1em] mb-4">About DeflockSC</h3>
+            <p class="text-[#94a3b8] text-sm leading-relaxed">DeflockSC is a group of South Carolinians who think residents should have a say in how they're surveilled. We're not affiliated with any political party. This is a privacy issue, not a partisan one.</p>
+          </div>
+
+          <!-- Links -->
+          <div>
+            <h3 class="text-white font-extrabold text-sm uppercase tracking-[0.1em] mb-4">Resources</h3>
+            <ul class="space-y-2 text-sm">
+              <li><a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] transition-colors">Deflock.org — community camera map</a></li>
+              <li><a href="https://www.eff.org/issues/license-plates" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] transition-colors">EFF License Plate Reader Hub</a></li>
+              <li><a href="https://banthecams.org" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] transition-colors">Ban The Cams</a></li>
+              <li><a href="https://www.scstatehouse.gov/sess126_2025-2026/bills/447.htm" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] transition-colors">SC Legislature — S447</a></li>
+              <li><a href="https://www.scstatehouse.gov/sess126_2025-2026/bills/3155.htm" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] transition-colors">SC Legislature — H3155</a></li>
+              <li><a href="https://www.scstatehouse.gov/sess126_2025-2026/bills/4013.htm" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] transition-colors">SC Legislature — H4013</a></li>
+            </ul>
+          </div>
+
+          <!-- Contact -->
+          <div>
+            <h3 class="text-white font-extrabold text-sm uppercase tracking-[0.1em] mb-4">Contact</h3>
+            <p class="text-[#94a3b8] text-sm">Want to get more involved? Email us.</p>
+          </div>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-[#1e293b] text-center text-[#64748b] text-xs">
+          &copy; {new Date().getFullYear()} DeflockSC. All rights reserved.
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const toggle = document.getElementById('menu-toggle');
+      const menu = document.getElementById('mobile-menu');
+      const iconOpen = document.getElementById('menu-icon-open');
+      const iconClose = document.getElementById('menu-icon-close');
+
+      toggle?.addEventListener('click', () => {
+        const isOpen = !menu?.classList.contains('hidden');
+        menu?.classList.toggle('hidden');
+        iconOpen?.classList.toggle('hidden');
+        iconClose?.classList.toggle('hidden');
+        toggle.setAttribute('aria-expanded', String(!isOpen));
+      });
+
+      // Close mobile menu when clicking a link
+      menu?.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          menu.classList.add('hidden');
+          iconOpen?.classList.remove('hidden');
+          iconClose?.classList.add('hidden');
+          toggle?.setAttribute('aria-expanded', 'false');
+        });
+      });
+    </script>
+  </body>
+</html>
