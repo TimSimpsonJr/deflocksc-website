@@ -10,7 +10,7 @@
     <!-- Split layout: intro text + divider + carousel -->
     <div class="grid md:grid-cols-[1fr_1px_1fr] gap-10 md:gap-12 mb-14">
       <!-- Left: intro paragraphs -->
-      <div class="space-y-6 text-[#cbd5e1] text-base leading-relaxed">
+      <div class="space-y-6 text-[#cbd5e1] text-base leading-relaxed min-w-0">
         <p>
           Flock Safety puts cameras on poles at intersections and along roadsides. Small. Solar-powered. Easy to miss. Every car that drives by gets photographed. Your plate number, vehicle make, color, and location get uploaded to Flock's servers automatically. Every time.
         </p>
@@ -26,7 +26,7 @@
       <div class="hidden md:block bg-[#334155]"></div>
 
       <!-- Right: carousel -->
-      <div class="factoid-carousel" id="factoidCarousel">
+      <div class="factoid-carousel min-w-0" id="factoidCarousel">
         <div class="carousel-container">
           <!-- Prev arrow -->
           <button class="carousel-arrow carousel-arrow-prev" id="prevBtn" aria-label="Previous factoid">&lsaquo;</button>
@@ -208,16 +208,23 @@
     position: relative;
     background: #0f172a;
     border-radius: 10px;
-    padding: 24px 48px 48px;
+    padding: 24px 20px 48px;
     overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    .carousel-container {
+      padding: 24px 48px 48px;
+    }
   }
 
   /* Carousel viewport & track */
   .carousel-viewport {
     overflow: hidden;
+    width: 100%;
   }
   .carousel-track {
     display: flex;
+    width: 100%;
     transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -272,10 +279,18 @@
     color: #94a3b8;
   }
   .carousel-arrow-prev {
-    left: 8px;
+    left: 2px;
   }
   .carousel-arrow-next {
-    right: 8px;
+    right: 2px;
+  }
+  @media (min-width: 768px) {
+    .carousel-arrow-prev {
+      left: 8px;
+    }
+    .carousel-arrow-next {
+      right: 8px;
+    }
   }
 
   /* Dots — bottom of the card */
@@ -320,7 +335,7 @@
     background: #1e293b;
     border: 1px solid #334155;
     border-radius: 12px;
-    padding: 32px;
+    padding: 48px 32px 32px;
     max-width: 560px;
     width: 100%;
     max-height: 80vh;
