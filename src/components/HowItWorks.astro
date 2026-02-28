@@ -2,65 +2,452 @@
 ---
 
 <section class="bg-[#1e293b] py-20 md:py-28">
-  <div class="max-w-4xl mx-auto px-6">
-    <h2 class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-10">
+  <div class="max-w-6xl mx-auto px-6">
+    <h2 class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-10 text-center">
       What Is Flock Safety?
     </h2>
 
-    <div class="space-y-6 text-[#cbd5e1] text-base leading-relaxed mb-12">
-      <p>
-        Flock Safety puts cameras on poles at intersections and along roadsides. Small. Solar-powered. Easy to miss. Every car that drives by gets photographed. Your plate number, vehicle make, color, and location get uploaded to Flock's servers automatically. Every time.
-      </p>
-      <p>
-        Here's what your police department may not have mentioned: that data doesn't stay in Greenville. Flock runs a national network. Police from other states can search it. So can federal agencies. Every drive you've taken is in there.
-      </p>
-      <p>
-        Your local police can't turn off the federal access. And neither can you.
-      </p>
+    <!-- Split layout: intro text + divider + carousel -->
+    <div class="grid md:grid-cols-[1fr_1px_1fr] gap-10 md:gap-12 mb-14">
+      <!-- Left: intro paragraphs -->
+      <div class="space-y-6 text-[#cbd5e1] text-base leading-relaxed">
+        <p>
+          Flock Safety puts cameras on poles at intersections and along roadsides. Small. Solar-powered. Easy to miss. Every car that drives by gets photographed. Your plate number, vehicle make, color, and location get uploaded to Flock's servers automatically. Every time.
+        </p>
+        <p>
+          Here's what your police department may not have mentioned: that data doesn't stay in Greenville. Flock runs a national network. Police from other states can search it. So can federal agencies. Every drive you've taken is in there.
+        </p>
+        <p>
+          Your local police can't turn off the federal access.<br /><span class="text-[#ef4444] font-semibold">And neither can you.</span>
+        </p>
+      </div>
+
+      <!-- Vertical divider -->
+      <div class="hidden md:block bg-[#334155]"></div>
+
+      <!-- Right: carousel -->
+      <div class="factoid-carousel" id="factoidCarousel">
+        <div class="carousel-container">
+          <!-- Prev arrow -->
+          <button class="carousel-arrow carousel-arrow-prev" id="prevBtn" aria-label="Previous factoid">&lsaquo;</button>
+
+          <!-- Viewport -->
+          <div class="carousel-viewport">
+            <div class="carousel-track" id="carouselTrack">
+              <div class="carousel-card" data-idx="0" data-overlay="0">
+                <div class="carousel-card-content">
+                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Greenville, SC &mdash; False Arrest</span>
+                  <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed mb-4">
+                    Two sisters driving a rental car were flagged as stolen by a Flock camera. Police drew weapons and handcuffed both women. The car wasn't stolen &mdash; it had been improperly reported. They are now suing Greenville PD.
+                  </p>
+                  <span class="read-more-text">Read more &rarr;</span>
+                </div>
+              </div>
+
+              <div class="carousel-card" data-idx="1" data-overlay="1">
+                <div class="carousel-card-content">
+                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Data Retention &mdash; 3 Years, Not 30 Days</span>
+                  <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed mb-4">
+                    Flock claims 30-day deletion. But Greenville's data goes to SLED, which keeps it for three years. When a reporter asked SLED for misconduct records, they refused to answer.
+                  </p>
+                  <span class="read-more-text">Read more &rarr;</span>
+                </div>
+              </div>
+
+              <div class="carousel-card" data-idx="2" data-overlay="2">
+                <div class="carousel-card-content">
+                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Santa Cruz, CA &mdash; 4,000 Federal Searches</span>
+                  <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed mb-4">
+                    State agencies accessed local camera data 4,000 times on behalf of federal authorities &mdash; including ICE &mdash; before the city found out and cancelled the contract 6&ndash;1.
+                  </p>
+                  <span class="read-more-text">Read more &rarr;</span>
+                </div>
+              </div>
+
+              <div class="carousel-card" data-idx="3" data-overlay="3">
+                <div class="carousel-card-content">
+                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Spartanburg, SC &mdash; Sheriff Convicted</span>
+                  <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed mb-4">
+                    The Spartanburg County Sheriff who oversaw Flock deployments pled guilty to federal charges: conspiracy to commit theft and wire fraud. The man with access to your location history was a federal criminal.
+                  </p>
+                  <span class="read-more-text">Read more &rarr;</span>
+                </div>
+              </div>
+
+              <div class="carousel-card" data-idx="4" data-overlay="4">
+                <div class="carousel-card-content">
+                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Austin, TX &mdash; No Crime Reduction</span>
+                  <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed mb-4">
+                    Austin's own city audit couldn't find evidence the cameras reduce crime. Over 20% of searches lacked proper documentation. The city cancelled the contract.
+                  </p>
+                  <span class="read-more-text">Read more &rarr;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Next arrow -->
+          <button class="carousel-arrow carousel-arrow-next" id="nextBtn" aria-label="Next factoid">&rsaquo;</button>
+
+          <!-- Dots inside the card area -->
+          <div class="carousel-dots-bar" id="carouselDots"></div>
+        </div>
+      </div>
     </div>
 
+    <!-- Divider -->
+    <hr class="border-[#334155] mb-14" />
+
     <!-- Pull quote -->
-    <blockquote class="border-l-4 border-[#ef4444] pl-6 py-4 mb-14">
+    <blockquote class="border-l-4 border-[#ef4444] pl-6 py-4 mb-10">
       <p class="text-[#f8fafc] font-bold italic text-lg md:text-xl leading-relaxed">
         "Your data is shared with agencies you don't control."
       </p>
     </blockquote>
-
-    <!-- Fact cards -->
-    <div class="space-y-4 mb-12">
-      <div class="bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5">
-        <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed">
-          Two sisters in Greenville were driving a rental car when a Flock camera flagged it as stolen. Police drew their weapons and handcuffed both women. The car wasn't stolen; it had been improperly reported. They are now suing Greenville PD.
-        </p>
-      </div>
-
-      <div class="bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5">
-        <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed">
-          Flock says it deletes data after 30 days. Greenville's data goes to SLED, which keeps it for three years. When a reporter asked SLED for recent misconduct cases, they refused to answer.
-        </p>
-      </div>
-
-      <div class="bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5">
-        <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed">
-          In Santa Cruz, CA, agencies accessed local camera data 4,000 times on behalf of federal authorities before the city found out and cancelled the contract.
-        </p>
-      </div>
-
-      <div class="bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5">
-        <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed">
-          The Spartanburg County Sheriff who oversaw Flock camera deployments later pled guilty to federal charges: conspiracy to commit theft from federal programs and wire fraud. The man with access to your location history turned out to be a federal criminal.
-        </p>
-      </div>
-
-      <div class="bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5">
-        <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed">
-          Austin ran its own city audit and couldn't find evidence the cameras reduce crime. The system is designed to share data. There's no local switch to turn that off.
-        </p>
-      </div>
-    </div>
 
     <p class="text-[#cbd5e1] text-base leading-relaxed">
       These cameras track everyone. Most of the people they photograph have done nothing wrong. All of them end up in the same database.
     </p>
   </div>
 </section>
+
+<!-- Read More Overlays -->
+<div class="overlay-backdrop" id="overlayBackdrop">
+  <!-- Overlay 0: False Arrest -->
+  <div class="overlay-panel" data-overlay-panel="0">
+    <button class="overlay-close" aria-label="Close">&times;</button>
+    <h3 class="text-white font-bold text-lg mb-1">The Greenville Sisters Lawsuit</h3>
+    <span class="block text-[#ef4444] text-xs font-semibold uppercase tracking-wider mb-4">Greenville, SC</span>
+    <div class="text-[#cbd5e1] text-sm leading-relaxed space-y-3">
+      <p>Two Greenville women were driving a rental car that a Flock camera wrongly flagged as stolen. Police drew their weapons, handcuffed both sisters, and put them in the back of a police car before realizing it had simply been improperly reported.</p>
+      <p>They are now suing Greenville PD. This isn't a hypothetical. This happened here, to people in our community.</p>
+      <p>Greenville's 30 cameras went up in January 2021, paid for with federal civil asset forfeiture funds. No city ordinance. No council vote on oversight. Five years of cameras running with no rules about who can see your data, how long it's kept, or whether anyone checks how it's used.</p>
+    </div>
+    <div class="mt-5 pt-4 border-t border-[#334155]">
+      <span class="text-[#64748b] text-xs">Source:</span>
+      <a href="https://www.greenvilleonline.com" target="_blank" rel="noopener" class="text-[#ef4444] text-xs hover:underline ml-1">Greenville News</a>
+    </div>
+  </div>
+
+  <!-- Overlay 1: SLED Retention -->
+  <div class="overlay-panel" data-overlay-panel="1">
+    <button class="overlay-close" aria-label="Close">&times;</button>
+    <h3 class="text-white font-bold text-lg mb-1">SLED Keeps Your Data for Three Years</h3>
+    <span class="block text-[#ef4444] text-xs font-semibold uppercase tracking-wider mb-4">South Carolina</span>
+    <div class="text-[#cbd5e1] text-sm leading-relaxed space-y-3">
+      <p>Flock claims 30-day deletion, but Greenville's data goes to SLED, which retains it in its statewide database regardless of what Flock promises locally.</p>
+      <p>When the Post and Courier asked SLED for recent misconduct records, SLED refused to produce any documents, citing ongoing litigation. We don't know what's happened since. They won't tell us.</p>
+      <p>In 2013, a South Carolina law enforcement officer used SLED's ALPR database to search for his own vehicle, found an image of his plate and altered the record to show someone else's. His access was removed &mdash; but the incident was only discovered after the fact.</p>
+      <p>Flock confirmed it cannot monitor how federal agencies use its system or ensure searches comply with state law.</p>
+    </div>
+    <div class="mt-5 pt-4 border-t border-[#334155]">
+      <span class="text-[#64748b] text-xs">Source:</span>
+      <a href="https://www.postandcourier.com" target="_blank" rel="noopener" class="text-[#ef4444] text-xs hover:underline ml-1">The Post and Courier</a>
+    </div>
+  </div>
+
+  <!-- Overlay 2: Santa Cruz -->
+  <div class="overlay-panel" data-overlay-panel="2">
+    <button class="overlay-close" aria-label="Close">&times;</button>
+    <h3 class="text-white font-bold text-lg mb-1">4,000 Federal Searches in Five Months</h3>
+    <span class="block text-[#ef4444] text-xs font-semibold uppercase tracking-wider mb-4">Santa Cruz, CA</span>
+    <div class="text-[#cbd5e1] text-sm leading-relaxed space-y-3">
+      <p>Santa Cruz became the first California city to terminate its Flock Safety contract, voting 6&ndash;1 to end the agreement after state agencies accessed the city's camera data approximately 4,000 times between June and October 2025 on behalf of federal authorities &mdash; including ICE &mdash; in direct violation of California's decade-old prohibition on interstate ALPR data sharing.</p>
+      <p>A Georgia police chief &mdash; later arrested for using cameras to stalk a person &mdash; also accessed neighboring Capitola's data through the same network.</p>
+      <p>Mayor Fred Keeley: <em>"The threat to our civil liberties was greater than any benefit we could get from the system."</em></p>
+      <p>Public comment ran over an hour with unanimous resident support for ending the contract.</p>
+    </div>
+    <div class="mt-5 pt-4 border-t border-[#334155]">
+      <span class="text-[#64748b] text-xs">Sources:</span>
+      <a href="https://lookout.co/city-council-votes-to-end-santa-cruzs-contract-with-flock-safety/story" target="_blank" rel="noopener" class="text-[#ef4444] text-xs hover:underline ml-1">Lookout Santa Cruz</a>
+      <span class="text-[#475569] text-xs mx-1">&middot;</span>
+      <a href="https://www.kqed.org/news/12069705/santa-cruz-the-first-in-california-to-terminate-its-contract-with-flock-safety" target="_blank" rel="noopener" class="text-[#ef4444] text-xs hover:underline">KQED</a>
+    </div>
+  </div>
+
+  <!-- Overlay 3: Sheriff Wright -->
+  <div class="overlay-panel" data-overlay-panel="3">
+    <button class="overlay-close" aria-label="Close">&times;</button>
+    <h3 class="text-white font-bold text-lg mb-1">The Chuck Wright Pattern</h3>
+    <span class="block text-[#ef4444] text-xs font-semibold uppercase tracking-wider mb-4">Spartanburg County, SC</span>
+    <div class="text-[#cbd5e1] text-sm leading-relaxed space-y-3">
+      <p>Spartanburg County Sheriff Chuck Wright oversaw Flock Safety camera deployment throughout the county and later pled guilty to federal charges: conspiracy to commit theft from federal programs, conspiracy to commit wire fraud, and obtaining controlled substances through fraud.</p>
+      <p>He faces up to 30 years in prison. The same official who controlled your location data was a convicted federal criminal.</p>
+      <p>When surveillance tools are placed in the hands of officials who abuse their positions, the consequences are real. This isn't a hypothetical risk &mdash; it happened right here in Upstate SC.</p>
+      <p>As Rep. Garry Smith (R-Simpsonville), a conservative Republican and ALEC state chairman, said: <em>"I've also run into some individuals in law enforcement who have taken advantage of their positions and used it for their nefarious purposes. The potential is certainly out there."</em></p>
+    </div>
+    <div class="mt-5 pt-4 border-t border-[#334155]">
+      <span class="text-[#64748b] text-xs">Source:</span>
+      <a href="https://apnews.com" target="_blank" rel="noopener" class="text-[#ef4444] text-xs hover:underline ml-1">AP News</a>
+    </div>
+  </div>
+
+  <!-- Overlay 4: Austin -->
+  <div class="overlay-panel" data-overlay-panel="4">
+    <button class="overlay-close" aria-label="Close">&times;</button>
+    <h3 class="text-white font-bold text-lg mb-1">Austin's Audit Found No Crime Reduction</h3>
+    <span class="block text-[#ef4444] text-xs font-semibold uppercase tracking-wider mb-4">Austin, TX</span>
+    <div class="text-[#cbd5e1] text-sm leading-relaxed space-y-3">
+      <p>Austin became the first major US city to cancel a Flock Safety contract after a coalition of 30+ community groups forced the city not to renew. A city audit released days before the vote provided the decisive evidence.</p>
+      <p>The audit found: over 20% of ALPR database searches lacked proper documentation or justification, contract language allowed data retention beyond council-mandated limits, and potential data sharing with outside agencies was not disclosed to the public.</p>
+      <p>Austin had one of the best and most restrictive ALPR policies in the country, and the program still failed. The city's own audit revealed systematic compliance failures.</p>
+      <p>This is the core argument: even with a strict policy, the system was still abused. Policy cannot fix architecture.</p>
+    </div>
+    <div class="mt-5 pt-4 border-t border-[#334155]">
+      <span class="text-[#64748b] text-xs">Sources:</span>
+      <a href="https://www.eff.org/deeplinks/2025/06/victory-austin-organizers-cancel-citys-flock-alpr-contract" target="_blank" rel="noopener" class="text-[#ef4444] text-xs hover:underline ml-1">EFF</a>
+      <span class="text-[#475569] text-xs mx-1">&middot;</span>
+      <a href="https://www.kut.org/austin/2025-06-04/austin-tx-automatic-license-reader-program-police-data-privacy-flock" target="_blank" rel="noopener" class="text-[#ef4444] text-xs hover:underline">KUT Radio</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Carousel container — holds arrows, viewport, and dots as one unit */
+  .carousel-container {
+    position: relative;
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 24px 48px 48px;
+    overflow: hidden;
+  }
+
+  /* Carousel viewport & track */
+  .carousel-viewport {
+    overflow: hidden;
+  }
+  .carousel-track {
+    display: flex;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Carousel cards */
+  .carousel-card {
+    flex: 0 0 100%;
+    min-width: 100%;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+  }
+  .carousel-card-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+  .carousel-card:hover .read-more-text {
+    color: #f87171;
+  }
+
+  /* Read More text link */
+  .read-more-text {
+    color: #ef4444;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  /* Carousel arrows — integrated into the card */
+  .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #475569;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    line-height: 1;
+    z-index: 2;
+  }
+  .carousel-arrow:hover {
+    color: #94a3b8;
+  }
+  .carousel-arrow-prev {
+    left: 8px;
+  }
+  .carousel-arrow-next {
+    right: 8px;
+  }
+
+  /* Dots — bottom of the card */
+  .carousel-dots-bar {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+  }
+  :global(.carousel-dot) {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #64748b;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+    padding: 0;
+  }
+  :global(.carousel-dot.active) {
+    background: #ef4444;
+  }
+
+  /* Overlay */
+  .overlay-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.85);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .overlay-backdrop.active {
+    display: flex;
+  }
+  .overlay-panel {
+    display: none;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .overlay-panel.active {
+    display: block;
+  }
+  .overlay-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 24px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .overlay-close:hover {
+    color: white;
+    background: #334155;
+  }
+</style>
+
+<script>
+  // Carousel logic
+  const carousel = document.getElementById('factoidCarousel');
+  const track = document.getElementById('carouselTrack');
+  const cards = carousel?.querySelectorAll('.carousel-card') ?? [];
+  const dotsContainer = document.getElementById('carouselDots');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const totalCards = cards.length;
+  let currentSlide = 0;
+  let autoInterval: ReturnType<typeof setInterval> | null = null;
+  let userInteracted = false;
+
+  // Create dots
+  for (let i = 0; i < totalCards; i++) {
+    const dot = document.createElement('button');
+    dot.className = `carousel-dot${i === 0 ? ' active' : ''}`;
+    dot.setAttribute('aria-label', `Go to factoid ${i + 1}`);
+    dot.addEventListener('click', () => {
+      stopAuto();
+      goToSlide(i);
+    });
+    dotsContainer?.appendChild(dot);
+  }
+
+  function goToSlide(n: number) {
+    dotsContainer?.querySelectorAll('.carousel-dot').forEach(d => d.classList.remove('active'));
+    currentSlide = ((n % totalCards) + totalCards) % totalCards;
+    if (track) {
+      track.style.transform = `translateX(-${currentSlide * 100}%)`;
+    }
+    dotsContainer?.querySelectorAll('.carousel-dot')[currentSlide]?.classList.add('active');
+  }
+
+  function stopAuto() {
+    userInteracted = true;
+    if (autoInterval) {
+      clearInterval(autoInterval);
+      autoInterval = null;
+    }
+  }
+
+  // Arrow handlers (stopPropagation so card click doesn't fire)
+  prevBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    stopAuto();
+    goToSlide(currentSlide - 1);
+  });
+  nextBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    stopAuto();
+    goToSlide(currentSlide + 1);
+  });
+
+  // Auto-advance (4 seconds)
+  function startAuto() {
+    autoInterval = setInterval(() => {
+      if (!userInteracted) {
+        goToSlide(currentSlide + 1);
+      }
+    }, 4000);
+  }
+  startAuto();
+
+  // Card click opens overlay
+  const backdrop = document.getElementById('overlayBackdrop');
+  const overlayPanels = document.querySelectorAll('.overlay-panel');
+  const closeBtns = document.querySelectorAll('.overlay-close');
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      stopAuto();
+      const idx = card.getAttribute('data-overlay');
+      overlayPanels.forEach(p => p.classList.remove('active'));
+      document.querySelector(`[data-overlay-panel="${idx}"]`)?.classList.add('active');
+      backdrop?.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function closeOverlay() {
+    backdrop?.classList.remove('active');
+    overlayPanels.forEach(p => p.classList.remove('active'));
+    document.body.style.overflow = '';
+  }
+
+  closeBtns.forEach(btn => {
+    btn.addEventListener('click', closeOverlay);
+  });
+
+  backdrop?.addEventListener('click', (e) => {
+    if (e.target === backdrop) closeOverlay();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeOverlay();
+  });
+</script>
