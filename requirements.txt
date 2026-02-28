@@ -1,3 +1,6 @@
+# scraper.py
 requests
 beautifulsoup4
+
+# publish.py
 pyyaml

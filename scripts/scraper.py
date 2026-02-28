@@ -14,11 +14,12 @@ import requests
 from bs4 import BeautifulSoup
 
 BILLS_JSON = os.path.join(os.path.dirname(__file__), "..", "src", "data", "bills.json")
+HEADERS = {"User-Agent": "DeflockSC-BillScraper/1.0 (+https://deflocksc.org)"}
 
 
 def scrape_bill(url: str) -> dict:
     """Scrape a single bill page and return status fields."""
-    resp = requests.get(url, timeout=30)
+    resp = requests.get(url, timeout=30, headers=HEADERS)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
