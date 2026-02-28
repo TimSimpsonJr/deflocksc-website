@@ -46,7 +46,7 @@ import bills from '../data/bills.json';
   <!-- Modal backdrop -->
   <div id="bill-modal-backdrop" class="fixed inset-0 z-[100] bg-[rgba(2,6,23,0.85)] hidden opacity-0 transition-opacity duration-200">
     <!-- Modal card -->
-    <div id="bill-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-[90vw] max-w-[560px] max-h-[85vh] flex flex-col bg-[#1e293b] border-l-4 border-[#ef4444] rounded-lg opacity-0 translate-y-5 transition-all duration-250 ease-out">
+    <div id="bill-modal" role="dialog" aria-modal="true" aria-labelledby="modal-bill-id" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-[90vw] max-w-[560px] max-h-[85vh] flex flex-col bg-[#1e293b] border-l-4 border-[#ef4444] rounded-lg opacity-0 translate-y-5 transition-all duration-250 ease-out">
       <!-- Fixed header -->
       <div class="flex-shrink-0 p-6 md:p-8 pb-4 flex items-start justify-between gap-4">
         <div>
@@ -96,10 +96,12 @@ import bills from '../data/bills.json';
   const backdrop = document.getElementById('bill-modal-backdrop');
   const modal = document.getElementById('bill-modal');
   const closeBtn = document.getElementById('bill-modal-close');
+  var previouslyFocused = null;
 
   function openModal(index) {
     const bill = bills[index];
     if (!bill) return;
+    previouslyFocused = document.activeElement;
 
     document.getElementById('modal-bill-id').textContent = bill.bill;
     document.getElementById('modal-bill-title').textContent = bill.title;
@@ -128,6 +130,11 @@ import bills from '../data/bills.json';
     modal.classList.remove('opacity-0', 'translate-y-5');
 
     document.body.style.overflow = 'hidden';
+
+    // After showing the modal, focus close button
+    setTimeout(function() {
+      document.getElementById('bill-modal-close')?.focus();
+    }, 250);
   }
 
   function closeModal() {
@@ -139,11 +146,32 @@ import bills from '../data/bills.json';
     backdrop.classList.remove('opacity-100');
     backdrop.classList.add('opacity-0');
 
-    setTimeout(() => {
+    setTimeout(function() {
       backdrop.classList.add('hidden');
       document.body.style.overflow = '';
+      if (previouslyFocused) {
+        previouslyFocused.focus();
+      }
+      previouslyFocused = null;
     }, 200);
   }
+
+  // Focus trap on modal
+  modal?.addEventListener('keydown', function(e) {
+    if (e.key !== 'Tab') return;
+    var focusable = modal.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+    if (focusable.length === 0) return;
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
 
   // Card click handlers
   document.querySelectorAll('.bill-card').forEach(card => {
