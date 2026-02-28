@@ -46,39 +46,47 @@ import bills from '../data/bills.json';
   <!-- Modal backdrop -->
   <div id="bill-modal-backdrop" class="fixed inset-0 z-[100] bg-[rgba(2,6,23,0.85)] hidden opacity-0 transition-opacity duration-200">
     <!-- Modal card -->
-    <div id="bill-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-[90vw] max-w-[560px] max-h-[85vh] overflow-y-auto bg-[#1e293b] border-l-4 border-[#ef4444] rounded-lg p-6 md:p-8 opacity-0 translate-y-5 transition-all duration-250 ease-out">
-      <!-- Close button -->
-      <button id="bill-modal-close" class="absolute top-4 right-4 text-[#64748b] hover:text-white transition-colors text-xl leading-none cursor-pointer" aria-label="Close">&times;</button>
-
-      <!-- Bill ID -->
-      <h3 id="modal-bill-id" class="text-[#ef4444] font-black text-2xl tracking-[-0.02em] mb-2"></h3>
-
-      <!-- Title -->
-      <p id="modal-bill-title" class="text-white font-bold text-lg mb-4"></p>
-
-      <!-- Metadata row -->
-      <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-6">
+    <div id="bill-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-[90vw] max-w-[560px] max-h-[85vh] flex flex-col bg-[#1e293b] border-l-4 border-[#ef4444] rounded-lg opacity-0 translate-y-5 transition-all duration-250 ease-out">
+      <!-- Fixed header -->
+      <div class="flex-shrink-0 p-6 md:p-8 pb-4 flex items-start justify-between gap-4">
         <div>
-          <span class="text-[#64748b]">Status:</span>
-          <span id="modal-bill-status" class="text-[#fbbf24] font-bold ml-1"></span>
+          <!-- Bill ID -->
+          <h3 id="modal-bill-id" class="text-[#ef4444] font-black text-2xl tracking-[-0.02em] mb-2"></h3>
+          <!-- Title -->
+          <p id="modal-bill-title" class="text-white font-bold text-lg"></p>
         </div>
-        <div id="modal-last-action-row">
-          <span class="text-[#64748b]">Last Action:</span>
-          <span id="modal-bill-last-action" class="text-[#94a3b8] ml-1"></span>
-        </div>
+        <!-- Close button -->
+        <button id="bill-modal-close" class="text-[#64748b] hover:text-white transition-colors text-xl leading-none cursor-pointer flex-shrink-0" aria-label="Close">&times;</button>
       </div>
 
-      <!-- Description -->
-      <p id="modal-bill-description" class="text-[#94a3b8] text-sm leading-relaxed mb-8"></p>
+      <!-- Scrollable body -->
+      <div class="overflow-y-auto flex-1 min-h-0 px-6 md:px-8 py-2">
+        <!-- Metadata row -->
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-6">
+          <div>
+            <span class="text-[#64748b]">Status:</span>
+            <span id="modal-bill-status" class="text-[#fbbf24] font-bold ml-1"></span>
+          </div>
+          <div id="modal-last-action-row">
+            <span class="text-[#64748b]">Last Action:</span>
+            <span id="modal-bill-last-action" class="text-[#94a3b8] ml-1"></span>
+          </div>
+        </div>
 
-      <!-- Actions footer -->
-      <div class="flex flex-col items-start gap-3 min-[520px]:flex-row-reverse min-[520px]:justify-between min-[520px]:items-center">
-        <a href="#take-action" id="modal-cta" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.05em] px-6 py-3 rounded transition-colors">
-          Email Your Legislators
-        </a>
-        <a id="modal-bill-link" href="#" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] text-sm font-medium transition-colors">
-          Read full text on scstatehouse.gov &rarr;
-        </a>
+        <!-- Description -->
+        <p id="modal-bill-description" class="text-[#94a3b8] text-sm leading-relaxed"></p>
+      </div>
+
+      <!-- Fixed footer -->
+      <div class="flex-shrink-0 p-6 md:p-8 pt-4 border-t border-[#334155]">
+        <div class="flex flex-col items-start gap-3 min-[520px]:flex-row-reverse min-[520px]:justify-between min-[520px]:items-center">
+          <a href="#take-action" id="modal-cta" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.05em] px-6 py-3 rounded transition-colors">
+            Email Your Legislators
+          </a>
+          <a id="modal-bill-link" href="#" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] text-sm font-medium transition-colors">
+            Read full text on scstatehouse.gov &rarr;
+          </a>
+        </div>
       </div>
     </div>
   </div>
