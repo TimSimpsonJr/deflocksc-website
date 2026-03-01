@@ -35,12 +35,11 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
     <!-- Map embed area -->
     <div class="mb-12">
-      <p class="text-white font-bold text-lg mb-4">
-        Find the cameras in your neighborhood.
-      </p>
-
       <!-- Mobile toggle button -->
       <div id="map-button-container" class="md:hidden bg-[#1e293b] border border-[#334155] rounded-lg p-8 text-center">
+        <p class="text-white font-bold text-lg mb-4">
+          Find the cameras in your neighborhood.
+        </p>
         <button
           id="map-toggle"
           type="button"
@@ -50,20 +49,122 @@ import 'maplibre-gl/dist/maplibre-gl.css';
         </button>
       </div>
 
-      <!-- Map container -->
-      <div id="map-container" class="hidden md:block rounded-lg overflow-hidden" style="height: 600px; clip-path: inset(0);">
-        <div id="camera-map" style="width: 100%; height: 100%;" role="application" aria-label="ALPR Camera Map"></div>
+      <!-- Map container with glow frame -->
+      <div id="map-frame" class="hidden md:block map-frame" style="width: 80vw; position: relative; left: 50%; transform: translateX(-50%);" data-map-frame>
+        <p class="text-white font-bold text-lg mb-4 relative z-[3] px-1">
+          Find the cameras in your neighborhood.
+        </p>
+        <div id="map-container" class="rounded-lg overflow-hidden" style="height: 600px; clip-path: inset(0);">
+          <div id="camera-map" style="width: 100%; height: 100%;" role="application" aria-label="ALPR Camera Map"></div>
+        </div>
+        <div class="map-frame-credits relative z-[3] px-3 pt-2 pb-1">
+          <p class="text-[#475569] text-xs">
+            Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
+          </p>
+          <p class="text-[#64748b] text-sm mt-1">
+            Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
+          </p>
+        </div>
       </div>
-
-      <p class="text-[#475569] text-xs mt-1">
-        Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener" class="hover:text-[#64748b] transition-colors">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener" class="hover:text-[#64748b] transition-colors">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" class="hover:text-[#64748b] transition-colors">&copy; OpenStreetMap</a>
-      </p>
-      <p class="text-[#64748b] text-sm mt-1">
-        Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
-      </p>
     </div>
   </div>
 </section>
+
+<style>
+  .map-frame {
+    --frame-x: 50%;
+    --frame-y: 50%;
+    position: relative;
+    padding: 20px;
+    padding-top: 24px;
+    padding-bottom: 12px;
+    border-radius: 0.75rem;
+    background: rgba(148, 163, 184, 0.12);
+  }
+
+  /* Cursor-reactive glow gradient — visible through the padding gap */
+  .map-frame::before {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      600px circle at var(--frame-x) var(--frame-y),
+      rgba(59, 130, 246, 0.35),
+      rgba(59, 130, 246, 0.1) 35%,
+      transparent 55%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .map-frame:hover::before {
+    opacity: 1;
+  }
+
+  /* Backdrop-filter border boost — brightens the border area for extra glow */
+  .map-frame::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid transparent;
+    backdrop-filter: brightness(2) contrast(1.8);
+    -webkit-backdrop-filter: brightness(2) contrast(1.8);
+    mask:
+      linear-gradient(#fff 0 0) border-box,
+      linear-gradient(#fff 0 0) padding-box;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) border-box,
+      linear-gradient(#fff 0 0) padding-box;
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .map-frame:hover::after {
+    opacity: 1;
+  }
+
+  .map-frame #map-container {
+    position: relative;
+    z-index: 1;
+  }
+
+  .map-frame-credits p {
+    transition: color 0.4s ease;
+  }
+
+  /* Map tile links: inherit parent color, no own transition to avoid lag */
+  .map-frame-credits p:first-child a {
+    color: inherit;
+  }
+
+  .map-frame:hover .map-frame-credits p:first-child {
+    color: #64748b;
+  }
+
+  .map-frame-credits p:first-child a:hover {
+    color: #cbd5e1;
+    transition: color 0.2s ease;
+  }
+
+  .map-frame:hover .map-frame-credits p:last-child {
+    color: #94a3b8;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .map-frame::before,
+    .map-frame::after,
+    .map-frame-credits p {
+      transition: none;
+    }
+  }
+</style>
 
 <script>
   import maplibregl from 'maplibre-gl';
@@ -206,6 +307,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
             'text-field': '{point_count_abbreviated}',
             'text-size': 13,
             'text-font': ['Noto Sans Regular'],
+            'text-allow-overlap': true,
           },
           paint: { 'text-color': '#ffffff' },
         });
@@ -312,10 +414,10 @@ import 'maplibre-gl/dist/maplibre-gl.css';
   // Mobile toggle
   document.getElementById('map-toggle')?.addEventListener('click', () => {
     document.getElementById('map-button-container')?.classList.add('hidden');
-    const container = document.getElementById('map-container');
-    if (container) {
-      container.classList.remove('hidden');
-      container.classList.add('block');
+    const frame = document.getElementById('map-frame');
+    if (frame) {
+      frame.classList.remove('hidden');
+      frame.classList.add('block');
     }
     if (!map) {
       initMap();
@@ -323,4 +425,14 @@ import 'maplibre-gl/dist/maplibre-gl.css';
       map.resize();
     }
   });
+
+  // Frame glow cursor tracking
+  const mapFrame = document.querySelector<HTMLElement>('[data-map-frame]');
+  if (mapFrame) {
+    mapFrame.addEventListener('pointermove', (e: PointerEvent) => {
+      const rect = mapFrame.getBoundingClientRect();
+      mapFrame.style.setProperty('--frame-x', `${e.clientX - rect.left}px`);
+      mapFrame.style.setProperty('--frame-y', `${e.clientY - rect.top}px`);
+    }, { passive: true });
+  }
 </script>
