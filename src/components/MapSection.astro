@@ -127,6 +127,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
     map.on('load', async () => {
       try {
         const res = await fetch('https://cdn.deflock.me/regions/20/-100.json');
+        if (!res.ok) throw new Error(`CDN responded with ${res.status}`);
         const cameras: DeflockCamera[] = await res.json();
 
         const geojson: GeoJSON.FeatureCollection = {
