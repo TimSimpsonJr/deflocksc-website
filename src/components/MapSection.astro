@@ -195,6 +195,56 @@ import 'maplibre-gl/dist/maplibre-gl.css';
           },
         });
 
+        // Create directional cone image on a canvas
+        const coneSize = 48;
+        const coneCanvas = document.createElement('canvas');
+        coneCanvas.width = coneSize;
+        coneCanvas.height = coneSize;
+        const ctx = coneCanvas.getContext('2d')!;
+        const cx = coneSize / 2;
+        const cy = coneSize / 2;
+        const radius = 22;
+        const halfAngle = 25 * (Math.PI / 180);
+
+        // Draw cone/wedge pointing up (0° = north)
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        const startAngle = -Math.PI / 2 - halfAngle;
+        const endAngle = -Math.PI / 2 + halfAngle;
+        ctx.arc(cx, cy, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+        ctx.fill();
+
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#ef4444';
+        ctx.fill();
+        ctx.strokeStyle = '#991b1b';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        map!.addImage('cone', {
+          width: coneSize,
+          height: coneSize,
+          data: ctx.getImageData(0, 0, coneSize, coneSize).data,
+        });
+
+        map!.addLayer({
+          id: 'camera-cones',
+          type: 'symbol',
+          source: 'cameras',
+          filter: ['all', ['!', ['has', 'point_count']], ['get', 'hasDirection']],
+          layout: {
+            'icon-image': 'cone',
+            'icon-size': 0.75,
+            'icon-rotate': ['get', 'direction'],
+            'icon-allow-overlap': true,
+            'icon-rotation-alignment': 'map',
+          },
+        });
+
         map!.on('click', 'clusters', (e) => {
           const features = map!.queryRenderedFeatures(e.point, { layers: ['clusters'] });
           if (!features.length) return;
