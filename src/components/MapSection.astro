@@ -70,6 +70,40 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
   let map: maplibregl.Map | null = null;
 
+  interface DeflockCamera {
+    id: number;
+    lat: number;
+    lon: number;
+    tags?: Record<string, string>;
+  }
+
+  function parseDirection(tags: Record<string, string> | undefined): number | null {
+    if (!tags) return null;
+    const raw = tags['direction'] || tags['camera:direction'];
+    if (!raw) return null;
+    const first = String(raw).split(';')[0].trim();
+
+    // Range format "138-183" → midpoint
+    if (/^\d+-\d+$/.test(first)) {
+      const [a, b] = first.split('-').map(Number);
+      return (a + b) / 2;
+    }
+
+    // Cardinal directions
+    const cardinals: Record<string, number> = {
+      N: 0, NNE: 22.5, NE: 45, ENE: 67.5,
+      E: 90, ESE: 112.5, SE: 135, SSE: 157.5,
+      S: 180, SSW: 202.5, SW: 225, WSW: 247.5,
+      W: 270, WNW: 292.5, NW: 315, NNW: 337.5,
+    };
+    const upper = first.toUpperCase();
+    if (upper in cardinals) return cardinals[upper];
+
+    // Numeric degrees
+    const deg = Number(first);
+    return isNaN(deg) ? null : deg;
+  }
+
   function initMap() {
     map = new maplibregl.Map({
       container: 'camera-map',
@@ -89,6 +123,101 @@ import 'maplibre-gl/dist/maplibre-gl.css';
     }));
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+    map.on('load', async () => {
+      try {
+        const res = await fetch('https://cdn.deflock.me/regions/20/-100.json');
+        const cameras: DeflockCamera[] = await res.json();
+
+        const geojson: GeoJSON.FeatureCollection = {
+          type: 'FeatureCollection',
+          features: cameras.map((cam) => {
+            const direction = parseDirection(cam.tags);
+            return {
+              type: 'Feature' as const,
+              geometry: {
+                type: 'Point' as const,
+                coordinates: [cam.lon, cam.lat],
+              },
+              properties: {
+                id: cam.id,
+                direction,
+                hasDirection: direction !== null,
+              },
+            };
+          }),
+        };
+
+        map!.addSource('cameras', {
+          type: 'geojson',
+          data: geojson,
+          cluster: true,
+          clusterMaxZoom: 15,
+          clusterRadius: 50,
+        });
+
+        map!.addLayer({
+          id: 'clusters',
+          type: 'circle',
+          source: 'cameras',
+          filter: ['has', 'point_count'],
+          paint: {
+            'circle-color': '#ef4444',
+            'circle-radius': ['step', ['get', 'point_count'], 18, 10, 24, 50, 32],
+            'circle-opacity': 0.85,
+          },
+        });
+
+        map!.addLayer({
+          id: 'cluster-count',
+          type: 'symbol',
+          source: 'cameras',
+          filter: ['has', 'point_count'],
+          layout: {
+            'text-field': '{point_count_abbreviated}',
+            'text-size': 13,
+            'text-font': ['Noto Sans Regular'],
+          },
+          paint: { 'text-color': '#ffffff' },
+        });
+
+        map!.addLayer({
+          id: 'camera-dots',
+          type: 'circle',
+          source: 'cameras',
+          filter: ['all', ['!', ['has', 'point_count']], ['!', ['get', 'hasDirection']]],
+          paint: {
+            'circle-color': '#ef4444',
+            'circle-radius': 6,
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#991b1b',
+          },
+        });
+
+        map!.on('click', 'clusters', (e) => {
+          const features = map!.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+          if (!features.length) return;
+          const clusterId = features[0].properties.cluster_id;
+          const source = map!.getSource('cameras') as maplibregl.GeoJSONSource;
+          source.getClusterExpansionZoom(clusterId).then((zoom) => {
+            map!.easeTo({
+              center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number],
+              zoom,
+            });
+          });
+        });
+
+        map!.on('mouseenter', 'clusters', () => {
+          map!.getCanvas().style.cursor = 'pointer';
+        });
+
+        map!.on('mouseleave', 'clusters', () => {
+          map!.getCanvas().style.cursor = '';
+        });
+      } catch (err) {
+        console.error('Failed to load camera data:', err);
+      }
+    });
   }
 
   // Desktop: init immediately
