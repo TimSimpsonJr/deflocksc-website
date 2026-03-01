@@ -1,4 +1,5 @@
 ---
+import 'maplibre-gl/dist/maplibre-gl.css';
 ---
 
 <section class="bg-[#0f172a] py-20 md:py-28 relative overflow-hidden">
@@ -38,41 +39,20 @@
         Find the cameras in your neighborhood.
       </p>
 
-      <!-- Desktop/tablet: iframe visible by default -->
-      <div class="hidden md:block rounded-lg overflow-hidden" style="height: 600px;">
-        <iframe
-          src="https://deflock.org/map#map=11/34.85/-82.39"
-          width="100%"
-          height="600"
-          style="border: none;"
-          loading="lazy"
-          allow="geolocation"
-          title="DeFlock ALPR Camera Map"
-        ></iframe>
+      <!-- Mobile toggle button -->
+      <div id="map-button-container" class="md:hidden bg-[#1e293b] border border-[#334155] rounded-lg p-8 text-center">
+        <button
+          id="map-toggle"
+          type="button"
+          class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer"
+        >
+          Explore the camera map &rarr;
+        </button>
       </div>
 
-      <!-- Mobile: toggle button + hidden iframe -->
-      <div class="md:hidden">
-        <div id="map-button-container" class="bg-[#1e293b] border border-[#334155] rounded-lg p-8 text-center">
-          <button
-            id="map-toggle"
-            type="button"
-            class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer"
-          >
-            Explore the camera map &rarr;
-          </button>
-        </div>
-        <div id="map-iframe-container" class="hidden rounded-lg overflow-hidden" style="height: 600px;">
-          <iframe
-            id="map-iframe-mobile"
-            data-src="https://deflock.org/map#map=11/34.85/-82.39"
-            width="100%"
-            height="600"
-            style="border: none;"
-            allow="geolocation"
-            title="DeFlock ALPR Camera Map"
-          ></iframe>
-        </div>
+      <!-- Map container -->
+      <div id="map-container" class="hidden md:block rounded-lg overflow-hidden" style="height: 600px; clip-path: inset(0);">
+        <div id="camera-map" style="width: 100%; height: 100%;"></div>
       </div>
 
       <p class="text-[#64748b] text-sm mt-3">
@@ -83,16 +63,56 @@
 </section>
 
 <script>
-  const toggle = document.getElementById('map-toggle');
-  const buttonContainer = document.getElementById('map-button-container');
-  const iframeContainer = document.getElementById('map-iframe-container');
-  const iframe = document.getElementById('map-iframe-mobile') as HTMLIFrameElement;
+  import maplibregl from 'maplibre-gl';
 
-  toggle?.addEventListener('click', () => {
-    buttonContainer?.classList.add('hidden');
-    iframeContainer?.classList.remove('hidden');
-    if (iframe && !iframe.src) {
-      iframe.src = iframe.dataset.src || '';
+  const MAP_CENTER: [number, number] = [-82.39, 34.85];
+  const MAP_ZOOM = 11;
+
+  let map: maplibregl.Map | null = null;
+
+  function initMap() {
+    map = new maplibregl.Map({
+      container: 'camera-map',
+      style: '/map-style.json',
+      center: MAP_CENTER,
+      zoom: MAP_ZOOM,
+      attributionControl: false,
+    });
+
+    map.addControl(new maplibregl.AttributionControl({
+      customAttribution: [
+        '<a href="https://deflock.org" target="_blank">Deflock</a>',
+        '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a>',
+        '<a href="https://openmaptiles.org" target="_blank">OpenMapTiles</a>',
+        '<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+      ],
+    }));
+
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+  }
+
+  // Desktop: init immediately
+  if (window.matchMedia('(min-width: 768px)').matches) {
+    initMap();
+  }
+
+  // Handle resize mobile → desktop
+  window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
+    if (e.matches && !map) initMap();
+  });
+
+  // Mobile toggle
+  document.getElementById('map-toggle')?.addEventListener('click', () => {
+    document.getElementById('map-button-container')?.classList.add('hidden');
+    const container = document.getElementById('map-container');
+    if (container) {
+      container.classList.remove('hidden');
+      container.classList.add('block');
+    }
+    if (!map) {
+      initMap();
+    } else {
+      map.resize();
     }
   });
 </script>
