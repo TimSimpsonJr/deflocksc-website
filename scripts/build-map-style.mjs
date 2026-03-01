@@ -13,6 +13,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_PATH = resolve(__dirname, "..", "public", "map-style.json");
 
 // ---------------------------------------------------------------------------
+// Track unmapped colors for diagnostic reporting
+// ---------------------------------------------------------------------------
+const unmappedColors = new Set();
+
+// ---------------------------------------------------------------------------
 // Color-property names that can contain color values in MapLibre styles
 // ---------------------------------------------------------------------------
 const COLOR_PROPS = new Set([
@@ -98,6 +103,9 @@ function buildExactMap() {
 function remapColor(color) {
   const norm = normalizeColorString(color);
   const mapped = EXACT_MAP.get(norm);
+  if (mapped === undefined) {
+    unmappedColors.add(color);
+  }
   return mapped !== undefined ? mapped : color;
 }
 
@@ -170,6 +178,18 @@ async function main() {
 
   writeFileSync(OUT_PATH, JSON.stringify(style, null, 2) + "\n");
   console.log(`Wrote ${OUT_PATH}`);
+
+  if (unmappedColors.size > 0) {
+    console.warn(
+      `⚠️  Found ${unmappedColors.size} unmapped color(s):\n` +
+        Array.from(unmappedColors)
+          .sort()
+          .map((c) => `  - ${c}`)
+          .join("\n")
+    );
+  } else {
+    console.log("✓ All colors successfully mapped");
+  }
 }
 
 main().catch((err) => {
