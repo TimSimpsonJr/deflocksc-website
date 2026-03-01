@@ -50,7 +50,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
       </div>
 
       <!-- Map container with glow frame -->
-      <div id="map-frame" class="hidden md:block map-frame" style="width: 80vw; position: relative; left: 50%; transform: translateX(-50%);" data-map-frame>
+      <div id="map-frame" class="hidden md:block map-frame" style="position: relative; left: 50%; transform: translateX(-50%);" data-map-frame>
         <p class="text-white font-bold text-lg mb-4 relative z-[3] px-1">
           Find the cameras in your neighborhood.
         </p>
@@ -74,12 +74,23 @@ import 'maplibre-gl/dist/maplibre-gl.css';
   .map-frame {
     --frame-x: 50%;
     --frame-y: 50%;
+    width: 100vw;
     position: relative;
-    padding: 20px;
+    padding: 0;
     padding-top: 24px;
     padding-bottom: 12px;
-    border-radius: 0.75rem;
+    border-radius: 0;
     background: rgba(148, 163, 184, 0.12);
+  }
+
+  @media (min-width: 768px) {
+    .map-frame {
+      width: 70vw;
+      padding: 20px;
+      padding-top: 24px;
+      padding-bottom: 12px;
+      border-radius: 0.75rem;
+    }
   }
 
   /* Cursor-reactive glow gradient — visible through the padding gap */
