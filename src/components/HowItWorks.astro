@@ -1,7 +1,10 @@
 ---
 ---
 
-<section class="bg-[#1e293b] py-20 md:py-28">
+<section class="bg-[#1e293b] py-20 md:py-28 relative overflow-hidden">
+  <!-- Section glow accent -->
+  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[200px] blur-[64px] opacity-[0.10] md:opacity-[0.15] pointer-events-none"></div>
+
   <div class="max-w-6xl mx-auto px-6">
     <h2 class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-10 text-center">
       What Is Flock Safety?
@@ -34,7 +37,7 @@
           <!-- Viewport -->
           <div class="carousel-viewport" aria-live="polite">
             <div class="carousel-track" id="carouselTrack">
-              <div class="carousel-card" data-idx="0" data-overlay="0" tabindex="0" role="group" aria-label="Case study 1 of 5">
+              <div class="carousel-card" data-spotlight data-idx="0" data-overlay="0" tabindex="0" role="group" aria-label="Case study 1 of 5">
                 <div class="carousel-card-content">
                   <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Greenville, SC &mdash; False Arrest</span>
                   <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed mb-4">
@@ -44,7 +47,7 @@
                 </div>
               </div>
 
-              <div class="carousel-card" data-idx="1" data-overlay="1" tabindex="-1" role="group" aria-label="Case study 2 of 5">
+              <div class="carousel-card" data-spotlight data-idx="1" data-overlay="1" tabindex="-1" role="group" aria-label="Case study 2 of 5">
                 <div class="carousel-card-content">
                   <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Data Retention &mdash; 3 Years, Not 30 Days</span>
                   <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed mb-4">
@@ -54,7 +57,7 @@
                 </div>
               </div>
 
-              <div class="carousel-card" data-idx="2" data-overlay="2" tabindex="-1" role="group" aria-label="Case study 3 of 5">
+              <div class="carousel-card" data-spotlight data-idx="2" data-overlay="2" tabindex="-1" role="group" aria-label="Case study 3 of 5">
                 <div class="carousel-card-content">
                   <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Santa Cruz, CA &mdash; 4,000 Federal Searches</span>
                   <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed mb-4">
@@ -64,7 +67,7 @@
                 </div>
               </div>
 
-              <div class="carousel-card" data-idx="3" data-overlay="3" tabindex="-1" role="group" aria-label="Case study 4 of 5">
+              <div class="carousel-card" data-spotlight data-idx="3" data-overlay="3" tabindex="-1" role="group" aria-label="Case study 4 of 5">
                 <div class="carousel-card-content">
                   <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Spartanburg, SC &mdash; Sheriff Convicted</span>
                   <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed mb-4">
@@ -74,7 +77,7 @@
                 </div>
               </div>
 
-              <div class="carousel-card" data-idx="4" data-overlay="4" tabindex="-1" role="group" aria-label="Case study 5 of 5">
+              <div class="carousel-card" data-spotlight data-idx="4" data-overlay="4" tabindex="-1" role="group" aria-label="Case study 5 of 5">
                 <div class="carousel-card-content">
                   <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Austin, TX &mdash; No Crime Reduction</span>
                   <p class="text-[#cbd5e1] text-[0.9rem] leading-relaxed mb-4">

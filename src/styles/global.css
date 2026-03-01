@@ -5,3 +5,52 @@
     scroll-behavior: smooth;
   }
 }
+
+/* Mouse-tracking spotlight on cards */
+[data-spotlight] {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-spotlight]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: clamp(200px, 40vw, 300px);
+  height: clamp(200px, 40vw, 300px);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    color-mix(in oklch, #ef4444 8%, transparent) 0%,
+    transparent 100%
+  );
+  transform: translate(
+    calc(var(--mouse-x, -300px) - 150px),
+    calc(var(--mouse-y, -300px) - 150px)
+  );
+  opacity: 0;
+  transition: opacity 500ms ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+[data-spotlight]:hover::before {
+  opacity: 1;
+}
+
+/* Bill cards: allow shadow to paint outside */
+.bill-card[data-spotlight] {
+  overflow: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-spotlight]::before {
+    display: none;
+  }
+}
+
+/* Section glow accent */
+.section-glow {
+  background: radial-gradient(ellipse at center, #ef4444 0%, transparent 70%);
+}
