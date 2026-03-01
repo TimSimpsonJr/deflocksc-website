@@ -15,35 +15,37 @@ import bills from '../data/bills.json';
       Three bills to rein in license plate cameras are sitting in SC committee right now. None have had a hearing. As of February 2026, they're just waiting. That changes when legislators hear from you.
     </p>
 
-    <!-- Bill cards -->
-    <div class="space-y-4 mb-10">
-      {bills.map((bill: any, i: number) => (
-        <div
-          class="bill-card bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#263548] hover:translate-x-1"
-          data-bill={i}
-          data-spotlight
-        >
-          <div class="flex items-start justify-between gap-4 mb-2">
-            <span class="text-[#ef4444] font-extrabold text-lg">{bill.bill}</span>
-            <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase tracking-[0.05em] bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded whitespace-nowrap">
-              {bill.status}
-            </span>
+    <!-- Bill cards in glow frame -->
+    <div id="bill-frame" class="glow-frame" data-glow-frame>
+      <div class="space-y-4 mb-6 relative z-[3]">
+        {bills.map((bill: any, i: number) => (
+          <div
+            class="bill-card bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#263548] hover:translate-x-1"
+            data-bill={i}
+            data-spotlight
+          >
+            <div class="flex items-start justify-between gap-4 mb-2">
+              <span class="text-[#ef4444] font-extrabold text-lg">{bill.bill}</span>
+              <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase tracking-[0.05em] bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded whitespace-nowrap">
+                {bill.status}
+              </span>
+            </div>
+            <p class="text-[#cbd5e1] text-sm mb-2">{bill.title}</p>
+            <p class="text-[#475569] text-xs font-medium">Click for details</p>
           </div>
-          <p class="text-[#cbd5e1] text-sm mb-2">{bill.title}</p>
-          <p class="text-[#475569] text-xs font-medium">Click for details</p>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
 
-    <!-- Last updated + status note -->
-    <p class="text-[#64748b] text-sm mb-4">Last updated: February 2026</p>
-    <div class="text-[#94a3b8] text-sm leading-relaxed space-y-3">
-      <p>
-        <em>S447 has gotten the furthest: it cleared a Senate Judiciary subcommittee, but the full committee hasn't acted. H3155 and H4013 haven't had any committee action at all. Meanwhile, a separate lawsuit (SCPIF v. SLED) is challenging the state's existing license plate database in court. How that turns out may affect how urgently legislators move.</em>
-      </p>
-      <p>
-        <em>Bill status is checked automatically each week during the legislative session.</em>
-      </p>
+      <!-- Last updated + status note -->
+      <p class="text-[#64748b] text-sm mb-4 relative z-[3]">Last updated: February 2026</p>
+      <div class="text-[#94a3b8] text-sm leading-relaxed space-y-3 relative z-[3]">
+        <p>
+          <em>S447 has gotten the furthest: it cleared a Senate Judiciary subcommittee, but the full committee hasn't acted. H3155 and H4013 haven't had any committee action at all. Meanwhile, a separate lawsuit (SCPIF v. SLED) is challenging the state's existing license plate database in court. How that turns out may affect how urgently legislators move.</em>
+        </p>
+        <p>
+          <em>Bill status is checked automatically each week during the legislative session.</em>
+        </p>
+      </div>
     </div>
   </div>
 
@@ -198,4 +200,14 @@ import bills from '../data/bills.json';
 
   // Close modal when clicking CTA (since it navigates to #take-action)
   document.getElementById('modal-cta')?.addEventListener('click', closeModal);
+
+  // Glow frame cursor tracking
+  var billFrame = document.getElementById('bill-frame');
+  if (billFrame) {
+    billFrame.addEventListener('pointermove', function(e) {
+      var rect = billFrame.getBoundingClientRect();
+      billFrame.style.setProperty('--frame-x', (e.clientX - rect.left) + 'px');
+      billFrame.style.setProperty('--frame-y', (e.clientY - rect.top) + 'px');
+    }, { passive: true });
+  }
 </script>
