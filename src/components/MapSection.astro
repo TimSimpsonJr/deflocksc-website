@@ -151,7 +151,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
           clusterRadius: 50,
         });
 
-        // Cluster glow (larger, semi-transparent circle behind)
+        // Cluster glow (much larger blurred circle behind)
         map!.addLayer({
           id: 'cluster-glow',
           type: 'circle',
@@ -165,9 +165,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
               25, '#ef4444',
               50, '#dc2626',
             ],
-            'circle-radius': ['step', ['get', 'point_count'], 22, 10, 28, 50, 34],
-            'circle-opacity': 0.25,
-            'circle-blur': 0.7,
+            'circle-radius': ['step', ['get', 'point_count'], 28, 10, 36, 50, 48],
+            'circle-opacity': 0.4,
+            'circle-blur': 1,
           },
         });
 
@@ -180,13 +180,20 @@ import 'maplibre-gl/dist/maplibre-gl.css';
           paint: {
             'circle-color': [
               'interpolate', ['linear'], ['get', 'point_count'],
-              2, '#fbbf24',   // amber for small clusters
-              10, '#f59e0b',  // darker amber
-              25, '#ef4444',  // red for medium
-              50, '#dc2626',  // deeper red for large
+              2, '#dc2626',   // red for small clusters
+              15, '#b91c1c',  // darker red
+              50, '#991b1b',  // deep red for large
             ],
             'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 50, 24],
-            'circle-opacity': 0.9,
+            'circle-opacity': 0.95,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': [
+              'interpolate', ['linear'], ['get', 'point_count'],
+              2, '#fbbf24',   // amber border for small
+              15, '#f59e0b',  // darker amber
+              50, '#ef4444',  // red border for large
+            ],
+            'circle-stroke-opacity': 0.9,
           },
         });
 
@@ -210,21 +217,21 @@ import 'maplibre-gl/dist/maplibre-gl.css';
           filter: ['all', ['!', ['has', 'point_count']], ['!', ['get', 'hasDirection']]],
           paint: {
             'circle-color': '#ef4444',
-            'circle-radius': 12,
+            'circle-radius': 16,
             'circle-stroke-width': 2,
             'circle-stroke-color': '#991b1b',
           },
         });
 
         // Create directional cone image on a canvas
-        const coneSize = 64;
+        const coneSize = 80;
         const coneCanvas = document.createElement('canvas');
         coneCanvas.width = coneSize;
         coneCanvas.height = coneSize;
         const ctx = coneCanvas.getContext('2d')!;
         const cx = coneSize / 2;
         const cy = coneSize / 2;
-        const radius = 30;
+        const radius = 36;
         const halfAngle = 25 * (Math.PI / 180);
 
         // Draw cone/wedge pointing up (0° = north)
@@ -239,7 +246,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
         // Center dot
         ctx.beginPath();
-        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 7, 0, Math.PI * 2);
         ctx.fillStyle = '#ef4444';
         ctx.fill();
         ctx.strokeStyle = '#991b1b';
