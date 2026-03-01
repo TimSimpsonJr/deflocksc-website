@@ -50,3 +50,68 @@
 .section-glow {
   background: radial-gradient(ellipse at center, rgba(148, 163, 184, 0.6) 0%, transparent 70%);
 }
+
+/* Glow frame — reusable container with cursor-reactive glow */
+.glow-frame {
+  --frame-x: 50%;
+  --frame-y: 50%;
+  position: relative;
+  padding: 20px;
+  padding-top: 24px;
+  padding-bottom: 12px;
+  border-radius: 0.75rem;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.glow-frame::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    600px circle at var(--frame-x) var(--frame-y),
+    rgba(148, 163, 184, 0.35),
+    rgba(148, 163, 184, 0.1) 35%,
+    transparent 55%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.glow-frame:hover::before {
+  opacity: 1;
+}
+
+.glow-frame::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid transparent;
+  backdrop-filter: brightness(2) contrast(1.8);
+  -webkit-backdrop-filter: brightness(2) contrast(1.8);
+  mask:
+    linear-gradient(#fff 0 0) border-box,
+    linear-gradient(#fff 0 0) padding-box;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) border-box,
+    linear-gradient(#fff 0 0) padding-box;
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.glow-frame:hover::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-frame::before,
+  .glow-frame::after {
+    transition: none;
+  }
+}

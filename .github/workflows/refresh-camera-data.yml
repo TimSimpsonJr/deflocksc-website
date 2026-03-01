@@ -1,0 +1,22 @@
+name: Refresh Camera Data
+
+on:
+  schedule:
+    # Weekly on Wednesdays at 6am ET (offset from bill scraper)
+    - cron: '0 11 * * 3'
+  workflow_dispatch: # manual trigger
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node scripts/fetch-camera-data.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet public/camera-data.json || (git add public/camera-data.json && git commit -m "chore: refresh camera data from Deflock CDN" && git push)
