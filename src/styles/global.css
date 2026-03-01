@@ -39,10 +39,6 @@
   opacity: 1;
 }
 
-/* Bill cards: allow shadow to paint outside */
-.bill-card[data-spotlight] {
-  overflow: visible;
-}
 
 @media (prefers-reduced-motion: reduce) {
   [data-spotlight]::before {
@@ -52,5 +48,5 @@
 
 /* Section glow accent */
 .section-glow {
-  background: radial-gradient(ellipse at center, #ef4444 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(148, 163, 184, 0.6) 0%, transparent 70%);
 }

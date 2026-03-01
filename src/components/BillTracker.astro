@@ -4,7 +4,7 @@ import bills from '../data/bills.json';
 
 <section class="bg-[#1e293b] py-20 md:py-28 relative overflow-hidden">
   <!-- Section glow accent -->
-  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[200px] blur-[64px] opacity-[0.10] md:opacity-[0.12] pointer-events-none"></div>
+  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[300px] blur-[64px] opacity-[0.15] md:opacity-[0.18] pointer-events-none"></div>
 
   <div class="max-w-4xl mx-auto px-6">
     <h2 class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-6">
@@ -19,7 +19,7 @@ import bills from '../data/bills.json';
     <div class="space-y-4 mb-10">
       {bills.map((bill: any, i: number) => (
         <div
-          class="bill-card bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#263548] hover:translate-x-1 hover:shadow-lg"
+          class="bill-card bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#263548] hover:translate-x-1"
           data-bill={i}
           data-spotlight
         >

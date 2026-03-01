@@ -2,9 +2,22 @@
 ---
 
 <section id="take-action" class="py-20 md:py-28 bg-[#1e293b] relative overflow-hidden">
-  <!-- Section glow accent -->
-  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[200px] blur-[64px] opacity-[0.08] md:opacity-[0.10] pointer-events-none"></div>
-  <div class="max-w-3xl mx-auto px-6">
+  <!-- Multi-glow effect -->
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <!-- Base glow - upper center-right -->
+    <div class="absolute top-[25%] left-[55%] -translate-x-1/2 -translate-y-1/2 w-[min(900px,90vw)] h-[500px] opacity-[0.25]"
+      style="background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.6) 0%, rgba(29, 78, 216, 0.2) 40%, transparent 70%);">
+    </div>
+    <!-- Mid glow - lower left -->
+    <div class="absolute top-[70%] left-[40%] -translate-x-1/2 -translate-y-1/2 w-[min(700px,80vw)] h-[400px] opacity-[0.30]"
+      style="background: radial-gradient(ellipse at center, rgba(96, 165, 250, 0.5) 0%, rgba(59, 130, 246, 0.15) 50%, transparent 80%);">
+    </div>
+    <!-- Core glow - center, slightly right -->
+    <div class="absolute top-[45%] left-[60%] -translate-x-1/2 -translate-y-1/2 w-[min(500px,60vw)] h-[300px] blur-[40px] opacity-[0.35]"
+      style="background: radial-gradient(ellipse at center, rgba(147, 197, 253, 0.6) 0%, transparent 70%);">
+    </div>
+  </div>
+  <div class="max-w-3xl mx-auto px-6 relative z-10">
     <h2 class="text-3xl md:text-4xl font-[900] text-white leading-tight mb-8">
       Tell Your Legislators: South Carolina Won't Be Watched Without a Vote.
     </h2>
