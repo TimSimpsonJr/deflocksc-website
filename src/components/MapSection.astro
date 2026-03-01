@@ -164,6 +164,37 @@ import 'maplibre-gl/dist/maplibre-gl.css';
       transition: none;
     }
   }
+
+  /* Dark glass zoom controls */
+  #camera-map :global(.maplibregl-ctrl-group) {
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(51, 65, 85, 0.6);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  #camera-map :global(.maplibregl-ctrl-group button) {
+    width: 36px;
+    height: 36px;
+  }
+
+  #camera-map :global(.maplibregl-ctrl-group button + button) {
+    border-top: 1px solid #334155;
+  }
+
+  #camera-map :global(.maplibregl-ctrl-group button .maplibregl-ctrl-icon) {
+    filter: invert(1) brightness(0.7);
+  }
+
+  #camera-map :global(.maplibregl-ctrl-group button:hover .maplibregl-ctrl-icon) {
+    filter: invert(1) brightness(0.9);
+  }
+
+  #camera-map :global(.maplibregl-ctrl-group button:hover) {
+    background: rgba(51, 65, 85, 0.5);
+  }
 </style>
 
 <script>
@@ -217,7 +248,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
       attributionControl: false,
     });
 
-    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
     map.on('load', async () => {
       try {
