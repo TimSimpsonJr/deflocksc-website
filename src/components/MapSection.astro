@@ -151,6 +151,27 @@ import 'maplibre-gl/dist/maplibre-gl.css';
           clusterRadius: 50,
         });
 
+        // Cluster glow (larger, semi-transparent circle behind)
+        map!.addLayer({
+          id: 'cluster-glow',
+          type: 'circle',
+          source: 'cameras',
+          filter: ['has', 'point_count'],
+          paint: {
+            'circle-color': [
+              'interpolate', ['linear'], ['get', 'point_count'],
+              2, '#fbbf24',
+              10, '#f59e0b',
+              25, '#ef4444',
+              50, '#dc2626',
+            ],
+            'circle-radius': ['step', ['get', 'point_count'], 22, 10, 28, 50, 34],
+            'circle-opacity': 0.25,
+            'circle-blur': 0.7,
+          },
+        });
+
+        // Cluster circles
         map!.addLayer({
           id: 'clusters',
           type: 'circle',
@@ -164,7 +185,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
               25, '#ef4444',  // red for medium
               50, '#dc2626',  // deeper red for large
             ],
-            'circle-radius': ['step', ['get', 'point_count'], 20, 10, 28, 50, 36],
+            'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 50, 24],
             'circle-opacity': 0.9,
           },
         });
@@ -189,21 +210,21 @@ import 'maplibre-gl/dist/maplibre-gl.css';
           filter: ['all', ['!', ['has', 'point_count']], ['!', ['get', 'hasDirection']]],
           paint: {
             'circle-color': '#ef4444',
-            'circle-radius': 9,
-            'circle-stroke-width': 1.5,
+            'circle-radius': 12,
+            'circle-stroke-width': 2,
             'circle-stroke-color': '#991b1b',
           },
         });
 
         // Create directional cone image on a canvas
-        const coneSize = 48;
+        const coneSize = 64;
         const coneCanvas = document.createElement('canvas');
         coneCanvas.width = coneSize;
         coneCanvas.height = coneSize;
         const ctx = coneCanvas.getContext('2d')!;
         const cx = coneSize / 2;
         const cy = coneSize / 2;
-        const radius = 22;
+        const radius = 30;
         const halfAngle = 25 * (Math.PI / 180);
 
         // Draw cone/wedge pointing up (0° = north)
@@ -218,7 +239,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
         // Center dot
         ctx.beginPath();
-        ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
         ctx.fillStyle = '#ef4444';
         ctx.fill();
         ctx.strokeStyle = '#991b1b';
