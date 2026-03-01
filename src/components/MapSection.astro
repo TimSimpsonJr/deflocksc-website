@@ -56,7 +56,10 @@ import 'maplibre-gl/dist/maplibre-gl.css';
       </div>
 
       <p class="text-[#64748b] text-sm mt-3">
-        Data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
+        Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
+      </p>
+      <p class="text-[#475569] text-xs mt-1">
+        Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener" class="hover:text-[#64748b] transition-colors">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener" class="hover:text-[#64748b] transition-colors">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" class="hover:text-[#64748b] transition-colors">&copy; OpenStreetMap</a>
       </p>
     </div>
   </div>
@@ -113,21 +116,12 @@ import 'maplibre-gl/dist/maplibre-gl.css';
       attributionControl: false,
     });
 
-    map.addControl(new maplibregl.AttributionControl({
-      customAttribution: [
-        '<a href="https://deflock.org" target="_blank" rel="noopener">Deflock</a>',
-        '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>',
-        '<a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a>',
-        '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
-      ],
-    }));
-
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
     map.on('load', async () => {
       try {
-        const res = await fetch('https://cdn.deflock.me/regions/20/-100.json');
-        if (!res.ok) throw new Error(`CDN responded with ${res.status}`);
+        const res = await fetch('/camera-data.json');
+        if (!res.ok) throw new Error(`Failed to load camera data: ${res.status}`);
         const cameras: DeflockCamera[] = await res.json();
 
         const geojson: GeoJSON.FeatureCollection = {
