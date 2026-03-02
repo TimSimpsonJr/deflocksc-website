@@ -2,7 +2,6 @@
 import actionLetters from '../data/action-letters.json';
 import stateLegislators from '../data/state-legislators.json';
 import localCouncils from '../data/local-councils.json';
-const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
 ---
 
 <div id="action-modal" class="fixed inset-0 z-[60] hidden"
@@ -187,7 +186,170 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
   </div>
 </div>
 
-<script define:vars={{ actionLetters, stateLegislators, localCouncils, civicApiKey }}>
+<script define:vars={{ actionLetters, stateLegislators, localCouncils }}>
+  // --- District Matcher (inlined from src/lib/district-matcher.js) ---
+
+  var DM_COUNTY_FILES = {
+    greenville: 'county-greenville.json',
+    spartanburg: 'county-spartanburg.json',
+    anderson: 'county-anderson.json',
+    pickens: 'county-pickens.json',
+    laurens: 'county-laurens.json'
+  };
+  var DM_CITY_FILES = { greenville: 'place-greenville.json' };
+  var DM_COUNTY_CITIES = { greenville: ['greenville'] };
+  var DM_SC_BBOX = { minLat: 32, maxLat: 35.3, minLng: -83.5, maxLng: -78.5 };
+  var dmBoundaryCache = {};
+
+  function dmPointInRing(lat, lng, ring) {
+    var inside = false;
+    for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      var xi = ring[i][0], yi = ring[i][1];
+      var xj = ring[j][0], yj = ring[j][1];
+      if (((yi > lat) !== (yj > lat)) && (lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+
+  function dmPointInPolygon(lat, lng, geometry) {
+    if (geometry.type === 'Polygon') {
+      var rings = geometry.coordinates;
+      if (!dmPointInRing(lat, lng, rings[0])) return false;
+      for (var h = 1; h < rings.length; h++) {
+        if (dmPointInRing(lat, lng, rings[h])) return false;
+      }
+      return true;
+    }
+    if (geometry.type === 'MultiPolygon') {
+      for (var p = 0; p < geometry.coordinates.length; p++) {
+        var rings2 = geometry.coordinates[p];
+        if (!dmPointInRing(lat, lng, rings2[0])) continue;
+        var inHole = false;
+        for (var h2 = 1; h2 < rings2.length; h2++) {
+          if (dmPointInRing(lat, lng, rings2[h2])) { inHole = true; break; }
+        }
+        if (!inHole) return true;
+      }
+      return false;
+    }
+    return false;
+  }
+
+  function dmComputeBBox(fc) {
+    var minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+    function scan(ring) {
+      for (var i = 0; i < ring.length; i++) {
+        if (ring[i][1] < minLat) minLat = ring[i][1];
+        if (ring[i][1] > maxLat) maxLat = ring[i][1];
+        if (ring[i][0] < minLng) minLng = ring[i][0];
+        if (ring[i][0] > maxLng) maxLng = ring[i][0];
+      }
+    }
+    for (var f = 0; f < fc.features.length; f++) {
+      var g = fc.features[f].geometry;
+      if (g.type === 'Polygon') {
+        for (var r = 0; r < g.coordinates.length; r++) scan(g.coordinates[r]);
+      } else if (g.type === 'MultiPolygon') {
+        for (var pp = 0; pp < g.coordinates.length; pp++) {
+          for (var r2 = 0; r2 < g.coordinates[pp].length; r2++) scan(g.coordinates[pp][r2]);
+        }
+      }
+    }
+    return { minLat: minLat, maxLat: maxLat, minLng: minLng, maxLng: maxLng };
+  }
+
+  function dmPointInBBox(lat, lng, bbox) {
+    var m = 0.01;
+    return lat >= bbox.minLat - m && lat <= bbox.maxLat + m && lng >= bbox.minLng - m && lng <= bbox.maxLng + m;
+  }
+
+  async function dmLoadBoundary(filename) {
+    if (dmBoundaryCache[filename] !== undefined) return dmBoundaryCache[filename];
+    try {
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function() { controller.abort(); }, 10000);
+      var res = await fetch('/districts/' + filename, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      var data = await res.json();
+      data._bbox = dmComputeBBox(data);
+      dmBoundaryCache[filename] = data;
+      return data;
+    } catch (e) {
+      if (e.name === 'AbortError') console.warn('Boundary load timed out: ' + filename);
+      else console.warn('Failed to load boundary: ' + filename, e);
+      dmBoundaryCache[filename] = null;
+      return null;
+    }
+  }
+
+  function dmFindDistrict(lat, lng, fc) {
+    if (!fc || !fc.features) return null;
+    if (fc._bbox && !dmPointInBBox(lat, lng, fc._bbox)) return null;
+    for (var i = 0; i < fc.features.length; i++) {
+      if (dmPointInPolygon(lat, lng, fc.features[i].geometry)) {
+        return fc.features[i].properties.district || null;
+      }
+    }
+    return null;
+  }
+
+  async function matchDistricts(lat, lng) {
+    var result = { senate: null, house: null, county: null, countyDistrict: null, city: null, cityDistrict: null };
+    if (lat < DM_SC_BBOX.minLat || lat > DM_SC_BBOX.maxLat || lng < DM_SC_BBOX.minLng || lng > DM_SC_BBOX.maxLng) return result;
+    var slduP = dmLoadBoundary('sldu.json');
+    var sldlP = dmLoadBoundary('sldl.json');
+    var sldu = await slduP;
+    var sldl = await sldlP;
+    result.senate = dmFindDistrict(lat, lng, sldu);
+    result.house = dmFindDistrict(lat, lng, sldl);
+    var countyKeys = Object.keys(DM_COUNTY_FILES);
+    var countyDataArr = await Promise.all(countyKeys.map(function(k) { return dmLoadBoundary(DM_COUNTY_FILES[k]); }));
+    for (var i = 0; i < countyKeys.length; i++) {
+      var d = dmFindDistrict(lat, lng, countyDataArr[i]);
+      if (d !== null) { result.county = countyKeys[i]; result.countyDistrict = d; break; }
+    }
+    var cityKeysToTest = result.county && DM_COUNTY_CITIES[result.county] ? DM_COUNTY_CITIES[result.county] : Object.keys(DM_CITY_FILES);
+    if (cityKeysToTest.length > 0) {
+      var cityDataArr = await Promise.all(cityKeysToTest.map(function(k) { return DM_CITY_FILES[k] ? dmLoadBoundary(DM_CITY_FILES[k]) : Promise.resolve(null); }));
+      for (var c = 0; c < cityKeysToTest.length; c++) {
+        var cd = dmFindDistrict(lat, lng, cityDataArr[c]);
+        if (cd !== null) { result.city = cityKeysToTest[c]; result.cityDistrict = cd; break; }
+      }
+    }
+    return result;
+  }
+
+  async function geocodeAddress(address) {
+    var result = { lat: null, lng: null, senate: null, house: null };
+    try {
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function() { controller.abort(); }, 10000);
+      var params = new URLSearchParams({ address: address, benchmark: 'Public_AR_Current', vintage: 'Current_Current', format: 'json' });
+      var res = await fetch('https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?' + params.toString(), { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error('Census geocoder HTTP ' + res.status);
+      var data = await res.json();
+      var matches = data.result && data.result.addressMatches;
+      if (!matches || matches.length === 0) return result;
+      var match = matches[0];
+      if (match.coordinates) { result.lng = match.coordinates.x; result.lat = match.coordinates.y; }
+      var geo = match.geographies;
+      if (geo) {
+        var upper = geo['State Legislative Districts - Upper'];
+        if (upper && upper.length > 0 && upper[0].BASENAME) result.senate = upper[0].BASENAME;
+        var lower = geo['State Legislative Districts - Lower'];
+        if (lower && lower.length > 0 && lower[0].BASENAME) result.house = lower[0].BASENAME;
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') console.warn('Census geocoder timed out');
+      else console.warn('Census geocoder failed:', e);
+    }
+    return result;
+  }
+
   // --- Modal Management ---
   var modal = document.getElementById('action-modal');
   var openerElement = null; // tracks which button opened the modal for focus return
@@ -231,235 +393,202 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
     showState('error');
   }
 
-  // --- API Integration ---
-  async function lookupDivisions(address) {
-    var url = 'https://www.googleapis.com/civicinfo/v2/divisionsByAddress?address=' +
-      encodeURIComponent(address) + '&key=' + civicApiKey;
-    var res = await fetch(url);
-    if (!res.ok) throw new Error('API error: ' + res.status);
-    return res.json();
-  }
-
-  function parseDivisions(data) {
-    if (!data.divisions) return { ocdIds: [], city: null };
-    var ocdIds = Object.keys(data.divisions);
-
-    // Extract city from normalizedInput if available
-    var city = null;
-    if (data.normalizedInput && data.normalizedInput.city) {
-      city = data.normalizedInput.city.toLowerCase();
-    }
-
-    // Synthesize a place OCD-ID if the API didn't return one for this city
-    if (city) {
-      var placePrefix = 'ocd-division/country:us/state:sc/place:' + city;
-      var hasPlace = false;
-      for (var i = 0; i < ocdIds.length; i++) {
-        if (ocdIds[i].indexOf('/place:') !== -1) {
-          hasPlace = true;
-          break;
-        }
-      }
-      if (!hasPlace) {
-        ocdIds.push(placePrefix);
-      }
-    }
-
-    return { ocdIds: ocdIds, city: city };
-  }
-
-  function buildGroups(ocdIds) {
+  // --- Build Groups from match object ---
+  function buildGroups(match) {
     var groups = [];
-    var OCD_PREFIX = 'ocd-division/country:us/';
 
-    // Track which letter labels we've already added to avoid duplicates
-    var usedLabels = new Set();
+    // Helper: find a letter template by divisionPattern substring
+    function findLetter(patternSubstring) {
+      for (var i = 0; i < actionLetters.length; i++) {
+        if (actionLetters[i].divisionPattern.indexOf(patternSubstring) !== -1) {
+          return actionLetters[i];
+        }
+      }
+      return null;
+    }
 
-    for (var i = 0; i < ocdIds.length; i++) {
-      var ocdId = ocdIds[i];
-      // Strip OCD prefix for matching against divisionPatterns and local council keys
-      var stripped = ocdId.indexOf(OCD_PREFIX) === 0 ? ocdId.substring(OCD_PREFIX.length) : ocdId;
+    // Helper: find a letter by exact council key (e.g. 'county:greenville')
+    function findLocalLetter(councilKey) {
+      for (var i = 0; i < actionLetters.length; i++) {
+        if (actionLetters[i].divisionPattern.indexOf(councilKey) !== -1 && actionLetters[i].category === 'local') {
+          return actionLetters[i];
+        }
+      }
+      return null;
+    }
 
-      // --- State Senator ---
-      var slduMatch = stripped.match(/state:sc\/sldu:(\d+)/);
-      if (slduMatch) {
-        var senateDistrict = slduMatch[1];
-        var senator = stateLegislators.senate[senateDistrict];
-        // Find matching letter template
-        var senateLetter = null;
-        for (var j = 0; j < actionLetters.length; j++) {
-          if (stripped.indexOf(actionLetters[j].divisionPattern) !== -1 && actionLetters[j].divisionPattern.indexOf('sldu:') !== -1) {
-            senateLetter = actionLetters[j];
+    // Helper: find matched district member from a council
+    function findMatchedMember(council, districtNum) {
+      if (!council || !council.members || !districtNum) return null;
+      var needleD = 'District ' + districtNum;
+      var needleS = 'Seat ' + districtNum;
+      for (var i = 0; i < council.members.length; i++) {
+        var title = council.members[i].title || '';
+        if (title.indexOf(needleD) !== -1 || title.indexOf(needleS) !== -1) {
+          return council.members[i];
+        }
+      }
+      return null;
+    }
+
+    // 1. State Senator
+    var senateLetter = findLetter('sldu:');
+    if (senateLetter) {
+      var senator = match.senate ? stateLegislators.senate[match.senate] : null;
+      groups.push({
+        label: senateLetter.label,
+        category: 'state',
+        subject: senateLetter.subject,
+        body: senateLetter.body,
+        reps: senator ? [{ name: senator.name, office: 'State Senator, District ' + match.senate, email: senator.email, phone: senator.phone || '' }] : []
+      });
+    }
+
+    // 2. State Representative
+    var houseLetter = findLetter('sldl:');
+    if (houseLetter) {
+      var houseRep = match.house ? stateLegislators.house[match.house] : null;
+      groups.push({
+        label: houseLetter.label,
+        category: 'state',
+        subject: houseLetter.subject,
+        body: houseLetter.body,
+        reps: houseRep ? [{ name: houseRep.name, office: 'State Representative, District ' + match.house, email: houseRep.email, phone: houseRep.phone || '' }] : []
+      });
+    }
+
+    // 3. Your Local Representatives (local-matched) — district-matched reps only
+    var localMatchedReps = [];
+    var countyKey = match.county ? 'county:' + match.county : null;
+    var cityKey = match.city ? 'place:' + match.city : null;
+    var countyCouncil = countyKey ? localCouncils[countyKey] : null;
+    var cityCouncil = cityKey ? localCouncils[cityKey] : null;
+
+    // Find the matched county council member
+    var matchedCountyMember = findMatchedMember(countyCouncil, match.countyDistrict);
+    if (matchedCountyMember && matchedCountyMember.name && matchedCountyMember.name !== 'Vacant') {
+      localMatchedReps.push({
+        name: matchedCountyMember.name,
+        office: matchedCountyMember.title + ' — ' + countyCouncil.label,
+        email: matchedCountyMember.email || '',
+        phone: matchedCountyMember.phone || ''
+      });
+    }
+
+    // Find the matched city council member
+    var matchedCityMember = findMatchedMember(cityCouncil, match.cityDistrict);
+    if (matchedCityMember && matchedCityMember.name && matchedCityMember.name !== 'Vacant') {
+      localMatchedReps.push({
+        name: matchedCityMember.name,
+        office: matchedCityMember.title + ' — ' + cityCouncil.label,
+        email: matchedCityMember.email || '',
+        phone: matchedCityMember.phone || ''
+      });
+    }
+
+    if (localMatchedReps.length > 0) {
+      // Use the county letter for the local-matched group (or city letter, or catch-all)
+      var localMatchedLetter = (countyKey && findLocalLetter(countyKey)) ||
+                               (cityKey && findLocalLetter(cityKey)) ||
+                               null;
+      if (!localMatchedLetter) {
+        // Fallback to catch-all local letter
+        for (var ca = 0; ca < actionLetters.length; ca++) {
+          if (actionLetters[ca].divisionPattern === 'state:sc/' && actionLetters[ca].category === 'local') {
+            localMatchedLetter = actionLetters[ca];
             break;
           }
         }
-        if (senateLetter && !usedLabels.has('State Senator')) {
-          usedLabels.add('State Senator');
-          groups.push({
-            label: senateLetter.label,
-            category: 'state',
-            subject: senateLetter.subject,
-            body: senateLetter.body,
-            reps: senator ? [{ name: senator.name, office: 'State Senator, District ' + senateDistrict, email: senator.email, phone: senator.phone || '' }] : []
-          });
-        }
       }
-
-      // --- State Representative ---
-      var sldlMatch = stripped.match(/state:sc\/sldl:(\d+)/);
-      if (sldlMatch) {
-        var houseDistrict = sldlMatch[1];
-        var houseRep = stateLegislators.house[houseDistrict];
-        var houseLetter = null;
-        for (var j2 = 0; j2 < actionLetters.length; j2++) {
-          if (stripped.indexOf(actionLetters[j2].divisionPattern) !== -1 && actionLetters[j2].divisionPattern.indexOf('sldl:') !== -1) {
-            houseLetter = actionLetters[j2];
-            break;
-          }
-        }
-        if (houseLetter && !usedLabels.has('State Representative')) {
-          usedLabels.add('State Representative');
-          groups.push({
-            label: houseLetter.label,
-            category: 'state',
-            subject: houseLetter.subject,
-            body: houseLetter.body,
-            reps: houseRep ? [{ name: houseRep.name, office: 'State Representative, District ' + houseDistrict, email: houseRep.email, phone: houseRep.phone || '' }] : []
-          });
-        }
-      }
-
-      // --- Local Councils ---
-      var localKeys = Object.keys(localCouncils);
-      for (var lk = 0; lk < localKeys.length; lk++) {
-        var localKey = localKeys[lk]; // e.g. "place:greenville", "county:greenville"
-        if (stripped.indexOf(localKey) !== -1 && !usedLabels.has(localKey)) {
-          usedLabels.add(localKey);
-          var council = localCouncils[localKey];
-          // Find matching letter template
-          var localLetter = null;
-          for (var ll = 0; ll < actionLetters.length; ll++) {
-            if (stripped.indexOf(actionLetters[ll].divisionPattern) !== -1 && actionLetters[ll].category === 'local') {
-              localLetter = actionLetters[ll];
-              break;
-            }
-          }
-          if (localLetter) {
-            var memberReps = [];
-            for (var cm = 0; cm < council.members.length; cm++) {
-              var member = council.members[cm];
-              if (!member.name || member.name === 'Vacant') continue;
-              memberReps.push({
-                name: member.name,
-                office: member.title,
-                email: member.email || '',
-                phone: member.phone || ''
-              });
-            }
-            groups.push({
-              label: localLetter.label,
-              category: 'local',
-              subject: localLetter.subject,
-              body: localLetter.body,
-              reps: memberReps
-            });
-          }
-        }
+      if (localMatchedLetter) {
+        groups.push({
+          label: 'Your Local Representatives',
+          category: 'local-matched',
+          subject: localMatchedLetter.subject,
+          body: localMatchedLetter.body,
+          reps: localMatchedReps
+        });
       }
     }
 
-    // If no local council groups were matched, add the catch-all local letter
-    var hasLocal = groups.some(function(g) { return g.category === 'local'; });
+    // 4. Full county council (with isMatchedDistrict badge)
+    if (countyCouncil) {
+      var countyLetter = findLocalLetter(countyKey);
+      if (countyLetter) {
+        var countyReps = [];
+        for (var cm = 0; cm < countyCouncil.members.length; cm++) {
+          var member = countyCouncil.members[cm];
+          if (!member.name || member.name === 'Vacant') continue;
+          var isMatched = matchedCountyMember && member.name === matchedCountyMember.name;
+          countyReps.push({
+            name: member.name,
+            office: member.title,
+            email: member.email || '',
+            phone: member.phone || '',
+            isMatchedDistrict: isMatched
+          });
+        }
+        countyReps.sort(function(a, b) { return (b.isMatchedDistrict ? 1 : 0) - (a.isMatchedDistrict ? 1 : 0); });
+        groups.push({
+          label: countyLetter.label,
+          category: 'local',
+          subject: countyLetter.subject,
+          body: countyLetter.body,
+          reps: countyReps,
+          countyKey: countyKey,
+          matchedDistrict: match.countyDistrict || null
+        });
+      }
+    }
+
+    // 5. Full city council (with isMatchedDistrict badge)
+    if (cityCouncil) {
+      var cityLetter = findLocalLetter(cityKey);
+      if (cityLetter) {
+        var cityReps = [];
+        for (var cim = 0; cim < cityCouncil.members.length; cim++) {
+          var cmember = cityCouncil.members[cim];
+          if (!cmember.name || cmember.name === 'Vacant') continue;
+          var isCityMatched = matchedCityMember && cmember.name === matchedCityMember.name;
+          cityReps.push({
+            name: cmember.name,
+            office: cmember.title,
+            email: cmember.email || '',
+            phone: cmember.phone || '',
+            isMatchedDistrict: isCityMatched
+          });
+        }
+        cityReps.sort(function(a, b) { return (b.isMatchedDistrict ? 1 : 0) - (a.isMatchedDistrict ? 1 : 0); });
+        groups.push({
+          label: cityLetter.label,
+          category: 'local',
+          subject: cityLetter.subject,
+          body: cityLetter.body,
+          reps: cityReps,
+          cityKey: cityKey,
+          matchedDistrict: match.cityDistrict || null
+        });
+      }
+    }
+
+    // If no local council groups were matched at all, add catch-all
+    var hasLocal = groups.some(function(g) { return g.category === 'local' || g.category === 'local-matched'; });
     if (!hasLocal) {
-      for (var ca = 0; ca < actionLetters.length; ca++) {
-        if (actionLetters[ca].divisionPattern === 'state:sc/' && actionLetters[ca].category === 'local') {
+      for (var ca2 = 0; ca2 < actionLetters.length; ca2++) {
+        if (actionLetters[ca2].divisionPattern === 'state:sc/' && actionLetters[ca2].category === 'local') {
           groups.push({
-            label: actionLetters[ca].label,
+            label: actionLetters[ca2].label,
             category: 'local',
-            subject: actionLetters[ca].subject,
-            body: actionLetters[ca].body,
+            subject: actionLetters[ca2].subject,
+            body: actionLetters[ca2].body,
             reps: []
           });
           break;
         }
       }
     }
-
-    // If no state legislative districts were found, add fallback state letters
-    var hasSenateLetter = usedLabels.has('State Senator');
-    var hasHouseLetter = usedLabels.has('State Representative');
-    if (!hasSenateLetter) {
-      for (var fl = 0; fl < actionLetters.length; fl++) {
-        if (actionLetters[fl].divisionPattern.indexOf('sldu:') !== -1) {
-          groups.unshift({
-            label: actionLetters[fl].label,
-            category: 'state',
-            subject: actionLetters[fl].subject,
-            body: actionLetters[fl].body,
-            reps: []
-          });
-          break;
-        }
-      }
-    }
-    if (!hasHouseLetter) {
-      // Insert after senate group (index 0 if senate was just added, or index 0 if not)
-      var insertIdx = !hasSenateLetter ? 1 : 0;
-      for (var fl2 = 0; fl2 < actionLetters.length; fl2++) {
-        if (actionLetters[fl2].divisionPattern.indexOf('sldl:') !== -1) {
-          groups.splice(insertIdx, 0, {
-            label: actionLetters[fl2].label,
-            category: 'state',
-            subject: actionLetters[fl2].subject,
-            body: actionLetters[fl2].body,
-            reps: []
-          });
-          break;
-        }
-      }
-    }
-
-    // Sort: state groups first, local groups second
-    groups.sort(function(a, b) {
-      return (a.category === 'state' ? 0 : 1) - (b.category === 'state' ? 0 : 1);
-    });
 
     return groups;
-  }
-
-  // --- Geolocation ---
-  async function getAddressFromLocation() {
-    return new Promise(function(resolve, reject) {
-      if (!navigator.geolocation) {
-        reject(new Error('Geolocation not supported'));
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        async function(pos) {
-          try {
-            var res = await fetch(
-              'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' +
-              pos.coords.latitude + '&longitude=' + pos.coords.longitude +
-              '&localityLanguage=en'
-            );
-            var data = await res.json();
-            var parts = [];
-            if (data.streetNumber) parts.push(data.streetNumber);
-            if (data.streetName) parts.push(data.streetName);
-            var street = parts.join(' ');
-            var addressParts = [];
-            if (street) addressParts.push(street);
-            if (data.city) addressParts.push(data.city);
-            if (data.principalSubdivision) addressParts.push(data.principalSubdivision);
-            if (data.postcode) addressParts.push(data.postcode);
-            var address = addressParts.join(', ');
-            if (address) resolve(address);
-            else reject(new Error('Could not determine address from location'));
-          } catch (e) { reject(e); }
-        },
-        function(err) { reject(err); }
-      );
-    });
   }
 
   // --- mailto and clipboard ---
@@ -505,10 +634,24 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
       groupDiv.className = gi > 0 ? 'mt-8 pt-8 border-t border-[#334155]' : '';
 
       // Group header
-      var headerLabel = group.category === 'state' ? ('YOUR ' + group.label.toUpperCase()) : group.label.toUpperCase();
+      var headerLabel = group.category === 'state'
+        ? ('YOUR ' + group.label.toUpperCase())
+        : group.label.toUpperCase();
       var header = document.createElement('h3');
       header.className = 'text-[#64748b] text-xs font-bold tracking-wider uppercase mb-4';
       header.textContent = headerLabel;
+
+      // Wrong-district link for local groups with council key
+      if (group.category === 'local' && (group.countyKey || group.cityKey)) {
+        var wrongLink = document.createElement('button');
+        wrongLink.type = 'button';
+        wrongLink.className = 'text-[#3b82f6] hover:text-[#60a5fa] text-xs font-medium transition-colors cursor-pointer bg-transparent border-none ml-2';
+        wrongLink.textContent = group.matchedDistrict ? 'Wrong district?' : 'Select your district';
+        wrongLink.setAttribute('data-action', 'wrong-district');
+        wrongLink.setAttribute('data-group', gi);
+        header.appendChild(wrongLink);
+      }
+
       groupDiv.appendChild(header);
 
       // Rep list
@@ -530,6 +673,15 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
         officeSpan.textContent = rep.office;
         infoDiv.appendChild(nameSpan);
         infoDiv.appendChild(officeSpan);
+
+        // District badge
+        if (rep.isMatchedDistrict) {
+          var badge = document.createElement('span');
+          badge.className = 'text-[#3b82f6] text-xs font-medium';
+          badge.textContent = 'Your district';
+          infoDiv.appendChild(badge);
+        }
+
         if (rep.phone) {
           var phoneLink = document.createElement('a');
           phoneLink.href = 'tel:' + rep.phone.replace(/[^+\d]/g, '');
@@ -539,7 +691,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
         }
         repDiv.appendChild(infoDiv);
 
-        // Individual buttons for all reps (state and local)
+        // Individual buttons for all reps (state, local-matched, and local)
         var btnRow = document.createElement('div');
         btnRow.className = 'flex gap-2 flex-shrink-0';
 
@@ -551,7 +703,8 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
           sendBtn.setAttribute('aria-label', 'Send email to ' + rep.name);
           sendBtn.setAttribute('data-group', gi);
           sendBtn.setAttribute('data-rep', ri);
-          sendBtn.setAttribute('data-action', group.category === 'state' ? 'send-state' : 'send-local-individual');
+          var sendAction = (group.category === 'state' || group.category === 'local-matched') ? 'send-state' : 'send-local-individual';
+          sendBtn.setAttribute('data-action', sendAction);
           btnRow.appendChild(sendBtn);
         }
 
@@ -573,7 +726,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
 
       groupDiv.appendChild(repListDiv);
 
-      // Group-level buttons for local councils (email all + copy)
+      // Group-level buttons for local councils (email all + copy) — not for local-matched
       if (group.category === 'local') {
         var groupBtnRow = document.createElement('div');
         groupBtnRow.className = 'flex gap-2 mt-4 pt-4 border-t border-[#334155]';
@@ -635,18 +788,18 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
 
       // Replace [NAME] depending on category
       var prefilledBody = group.body;
-      if (group.category === 'state' && group.reps.length > 0) {
+      if ((group.category === 'state' || group.category === 'local-matched') && group.reps.length > 0) {
         prefilledBody = group.body.replace(/\[NAME\]/g, group.reps[0].name);
       } else if (group.category === 'state') {
         var placeholder = group.label === 'State Senator' ? 'Senator' : 'Representative';
         prefilledBody = group.body.replace(/\[NAME\]/g, placeholder);
-      } else if (group.category === 'local') {
+      } else if (group.category === 'local' || group.category === 'local-matched') {
         prefilledBody = group.body.replace(/\[NAME\]/g, 'Council Member');
       }
       textarea.value = prefilledBody;
       previewDiv.appendChild(textarea);
 
-      if (group.category === 'state' && group.reps.length > 1) {
+      if ((group.category === 'state' || group.category === 'local-matched') && group.reps.length > 1) {
         var noteP = document.createElement('p');
         noteP.className = 'text-[#64748b] text-xs italic';
         noteP.textContent = 'The greeting will be personalized for each representative when you click Send Email.';
@@ -679,11 +832,6 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
       if (!rep || !rep.email) return;
       var personalizedBody = replaceGreeting(currentBody, rep.name);
       window.location.href = buildMailto([rep.email], group.subject, personalizedBody);
-    } else if (action === 'copy-state') {
-      var rep2 = group.reps[repIdx];
-      var personalizedBody2 = rep2 ? replaceGreeting(currentBody, rep2.name) : currentBody;
-      var copyText = 'Subject: ' + group.subject + '\n\n' + personalizedBody2;
-      copyToClipboard(copyText, target);
     } else if (action === 'send-local-individual') {
       var localRep = group.reps[repIdx];
       if (!localRep || !localRep.email) return;
@@ -703,6 +851,14 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
     } else if (action === 'copy-local') {
       var copyText2 = 'Subject: ' + group.subject + '\n\n' + currentBody;
       copyToClipboard(copyText2, target);
+    } else if (action === 'wrong-district') {
+      // Scroll to the manual selection and open it
+      showState('input');
+      var manualDetails = document.getElementById('action-manual-details');
+      if (manualDetails) {
+        manualDetails.open = true;
+        manualDetails.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
   });
 
@@ -721,47 +877,69 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
 
   // --- Event Handlers ---
 
-  // Form submit (address lookup)
-  document.getElementById('action-form')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    var addressInput = document.getElementById('action-address');
-    var address = addressInput?.value?.trim();
-    if (!address) return;
-    showState('loading');
-    try {
-      var data = await lookupDivisions(address);
-      var parsed = parseDivisions(data);
-      if (parsed.ocdIds.length === 0) throw new Error("We couldn't find divisions for that address. Please check and try again.");
-      var groups = buildGroups(parsed.ocdIds);
-      if (groups.length === 0) throw new Error("We couldn't find representatives for that address. Please check and try again.");
-      renderResults(groups);
-      showState('results');
-    } catch (err) {
-      showError(err.message || 'Something went wrong. Please try again in a moment.');
-    }
-  });
-
   // Geolocation button
   document.getElementById('action-geo')?.addEventListener('click', async function() {
     showState('loading');
     try {
-      var address = await getAddressFromLocation();
-      var addressInput = document.getElementById('action-address');
-      if (addressInput) addressInput.value = address;
-      var data = await lookupDivisions(address);
-      var parsed = parseDivisions(data);
-      if (parsed.ocdIds.length === 0) throw new Error("We couldn't find divisions for that address. Please check and try again.");
-      var groups = buildGroups(parsed.ocdIds);
-      if (groups.length === 0) throw new Error("We couldn't find representatives for your location. Please enter your address manually.");
+      var pos = await new Promise(function(resolve, reject) {
+        if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+      var match = await matchDistricts(pos.coords.latitude, pos.coords.longitude);
+      if (!match.senate && !match.house) {
+        throw new Error("We couldn't match your location to any SC districts. Please try entering your address instead.");
+      }
+      var groups = buildGroups(match);
       renderResults(groups);
       showState('results');
     } catch (err) {
       if (err.code === 1) {
         showError('Location access denied. Please enter your address instead.');
       } else {
-        showError(err.message || 'Something went wrong. Please try again in a moment.');
+        showError(err.message || 'Something went wrong. Please try again.');
       }
     }
+  });
+
+  // Form submit (address lookup)
+  document.getElementById('action-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var address = document.getElementById('action-address')?.value?.trim();
+    if (!address) return;
+    showState('loading');
+    try {
+      var geo = await geocodeAddress(address);
+      if (!geo.lat || !geo.lng) {
+        throw new Error("We couldn't find that address. Please check and try again.");
+      }
+      var match = await matchDistricts(geo.lat, geo.lng);
+      if (geo.senate) match.senate = geo.senate;
+      if (geo.house) match.house = geo.house;
+      var groups = buildGroups(match);
+      renderResults(groups);
+      showState('results');
+    } catch (err) {
+      showError(err.message || 'Something went wrong. Please try again.');
+    }
+  });
+
+  // Manual submit
+  document.getElementById('action-manual-submit')?.addEventListener('click', function() {
+    var match = {
+      senate: document.getElementById('manual-senate')?.value || null,
+      house: document.getElementById('manual-house')?.value || null,
+      county: document.getElementById('manual-county')?.value || null,
+      countyDistrict: document.getElementById('manual-county-district')?.value || null,
+      city: document.getElementById('manual-city')?.value || null,
+      cityDistrict: document.getElementById('manual-city-district')?.value || null
+    };
+    if (!match.senate && !match.house) {
+      showError('Please select at least a Senate or House district.');
+      return;
+    }
+    var groups = buildGroups(match);
+    renderResults(groups);
+    showState('results');
   });
 
   // Reset button
@@ -806,9 +984,9 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
   // --- Focus Trap ---
   modal?.addEventListener('keydown', function(e) {
     if (e.key !== 'Tab') return;
-    var focusable = modal.querySelectorAll(
-      'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), a[href], details > summary'
-    );
+    var focusable = Array.from(modal.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"]), a[href], details > summary'
+    )).filter(function(el) { return el.offsetParent !== null; });
     if (focusable.length === 0) return;
     var first = focusable[0];
     var last = focusable[focusable.length - 1];
@@ -823,7 +1001,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
 
   // --- Manual Selection Dropdowns ---
 
-  // Populate senate district dropdown (1-46)
+  // Populate senate district dropdown
   (function() {
     var senateSel = document.getElementById('manual-senate');
     if (!senateSel) return;
@@ -836,7 +1014,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
     }
   })();
 
-  // Populate house district dropdown (1-124)
+  // Populate house district dropdown
   (function() {
     var houseSel = document.getElementById('manual-house');
     if (!houseSel) return;
