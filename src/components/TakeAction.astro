@@ -1,4 +1,6 @@
 ---
+import actionLetters from '../data/action-letters.json';
+const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
 ---
 
 <section id="take-action" class="py-20 md:py-28 bg-[#1e293b] relative overflow-hidden">
@@ -26,10 +28,473 @@
       Three bills are sitting in committee. Greenville has 30 cameras and no rules governing them. The quickest way to change that is to contact your legislators. Enter your address below and we'll route your message to the right people automatically.
     </p>
 
-    <div class="bg-[#0f172a] border border-[#334155] rounded-lg p-10 text-center">
-      <p class="text-[#64748b] text-base">
-        Action widget will be embedded here once the WeAct campaign is set up.
-      </p>
+    <!-- Action Widget -->
+    <div class="bg-[#0f172a] border border-[#334155] rounded-lg p-6 md:p-10">
+
+      <!-- Input State -->
+      <div id="action-input">
+        <form id="action-form" class="flex flex-col items-center gap-4">
+          <label for="action-zip" class="sr-only">Zip code</label>
+          <div class="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+            <input
+              id="action-zip"
+              type="text"
+              maxlength="5"
+              pattern="[0-9]{5}"
+              inputmode="numeric"
+              placeholder="Enter your zip code"
+              required
+              class="flex-1 bg-[#1e293b] border border-[#334155] text-white rounded px-4 py-3 text-base placeholder-[#64748b] focus:outline-none focus:border-[#3b82f6] focus:ring-1 focus:ring-[#3b82f6] transition-colors"
+            />
+            <button
+              type="submit"
+              class="bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-6 py-3 text-sm min-h-[44px] transition-colors cursor-pointer whitespace-nowrap"
+            >
+              Look Up My Reps
+            </button>
+          </div>
+          <button
+            id="action-geo"
+            type="button"
+            class="text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium transition-colors cursor-pointer bg-transparent border-none min-h-[44px]"
+          >
+            Use my location instead
+          </button>
+          <p class="text-[#64748b] text-xs italic text-center max-w-sm">
+            Your location is used only to find your representatives. We don't store or share any location data.
+          </p>
+        </form>
+      </div>
+
+      <!-- Loading State -->
+      <div id="action-loading" class="hidden flex flex-col items-center justify-center py-12 gap-4">
+        <div class="w-10 h-10 border-4 border-[#334155] border-t-[#ef4444] rounded-full animate-spin"></div>
+        <p class="text-[#94a3b8] text-sm">Finding your representatives...</p>
+      </div>
+
+      <!-- Results State -->
+      <div id="action-results" class="hidden">
+        <div id="action-results-list"></div>
+        <div class="text-center mt-8">
+          <button
+            id="action-reset"
+            type="button"
+            class="text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium transition-colors cursor-pointer bg-transparent border-none min-h-[44px]"
+          >
+            &larr; Look up a different zip
+          </button>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div id="action-error" class="hidden flex flex-col items-center justify-center py-8 gap-4">
+        <p id="action-error-msg" class="text-red-400 text-sm text-center"></p>
+        <button
+          id="action-retry"
+          type="button"
+          class="bg-[#334155] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer"
+        >
+          Try again
+        </button>
+      </div>
+
     </div>
   </div>
 </section>
+
+<script define:vars={{ actionLetters, civicApiKey }}>
+  // --- State Management ---
+  function showState(state) {
+    ['input', 'loading', 'results', 'error'].forEach(function(s) {
+      var el = document.getElementById('action-' + s);
+      if (el) el.classList.toggle('hidden', s !== state);
+    });
+  }
+
+  function showError(msg) {
+    var el = document.getElementById('action-error-msg');
+    if (el) el.textContent = msg;
+    showState('error');
+  }
+
+  // --- API Integration ---
+  async function lookupReps(zip) {
+    var url = 'https://www.googleapis.com/civicinfo/v2/representatives?address=' +
+      encodeURIComponent(zip) + '&key=' + civicApiKey;
+    var res = await fetch(url);
+    if (!res.ok) throw new Error('API error: ' + res.status);
+    return res.json();
+  }
+
+  function parseReps(data) {
+    var groups = [];
+    var seen = new Set();
+
+    for (var i = 0; i < data.offices.length; i++) {
+      var office = data.offices[i];
+      var divId = office.divisionId;
+      var letter = null;
+      for (var j = 0; j < actionLetters.length; j++) {
+        if (divId.includes(actionLetters[j].divisionPattern)) {
+          letter = actionLetters[j];
+          break;
+        }
+      }
+      if (!letter) continue;
+
+      var group = null;
+      for (var k = 0; k < groups.length; k++) {
+        if (groups[k].label === letter.label) {
+          group = groups[k];
+          break;
+        }
+      }
+      if (!group) {
+        group = {
+          label: letter.label,
+          category: letter.category,
+          subject: letter.subject,
+          body: letter.body,
+          reps: []
+        };
+        groups.push(group);
+      }
+
+      if (!office.officialIndices) continue;
+      for (var m = 0; m < office.officialIndices.length; m++) {
+        var idx = office.officialIndices[m];
+        var official = data.officials[idx];
+        if (seen.has(official.name)) continue;
+        seen.add(official.name);
+        group.reps.push({
+          name: official.name,
+          office: office.name,
+          emails: official.emails || [],
+          phones: official.phones || []
+        });
+      }
+    }
+
+    // Sort: state groups first, local groups second
+    groups.sort(function(a, b) {
+      return (a.category === 'state' ? 0 : 1) - (b.category === 'state' ? 0 : 1);
+    });
+    return groups;
+  }
+
+  // --- Geolocation ---
+  async function getZipFromLocation() {
+    return new Promise(function(resolve, reject) {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation not supported'));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        async function(pos) {
+          try {
+            var res = await fetch(
+              'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' +
+              pos.coords.latitude + '&longitude=' + pos.coords.longitude +
+              '&localityLanguage=en'
+            );
+            var data = await res.json();
+            if (data.postcode) resolve(data.postcode);
+            else reject(new Error('Could not determine zip code'));
+          } catch (e) { reject(e); }
+        },
+        function(err) { reject(err); }
+      );
+    });
+  }
+
+  // --- mailto and clipboard ---
+  function buildMailto(emails, subject, body) {
+    var to = emails.join(',');
+    return 'mailto:' + to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  }
+
+  async function copyToClipboard(text, button) {
+    try {
+      await navigator.clipboard.writeText(text);
+      var original = button.textContent;
+      button.textContent = 'Copied!';
+      setTimeout(function() { button.textContent = original; }, 2000);
+    } catch (e) {
+      var textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      var original2 = button.textContent;
+      button.textContent = 'Copied!';
+      setTimeout(function() { button.textContent = original2; }, 2000);
+    }
+  }
+
+  // --- Results Renderer ---
+  function renderResults(groups) {
+    var container = document.getElementById('action-results-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    for (var gi = 0; gi < groups.length; gi++) {
+      var group = groups[gi];
+      var groupId = 'action-group-' + gi;
+
+      // Group wrapper
+      var groupDiv = document.createElement('div');
+      groupDiv.className = gi > 0 ? 'mt-8 pt-8 border-t border-[#334155]' : '';
+
+      // Group header
+      var headerLabel = group.category === 'state' ? 'YOUR STATE LEGISLATORS' : group.label.toUpperCase();
+      var header = document.createElement('h3');
+      header.className = 'text-[#64748b] text-xs font-bold tracking-wider uppercase mb-4';
+      header.textContent = headerLabel;
+      groupDiv.appendChild(header);
+
+      // Rep list
+      var repListDiv = document.createElement('div');
+      repListDiv.className = 'space-y-3';
+
+      for (var ri = 0; ri < group.reps.length; ri++) {
+        var rep = group.reps[ri];
+        var repDiv = document.createElement('div');
+        repDiv.className = 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-2';
+
+        // Rep info
+        var infoDiv = document.createElement('div');
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'text-white font-semibold block';
+        nameSpan.textContent = rep.name;
+        var officeSpan = document.createElement('span');
+        officeSpan.className = 'text-[#94a3b8] text-sm block';
+        officeSpan.textContent = rep.office;
+        infoDiv.appendChild(nameSpan);
+        infoDiv.appendChild(officeSpan);
+        repDiv.appendChild(infoDiv);
+
+        // Individual buttons for state reps
+        if (group.category === 'state') {
+          var btnRow = document.createElement('div');
+          btnRow.className = 'flex gap-2 flex-shrink-0';
+
+          if (rep.emails.length > 0) {
+            var sendBtn = document.createElement('a');
+            sendBtn.className = 'bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer inline-flex items-center no-underline';
+            sendBtn.textContent = 'Send Email';
+            sendBtn.setAttribute('data-group', gi);
+            sendBtn.setAttribute('data-rep', ri);
+            sendBtn.setAttribute('data-action', 'send-state');
+            sendBtn.href = '#';
+            btnRow.appendChild(sendBtn);
+          }
+
+          var copyBtn = document.createElement('button');
+          copyBtn.className = 'bg-[#334155] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer';
+          copyBtn.textContent = 'Copy Letter';
+          copyBtn.setAttribute('data-group', gi);
+          copyBtn.setAttribute('data-rep', ri);
+          copyBtn.setAttribute('data-action', 'copy-state');
+          copyBtn.type = 'button';
+          btnRow.appendChild(copyBtn);
+
+          repDiv.appendChild(btnRow);
+        }
+
+        repListDiv.appendChild(repDiv);
+      }
+
+      groupDiv.appendChild(repListDiv);
+
+      // Group-level buttons for local councils
+      if (group.category === 'local') {
+        var groupBtnRow = document.createElement('div');
+        groupBtnRow.className = 'flex gap-2 mt-4';
+
+        // Collect all council emails
+        var allEmails = [];
+        for (var re = 0; re < group.reps.length; re++) {
+          for (var em = 0; em < group.reps[re].emails.length; em++) {
+            allEmails.push(group.reps[re].emails[em]);
+          }
+        }
+
+        if (allEmails.length > 0) {
+          var sendAllBtn = document.createElement('a');
+          sendAllBtn.className = 'bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer inline-flex items-center no-underline';
+          sendAllBtn.textContent = 'Send Email All';
+          sendAllBtn.setAttribute('data-group', gi);
+          sendAllBtn.setAttribute('data-action', 'send-local');
+          sendAllBtn.href = '#';
+          groupBtnRow.appendChild(sendAllBtn);
+        }
+
+        var copyGroupBtn = document.createElement('button');
+        copyGroupBtn.className = 'bg-[#334155] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer';
+        copyGroupBtn.textContent = 'Copy Letter';
+        copyGroupBtn.setAttribute('data-group', gi);
+        copyGroupBtn.setAttribute('data-action', 'copy-local');
+        copyGroupBtn.type = 'button';
+        groupBtnRow.appendChild(copyGroupBtn);
+
+        groupDiv.appendChild(groupBtnRow);
+      }
+
+      // Collapsible letter preview
+      var details = document.createElement('details');
+      details.className = 'mt-4';
+
+      var summary = document.createElement('summary');
+      summary.className = 'text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium cursor-pointer transition-colors';
+      summary.textContent = 'Preview & edit letter';
+      details.appendChild(summary);
+
+      var previewDiv = document.createElement('div');
+      previewDiv.className = 'mt-3 space-y-3';
+
+      // Subject line (read-only display)
+      var subjectP = document.createElement('p');
+      subjectP.className = 'text-[#94a3b8] text-sm';
+      subjectP.innerHTML = '<span class="text-[#64748b]">Subject:</span> ' + escapeHtml(group.subject);
+      previewDiv.appendChild(subjectP);
+
+      // Textarea with letter body
+      var textarea = document.createElement('textarea');
+      textarea.id = groupId + '-body';
+      textarea.className = 'bg-[#0f172a] border border-[#334155] text-[#cbd5e1] rounded p-4 w-full text-sm min-h-[200px] focus:outline-none focus:border-[#3b82f6] focus:ring-1 focus:ring-[#3b82f6] transition-colors resize-y';
+
+      // Replace [NAME] depending on category
+      var prefilledBody = group.body;
+      if (group.category === 'state' && group.reps.length > 0) {
+        // For state reps, use first rep's name as default display in the preview.
+        // The actual send will re-read the textarea and replace for the specific rep.
+        prefilledBody = group.body.replace(/\[NAME\]/g, group.reps[0].name);
+      } else {
+        prefilledBody = group.body.replace(/\[NAME\]/g, 'Council Member');
+      }
+      textarea.value = prefilledBody;
+      previewDiv.appendChild(textarea);
+
+      if (group.category === 'state' && group.reps.length > 1) {
+        var noteP = document.createElement('p');
+        noteP.className = 'text-[#64748b] text-xs italic';
+        noteP.textContent = 'The greeting will be personalized for each representative when you click Send Email.';
+        previewDiv.appendChild(noteP);
+      }
+
+      details.appendChild(previewDiv);
+      groupDiv.appendChild(details);
+
+      container.appendChild(groupDiv);
+    }
+
+    // Attach event listeners via delegation
+    container.addEventListener('click', function(e) {
+      var target = e.target.closest('[data-action]');
+      if (!target) return;
+
+      var action = target.getAttribute('data-action');
+      var groupIdx = parseInt(target.getAttribute('data-group'));
+      var repIdx = target.getAttribute('data-rep') ? parseInt(target.getAttribute('data-rep')) : null;
+      var group = groups[groupIdx];
+      if (!group) return;
+
+      var textareaEl = document.getElementById('action-group-' + groupIdx + '-body');
+      var currentBody = textareaEl ? textareaEl.value : group.body;
+
+      if (action === 'send-state') {
+        e.preventDefault();
+        var rep = group.reps[repIdx];
+        if (!rep || rep.emails.length === 0) return;
+        // Replace the greeting with this specific rep's name
+        var personalizedBody = replaceGreeting(currentBody, rep.name);
+        window.location.href = buildMailto(rep.emails, group.subject, personalizedBody);
+      } else if (action === 'copy-state') {
+        var rep2 = group.reps[repIdx];
+        var personalizedBody2 = replaceGreeting(currentBody, rep2.name);
+        var copyText = 'Subject: ' + group.subject + '\n\n' + personalizedBody2;
+        copyToClipboard(copyText, target);
+      } else if (action === 'send-local') {
+        e.preventDefault();
+        var allEmails2 = [];
+        for (var i = 0; i < group.reps.length; i++) {
+          for (var j = 0; j < group.reps[i].emails.length; j++) {
+            allEmails2.push(group.reps[i].emails[j]);
+          }
+        }
+        if (allEmails2.length === 0) return;
+        window.location.href = buildMailto(allEmails2, group.subject, currentBody);
+      } else if (action === 'copy-local') {
+        var copyText2 = 'Subject: ' + group.subject + '\n\n' + currentBody;
+        copyToClipboard(copyText2, target);
+      }
+    });
+  }
+
+  // Replace the greeting line in the letter body with a specific name.
+  // The textarea might have been edited, so we replace the "Dear ..." line.
+  function replaceGreeting(body, name) {
+    // Replace "Dear <anything>," on the first Dear line with "Dear <name>,"
+    return body.replace(/^Dear .+,/m, 'Dear ' + name + ',');
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // --- Event Handlers ---
+
+  // Form submit (zip code lookup)
+  document.getElementById('action-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var zipInput = document.getElementById('action-zip');
+    var zip = zipInput?.value?.trim();
+    if (!zip || zip.length !== 5) return;
+    showState('loading');
+    try {
+      var data = await lookupReps(zip);
+      var groups = parseReps(data);
+      if (groups.length === 0) throw new Error("We couldn't find representatives for that zip code. Please check and try again.");
+      renderResults(groups);
+      showState('results');
+    } catch (err) {
+      showError(err.message || 'Something went wrong. Please try again in a moment.');
+    }
+  });
+
+  // Geolocation button
+  document.getElementById('action-geo')?.addEventListener('click', async function() {
+    showState('loading');
+    try {
+      var zip = await getZipFromLocation();
+      var zipInput = document.getElementById('action-zip');
+      if (zipInput) zipInput.value = zip;
+      var data = await lookupReps(zip);
+      var groups = parseReps(data);
+      if (groups.length === 0) throw new Error("We couldn't find representatives for that zip code. Please check and try again.");
+      renderResults(groups);
+      showState('results');
+    } catch (err) {
+      if (err.code === 1) {
+        showError('Location access denied. Please enter your zip code instead.');
+      } else {
+        showError(err.message || 'Something went wrong. Please try again in a moment.');
+      }
+    }
+  });
+
+  // Reset button
+  document.getElementById('action-reset')?.addEventListener('click', function() {
+    showState('input');
+    document.getElementById('action-zip')?.focus();
+  });
+
+  // Retry button (error state)
+  document.getElementById('action-retry')?.addEventListener('click', function() {
+    showState('input');
+    document.getElementById('action-zip')?.focus();
+  });
+</script>
