@@ -110,8 +110,8 @@ ANDERSON_COUNTY_COUNCIL_URL = (
 # FIPS codes for counties we need from the RFA statewide shapefile
 # Used to filter the statewide file to just the counties we need.
 COUNTY_FIPS = {
-    "pickens": "077",   # Pickens County FIPS
-    "laurens": "059",   # Laurens County FIPS
+    "pickens": "45077",   # Pickens County FIPS (state 45 + county 077)
+    "laurens": "45059",   # Laurens County FIPS (state 45 + county 059)
 }
 
 # Anderson district name-to-number mapping (the Anderson ArcGIS layer
@@ -441,16 +441,17 @@ def _extract_county_from_rfa(rfa_gdf, county_fips, county_name, output_path, dis
 
     # Try to find the county filter field
     county_field = None
-    for candidate in ["COUNTYFP", "COUNTYFIPS", "COUNTYFP20", "COUNTYFP10", "CNTY_FIPS"]:
+    for candidate in ["COUNTYFP", "COUNTYFIPS", "COUNTYFP20", "COUNTYFP10", "CNTY_FIPS", "FIPS"]:
         if candidate in rfa_gdf.columns:
             county_field = candidate
             break
 
     if county_field is None:
-        # Try matching by county name
-        for candidate in ["COUNTY", "NAME", "CNTY_NAME", "NAMELSAD"]:
-            if candidate in rfa_gdf.columns:
-                county_field = candidate
+        # Try matching by county name (case-insensitive column lookup)
+        col_lower = {c.lower(): c for c in rfa_gdf.columns}
+        for candidate in ["county", "name", "cnty_name", "namelsad"]:
+            if candidate in col_lower:
+                county_field = col_lower[candidate]
                 county_fips = county_name  # Use name instead of FIPS
                 break
 
@@ -461,7 +462,7 @@ def _extract_county_from_rfa(rfa_gdf, county_fips, county_name, output_path, dis
         return
 
     # Filter to target county
-    if county_field in ["COUNTY", "NAME", "CNTY_NAME", "NAMELSAD"]:
+    if county_field.lower() in ["county", "name", "cnty_name", "namelsad"]:
         # Case-insensitive name match
         county_gdf = rfa_gdf[
             rfa_gdf[county_field].str.lower().str.contains(county_name.lower())
