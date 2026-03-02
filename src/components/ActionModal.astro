@@ -852,13 +852,59 @@ import localCouncils from '../data/local-councils.json';
       var copyText2 = 'Subject: ' + group.subject + '\n\n' + currentBody;
       copyToClipboard(copyText2, target);
     } else if (action === 'wrong-district') {
-      // Scroll to the manual selection and open it
-      showState('input');
-      var manualDetails = document.getElementById('action-manual-details');
-      if (manualDetails) {
-        manualDetails.open = true;
-        manualDetails.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Toggle an inline district dropdown below the header
+      var existingDropdown = target.parentElement.querySelector('.wrong-district-dropdown');
+      if (existingDropdown) {
+        existingDropdown.remove();
+        return;
       }
+
+      var wdGroup = currentGroups[groupIdx];
+      if (!wdGroup) return;
+
+      var dropdownDiv = document.createElement('div');
+      dropdownDiv.className = 'wrong-district-dropdown mt-2 mb-3 flex items-center gap-2';
+
+      var sel = document.createElement('select');
+      sel.className = 'bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-1 text-sm focus:outline-none focus:border-[#3b82f6]';
+      sel.innerHTML = '<option value="">Select district...</option>';
+
+      // countyKey and cityKey are already prefixed (e.g. 'county:greenville', 'place:greenville')
+      var councilKey = wdGroup.countyKey || wdGroup.cityKey || null;
+      if (councilKey && localCouncils[councilKey]) {
+        var council = localCouncils[councilKey];
+        var seen = new Set();
+        for (var di = 0; di < council.members.length; di++) {
+          var titleMatch = council.members[di].title.match(/(?:District|Seat) (\d+)/);
+          if (titleMatch && !seen.has(titleMatch[1])) {
+            seen.add(titleMatch[1]);
+            var opt = document.createElement('option');
+            opt.value = titleMatch[1];
+            opt.textContent = 'District ' + titleMatch[1];
+            if (titleMatch[1] === String(wdGroup.matchedDistrict)) opt.selected = true;
+            sel.appendChild(opt);
+          }
+        }
+      }
+
+      sel.addEventListener('change', function() {
+        var newDistrict = sel.value;
+        if (!newDistrict) return;
+        wdGroup.matchedDistrict = newDistrict;
+        // Update isMatchedDistrict badges — match both "District N" and "Seat N" patterns
+        for (var r = 0; r < wdGroup.reps.length; r++) {
+          var repTitle = wdGroup.reps[r].office || '';
+          var repDistMatch = repTitle.match(/(?:District|Seat) (\d+)/);
+          wdGroup.reps[r].isMatchedDistrict = repDistMatch && repDistMatch[1] === newDistrict;
+        }
+        // Re-sort so the newly matched rep appears first
+        wdGroup.reps.sort(function(a, b) { return (b.isMatchedDistrict ? 1 : 0) - (a.isMatchedDistrict ? 1 : 0); });
+        // Re-render results with updated groups
+        renderResults(currentGroups);
+      });
+
+      dropdownDiv.appendChild(sel);
+      target.parentElement.appendChild(dropdownDiv);
     }
   });
 
