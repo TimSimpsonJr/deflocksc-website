@@ -43,6 +43,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
               type="text"
               autocomplete="street-address"
               placeholder="Enter your address (e.g. 123 Main St, Greenville, SC)"
+              required
               class="flex-1 bg-[#1e293b] border border-[#334155] text-white rounded px-4 py-3 text-base placeholder-[#64748b] focus:outline-none focus:border-[#3b82f6] focus:ring-1 focus:ring-[#3b82f6] transition-colors"
             />
             <button
@@ -66,7 +67,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
       </div>
 
       <!-- Loading State -->
-      <div id="action-loading" class="hidden">
+      <div id="action-loading" class="hidden" aria-live="polite">
         <div class="flex flex-col items-center justify-center py-12 gap-4">
           <div class="w-10 h-10 border-4 border-[#334155] border-t-[#ef4444] rounded-full animate-spin"></div>
           <p class="text-[#94a3b8] text-sm">Finding your representatives...</p>
@@ -90,7 +91,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
       <!-- Error State -->
       <div id="action-error" class="hidden">
         <div class="flex flex-col items-center justify-center py-8 gap-4">
-          <p id="action-error-msg" class="text-red-400 text-sm text-center"></p>
+          <p id="action-error-msg" class="text-red-400 text-sm text-center" role="alert"></p>
           <button
             id="action-retry"
             type="button"
@@ -237,6 +238,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
             var memberReps = [];
             for (var cm = 0; cm < council.members.length; cm++) {
               var member = council.members[cm];
+              if (!member.name || member.name === 'Vacant') continue;
               memberReps.push({
                 name: member.name,
                 office: member.title,
@@ -251,6 +253,23 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
               reps: memberReps
             });
           }
+        }
+      }
+    }
+
+    // If no local council groups were matched, add the catch-all local letter
+    var hasLocal = groups.some(function(g) { return g.category === 'local'; });
+    if (!hasLocal) {
+      for (var ca = 0; ca < actionLetters.length; ca++) {
+        if (actionLetters[ca].divisionPattern === 'state:sc/' && actionLetters[ca].category === 'local') {
+          groups.push({
+            label: actionLetters[ca].label,
+            category: 'local',
+            subject: actionLetters[ca].subject,
+            body: actionLetters[ca].body,
+            reps: []
+          });
+          break;
         }
       }
     }
@@ -375,7 +394,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
       groupDiv.className = gi > 0 ? 'mt-8 pt-8 border-t border-[#334155]' : '';
 
       // Group header
-      var headerLabel = group.category === 'state' ? 'YOUR STATE LEGISLATORS' : group.label.toUpperCase();
+      var headerLabel = group.category === 'state' ? ('YOUR ' + group.label.toUpperCase()) : group.label.toUpperCase();
       var header = document.createElement('h3');
       header.className = 'text-[#64748b] text-xs font-bold tracking-wider uppercase mb-4';
       header.textContent = headerLabel;
@@ -453,10 +472,12 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
         var groupBtnRow = document.createElement('div');
         groupBtnRow.className = 'flex gap-2 mt-4';
 
-        // Collect all council emails (non-empty)
+        // Collect unique council emails (non-empty, deduplicated)
+        var emailSet = new Set();
         var allEmails = [];
         for (var re = 0; re < group.reps.length; re++) {
-          if (group.reps[re].email) {
+          if (group.reps[re].email && !emailSet.has(group.reps[re].email)) {
+            emailSet.add(group.reps[re].email);
             allEmails.push(group.reps[re].email);
           }
         }
@@ -510,6 +531,9 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
       var prefilledBody = group.body;
       if (group.category === 'state' && group.reps.length > 0) {
         prefilledBody = group.body.replace(/\[NAME\]/g, group.reps[0].name);
+      } else if (group.category === 'state') {
+        var placeholder = group.label === 'State Senator' ? 'Senator' : 'Representative';
+        prefilledBody = group.body.replace(/\[NAME\]/g, placeholder);
       } else if (group.category === 'local') {
         prefilledBody = group.body.replace(/\[NAME\]/g, 'Council Member');
       }
@@ -555,9 +579,11 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
       var copyText = 'Subject: ' + group.subject + '\n\n' + personalizedBody2;
       copyToClipboard(copyText, target);
     } else if (action === 'send-local') {
+      var emailSet2 = new Set();
       var allEmails2 = [];
       for (var i = 0; i < group.reps.length; i++) {
-        if (group.reps[i].email) {
+        if (group.reps[i].email && !emailSet2.has(group.reps[i].email)) {
+          emailSet2.add(group.reps[i].email);
           allEmails2.push(group.reps[i].email);
         }
       }
