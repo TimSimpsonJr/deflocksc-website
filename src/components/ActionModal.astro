@@ -215,7 +215,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
             category: 'state',
             subject: senateLetter.subject,
             body: senateLetter.body,
-            reps: senator ? [{ name: senator.name, office: 'State Senator, District ' + senateDistrict, email: senator.email }] : []
+            reps: senator ? [{ name: senator.name, office: 'State Senator, District ' + senateDistrict, email: senator.email, phone: senator.phone || '' }] : []
           });
         }
       }
@@ -239,7 +239,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
             category: 'state',
             subject: houseLetter.subject,
             body: houseLetter.body,
-            reps: houseRep ? [{ name: houseRep.name, office: 'State Representative, District ' + houseDistrict, email: houseRep.email }] : []
+            reps: houseRep ? [{ name: houseRep.name, office: 'State Representative, District ' + houseDistrict, email: houseRep.email, phone: houseRep.phone || '' }] : []
           });
         }
       }
@@ -267,7 +267,8 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
               memberReps.push({
                 name: member.name,
                 office: member.title,
-                email: member.email || ''
+                email: member.email || '',
+                phone: member.phone || ''
               });
             }
             groups.push({
@@ -444,6 +445,13 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
         officeSpan.textContent = rep.office;
         infoDiv.appendChild(nameSpan);
         infoDiv.appendChild(officeSpan);
+        if (rep.phone) {
+          var phoneLink = document.createElement('a');
+          phoneLink.href = 'tel:' + rep.phone.replace(/[^+\d]/g, '');
+          phoneLink.className = 'text-[#3b82f6] hover:text-[#60a5fa] text-sm block transition-colors';
+          phoneLink.textContent = rep.phone;
+          infoDiv.appendChild(phoneLink);
+        }
         repDiv.appendChild(infoDiv);
 
         // Individual buttons for all reps (state and local)
