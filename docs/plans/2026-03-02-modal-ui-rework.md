@@ -809,4 +809,34 @@ git commit -m "chore: remove Google Civic API dependency, clean up dead code"
 
 - The boundary GeoJSON files in `public/districts/` don't exist yet. Run `scripts/build-districts.py` to generate them before testing the geolocation and address paths. The manual selection path works without them.
 - The `src/lib/district-matcher.js` module is already built and ready to import.
-- The `define:vars` → data island migration (Task 5) is the biggest architectural change. This lets us use ES module imports for the district matcher while still passing server-side data to the client.
+- The `define:vars` → data island migration (Task 5) was abandoned — inline `<script type="module">` tags don't get Vite resolution in Astro. District matcher functions are inlined with `dm` prefix instead.
+
+---
+
+## Future: Statewide Local Council Expansion
+
+The state legislative matching (senate + house) already covers all of SC. Local council matching currently covers Upstate only: Greenville, Spartanburg, Anderson, Pickens, Laurens counties + Greenville city.
+
+### What's needed to add a new county/city
+
+1. **Boundary source**: Find the county's GIS portal or ArcGIS REST API endpoint for council district boundaries. Add it as a new source in `scripts/build-districts.py`.
+2. **Council member data**: Add the council's members to `src/data/local-councils.json` under the key `county:<name>` or `place:<name>` with `name`, `title`, `email`, `phone` for each member.
+3. **Action letter template**: Add a letter entry in `src/data/action-letters.json` with `divisionPattern` matching the council key (e.g., `county:richland/`).
+4. **Modal lookup tables**: Add the county/city to the `DM_COUNTY_FILES`, `DM_CITY_FILES`, and `DM_COUNTY_CITIES` objects in `ActionModal.astro` (inlined district matcher section).
+5. **Manual dropdown data**: Add the county to the `COUNTY_DISTRICTS` object in the manual dropdown population code in `ActionModal.astro`.
+6. **Re-run build script**: `python scripts/build-districts.py` to generate the new boundary file.
+
+### Data source strategy
+
+- **Counties with public ArcGIS REST APIs**: Query directly (like Greenville, Spartanburg, Anderson)
+- **Counties in SC RFA statewide shapefile**: Filter from the statewide file (like Pickens, Laurens)
+- **Counties without public GIS**: May need to digitize from PDF maps or request data from the county
+
+### Priority order for expansion
+
+Consider expanding by population density / camera prevalence:
+1. Richland County (Columbia) — 130 Flock cameras, most active surveillance
+2. Charleston County — large metro area
+3. Lexington County — Columbia suburb
+4. York County — Charlotte suburb, growing
+5. Remaining counties as needed
