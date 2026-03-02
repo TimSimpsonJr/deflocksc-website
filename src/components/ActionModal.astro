@@ -30,35 +30,120 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
 
     <!-- Input State -->
     <div id="action-input">
-      <form id="action-form" class="flex flex-col items-center gap-4">
-        <label for="action-address" class="sr-only">Street address</label>
-        <div class="flex flex-col sm:flex-row gap-3 w-full max-w-md">
-          <input
-            id="action-address"
-            type="text"
-            autocomplete="street-address"
-            placeholder="Enter your address (e.g. 123 Main St, Greenville, SC)"
-            required
-            class="flex-1 bg-[#1e293b] border border-[#334155] text-white rounded px-4 py-3 text-base placeholder-[#64748b] focus:outline-none focus:border-[#3b82f6] focus:ring-1 focus:ring-[#3b82f6] transition-colors"
-          />
+      <div class="flex flex-col items-center gap-6 max-w-md mx-auto">
+
+        <!-- 1. Geolocation (primary) -->
+        <div class="w-full text-center">
           <button
-            type="submit"
-            class="bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-6 py-3 text-sm min-h-[44px] transition-colors cursor-pointer whitespace-nowrap"
+            id="action-geo"
+            type="button"
+            class="bg-[#ef4444] hover:bg-[#dc2626] text-white font-bold rounded-lg px-8 py-4 text-lg min-h-[56px] transition-colors cursor-pointer w-full max-w-xs"
           >
-            Look Up My Reps
+            Find My Reps
           </button>
+          <p class="text-[#64748b] text-xs italic mt-3 max-w-sm mx-auto">
+            Your location is matched entirely in your browser. No data is sent to any server.
+          </p>
         </div>
-        <button
-          id="action-geo"
-          type="button"
-          class="text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium transition-colors cursor-pointer bg-transparent border-none min-h-[44px]"
-        >
-          Use my location instead
-        </button>
-        <p class="text-[#64748b] text-xs italic text-center max-w-sm">
-          Your location is used only to find your representatives. We don't store or share any location data.
-        </p>
-      </form>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-4 w-full">
+          <div class="flex-1 h-px bg-[#334155]"></div>
+          <span class="text-[#64748b] text-sm">or enter your address</span>
+          <div class="flex-1 h-px bg-[#334155]"></div>
+        </div>
+
+        <!-- 2. Address input (secondary) -->
+        <form id="action-form" class="w-full">
+          <label for="action-address" class="sr-only">Street address</label>
+          <div class="flex flex-col sm:flex-row gap-3 w-full">
+            <input
+              id="action-address"
+              type="text"
+              autocomplete="street-address"
+              placeholder="123 Main St, Greenville, SC"
+              required
+              class="flex-1 bg-[#1e293b] border border-[#334155] text-white rounded px-4 py-3 text-base placeholder-[#64748b] focus:outline-none focus:border-[#3b82f6] focus:ring-1 focus:ring-[#3b82f6] transition-colors"
+            />
+            <button
+              type="submit"
+              class="bg-[#334155] hover:bg-[#475569] text-white font-medium rounded px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer whitespace-nowrap"
+            >
+              Look Up
+            </button>
+          </div>
+          <p class="text-[#64748b] text-xs italic mt-2">
+            Your address is sent to the US Census Bureau's geocoding service. No other data is shared.
+          </p>
+        </form>
+
+        <!-- 3. Manual selection (tertiary) -->
+        <details id="action-manual-details" class="w-full">
+          <summary class="text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium cursor-pointer transition-colors text-center">
+            I already know my district
+          </summary>
+          <div class="mt-4 space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="manual-senate" class="text-[#94a3b8] text-xs block mb-1">Senate District</label>
+                <select id="manual-senate" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">Select...</option>
+                </select>
+              </div>
+              <div>
+                <label for="manual-house" class="text-[#94a3b8] text-xs block mb-1">House District</label>
+                <select id="manual-house" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">Select...</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="manual-county" class="text-[#94a3b8] text-xs block mb-1">County</label>
+                <select id="manual-county" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">Select...</option>
+                  <option value="greenville">Greenville</option>
+                  <option value="spartanburg">Spartanburg</option>
+                  <option value="anderson">Anderson</option>
+                  <option value="pickens">Pickens</option>
+                  <option value="laurens">Laurens</option>
+                </select>
+              </div>
+              <div>
+                <label for="manual-county-district" class="text-[#94a3b8] text-xs block mb-1">County District</label>
+                <select id="manual-county-district" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">Select county first</option>
+                </select>
+              </div>
+            </div>
+            <div id="manual-city-row" class="grid grid-cols-2 gap-3 hidden">
+              <div>
+                <label for="manual-city" class="text-[#94a3b8] text-xs block mb-1">City</label>
+                <select id="manual-city" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">None</option>
+                </select>
+              </div>
+              <div>
+                <label for="manual-city-district" class="text-[#94a3b8] text-xs block mb-1">City District</label>
+                <select id="manual-city-district" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">Select city first</option>
+                </select>
+              </div>
+            </div>
+            <p class="text-[#64748b] text-xs">
+              Don't know your district? <a href="https://www.scstatehouse.gov/legislatorssearch.php" target="_blank" rel="noopener" class="text-[#3b82f6] hover:text-[#60a5fa] underline">Look it up on scstatehouse.gov</a>
+            </p>
+            <button
+              id="action-manual-submit"
+              type="button"
+              class="bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer w-full"
+            >
+              Find My Reps
+            </button>
+          </div>
+        </details>
+
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -733,6 +818,104 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
     } else if (!e.shiftKey && document.activeElement === last) {
       e.preventDefault();
       first.focus();
+    }
+  });
+
+  // --- Manual Selection Dropdowns ---
+
+  // Populate senate district dropdown (1-46)
+  (function() {
+    var senateSel = document.getElementById('manual-senate');
+    if (!senateSel) return;
+    var senateNums = Object.keys(stateLegislators.senate).sort(function(a,b) { return +a - +b; });
+    for (var i = 0; i < senateNums.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = senateNums[i];
+      opt.textContent = senateNums[i];
+      senateSel.appendChild(opt);
+    }
+  })();
+
+  // Populate house district dropdown (1-124)
+  (function() {
+    var houseSel = document.getElementById('manual-house');
+    if (!houseSel) return;
+    var houseNums = Object.keys(stateLegislators.house).sort(function(a,b) { return +a - +b; });
+    for (var i = 0; i < houseNums.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = houseNums[i];
+      opt.textContent = houseNums[i];
+      houseSel.appendChild(opt);
+    }
+  })();
+
+  // County district ranges
+  var COUNTY_DISTRICT_RANGES = {
+    greenville: { start: 17, end: 28 },
+    spartanburg: { start: 1, end: 6 },
+    anderson: { start: 1, end: 7 },
+    pickens: { start: 1, end: 6 },
+    laurens: { start: 1, end: 7 }
+  };
+
+  // County-to-city mapping
+  var COUNTY_CITIES_MAP = {
+    greenville: [{ value: 'greenville', label: 'Greenville', start: 1, end: 4 }]
+  };
+
+  // When county changes, populate county district dropdown and show/hide city row
+  document.getElementById('manual-county')?.addEventListener('change', function() {
+    var county = this.value;
+    var distSel = document.getElementById('manual-county-district');
+    var cityRow = document.getElementById('manual-city-row');
+    var citySel = document.getElementById('manual-city');
+    var cityDistSel = document.getElementById('manual-city-district');
+
+    distSel.innerHTML = '<option value="">Select...</option>';
+    if (county && COUNTY_DISTRICT_RANGES[county]) {
+      var range = COUNTY_DISTRICT_RANGES[county];
+      for (var d = range.start; d <= range.end; d++) {
+        var opt = document.createElement('option');
+        opt.value = String(d);
+        opt.textContent = 'District ' + d;
+        distSel.appendChild(opt);
+      }
+    }
+
+    if (county && COUNTY_CITIES_MAP[county]) {
+      cityRow.classList.remove('hidden');
+      citySel.innerHTML = '<option value="">None</option>';
+      var cities = COUNTY_CITIES_MAP[county];
+      for (var c = 0; c < cities.length; c++) {
+        var copt = document.createElement('option');
+        copt.value = cities[c].value;
+        copt.textContent = cities[c].label;
+        citySel.appendChild(copt);
+      }
+    } else {
+      cityRow.classList.add('hidden');
+      citySel.innerHTML = '<option value="">None</option>';
+    }
+    cityDistSel.innerHTML = '<option value="">Select city first</option>';
+  });
+
+  // When city changes, populate city district dropdown
+  document.getElementById('manual-city')?.addEventListener('change', function() {
+    var city = this.value;
+    var county = document.getElementById('manual-county')?.value;
+    var cityDistSel = document.getElementById('manual-city-district');
+
+    cityDistSel.innerHTML = '<option value="">Select...</option>';
+    if (city && county && COUNTY_CITIES_MAP[county]) {
+      var cityData = COUNTY_CITIES_MAP[county].find(function(c) { return c.value === city; });
+      if (cityData) {
+        for (var d = cityData.start; d <= cityData.end; d++) {
+          var opt = document.createElement('option');
+          opt.value = String(d);
+          opt.textContent = 'District ' + d;
+          cityDistSel.appendChild(opt);
+        }
+      }
     }
   });
 </script>
