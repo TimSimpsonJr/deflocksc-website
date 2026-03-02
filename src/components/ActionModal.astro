@@ -1,0 +1,1145 @@
+---
+import actionLetters from '../data/action-letters.json';
+import stateLegislators from '../data/state-legislators.json';
+import localCouncils from '../data/local-councils.json';
+---
+
+<div id="action-modal" class="fixed inset-0 z-[60] hidden"
+     role="dialog" aria-modal="true" aria-label="Contact your representatives">
+
+  <!-- Backdrop + centering wrapper -->
+  <div id="action-modal-backdrop" class="min-h-full bg-[#0f172a] overflow-y-auto md:bg-black/70 md:backdrop-blur-sm md:flex md:items-start md:justify-center md:py-12">
+
+    <!-- Modal card (full-screen mobile, centered card desktop) -->
+    <div id="action-modal-card" class="min-h-full md:min-h-0 md:bg-[#0f172a] md:border md:border-[#334155] md:rounded-xl md:w-full md:max-w-2xl md:max-h-[85vh] md:overflow-y-auto md:relative">
+      <!-- Close button -->
+      <button id="action-modal-close" type="button"
+        class="fixed top-4 right-4 z-10 w-10 h-10 rounded-full bg-[#1e293b] hover:bg-[#334155]
+               text-[#94a3b8] hover:text-white flex items-center justify-center transition-colors cursor-pointer
+               md:absolute md:top-3 md:right-3"
+        aria-label="Close">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Content container -->
+      <div class="px-6 pt-16 pb-12 md:px-8 md:pt-8 md:pb-8">
+        <h2 class="text-2xl md:text-3xl font-[900] text-white leading-tight mb-8 text-center">Email Your Representatives</h2>
+
+    <!-- Input State -->
+    <div id="action-input">
+      <div class="flex flex-col items-center gap-6 max-w-md mx-auto">
+
+        <!-- 1. Geolocation (primary) -->
+        <div class="w-full text-center">
+          <button
+            id="action-geo"
+            type="button"
+            class="bg-[#ef4444] hover:bg-[#dc2626] text-white font-bold rounded-lg px-8 py-4 text-lg min-h-[56px] transition-colors cursor-pointer w-full max-w-xs"
+          >
+            Find My Reps
+          </button>
+          <p class="text-[#64748b] text-xs italic mt-3 max-w-sm mx-auto">
+            Your location is matched entirely in your browser. No data is sent to any server.
+          </p>
+        </div>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-4 w-full">
+          <div class="flex-1 h-px bg-[#334155]"></div>
+          <span class="text-[#64748b] text-sm">or enter your address</span>
+          <div class="flex-1 h-px bg-[#334155]"></div>
+        </div>
+
+        <!-- 2. Address input (secondary) -->
+        <form id="action-form" class="w-full">
+          <label for="action-address" class="sr-only">Street address</label>
+          <div class="flex flex-col sm:flex-row gap-3 w-full">
+            <input
+              id="action-address"
+              type="text"
+              autocomplete="street-address"
+              placeholder="123 Main St, Greenville, SC"
+              required
+              class="flex-1 bg-[#1e293b] border border-[#334155] text-white rounded px-4 py-3 text-base placeholder-[#64748b] focus:outline-none focus:border-[#3b82f6] focus:ring-1 focus:ring-[#3b82f6] transition-colors"
+            />
+            <button
+              type="submit"
+              class="bg-[#334155] hover:bg-[#475569] text-white font-medium rounded px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer whitespace-nowrap"
+            >
+              Look Up
+            </button>
+          </div>
+          <p class="text-[#64748b] text-xs italic mt-2">
+            Your address is sent to the US Census Bureau's geocoding service. No other data is shared.
+          </p>
+        </form>
+
+        <!-- 3. Manual selection (tertiary) -->
+        <details id="action-manual-details" class="w-full">
+          <summary class="text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium cursor-pointer transition-colors text-center">
+            I already know my district
+          </summary>
+          <div class="mt-4 space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="manual-senate" class="text-[#94a3b8] text-xs block mb-1">Senate District</label>
+                <select id="manual-senate" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">Select...</option>
+                </select>
+              </div>
+              <div>
+                <label for="manual-house" class="text-[#94a3b8] text-xs block mb-1">House District</label>
+                <select id="manual-house" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">Select...</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="manual-county" class="text-[#94a3b8] text-xs block mb-1">County</label>
+                <select id="manual-county" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">Select...</option>
+                  <option value="greenville">Greenville</option>
+                  <option value="spartanburg">Spartanburg</option>
+                  <option value="anderson">Anderson</option>
+                  <option value="pickens">Pickens</option>
+                  <option value="laurens">Laurens</option>
+                </select>
+              </div>
+              <div>
+                <label for="manual-county-district" class="text-[#94a3b8] text-xs block mb-1">County District</label>
+                <select id="manual-county-district" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">Select county first</option>
+                </select>
+              </div>
+            </div>
+            <div id="manual-city-row" class="grid grid-cols-2 gap-3 hidden">
+              <div>
+                <label for="manual-city" class="text-[#94a3b8] text-xs block mb-1">City</label>
+                <select id="manual-city" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">None</option>
+                </select>
+              </div>
+              <div>
+                <label for="manual-city-district" class="text-[#94a3b8] text-xs block mb-1">City District</label>
+                <select id="manual-city-district" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                  <option value="">Select city first</option>
+                </select>
+              </div>
+            </div>
+            <p class="text-[#64748b] text-xs">
+              Don't know your district? <a href="https://www.scstatehouse.gov/legislatorssearch.php" target="_blank" rel="noopener" class="text-[#3b82f6] hover:text-[#60a5fa] underline">Look it up on scstatehouse.gov</a>
+            </p>
+            <button
+              id="action-manual-submit"
+              type="button"
+              class="bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer w-full"
+            >
+              Find My Reps
+            </button>
+          </div>
+        </details>
+
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="action-loading" class="hidden" aria-live="polite">
+      <div class="flex flex-col items-center justify-center py-12 gap-4">
+        <div class="w-10 h-10 border-4 border-[#334155] border-t-[#ef4444] rounded-full animate-spin"></div>
+        <p class="text-[#94a3b8] text-sm">Finding your representatives...</p>
+      </div>
+    </div>
+
+    <!-- Results State -->
+    <div id="action-results" class="hidden">
+      <div id="action-results-list"></div>
+      <div class="text-center mt-8">
+        <button
+          id="action-reset"
+          type="button"
+          class="text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium transition-colors cursor-pointer bg-transparent border-none min-h-[44px]"
+        >
+          &larr; Look up a different address
+        </button>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="action-error" class="hidden">
+      <div class="flex flex-col items-center justify-center py-8 gap-4">
+        <p id="action-error-msg" class="text-red-400 text-sm text-center" role="alert"></p>
+        <button
+          id="action-retry"
+          type="button"
+          class="bg-[#334155] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer"
+        >
+          Try again
+        </button>
+      </div>
+    </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ actionLetters, stateLegislators, localCouncils }}>
+  // --- District Matcher (inlined from src/lib/district-matcher.js) ---
+
+  var DM_COUNTY_FILES = {
+    greenville: 'county-greenville.json',
+    spartanburg: 'county-spartanburg.json',
+    anderson: 'county-anderson.json',
+    pickens: 'county-pickens.json',
+    laurens: 'county-laurens.json'
+  };
+  var DM_CITY_FILES = { greenville: 'place-greenville.json' };
+  var DM_COUNTY_CITIES = { greenville: ['greenville'] };
+  var DM_SC_BBOX = { minLat: 32, maxLat: 35.3, minLng: -83.5, maxLng: -78.5 };
+  var dmBoundaryCache = {};
+
+  function dmPointInRing(lat, lng, ring) {
+    var inside = false;
+    for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      var xi = ring[i][0], yi = ring[i][1];
+      var xj = ring[j][0], yj = ring[j][1];
+      if (((yi > lat) !== (yj > lat)) && (lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+
+  function dmPointInPolygon(lat, lng, geometry) {
+    if (geometry.type === 'Polygon') {
+      var rings = geometry.coordinates;
+      if (!dmPointInRing(lat, lng, rings[0])) return false;
+      for (var h = 1; h < rings.length; h++) {
+        if (dmPointInRing(lat, lng, rings[h])) return false;
+      }
+      return true;
+    }
+    if (geometry.type === 'MultiPolygon') {
+      for (var p = 0; p < geometry.coordinates.length; p++) {
+        var rings2 = geometry.coordinates[p];
+        if (!dmPointInRing(lat, lng, rings2[0])) continue;
+        var inHole = false;
+        for (var h2 = 1; h2 < rings2.length; h2++) {
+          if (dmPointInRing(lat, lng, rings2[h2])) { inHole = true; break; }
+        }
+        if (!inHole) return true;
+      }
+      return false;
+    }
+    return false;
+  }
+
+  function dmComputeBBox(fc) {
+    var minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+    function scan(ring) {
+      for (var i = 0; i < ring.length; i++) {
+        if (ring[i][1] < minLat) minLat = ring[i][1];
+        if (ring[i][1] > maxLat) maxLat = ring[i][1];
+        if (ring[i][0] < minLng) minLng = ring[i][0];
+        if (ring[i][0] > maxLng) maxLng = ring[i][0];
+      }
+    }
+    for (var f = 0; f < fc.features.length; f++) {
+      var g = fc.features[f].geometry;
+      if (g.type === 'Polygon') {
+        for (var r = 0; r < g.coordinates.length; r++) scan(g.coordinates[r]);
+      } else if (g.type === 'MultiPolygon') {
+        for (var pp = 0; pp < g.coordinates.length; pp++) {
+          for (var r2 = 0; r2 < g.coordinates[pp].length; r2++) scan(g.coordinates[pp][r2]);
+        }
+      }
+    }
+    return { minLat: minLat, maxLat: maxLat, minLng: minLng, maxLng: maxLng };
+  }
+
+  function dmPointInBBox(lat, lng, bbox) {
+    var m = 0.01;
+    return lat >= bbox.minLat - m && lat <= bbox.maxLat + m && lng >= bbox.minLng - m && lng <= bbox.maxLng + m;
+  }
+
+  async function dmLoadBoundary(filename) {
+    if (dmBoundaryCache[filename] !== undefined) return dmBoundaryCache[filename];
+    try {
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function() { controller.abort(); }, 10000);
+      var res = await fetch('/districts/' + filename, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      var data = await res.json();
+      data._bbox = dmComputeBBox(data);
+      dmBoundaryCache[filename] = data;
+      return data;
+    } catch (e) {
+      if (e.name === 'AbortError') console.warn('Boundary load timed out: ' + filename);
+      else console.warn('Failed to load boundary: ' + filename, e);
+      dmBoundaryCache[filename] = null;
+      return null;
+    }
+  }
+
+  function dmFindDistrict(lat, lng, fc) {
+    if (!fc || !fc.features) return null;
+    if (fc._bbox && !dmPointInBBox(lat, lng, fc._bbox)) return null;
+    for (var i = 0; i < fc.features.length; i++) {
+      if (dmPointInPolygon(lat, lng, fc.features[i].geometry)) {
+        return fc.features[i].properties.district || null;
+      }
+    }
+    return null;
+  }
+
+  async function matchDistricts(lat, lng) {
+    var result = { senate: null, house: null, county: null, countyDistrict: null, city: null, cityDistrict: null };
+    if (lat < DM_SC_BBOX.minLat || lat > DM_SC_BBOX.maxLat || lng < DM_SC_BBOX.minLng || lng > DM_SC_BBOX.maxLng) return result;
+    var slduP = dmLoadBoundary('sldu.json');
+    var sldlP = dmLoadBoundary('sldl.json');
+    var sldu = await slduP;
+    var sldl = await sldlP;
+    result.senate = dmFindDistrict(lat, lng, sldu);
+    result.house = dmFindDistrict(lat, lng, sldl);
+    var countyKeys = Object.keys(DM_COUNTY_FILES);
+    var countyDataArr = await Promise.all(countyKeys.map(function(k) { return dmLoadBoundary(DM_COUNTY_FILES[k]); }));
+    for (var i = 0; i < countyKeys.length; i++) {
+      var d = dmFindDistrict(lat, lng, countyDataArr[i]);
+      if (d !== null) { result.county = countyKeys[i]; result.countyDistrict = d; break; }
+    }
+    var cityKeysToTest = result.county && DM_COUNTY_CITIES[result.county] ? DM_COUNTY_CITIES[result.county] : Object.keys(DM_CITY_FILES);
+    if (cityKeysToTest.length > 0) {
+      var cityDataArr = await Promise.all(cityKeysToTest.map(function(k) { return DM_CITY_FILES[k] ? dmLoadBoundary(DM_CITY_FILES[k]) : Promise.resolve(null); }));
+      for (var c = 0; c < cityKeysToTest.length; c++) {
+        var cd = dmFindDistrict(lat, lng, cityDataArr[c]);
+        if (cd !== null) { result.city = cityKeysToTest[c]; result.cityDistrict = cd; break; }
+      }
+    }
+    return result;
+  }
+
+  async function geocodeAddress(address) {
+    var result = { lat: null, lng: null, senate: null, house: null };
+    try {
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function() { controller.abort(); }, 10000);
+      var params = new URLSearchParams({ address: address, benchmark: 'Public_AR_Current', vintage: 'Current_Current', format: 'json' });
+      var res = await fetch('https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?' + params.toString(), { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error('Census geocoder HTTP ' + res.status);
+      var data = await res.json();
+      var matches = data.result && data.result.addressMatches;
+      if (!matches || matches.length === 0) return result;
+      var match = matches[0];
+      if (match.coordinates) { result.lng = match.coordinates.x; result.lat = match.coordinates.y; }
+      var geo = match.geographies;
+      if (geo) {
+        var upper = geo['State Legislative Districts - Upper'];
+        if (upper && upper.length > 0 && upper[0].BASENAME) result.senate = upper[0].BASENAME;
+        var lower = geo['State Legislative Districts - Lower'];
+        if (lower && lower.length > 0 && lower[0].BASENAME) result.house = lower[0].BASENAME;
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') console.warn('Census geocoder timed out');
+      else console.warn('Census geocoder failed:', e);
+    }
+    return result;
+  }
+
+  // --- Modal Management ---
+  var modal = document.getElementById('action-modal');
+  var openerElement = null; // tracks which button opened the modal for focus return
+
+  function openModal(opener) {
+    if (!modal) return;
+    openerElement = opener || null;
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    // Focus the address input after a tick (let the DOM settle)
+    requestAnimationFrame(function() {
+      var input = document.getElementById('action-address');
+      if (input) input.focus();
+    });
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    // Reset to input state for next open
+    showState('input');
+    // Return focus to the opener
+    if (openerElement && typeof openerElement.focus === 'function') {
+      openerElement.focus();
+    }
+    openerElement = null;
+  }
+
+  // --- State Management ---
+  function showState(state) {
+    ['input', 'loading', 'results', 'error'].forEach(function(s) {
+      var el = document.getElementById('action-' + s);
+      if (el) el.classList.toggle('hidden', s !== state);
+    });
+  }
+
+  function showError(msg) {
+    var el = document.getElementById('action-error-msg');
+    if (el) el.textContent = msg;
+    showState('error');
+  }
+
+  // --- Build Groups from match object ---
+  function buildGroups(match) {
+    var groups = [];
+
+    // Helper: find a letter template by divisionPattern substring
+    function findLetter(patternSubstring) {
+      for (var i = 0; i < actionLetters.length; i++) {
+        if (actionLetters[i].divisionPattern.indexOf(patternSubstring) !== -1) {
+          return actionLetters[i];
+        }
+      }
+      return null;
+    }
+
+    // Helper: find a letter by exact council key (e.g. 'county:greenville')
+    function findLocalLetter(councilKey) {
+      for (var i = 0; i < actionLetters.length; i++) {
+        if (actionLetters[i].divisionPattern.indexOf(councilKey) !== -1 && actionLetters[i].category === 'local') {
+          return actionLetters[i];
+        }
+      }
+      return null;
+    }
+
+    // Helper: find matched district member from a council
+    function findMatchedMember(council, districtNum) {
+      if (!council || !council.members || !districtNum) return null;
+      var needleD = 'District ' + districtNum;
+      var needleS = 'Seat ' + districtNum;
+      for (var i = 0; i < council.members.length; i++) {
+        var title = council.members[i].title || '';
+        if (title.indexOf(needleD) !== -1 || title.indexOf(needleS) !== -1) {
+          return council.members[i];
+        }
+      }
+      return null;
+    }
+
+    // 1. State Senator
+    var senateLetter = findLetter('sldu:');
+    if (senateLetter) {
+      var senator = match.senate ? stateLegislators.senate[match.senate] : null;
+      groups.push({
+        label: senateLetter.label,
+        category: 'state',
+        subject: senateLetter.subject,
+        body: senateLetter.body,
+        reps: senator ? [{ name: senator.name, office: 'State Senator, District ' + match.senate, email: senator.email, phone: senator.phone || '' }] : []
+      });
+    }
+
+    // 2. State Representative
+    var houseLetter = findLetter('sldl:');
+    if (houseLetter) {
+      var houseRep = match.house ? stateLegislators.house[match.house] : null;
+      groups.push({
+        label: houseLetter.label,
+        category: 'state',
+        subject: houseLetter.subject,
+        body: houseLetter.body,
+        reps: houseRep ? [{ name: houseRep.name, office: 'State Representative, District ' + match.house, email: houseRep.email, phone: houseRep.phone || '' }] : []
+      });
+    }
+
+    // 3. Your Local Representatives (local-matched) — district-matched reps only
+    var localMatchedReps = [];
+    var countyKey = match.county ? 'county:' + match.county : null;
+    var cityKey = match.city ? 'place:' + match.city : null;
+    var countyCouncil = countyKey ? localCouncils[countyKey] : null;
+    var cityCouncil = cityKey ? localCouncils[cityKey] : null;
+
+    // Find the matched county council member
+    var matchedCountyMember = findMatchedMember(countyCouncil, match.countyDistrict);
+    if (matchedCountyMember && matchedCountyMember.name && matchedCountyMember.name !== 'Vacant') {
+      localMatchedReps.push({
+        name: matchedCountyMember.name,
+        office: matchedCountyMember.title + ' — ' + countyCouncil.label,
+        email: matchedCountyMember.email || '',
+        phone: matchedCountyMember.phone || ''
+      });
+    }
+
+    // Find the matched city council member
+    var matchedCityMember = findMatchedMember(cityCouncil, match.cityDistrict);
+    if (matchedCityMember && matchedCityMember.name && matchedCityMember.name !== 'Vacant') {
+      localMatchedReps.push({
+        name: matchedCityMember.name,
+        office: matchedCityMember.title + ' — ' + cityCouncil.label,
+        email: matchedCityMember.email || '',
+        phone: matchedCityMember.phone || ''
+      });
+    }
+
+    if (localMatchedReps.length > 0) {
+      // Use the county letter for the local-matched group (or city letter, or catch-all)
+      var localMatchedLetter = (countyKey && findLocalLetter(countyKey)) ||
+                               (cityKey && findLocalLetter(cityKey)) ||
+                               null;
+      if (!localMatchedLetter) {
+        // Fallback to catch-all local letter
+        for (var ca = 0; ca < actionLetters.length; ca++) {
+          if (actionLetters[ca].divisionPattern === 'state:sc/' && actionLetters[ca].category === 'local') {
+            localMatchedLetter = actionLetters[ca];
+            break;
+          }
+        }
+      }
+      if (localMatchedLetter) {
+        groups.push({
+          label: 'Your Local Representatives',
+          category: 'local-matched',
+          subject: localMatchedLetter.subject,
+          body: localMatchedLetter.body,
+          reps: localMatchedReps
+        });
+      }
+    }
+
+    // 4. Full county council (with isMatchedDistrict badge)
+    if (countyCouncil) {
+      var countyLetter = findLocalLetter(countyKey);
+      if (countyLetter) {
+        var countyReps = [];
+        for (var cm = 0; cm < countyCouncil.members.length; cm++) {
+          var member = countyCouncil.members[cm];
+          if (!member.name || member.name === 'Vacant') continue;
+          var isMatched = matchedCountyMember && member.name === matchedCountyMember.name;
+          countyReps.push({
+            name: member.name,
+            office: member.title,
+            email: member.email || '',
+            phone: member.phone || '',
+            isMatchedDistrict: isMatched
+          });
+        }
+        countyReps.sort(function(a, b) { return (b.isMatchedDistrict ? 1 : 0) - (a.isMatchedDistrict ? 1 : 0); });
+        groups.push({
+          label: countyLetter.label,
+          category: 'local',
+          subject: countyLetter.subject,
+          body: countyLetter.body,
+          reps: countyReps,
+          countyKey: countyKey,
+          matchedDistrict: match.countyDistrict || null
+        });
+      }
+    }
+
+    // 5. Full city council (with isMatchedDistrict badge)
+    if (cityCouncil) {
+      var cityLetter = findLocalLetter(cityKey);
+      if (cityLetter) {
+        var cityReps = [];
+        for (var cim = 0; cim < cityCouncil.members.length; cim++) {
+          var cmember = cityCouncil.members[cim];
+          if (!cmember.name || cmember.name === 'Vacant') continue;
+          var isCityMatched = matchedCityMember && cmember.name === matchedCityMember.name;
+          cityReps.push({
+            name: cmember.name,
+            office: cmember.title,
+            email: cmember.email || '',
+            phone: cmember.phone || '',
+            isMatchedDistrict: isCityMatched
+          });
+        }
+        cityReps.sort(function(a, b) { return (b.isMatchedDistrict ? 1 : 0) - (a.isMatchedDistrict ? 1 : 0); });
+        groups.push({
+          label: cityLetter.label,
+          category: 'local',
+          subject: cityLetter.subject,
+          body: cityLetter.body,
+          reps: cityReps,
+          cityKey: cityKey,
+          matchedDistrict: match.cityDistrict || null
+        });
+      }
+    }
+
+    // If no local council groups were matched at all, add catch-all
+    var hasLocal = groups.some(function(g) { return g.category === 'local' || g.category === 'local-matched'; });
+    if (!hasLocal) {
+      for (var ca2 = 0; ca2 < actionLetters.length; ca2++) {
+        if (actionLetters[ca2].divisionPattern === 'state:sc/' && actionLetters[ca2].category === 'local') {
+          groups.push({
+            label: actionLetters[ca2].label,
+            category: 'local',
+            subject: actionLetters[ca2].subject,
+            body: actionLetters[ca2].body,
+            reps: []
+          });
+          break;
+        }
+      }
+    }
+
+    return groups;
+  }
+
+  // --- mailto and clipboard ---
+  function buildMailto(emails, subject, body) {
+    var to = emails.join(',');
+    return 'mailto:' + to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  }
+
+  async function copyToClipboard(text, button) {
+    try {
+      await navigator.clipboard.writeText(text);
+      var original = button.textContent;
+      button.textContent = 'Copied!';
+      setTimeout(function() { button.textContent = original; }, 2000);
+    } catch (e) {
+      var textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      var original2 = button.textContent;
+      button.textContent = 'Copied!';
+      setTimeout(function() { button.textContent = original2; }, 2000);
+    }
+  }
+
+  // --- Results Renderer ---
+  var currentGroups = null;
+
+  function renderResults(groups) {
+    currentGroups = groups;
+    var container = document.getElementById('action-results-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    for (var gi = 0; gi < groups.length; gi++) {
+      var group = groups[gi];
+      var groupId = 'action-group-' + gi;
+
+      // Group wrapper
+      var groupDiv = document.createElement('div');
+      groupDiv.className = gi > 0 ? 'mt-8 pt-8 border-t border-[#334155]' : '';
+
+      // Group header
+      var headerLabel = group.category === 'state'
+        ? ('YOUR ' + group.label.toUpperCase())
+        : group.label.toUpperCase();
+      var header = document.createElement('h3');
+      header.className = 'text-[#64748b] text-xs font-bold tracking-wider uppercase mb-4';
+      header.textContent = headerLabel;
+
+      // Wrong-district link for local groups with council key
+      if (group.category === 'local' && (group.countyKey || group.cityKey)) {
+        var wrongLink = document.createElement('button');
+        wrongLink.type = 'button';
+        wrongLink.className = 'text-[#3b82f6] hover:text-[#60a5fa] text-xs font-medium transition-colors cursor-pointer bg-transparent border-none ml-2';
+        wrongLink.textContent = group.matchedDistrict ? 'Wrong district?' : 'Select your district';
+        wrongLink.setAttribute('data-action', 'wrong-district');
+        wrongLink.setAttribute('data-group', gi);
+        header.appendChild(wrongLink);
+      }
+
+      groupDiv.appendChild(header);
+
+      // Rep list
+      var repListDiv = document.createElement('div');
+      repListDiv.className = 'space-y-3';
+
+      for (var ri = 0; ri < group.reps.length; ri++) {
+        var rep = group.reps[ri];
+        var repDiv = document.createElement('div');
+        repDiv.className = 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-2';
+
+        // Rep info
+        var infoDiv = document.createElement('div');
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'text-white font-semibold block';
+        nameSpan.textContent = rep.name;
+        var officeSpan = document.createElement('span');
+        officeSpan.className = 'text-[#94a3b8] text-sm block';
+        officeSpan.textContent = rep.office;
+        infoDiv.appendChild(nameSpan);
+        infoDiv.appendChild(officeSpan);
+
+        // District badge
+        if (rep.isMatchedDistrict) {
+          var badge = document.createElement('span');
+          badge.className = 'text-[#3b82f6] text-xs font-medium';
+          badge.textContent = 'Your district';
+          infoDiv.appendChild(badge);
+        }
+
+        if (rep.phone) {
+          var phoneLink = document.createElement('a');
+          phoneLink.href = 'tel:' + rep.phone.replace(/[^+\d]/g, '');
+          phoneLink.className = 'text-[#3b82f6] hover:text-[#60a5fa] text-sm block transition-colors';
+          phoneLink.textContent = rep.phone;
+          infoDiv.appendChild(phoneLink);
+        }
+        repDiv.appendChild(infoDiv);
+
+        // Individual buttons for all reps (state, local-matched, and local)
+        var btnRow = document.createElement('div');
+        btnRow.className = 'flex gap-2 flex-shrink-0';
+
+        if (rep.email) {
+          var sendBtn = document.createElement('button');
+          sendBtn.type = 'button';
+          sendBtn.className = 'bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer inline-flex items-center';
+          sendBtn.textContent = 'Send Email';
+          sendBtn.setAttribute('aria-label', 'Send email to ' + rep.name);
+          sendBtn.setAttribute('data-group', gi);
+          sendBtn.setAttribute('data-rep', ri);
+          var sendAction = (group.category === 'state' || group.category === 'local-matched') ? 'send-state' : 'send-local-individual';
+          sendBtn.setAttribute('data-action', sendAction);
+          btnRow.appendChild(sendBtn);
+        }
+
+        repDiv.appendChild(btnRow);
+
+        repListDiv.appendChild(repDiv);
+      }
+
+      // If state group has no reps, show a note
+      if (group.category === 'state' && group.reps.length === 0) {
+        var noRepDiv = document.createElement('div');
+        noRepDiv.className = 'py-2';
+        var noRepText = document.createElement('p');
+        noRepText.className = 'text-[#94a3b8] text-sm italic';
+        noRepText.textContent = 'Enter a full street address to find your specific ' + group.label.toLowerCase() + '.';
+        noRepDiv.appendChild(noRepText);
+        repListDiv.appendChild(noRepDiv);
+      }
+
+      groupDiv.appendChild(repListDiv);
+
+      // Group-level buttons for local councils (email all + copy) — not for local-matched
+      if (group.category === 'local') {
+        var groupBtnRow = document.createElement('div');
+        groupBtnRow.className = 'flex gap-2 mt-4 pt-4 border-t border-[#334155]';
+
+        // Collect unique council emails (non-empty, deduplicated)
+        var emailSet = new Set();
+        var allEmails = [];
+        for (var re = 0; re < group.reps.length; re++) {
+          if (group.reps[re].email && !emailSet.has(group.reps[re].email)) {
+            emailSet.add(group.reps[re].email);
+            allEmails.push(group.reps[re].email);
+          }
+        }
+
+        if (allEmails.length > 1) {
+          var sendAllBtn = document.createElement('button');
+          sendAllBtn.type = 'button';
+          sendAllBtn.className = 'bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer inline-flex items-center';
+          sendAllBtn.textContent = 'Email All Members';
+          sendAllBtn.setAttribute('aria-label', 'Send email to all ' + group.label + ' members');
+          sendAllBtn.setAttribute('data-group', gi);
+          sendAllBtn.setAttribute('data-action', 'send-local');
+          groupBtnRow.appendChild(sendAllBtn);
+        }
+
+        var copyGroupBtn = document.createElement('button');
+        copyGroupBtn.className = 'bg-[#334155] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer';
+        copyGroupBtn.textContent = 'Copy Letter';
+        copyGroupBtn.setAttribute('data-group', gi);
+        copyGroupBtn.setAttribute('data-action', 'copy-local');
+        copyGroupBtn.type = 'button';
+        groupBtnRow.appendChild(copyGroupBtn);
+
+        groupDiv.appendChild(groupBtnRow);
+      }
+
+      // Collapsible letter preview
+      var details = document.createElement('details');
+      details.className = 'mt-4';
+
+      var summary = document.createElement('summary');
+      summary.className = 'text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium cursor-pointer transition-colors';
+      summary.textContent = 'Preview & edit letter';
+      details.appendChild(summary);
+
+      var previewDiv = document.createElement('div');
+      previewDiv.className = 'mt-3 space-y-3';
+
+      // Subject line (read-only display)
+      var subjectP = document.createElement('p');
+      subjectP.className = 'text-[#94a3b8] text-sm';
+      subjectP.innerHTML = '<span class="text-[#64748b]">Subject:</span> ' + escapeHtml(group.subject);
+      previewDiv.appendChild(subjectP);
+
+      // Textarea with letter body
+      var textarea = document.createElement('textarea');
+      textarea.id = groupId + '-body';
+      textarea.className = 'bg-[#0f172a] border border-[#334155] text-[#cbd5e1] rounded p-4 w-full text-sm min-h-[200px] focus:outline-none focus:border-[#3b82f6] focus:ring-1 focus:ring-[#3b82f6] transition-colors resize-y';
+
+      // Replace [NAME] depending on category
+      var prefilledBody = group.body;
+      if ((group.category === 'state' || group.category === 'local-matched') && group.reps.length > 0) {
+        prefilledBody = group.body.replace(/\[NAME\]/g, group.reps[0].name);
+      } else if (group.category === 'state') {
+        var placeholder = group.label === 'State Senator' ? 'Senator' : 'Representative';
+        prefilledBody = group.body.replace(/\[NAME\]/g, placeholder);
+      } else if (group.category === 'local' || group.category === 'local-matched') {
+        prefilledBody = group.body.replace(/\[NAME\]/g, 'Council Member');
+      }
+      textarea.value = prefilledBody;
+      previewDiv.appendChild(textarea);
+
+      if ((group.category === 'state' || group.category === 'local-matched') && group.reps.length > 1) {
+        var noteP = document.createElement('p');
+        noteP.className = 'text-[#64748b] text-xs italic';
+        noteP.textContent = 'The greeting will be personalized for each representative when you click Send Email.';
+        previewDiv.appendChild(noteP);
+      }
+
+      details.appendChild(previewDiv);
+      groupDiv.appendChild(details);
+
+      container.appendChild(groupDiv);
+    }
+  }
+
+  // Event delegation for results — attached once, uses currentGroups
+  document.getElementById('action-results-list')?.addEventListener('click', function(e) {
+    var target = e.target.closest('[data-action]');
+    if (!target || !currentGroups) return;
+
+    var action = target.getAttribute('data-action');
+    var groupIdx = parseInt(target.getAttribute('data-group'));
+    var repIdx = target.getAttribute('data-rep') ? parseInt(target.getAttribute('data-rep')) : null;
+    var group = currentGroups[groupIdx];
+    if (!group) return;
+
+    var textareaEl = document.getElementById('action-group-' + groupIdx + '-body');
+    var currentBody = textareaEl ? textareaEl.value : group.body;
+
+    if (action === 'send-state') {
+      var rep = group.reps[repIdx];
+      if (!rep || !rep.email) return;
+      var personalizedBody = replaceGreeting(currentBody, rep.name);
+      window.location.href = buildMailto([rep.email], group.subject, personalizedBody);
+    } else if (action === 'send-local-individual') {
+      var localRep = group.reps[repIdx];
+      if (!localRep || !localRep.email) return;
+      var personalizedLocalBody = replaceGreeting(currentBody, localRep.name);
+      window.location.href = buildMailto([localRep.email], group.subject, personalizedLocalBody);
+    } else if (action === 'send-local') {
+      var emailSet2 = new Set();
+      var allEmails2 = [];
+      for (var i = 0; i < group.reps.length; i++) {
+        if (group.reps[i].email && !emailSet2.has(group.reps[i].email)) {
+          emailSet2.add(group.reps[i].email);
+          allEmails2.push(group.reps[i].email);
+        }
+      }
+      if (allEmails2.length === 0) return;
+      window.location.href = buildMailto(allEmails2, group.subject, currentBody);
+    } else if (action === 'copy-local') {
+      var copyText2 = 'Subject: ' + group.subject + '\n\n' + currentBody;
+      copyToClipboard(copyText2, target);
+    } else if (action === 'wrong-district') {
+      // Toggle an inline district dropdown below the header
+      var existingDropdown = target.parentElement.querySelector('.wrong-district-dropdown');
+      if (existingDropdown) {
+        existingDropdown.remove();
+        return;
+      }
+
+      var wdGroup = currentGroups[groupIdx];
+      if (!wdGroup) return;
+
+      var dropdownDiv = document.createElement('div');
+      dropdownDiv.className = 'wrong-district-dropdown mt-2 mb-3 flex items-center gap-2';
+
+      var sel = document.createElement('select');
+      sel.className = 'bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-1 text-sm focus:outline-none focus:border-[#3b82f6]';
+      sel.innerHTML = '<option value="">Select district...</option>';
+
+      // countyKey and cityKey are already prefixed (e.g. 'county:greenville', 'place:greenville')
+      var councilKey = wdGroup.countyKey || wdGroup.cityKey || null;
+      if (councilKey && localCouncils[councilKey]) {
+        var council = localCouncils[councilKey];
+        var seen = new Set();
+        for (var di = 0; di < council.members.length; di++) {
+          var titleMatch = council.members[di].title.match(/(?:District|Seat) (\d+)/);
+          if (titleMatch && !seen.has(titleMatch[1])) {
+            seen.add(titleMatch[1]);
+            var opt = document.createElement('option');
+            opt.value = titleMatch[1];
+            opt.textContent = 'District ' + titleMatch[1];
+            if (titleMatch[1] === String(wdGroup.matchedDistrict)) opt.selected = true;
+            sel.appendChild(opt);
+          }
+        }
+      }
+
+      sel.addEventListener('change', function() {
+        var newDistrict = sel.value;
+        if (!newDistrict) return;
+        wdGroup.matchedDistrict = newDistrict;
+        // Update isMatchedDistrict badges — match both "District N" and "Seat N" patterns
+        for (var r = 0; r < wdGroup.reps.length; r++) {
+          var repTitle = wdGroup.reps[r].office || '';
+          var repDistMatch = repTitle.match(/(?:District|Seat) (\d+)/);
+          wdGroup.reps[r].isMatchedDistrict = repDistMatch && repDistMatch[1] === newDistrict;
+        }
+        // Re-sort so the newly matched rep appears first
+        wdGroup.reps.sort(function(a, b) { return (b.isMatchedDistrict ? 1 : 0) - (a.isMatchedDistrict ? 1 : 0); });
+        // Re-render results with updated groups
+        renderResults(currentGroups);
+      });
+
+      dropdownDiv.appendChild(sel);
+      target.parentElement.appendChild(dropdownDiv);
+    }
+  });
+
+  // Replace the greeting line in the letter body with a specific name.
+  // The textarea might have been edited, so we replace the "Dear ..." line.
+  function replaceGreeting(body, name) {
+    // Replace "Dear <anything>," on the first Dear line with "Dear <name>,"
+    return body.replace(/^Dear .+,/m, 'Dear ' + name + ',');
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // --- Event Handlers ---
+
+  // Geolocation button
+  document.getElementById('action-geo')?.addEventListener('click', async function() {
+    showState('loading');
+    try {
+      var pos = await new Promise(function(resolve, reject) {
+        if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+      var match = await matchDistricts(pos.coords.latitude, pos.coords.longitude);
+      if (!match.senate && !match.house) {
+        throw new Error("We couldn't match your location to any SC districts. Please try entering your address instead.");
+      }
+      var groups = buildGroups(match);
+      renderResults(groups);
+      showState('results');
+    } catch (err) {
+      if (err.code === 1) {
+        showError('Location access denied. Please enter your address instead.');
+      } else {
+        showError(err.message || 'Something went wrong. Please try again.');
+      }
+    }
+  });
+
+  // Form submit (address lookup)
+  document.getElementById('action-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var address = document.getElementById('action-address')?.value?.trim();
+    if (!address) return;
+    showState('loading');
+    try {
+      var geo = await geocodeAddress(address);
+      if (!geo.lat || !geo.lng) {
+        throw new Error("We couldn't find that address. Please check and try again.");
+      }
+      var match = await matchDistricts(geo.lat, geo.lng);
+      if (geo.senate) match.senate = geo.senate;
+      if (geo.house) match.house = geo.house;
+      var groups = buildGroups(match);
+      renderResults(groups);
+      showState('results');
+    } catch (err) {
+      showError(err.message || 'Something went wrong. Please try again.');
+    }
+  });
+
+  // Manual submit
+  document.getElementById('action-manual-submit')?.addEventListener('click', function() {
+    var match = {
+      senate: document.getElementById('manual-senate')?.value || null,
+      house: document.getElementById('manual-house')?.value || null,
+      county: document.getElementById('manual-county')?.value || null,
+      countyDistrict: document.getElementById('manual-county-district')?.value || null,
+      city: document.getElementById('manual-city')?.value || null,
+      cityDistrict: document.getElementById('manual-city-district')?.value || null
+    };
+    if (!match.senate && !match.house) {
+      showError('Please select at least a Senate or House district.');
+      return;
+    }
+    var groups = buildGroups(match);
+    renderResults(groups);
+    showState('results');
+  });
+
+  // Reset button
+  document.getElementById('action-reset')?.addEventListener('click', function() {
+    showState('input');
+    document.getElementById('action-address')?.focus();
+  });
+
+  // Retry button (error state)
+  document.getElementById('action-retry')?.addEventListener('click', function() {
+    showState('input');
+    document.getElementById('action-address')?.focus();
+  });
+
+  // --- Modal Triggers ---
+
+  // All elements with data-open-action open the modal
+  document.querySelectorAll('[data-open-action]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      openModal(btn);
+    });
+  });
+
+  // Close button
+  document.getElementById('action-modal-close')?.addEventListener('click', closeModal);
+
+  // Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
+  // Click on backdrop (not inner content)
+  modal?.addEventListener('click', function(e) {
+    if (e.target === modal || e.target === document.getElementById('action-modal-backdrop')) {
+      closeModal();
+    }
+  });
+
+  // --- Focus Trap ---
+  modal?.addEventListener('keydown', function(e) {
+    if (e.key !== 'Tab') return;
+    var focusable = Array.from(modal.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"]), a[href], details > summary'
+    )).filter(function(el) { return el.offsetParent !== null; });
+    if (focusable.length === 0) return;
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+
+  // --- Manual Selection Dropdowns ---
+
+  // Populate senate district dropdown
+  (function() {
+    var senateSel = document.getElementById('manual-senate');
+    if (!senateSel) return;
+    var senateNums = Object.keys(stateLegislators.senate).sort(function(a,b) { return +a - +b; });
+    for (var i = 0; i < senateNums.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = senateNums[i];
+      opt.textContent = senateNums[i];
+      senateSel.appendChild(opt);
+    }
+  })();
+
+  // Populate house district dropdown
+  (function() {
+    var houseSel = document.getElementById('manual-house');
+    if (!houseSel) return;
+    var houseNums = Object.keys(stateLegislators.house).sort(function(a,b) { return +a - +b; });
+    for (var i = 0; i < houseNums.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = houseNums[i];
+      opt.textContent = houseNums[i];
+      houseSel.appendChild(opt);
+    }
+  })();
+
+  // County district ranges
+  var COUNTY_DISTRICT_RANGES = {
+    greenville: { start: 17, end: 28 },
+    spartanburg: { start: 1, end: 6 },
+    anderson: { start: 1, end: 7 },
+    pickens: { start: 1, end: 6 },
+    laurens: { start: 1, end: 7 }
+  };
+
+  // County-to-city mapping
+  var COUNTY_CITIES_MAP = {
+    greenville: [{ value: 'greenville', label: 'Greenville', start: 1, end: 4 }]
+  };
+
+  // When county changes, populate county district dropdown and show/hide city row
+  document.getElementById('manual-county')?.addEventListener('change', function() {
+    var county = this.value;
+    var distSel = document.getElementById('manual-county-district');
+    var cityRow = document.getElementById('manual-city-row');
+    var citySel = document.getElementById('manual-city');
+    var cityDistSel = document.getElementById('manual-city-district');
+
+    distSel.innerHTML = '<option value="">Select...</option>';
+    if (county && COUNTY_DISTRICT_RANGES[county]) {
+      var range = COUNTY_DISTRICT_RANGES[county];
+      for (var d = range.start; d <= range.end; d++) {
+        var opt = document.createElement('option');
+        opt.value = String(d);
+        opt.textContent = 'District ' + d;
+        distSel.appendChild(opt);
+      }
+    }
+
+    if (county && COUNTY_CITIES_MAP[county]) {
+      cityRow.classList.remove('hidden');
+      citySel.innerHTML = '<option value="">None</option>';
+      var cities = COUNTY_CITIES_MAP[county];
+      for (var c = 0; c < cities.length; c++) {
+        var copt = document.createElement('option');
+        copt.value = cities[c].value;
+        copt.textContent = cities[c].label;
+        citySel.appendChild(copt);
+      }
+    } else {
+      cityRow.classList.add('hidden');
+      citySel.innerHTML = '<option value="">None</option>';
+    }
+    cityDistSel.innerHTML = '<option value="">Select city first</option>';
+  });
+
+  // When city changes, populate city district dropdown
+  document.getElementById('manual-city')?.addEventListener('change', function() {
+    var city = this.value;
+    var county = document.getElementById('manual-county')?.value;
+    var cityDistSel = document.getElementById('manual-city-district');
+
+    cityDistSel.innerHTML = '<option value="">Select...</option>';
+    if (city && county && COUNTY_CITIES_MAP[county]) {
+      var cityData = COUNTY_CITIES_MAP[county].find(function(c) { return c.value === city; });
+      if (cityData) {
+        for (var d = cityData.start; d <= cityData.end; d++) {
+          var opt = document.createElement('option');
+          opt.value = String(d);
+          opt.textContent = 'District ' + d;
+          cityDistSel.appendChild(opt);
+        }
+      }
+    }
+  });
+</script>

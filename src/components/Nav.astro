@@ -9,7 +9,7 @@
     <div class="hidden md:flex items-center gap-8">
       <a href="/" class="text-[#94a3b8] font-bold text-xs uppercase tracking-[0.1em] hover:text-white transition-colors">Home</a>
       <a href="/blog" class="text-[#94a3b8] font-bold text-xs uppercase tracking-[0.1em] hover:text-white transition-colors">Blog</a>
-      <a href="/#take-action" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors">Take Action</a>
+      <button type="button" data-open-action class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors cursor-pointer">Take Action</button>
     </div>
 
     <!-- Mobile hamburger -->
@@ -28,7 +28,7 @@
     <div class="px-6 py-4 flex flex-col gap-4">
       <a href="/" class="text-[#94a3b8] font-bold text-sm uppercase tracking-[0.1em] hover:text-white transition-colors">Home</a>
       <a href="/blog" class="text-[#94a3b8] font-bold text-sm uppercase tracking-[0.1em] hover:text-white transition-colors">Blog</a>
-      <a href="/#take-action" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors text-center">Take Action</a>
+      <button type="button" data-open-action class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors text-center cursor-pointer w-full">Take Action</button>
     </div>
   </div>
 </nav>
@@ -48,7 +48,7 @@
   });
 
   // Close mobile menu when clicking a link
-  menu?.querySelectorAll('a').forEach(link => {
+  menu?.querySelectorAll('a, button').forEach(link => {
     link.addEventListener('click', () => {
       menu.classList.add('hidden');
       iconOpen?.classList.remove('hidden');
