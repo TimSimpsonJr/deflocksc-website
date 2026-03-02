@@ -93,6 +93,35 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
 </div>
 
 <script define:vars={{ actionLetters, stateLegislators, localCouncils, civicApiKey }}>
+  // --- Modal Management ---
+  var modal = document.getElementById('action-modal');
+  var openerElement = null; // tracks which button opened the modal for focus return
+
+  function openModal(opener) {
+    if (!modal) return;
+    openerElement = opener || null;
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    // Focus the address input after a tick (let the DOM settle)
+    requestAnimationFrame(function() {
+      var input = document.getElementById('action-address');
+      if (input) input.focus();
+    });
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    // Reset to input state for next open
+    showState('input');
+    // Return focus to the opener
+    if (openerElement && typeof openerElement.focus === 'function') {
+      openerElement.focus();
+    }
+    openerElement = null;
+  }
+
   // --- State Management ---
   function showState(state) {
     ['input', 'loading', 'results', 'error'].forEach(function(s) {
@@ -649,5 +678,50 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
   document.getElementById('action-retry')?.addEventListener('click', function() {
     showState('input');
     document.getElementById('action-address')?.focus();
+  });
+
+  // --- Modal Triggers ---
+
+  // All elements with data-open-action open the modal
+  document.querySelectorAll('[data-open-action]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      openModal(btn);
+    });
+  });
+
+  // Close button
+  document.getElementById('action-modal-close')?.addEventListener('click', closeModal);
+
+  // Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
+  // Click on backdrop (only if clicking the overlay itself, not content)
+  modal?.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  // --- Focus Trap ---
+  modal?.addEventListener('keydown', function(e) {
+    if (e.key !== 'Tab') return;
+    var focusable = modal.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), a[href], details > summary'
+    );
+    if (focusable.length === 0) return;
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
   });
 </script>
