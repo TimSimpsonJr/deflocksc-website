@@ -67,9 +67,11 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
       </div>
 
       <!-- Loading State -->
-      <div id="action-loading" class="hidden flex flex-col items-center justify-center py-12 gap-4">
-        <div class="w-10 h-10 border-4 border-[#334155] border-t-[#ef4444] rounded-full animate-spin"></div>
-        <p class="text-[#94a3b8] text-sm">Finding your representatives...</p>
+      <div id="action-loading" class="hidden">
+        <div class="flex flex-col items-center justify-center py-12 gap-4">
+          <div class="w-10 h-10 border-4 border-[#334155] border-t-[#ef4444] rounded-full animate-spin"></div>
+          <p class="text-[#94a3b8] text-sm">Finding your representatives...</p>
+        </div>
       </div>
 
       <!-- Results State -->
@@ -87,15 +89,17 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
       </div>
 
       <!-- Error State -->
-      <div id="action-error" class="hidden flex flex-col items-center justify-center py-8 gap-4">
-        <p id="action-error-msg" class="text-red-400 text-sm text-center"></p>
-        <button
-          id="action-retry"
-          type="button"
-          class="bg-[#334155] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer"
-        >
-          Try again
-        </button>
+      <div id="action-error" class="hidden">
+        <div class="flex flex-col items-center justify-center py-8 gap-4">
+          <p id="action-error-msg" class="text-red-400 text-sm text-center"></p>
+          <button
+            id="action-retry"
+            type="button"
+            class="bg-[#334155] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer"
+          >
+            Try again
+          </button>
+        </div>
       </div>
 
     </div>
@@ -127,6 +131,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
   }
 
   function parseReps(data) {
+    if (!data.offices || !data.officials) return [];
     var groups = [];
     var seen = new Set();
 
@@ -233,7 +238,10 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
   }
 
   // --- Results Renderer ---
+  var currentGroups = null;
+
   function renderResults(groups) {
+    currentGroups = groups;
     var container = document.getElementById('action-results-list');
     if (!container) return;
     container.innerHTML = '';
@@ -280,13 +288,14 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
           btnRow.className = 'flex gap-2 flex-shrink-0';
 
           if (rep.emails.length > 0) {
-            var sendBtn = document.createElement('a');
-            sendBtn.className = 'bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer inline-flex items-center no-underline';
+            var sendBtn = document.createElement('button');
+            sendBtn.type = 'button';
+            sendBtn.className = 'bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer inline-flex items-center';
             sendBtn.textContent = 'Send Email';
+            sendBtn.setAttribute('aria-label', 'Send email to ' + rep.name);
             sendBtn.setAttribute('data-group', gi);
             sendBtn.setAttribute('data-rep', ri);
             sendBtn.setAttribute('data-action', 'send-state');
-            sendBtn.href = '#';
             btnRow.appendChild(sendBtn);
           }
 
@@ -296,6 +305,7 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
           copyBtn.setAttribute('data-group', gi);
           copyBtn.setAttribute('data-rep', ri);
           copyBtn.setAttribute('data-action', 'copy-state');
+          copyBtn.setAttribute('aria-label', 'Copy letter for ' + rep.name);
           copyBtn.type = 'button';
           btnRow.appendChild(copyBtn);
 
@@ -321,12 +331,13 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
         }
 
         if (allEmails.length > 0) {
-          var sendAllBtn = document.createElement('a');
-          sendAllBtn.className = 'bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer inline-flex items-center no-underline';
+          var sendAllBtn = document.createElement('button');
+          sendAllBtn.type = 'button';
+          sendAllBtn.className = 'bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer inline-flex items-center';
           sendAllBtn.textContent = 'Send Email All';
+          sendAllBtn.setAttribute('aria-label', 'Send email to all ' + group.label + ' members');
           sendAllBtn.setAttribute('data-group', gi);
           sendAllBtn.setAttribute('data-action', 'send-local');
-          sendAllBtn.href = '#';
           groupBtnRow.appendChild(sendAllBtn);
         }
 
@@ -388,49 +399,46 @@ const civicApiKey = import.meta.env.PUBLIC_GOOGLE_CIVIC_API_KEY;
 
       container.appendChild(groupDiv);
     }
-
-    // Attach event listeners via delegation
-    container.addEventListener('click', function(e) {
-      var target = e.target.closest('[data-action]');
-      if (!target) return;
-
-      var action = target.getAttribute('data-action');
-      var groupIdx = parseInt(target.getAttribute('data-group'));
-      var repIdx = target.getAttribute('data-rep') ? parseInt(target.getAttribute('data-rep')) : null;
-      var group = groups[groupIdx];
-      if (!group) return;
-
-      var textareaEl = document.getElementById('action-group-' + groupIdx + '-body');
-      var currentBody = textareaEl ? textareaEl.value : group.body;
-
-      if (action === 'send-state') {
-        e.preventDefault();
-        var rep = group.reps[repIdx];
-        if (!rep || rep.emails.length === 0) return;
-        // Replace the greeting with this specific rep's name
-        var personalizedBody = replaceGreeting(currentBody, rep.name);
-        window.location.href = buildMailto(rep.emails, group.subject, personalizedBody);
-      } else if (action === 'copy-state') {
-        var rep2 = group.reps[repIdx];
-        var personalizedBody2 = replaceGreeting(currentBody, rep2.name);
-        var copyText = 'Subject: ' + group.subject + '\n\n' + personalizedBody2;
-        copyToClipboard(copyText, target);
-      } else if (action === 'send-local') {
-        e.preventDefault();
-        var allEmails2 = [];
-        for (var i = 0; i < group.reps.length; i++) {
-          for (var j = 0; j < group.reps[i].emails.length; j++) {
-            allEmails2.push(group.reps[i].emails[j]);
-          }
-        }
-        if (allEmails2.length === 0) return;
-        window.location.href = buildMailto(allEmails2, group.subject, currentBody);
-      } else if (action === 'copy-local') {
-        var copyText2 = 'Subject: ' + group.subject + '\n\n' + currentBody;
-        copyToClipboard(copyText2, target);
-      }
-    });
   }
+
+  // Event delegation for results — attached once, uses currentGroups
+  document.getElementById('action-results-list')?.addEventListener('click', function(e) {
+    var target = e.target.closest('[data-action]');
+    if (!target || !currentGroups) return;
+
+    var action = target.getAttribute('data-action');
+    var groupIdx = parseInt(target.getAttribute('data-group'));
+    var repIdx = target.getAttribute('data-rep') ? parseInt(target.getAttribute('data-rep')) : null;
+    var group = currentGroups[groupIdx];
+    if (!group) return;
+
+    var textareaEl = document.getElementById('action-group-' + groupIdx + '-body');
+    var currentBody = textareaEl ? textareaEl.value : group.body;
+
+    if (action === 'send-state') {
+      var rep = group.reps[repIdx];
+      if (!rep || rep.emails.length === 0) return;
+      var personalizedBody = replaceGreeting(currentBody, rep.name);
+      window.location.href = buildMailto(rep.emails, group.subject, personalizedBody);
+    } else if (action === 'copy-state') {
+      var rep2 = group.reps[repIdx];
+      var personalizedBody2 = replaceGreeting(currentBody, rep2.name);
+      var copyText = 'Subject: ' + group.subject + '\n\n' + personalizedBody2;
+      copyToClipboard(copyText, target);
+    } else if (action === 'send-local') {
+      var allEmails2 = [];
+      for (var i = 0; i < group.reps.length; i++) {
+        for (var j = 0; j < group.reps[i].emails.length; j++) {
+          allEmails2.push(group.reps[i].emails[j]);
+        }
+      }
+      if (allEmails2.length === 0) return;
+      window.location.href = buildMailto(allEmails2, group.subject, currentBody);
+    } else if (action === 'copy-local') {
+      var copyText2 = 'Subject: ' + group.subject + '\n\n' + currentBody;
+      copyToClipboard(copyText2, target);
+    }
+  });
 
   // Replace the greeting line in the letter body with a specific name.
   // The textarea might have been edited, so we replace the "Dear ..." line.
