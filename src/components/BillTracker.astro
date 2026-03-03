@@ -2,12 +2,12 @@
 import bills from '../data/bills.json';
 ---
 
-<section class="bg-[#262626] py-20 md:py-28 relative overflow-hidden">
+<section id="bill-tracker" aria-labelledby="bill-tracker-heading" class="bg-[#262626] py-20 md:py-28 relative overflow-hidden">
   <!-- Section glow accent -->
-  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[300px] blur-[64px] opacity-[0.15] md:opacity-[0.18] pointer-events-none"></div>
+  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[300px] blur-[64px] opacity-[0.15] md:opacity-[0.18] pointer-events-none" aria-hidden="true"></div>
 
   <div class="max-w-4xl mx-auto px-6">
-    <h2 class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-6">
+    <h2 id="bill-tracker-heading" class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-6">
       Three Bills. All Stalled. Your Legislators Need to Hear From You.
     </h2>
 
@@ -21,8 +21,11 @@ import bills from '../data/bills.json';
       <div class="space-y-4 mb-6">
         {bills.map((bill: any, i: number) => (
           <div
-            class="bill-card bg-[#171717] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#2e2e2e] hover:translate-x-1"
+            class="bill-card bg-[#171717] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#2e2e2e] hover:translate-x-1 focus-visible:bg-[#2e2e2e] focus-visible:translate-x-1 focus:outline-none focus:ring-2 focus:ring-[#ef4444] focus:ring-offset-2 focus:ring-offset-[#262626]"
             data-bill={i}
+            tabindex="0"
+            role="button"
+            aria-label={`View details for ${bill.bill}: ${bill.title}`}
           >
             <div class="flex items-start justify-between gap-4 mb-2">
               <span class="text-[#ef4444] font-extrabold text-lg">{bill.bill}</span>
@@ -31,7 +34,7 @@ import bills from '../data/bills.json';
               </span>
             </div>
             <p class="text-[#d4d4d4] text-sm mb-2">{bill.title}</p>
-            <p class="text-[#525252] text-xs font-medium">Click for details</p>
+            <p class="text-[#525252] text-xs font-medium">See what this bill would change &rarr;</p>
           </div>
         ))}
       </div>
@@ -52,7 +55,7 @@ import bills from '../data/bills.json';
   <!-- Modal backdrop -->
   <div id="bill-modal-backdrop" class="fixed inset-0 z-[100] bg-[rgba(10,10,10,0.85)] hidden opacity-0 transition-opacity duration-200 flex items-center justify-center p-5">
     <!-- Modal card -->
-    <div id="bill-modal" role="dialog" aria-modal="true" aria-labelledby="modal-bill-id" class="w-[90vw] max-w-[560px] max-h-[85vh] flex flex-col bg-[#262626] border-l-4 border-[#ef4444] rounded-lg opacity-0 translate-y-5 transition-all duration-250 ease-out">
+    <div id="bill-modal" role="dialog" aria-modal="true" aria-labelledby="modal-bill-id" class="w-[90vw] max-w-[560px] max-h-[85dvh] flex flex-col bg-[#262626] border-l-4 border-[#ef4444] rounded-lg opacity-0 translate-y-5 transition-all duration-250 ease-out">
       <!-- Fixed header -->
       <div class="flex-shrink-0 p-6 md:p-8 pb-4 flex items-start justify-between gap-4">
         <div>
@@ -62,7 +65,7 @@ import bills from '../data/bills.json';
           <p id="modal-bill-title" class="text-white font-bold text-lg"></p>
         </div>
         <!-- Close button -->
-        <button id="bill-modal-close" class="text-[#737373] hover:text-white transition-colors text-xl leading-none cursor-pointer flex-shrink-0" aria-label="Close">&times;</button>
+        <button id="bill-modal-close" class="text-[#737373] hover:text-white focus-visible:text-white transition-colors text-xl leading-none cursor-pointer flex-shrink-0 w-11 h-11 flex items-center justify-center rounded" aria-label="Close">&times;</button>
       </div>
 
       <!-- Scrollable body -->
@@ -90,7 +93,7 @@ import bills from '../data/bills.json';
             Email Your Legislators
           </a>
           <a id="modal-bill-link" href="#" target="_blank" rel="noopener" class="text-[#ef4444] hover:text-[#dc2626] text-sm font-medium transition-colors">
-            Read full text on scstatehouse.gov &rarr;
+            Read full text on scstatehouse.gov<span class="sr-only"> (opens in new tab)</span> &rarr;
           </a>
         </div>
       </div>
@@ -184,6 +187,13 @@ import bills from '../data/bills.json';
     card.addEventListener('click', () => {
       const index = parseInt(card.getAttribute('data-bill'));
       openModal(index);
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const index = parseInt(card.getAttribute('data-bill'));
+        openModal(index);
+      }
     });
   });
 

@@ -11,14 +11,14 @@ import localCouncils from '../data/local-councils.json';
   <div id="action-modal-backdrop" class="min-h-full bg-[#171717] overflow-y-auto md:bg-black/70 md:backdrop-blur-sm md:flex md:items-start md:justify-center md:py-12">
 
     <!-- Modal card (full-screen mobile, centered card desktop) -->
-    <div id="action-modal-card" class="min-h-full md:min-h-0 md:bg-[#171717] md:border md:border-[#404040] md:rounded-xl md:w-full md:max-w-2xl md:max-h-[85vh] md:overflow-y-auto md:relative">
+    <div id="action-modal-card" class="min-h-full md:min-h-0 md:bg-[#171717] md:border md:border-[#404040] md:rounded-xl md:w-full md:max-w-2xl md:max-h-[85dvh] md:overflow-y-auto md:relative">
       <!-- Close button -->
       <button id="action-modal-close" type="button"
         class="fixed top-4 right-4 z-10 w-10 h-10 rounded-full bg-[#262626] hover:bg-[#404040]
                text-[#a3a3a3] hover:text-white flex items-center justify-center transition-colors cursor-pointer
                md:absolute md:top-3 md:right-3"
         aria-label="Close">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -68,7 +68,7 @@ import localCouncils from '../data/local-councils.json';
               type="submit"
               class="bg-[#404040] hover:bg-[#475569] text-white font-medium rounded px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer whitespace-nowrap"
             >
-              Look Up
+              Find My Reps
             </button>
           </div>
           <p class="text-[#737373] text-xs italic mt-2">
@@ -130,7 +130,7 @@ import localCouncils from '../data/local-councils.json';
               </div>
             </div>
             <p class="text-[#737373] text-xs">
-              Don't know your district? <a href="https://www.scstatehouse.gov/legislatorssearch.php" target="_blank" rel="noopener" class="text-[#a3a3a3] hover:text-[#d4d4d4] underline">Look it up on scstatehouse.gov</a>
+              Don't know your district? <a href="https://www.scstatehouse.gov/legislatorssearch.php" target="_blank" rel="noopener" class="text-[#a3a3a3] hover:text-[#d4d4d4] underline">Look it up on scstatehouse.gov<span class="sr-only"> (opens in new tab)</span></a>
             </p>
             <button
               id="action-manual-submit"
@@ -176,7 +176,7 @@ import localCouncils from '../data/local-councils.json';
           type="button"
           class="bg-[#404040] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer"
         >
-          Try again
+          Start Over
         </button>
       </div>
     </div>
@@ -325,27 +325,43 @@ import localCouncils from '../data/local-councils.json';
   async function geocodeAddress(address) {
     var result = { lat: null, lng: null, senate: null, house: null };
     try {
-      var controller = new AbortController();
-      var timeoutId = setTimeout(function() { controller.abort(); }, 10000);
-      var params = new URLSearchParams({ address: address, benchmark: 'Public_AR_Current', vintage: 'Current_Current', format: 'json' });
-      var res = await fetch('https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?' + params.toString(), { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (!res.ok) throw new Error('Census geocoder HTTP ' + res.status);
-      var data = await res.json();
+      var params = new URLSearchParams({ address: address, benchmark: 'Public_AR_Current', vintage: 'Current_Current', format: 'jsonp' });
+      var data = await new Promise(function(resolve, reject) {
+        var callbackName = '_censusCallback_' + Date.now();
+        var timeout = setTimeout(function() {
+          delete window[callbackName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+          reject(new Error('Census geocoder timed out'));
+        }, 10000);
+        window[callbackName] = function(response) {
+          clearTimeout(timeout);
+          delete window[callbackName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+          resolve(response);
+        };
+        var script = document.createElement('script');
+        script.src = 'https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?' + params.toString() + '&callback=' + callbackName;
+        script.onerror = function() {
+          clearTimeout(timeout);
+          delete window[callbackName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+          reject(new Error('Census geocoder network error'));
+        };
+        document.head.appendChild(script);
+      });
       var matches = data.result && data.result.addressMatches;
       if (!matches || matches.length === 0) return result;
       var match = matches[0];
       if (match.coordinates) { result.lng = match.coordinates.x; result.lat = match.coordinates.y; }
       var geo = match.geographies;
       if (geo) {
-        var upper = geo['State Legislative Districts - Upper'];
+        var upper = geo['2024 State Legislative Districts - Upper'] || geo['State Legislative Districts - Upper'];
         if (upper && upper.length > 0 && upper[0].BASENAME) result.senate = upper[0].BASENAME;
-        var lower = geo['State Legislative Districts - Lower'];
+        var lower = geo['2024 State Legislative Districts - Lower'] || geo['State Legislative Districts - Lower'];
         if (lower && lower.length > 0 && lower[0].BASENAME) result.house = lower[0].BASENAME;
       }
     } catch (e) {
-      if (e.name === 'AbortError') console.warn('Census geocoder timed out');
-      else console.warn('Census geocoder failed:', e);
+      console.warn('Census geocoder failed:', e);
     }
     return result;
   }
@@ -928,21 +944,21 @@ import localCouncils from '../data/local-councils.json';
     showState('loading');
     try {
       var pos = await new Promise(function(resolve, reject) {
-        if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
+        if (!navigator.geolocation) return reject(new Error('Your browser does not support location services. Type your address below instead.'));
         navigator.geolocation.getCurrentPosition(resolve, reject);
       });
       var match = await matchDistricts(pos.coords.latitude, pos.coords.longitude);
       if (!match.senate && !match.house) {
-        throw new Error("We couldn't match your location to any SC districts. Please try entering your address instead.");
+        throw new Error("Your location didn't match any SC legislative districts. Try typing your street address instead.");
       }
       var groups = buildGroups(match);
       renderResults(groups);
       showState('results');
     } catch (err) {
       if (err.code === 1) {
-        showError('Location access denied. Please enter your address instead.');
+        showError('Location access was blocked by your browser. You can type your address below instead.');
       } else {
-        showError(err.message || 'Something went wrong. Please try again.');
+        showError(err.message || 'We could not determine your location. Try entering your street address instead.');
       }
     }
   });
@@ -956,7 +972,7 @@ import localCouncils from '../data/local-councils.json';
     try {
       var geo = await geocodeAddress(address);
       if (!geo.lat || !geo.lng) {
-        throw new Error("We couldn't find that address. Please check and try again.");
+        throw new Error("That address didn't return a match. Double-check the street, city, and state, then try again.");
       }
       var match = await matchDistricts(geo.lat, geo.lng);
       if (geo.senate) match.senate = geo.senate;
@@ -965,7 +981,7 @@ import localCouncils from '../data/local-councils.json';
       renderResults(groups);
       showState('results');
     } catch (err) {
-      showError(err.message || 'Something went wrong. Please try again.');
+      showError(err.message || 'The address lookup did not return results. Check the address and try again, or select your district manually below.');
     }
   });
 
@@ -980,7 +996,7 @@ import localCouncils from '../data/local-councils.json';
       cityDistrict: document.getElementById('manual-city-district')?.value || null
     };
     if (!match.senate && !match.house) {
-      showError('Please select at least a Senate or House district.');
+      showError('Pick at least a Senate or House district so we can find your representatives.');
       return;
     }
     var groups = buildGroups(match);

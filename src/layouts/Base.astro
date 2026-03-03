@@ -9,7 +9,7 @@ interface Props {
   description?: string;
 }
 
-const { title = "DeflockSC", description = "Bringing transparency to license plate surveillance in Upstate South Carolina." } = Astro.props;
+const { title = "DeflockSC", description = "155 cameras are tracking drivers across Upstate SC with no public vote and no oversight. Fight back." } = Astro.props;
 ---
 
 <html lang="en">
@@ -33,9 +33,12 @@ const { title = "DeflockSC", description = "Bringing transparency to license pla
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
   </head>
   <body class="bg-[#171717] text-[#d4d4d4] font-['Inter',sans-serif] leading-[1.7] min-h-screen">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-[#dc2626] focus:text-white focus:font-bold focus:text-sm focus:px-4 focus:py-2 focus:rounded">
+      Skip to main content
+    </a>
     <Nav />
 
-    <main class="pt-16">
+    <main id="main-content" class="pt-16">
       <slot />
     </main>
 
