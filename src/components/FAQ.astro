@@ -2,28 +2,32 @@
 const faqs = [
   {
     question: '"Don\'t these cameras only catch criminals?"',
-    lead: '99% of the plates Flock scans belong to people not suspected of anything.',
-    rest: 'The cameras watch everyone. In Greenville, the system flagged an innocent woman\'s rental car as stolen. Police drew their weapons and handcuffed her. She wasn\'t a criminal.',
+    lead: '99.5% of the plates Flock scans belong to people not suspected of anything.',
+    rest: 'Flock\'s cameras don\'t just record plate numbers. They log vehicle make, color, and travel patterns for every car that passes. That\'s a record of where everyone goes.',
+    source: 'Source: <a href="https://www.eff.org/pages/automated-license-plate-readers-alpr" target="_blank" rel="noopener" class="text-[#fbbf24] hover:underline">EFF</a>',
   },
   {
     question: '"If you have nothing to hide, why worry?"',
     lead: 'The 4th Amendment protects everyone from government searches without cause, not just people with something to hide.',
-    rest: 'You don\'t have to prove your innocence to deserve privacy.',
+    rest: 'These cameras log every trip your family makes. Every school run. Every doctor visit. Every church service. All of it goes into a government database, whether you\'ve done anything wrong or not.',
   },
   {
     question: '"Doesn\'t this reduce crime?"',
     lead: 'Austin ran its own city audit and couldn\'t find evidence the cameras reduce crime.',
-    rest: 'We want public safety too. Show us evidence this actually delivers it and we\'ll listen.',
+    rest: 'These systems cost cities hundreds of thousands of dollars a year. Greenville paid with federal civil asset forfeiture money that bypassed normal council appropriations. We want public safety too. Show us the return on that investment.',
+    source: 'Source: <a href="https://www.eff.org/deeplinks/2025/06/victory-austin-organizers-cancel-citys-flock-alpr-contract" target="_blank" rel="noopener" class="text-[#fbbf24] hover:underline">EFF</a> <span class="mx-1">&middot;</span> <a href="https://www.kut.org/austin/2025-06-04/austin-tx-automatic-license-reader-program-police-data-privacy-flock" target="_blank" rel="noopener" class="text-[#fbbf24] hover:underline">KUT Radio</a>',
   },
   {
     question: '"Isn\'t the data protected?"',
-    lead: 'Flock\'s own CEO admitted in 2025 they didn\'t have proper safeguards.',
-    rest: 'Right here in SC, a law enforcement officer used SLED\'s database to look up his own car, then changed the record. When a reporter asked SLED for more recent misconduct cases, they refused to answer. That\'s what "protected" looks like in practice.',
+    lead: 'Flock couldn\'t even explain how data sharing got turned back on in Ventura County after the agency disabled it.',
+    rest: 'Right here in SC, a law enforcement officer used SLED\'s database to look up his own car, then changed the record. When a reporter asked SLED about misconduct, they refused to answer. That\'s what protected looks like in practice.',
+    source: 'Sources: <a href="https://www.cbsnews.com/losangeles/news/flock-license-plate-readers-shared-data-with-out-of-state-federal-agencies/" target="_blank" rel="noopener" class="text-[#fbbf24] hover:underline">CBS Los Angeles</a> <span class="mx-1">&middot;</span> <a href="https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html" target="_blank" rel="noopener" class="text-[#fbbf24] hover:underline">Post and Courier</a>',
   },
   {
     question: '"Isn\'t this anti-police?"',
-    lead: 'In Hays County, TX and Staunton, VA, the decision to cancel Flock had police support.',
-    rest: 'A Staunton chief with 41 years on the job called residents raising concerns "democracy in action." A conservative Republican state rep from just outside Greenville put it plainly: "I\'ve run into individuals in law enforcement who have taken advantage of their positions. The potential is certainly out there."',
+    lead: 'A Virginia police chief with 41 years on the job helped cancel his city\'s Flock contract.',
+    rest: 'Chief Jim Williams of Staunton called residents raising privacy concerns "democracy in action." Back home, conservative Republican Rep. Garry Smith of Simpsonville has the same concern: "I\'ve run into individuals in law enforcement who have taken advantage of their positions. The potential is certainly out there."',
+    source: 'Sources: <a href="https://augustafreepress.com/news/staunton-to-cancel-flock-safety-camera-contract-doesnt-agree-with-ideology-of-ceo/" target="_blank" rel="noopener" class="text-[#fbbf24] hover:underline">Augusta Free Press</a> <span class="mx-1">&middot;</span> <a href="https://www.postandcourier.com/greenville/news/greenville-adding-more-cameras-to-read-license-plates-raising-questions-of-oversight-privacy/article_4cf2761a-4157-11eb-98b9-9b7e9434164e.html" target="_blank" rel="noopener" class="text-[#fbbf24] hover:underline">Post and Courier</a>',
   },
 ];
 ---
@@ -44,6 +48,9 @@ const faqs = [
           <div class="faq-content">
             <div class="faq-inner px-5 pb-5">
               <p class="text-[#a3a3a3] text-base leading-[1.7]"><strong class="text-[#d4d4d4]">{faq.lead}</strong> {faq.rest}</p>
+              {faq.source && (
+                <p class="text-[#525252] text-xs mt-2" set:html={faq.source} />
+              )}
             </div>
           </div>
         </details>

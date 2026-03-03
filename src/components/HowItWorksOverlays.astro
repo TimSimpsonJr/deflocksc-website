@@ -23,20 +23,22 @@
     </div>
   </div>
 
-  <!-- Overlay 1: SLED Retention -->
+  <!-- Overlay 1: Out-of-State Data Sharing -->
   <div class="overlay-panel" data-overlay-panel="1" role="dialog" aria-modal="true" aria-labelledby="overlay-title-1">
     <button class="overlay-close" aria-label="Close">&times;</button>
-    <h3 id="overlay-title-1" class="text-white font-bold text-lg mb-1">SLED Keeps Your Data for Three Years</h3>
-    <span class="block text-[#ef4444] text-xs font-semibold uppercase tracking-wider mb-4">South Carolina</span>
+    <h3 id="overlay-title-1" class="text-white font-bold text-lg mb-1">How Your Data Leaves the State</h3>
+    <span class="block text-[#ef4444] text-xs font-semibold uppercase tracking-wider mb-4">Nationwide</span>
     <div class="text-[#d4d4d4] text-sm leading-relaxed space-y-3">
-      <p>Flock claims 30-day deletion, but Greenville's data goes to SLED, which retains it in its statewide database regardless of what Flock promises locally.</p>
-      <p>When the Post and Courier asked SLED for recent misconduct records, SLED refused to produce any documents, citing ongoing litigation. We don't know what's happened since. They won't tell us.</p>
-      <p>In 2013, a South Carolina law enforcement officer used SLED's ALPR database to search for his own vehicle, found an image of his plate and altered the record to show someone else's. His access was removed &mdash; but the incident was only discovered after the fact.</p>
-      <p>Flock confirmed it cannot monitor how federal agencies use its system or ensure searches comply with state law.</p>
+      <p>Ventura County, CA disabled Flock's "National Lookup" feature in 2023 to comply with state law. It was reactivated without anyone's knowledge. Out-of-state agencies searched their data 364,000 times in just two months. Flock couldn't explain how the feature turned back on &mdash; only that "due to limitations in technical logging, it was impossible to determine the specific cause."</p>
+      <p>San Francisco's cameras were searched 1.6 million times by out-of-state agencies in six months. In one case, the California Highway Patrol searched 845 local agency databases in a single query on behalf of federal agents.</p>
+      <p>Researchers call this the "side door": local officers search the network on behalf of federal agencies, leaving no paper trail and bypassing every data-sharing agreement on the books.</p>
+      <p>Flock's 30-day deletion promise means nothing when the network sends your data everywhere before the clock starts. In South Carolina, SLED keeps it for three years regardless. Local policies can't control a national network.</p>
     </div>
     <div class="mt-5 pt-4 border-t border-[#404040]">
-      <span class="text-[#737373] text-xs">Source:</span>
-      <a href="https://www.postandcourier.com" target="_blank" rel="noopener" class="text-[#fbbf24] text-xs hover:underline ml-1">The Post and Courier</a>
+      <span class="text-[#737373] text-xs">Sources:</span>
+      <a href="https://www.cbsnews.com/losangeles/news/flock-license-plate-readers-shared-data-with-out-of-state-federal-agencies/" target="_blank" rel="noopener" class="text-[#fbbf24] text-xs hover:underline ml-1">CBS Los Angeles</a>
+      <span class="text-[#525252] text-xs mx-1">&middot;</span>
+      <a href="https://sfist.com/2026/02/28/lawsuit-says-flock-allowed-out-of-state-agencies-access-to-sfpd-database-1-6-million-times/" target="_blank" rel="noopener" class="text-[#fbbf24] text-xs hover:underline">SFist</a>
     </div>
   </div>
 
@@ -96,7 +98,7 @@
   </div>
 </div>
 
-<style>
+<style is:global>
   /* Overlay */
   .overlay-backdrop {
     display: none;
