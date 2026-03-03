@@ -1,10 +1,15 @@
 /**
- * District Matcher — client-side point-in-polygon district matching
+ * District Matcher -- client-side point-in-polygon district matching
  *
  * Matches a lat/lng to SC state legislative districts, county council
  * districts, and city council districts using bundled GeoJSON boundary
- * files and ray-casting. No external dependencies.
+ * files and ray-casting. No external dependencies beyond geo-utils.
  */
+
+import { pointInPolygon, computeBBox, pointInBBox } from './geo-utils.js';
+
+// Re-export pointInPolygon for consumers that imported it from here
+export { pointInPolygon };
 
 // --- Boundary file configuration ---
 
@@ -31,119 +36,6 @@ const SC_BBOX = { minLat: 32, maxLat: 35.3, minLng: -83.5, maxLng: -78.5 };
 // --- In-memory cache for fetched boundary files ---
 
 const boundaryCache = new Map();
-
-// --- Point-in-Polygon (ray-casting) ---
-
-/**
- * Tests whether a point is inside a single polygon ring using the
- * ray-casting algorithm.
- *
- * @param {number} lat - Latitude of the test point
- * @param {number} lng - Longitude of the test point
- * @param {number[][]} ring - Array of [lng, lat] coordinate pairs (GeoJSON order)
- * @returns {boolean}
- */
-function pointInRing(lat, lng, ring) {
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const xi = ring[i][0], yi = ring[i][1];
-    const xj = ring[j][0], yj = ring[j][1];
-    if (
-      ((yi > lat) !== (yj > lat)) &&
-      (lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi)
-    ) {
-      inside = !inside;
-    }
-  }
-  return inside;
-}
-
-/**
- * Tests whether a point is inside a GeoJSON Polygon or MultiPolygon geometry.
- *
- * For Polygon: tests the outer ring, then ensures the point is not inside
- * any hole rings.
- *
- * For MultiPolygon: returns true if the point is inside any sub-polygon.
- *
- * @param {number} lat - Latitude
- * @param {number} lng - Longitude
- * @param {object} geometry - GeoJSON geometry object (Polygon or MultiPolygon)
- * @returns {boolean}
- */
-export function pointInPolygon(lat, lng, geometry) {
-  if (geometry.type === 'Polygon') {
-    const rings = geometry.coordinates;
-    // Must be inside the outer ring
-    if (!pointInRing(lat, lng, rings[0])) return false;
-    // Must not be inside any hole
-    for (let h = 1; h < rings.length; h++) {
-      if (pointInRing(lat, lng, rings[h])) return false;
-    }
-    return true;
-  }
-
-  if (geometry.type === 'MultiPolygon') {
-    for (let p = 0; p < geometry.coordinates.length; p++) {
-      const rings = geometry.coordinates[p];
-      if (!pointInRing(lat, lng, rings[0])) continue;
-      let inHole = false;
-      for (let h = 1; h < rings.length; h++) {
-        if (pointInRing(lat, lng, rings[h])) { inHole = true; break; }
-      }
-      if (!inHole) return true;
-    }
-    return false;
-  }
-
-  return false;
-}
-
-// --- Bounding Box helpers ---
-
-/**
- * Computes a bounding box from all coordinates in a GeoJSON FeatureCollection.
- * Returns { minLat, maxLat, minLng, maxLng }.
- */
-function computeBBox(fc) {
-  let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
-
-  function scanRing(ring) {
-    for (let i = 0; i < ring.length; i++) {
-      const lng = ring[i][0], lat = ring[i][1];
-      if (lat < minLat) minLat = lat;
-      if (lat > maxLat) maxLat = lat;
-      if (lng < minLng) minLng = lng;
-      if (lng > maxLng) maxLng = lng;
-    }
-  }
-
-  for (let f = 0; f < fc.features.length; f++) {
-    const geom = fc.features[f].geometry;
-    if (geom.type === 'Polygon') {
-      for (let r = 0; r < geom.coordinates.length; r++) scanRing(geom.coordinates[r]);
-    } else if (geom.type === 'MultiPolygon') {
-      for (let p = 0; p < geom.coordinates.length; p++) {
-        for (let r = 0; r < geom.coordinates[p].length; r++) scanRing(geom.coordinates[p][r]);
-      }
-    }
-  }
-
-  return { minLat, maxLat, minLng, maxLng };
-}
-
-/**
- * Returns true if a point falls within a bounding box (with a small margin).
- */
-function pointInBBox(lat, lng, bbox) {
-  const margin = 0.01; // ~1km buffer
-  return (
-    lat >= bbox.minLat - margin &&
-    lat <= bbox.maxLat + margin &&
-    lng >= bbox.minLng - margin &&
-    lng <= bbox.maxLng + margin
-  );
-}
 
 // --- Boundary File Loader ---
 
@@ -197,19 +89,6 @@ function findDistrict(lat, lng, fc) {
     }
   }
   return null;
-}
-
-/**
- * Tests whether a point falls anywhere within a FeatureCollection
- * (i.e., is the point inside any feature's geometry at all).
- */
-function pointInAnyFeature(lat, lng, fc) {
-  if (!fc || !fc.features) return false;
-  if (fc._bbox && !pointInBBox(lat, lng, fc._bbox)) return false;
-  for (let i = 0; i < fc.features.length; i++) {
-    if (pointInPolygon(lat, lng, fc.features[i].geometry)) return true;
-  }
-  return false;
 }
 
 // --- District Matcher ---
@@ -356,16 +235,14 @@ export async function geocodeAddress(address) {
     }
 
     // Extract state legislative districts from geographies
-    // The Census geocoder nests these under geographies["State Legislative Districts - Upper"]
-    // and ["State Legislative Districts - Lower"]
     const geographies = match.geographies;
     if (geographies) {
-      const upper = geographies['State Legislative Districts - Upper'];
+      const upper = geographies['2024 State Legislative Districts - Upper'] || geographies['State Legislative Districts - Upper'];
       if (upper && upper.length > 0 && upper[0].BASENAME) {
         result.senate = upper[0].BASENAME;
       }
 
-      const lower = geographies['State Legislative Districts - Lower'];
+      const lower = geographies['2024 State Legislative Districts - Lower'] || geographies['State Legislative Districts - Lower'];
       if (lower && lower.length > 0 && lower[0].BASENAME) {
         result.house = lower[0].BASENAME;
       }
