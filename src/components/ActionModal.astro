@@ -701,7 +701,7 @@ import localCouncils from '../data/local-councils.json';
         if (rep.phone) {
           var phoneLink = document.createElement('a');
           phoneLink.href = 'tel:' + rep.phone.replace(/[^+\d]/g, '');
-          phoneLink.className = 'text-[#a3a3a3] hover:text-[#d4d4d4] text-sm block transition-colors';
+          phoneLink.className = 'text-[#fbbf24] hover:text-[#fcd34d] text-sm block transition-colors';
           phoneLink.textContent = rep.phone;
           infoDiv.appendChild(phoneLink);
         }
