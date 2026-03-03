@@ -5,17 +5,56 @@
   <!-- Subtle gradient background -->
   <div class="absolute inset-0 bg-gradient-to-br from-[#171717] via-[#1a1a1a] to-[#171717] opacity-80"></div>
 
-  <div class="max-w-4xl mx-auto px-6 relative z-10 text-center">
-    <h1 class="text-white font-black text-3xl md:text-5xl lg:text-6xl tracking-[-0.02em] leading-[1.1] mb-8">
-      In 1984, the Thought Police weren't looking for criminals. Neither is Flock Safety&nbsp;&mdash; 99% of the plates they scan belong to people suspected of nothing.
+  <!-- Camera poles and animated light cones -->
+  <div class="absolute top-8 md:top-6 lg:-top-5 left-1/2 -translate-x-1/2 pointer-events-none" style="z-index: 1;">
+    <div class="relative w-[650px] md:w-[1000px] lg:w-[1300px]">
+
+      <!-- Camera image -->
+      <img src="/hero-cameras.png" alt="" aria-hidden="true"
+        class="max-w-none w-full h-auto"
+        style="filter: blur(3px) brightness(0.90); mask-image: linear-gradient(to bottom, black 50%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);" />
+
+      <!-- Animated light cones (on top of camera image, overflow visible so cones aren't clipped at image edges) -->
+      <svg id="hero-cones" class="absolute inset-0 w-full h-full"
+        viewBox="0 0 5098 2949" style="overflow: visible;" aria-hidden="true">
+        <defs>
+          <linearGradient id="cone-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="white" stop-opacity="0.3" />
+            <stop offset="100%" stop-color="white" stop-opacity="0" />
+          </linearGradient>
+          <filter id="cone-blur" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="30" />
+          </filter>
+        </defs>
+        <polygon class="hero-cone hero-cone-outer" data-origin="53 1982"
+          points="53,1982 -647,5982 753,5982" fill="url(#cone-grad)" filter="url(#cone-blur)" />
+        <polygon class="hero-cone hero-cone-outer" data-origin="540 1804"
+          points="540,1804 -160,5804 1240,5804" fill="url(#cone-grad)" filter="url(#cone-blur)" />
+        <polygon class="hero-cone" data-origin="1206 1683"
+          points="1206,1683 506,5683 1906,5683" fill="url(#cone-grad)" filter="url(#cone-blur)" />
+        <polygon class="hero-cone" data-origin="2312 1389"
+          points="2312,1389 1612,5389 3012,5389" fill="url(#cone-grad)" filter="url(#cone-blur)" />
+        <polygon class="hero-cone" data-origin="3891 1683"
+          points="3891,1683 3191,5683 4591,5683" fill="url(#cone-grad)" filter="url(#cone-blur)" />
+        <polygon class="hero-cone hero-cone-outer" data-origin="4557 1804"
+          points="4557,1804 3857,5804 5257,5804" fill="url(#cone-grad)" filter="url(#cone-blur)" />
+        <polygon class="hero-cone hero-cone-outer" data-origin="5044 1982"
+          points="5044,1982 4344,5982 5744,5982" fill="url(#cone-grad)" filter="url(#cone-blur)" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-6 relative z-10 text-center" style="text-shadow: 0 2px 16px rgba(0,0,0,0.6);">
+    <h1 class="text-white font-black text-3xl md:text-5xl lg:text-6xl tracking-[-0.02em] leading-[1.1] mb-4">
+      In 1984, the Thought Police <br class="hidden md:block" />weren't looking for criminals. <br class="hidden md:block" />Neither is <span class="text-[#dc2626]">Flock Safety</span>
     </h1>
 
-    <p class="text-[#a3a3a3] font-medium text-lg md:text-xl mb-6 leading-relaxed">
-      155 cameras are watching Upstate South Carolina right now. Every car that passes gets photographed. That data goes into a national network. And nobody voted on any of it.
+    <p class="text-[#d4d4d4] font-semibold text-xl md:text-2xl lg:text-3xl mb-6 leading-snug">
+      99% of the plates they scan belong to people suspected of nothing.
     </p>
 
-    <p class="text-[#d4d4d4] text-base md:text-lg mb-10 leading-relaxed max-w-3xl mx-auto">
-      Your local police didn't build this alone. Flock Safety connects every camera to a national network. Agencies from other states, including federal authorities, can search it without asking you or your city. Your police can't shut that door. And neither can you.
+    <p class="text-[#a3a3a3] font-medium text-lg md:text-xl mb-8 leading-relaxed">
+      155 cameras are watching Upstate South Carolina right now. Every car that passes gets photographed. That data goes into a national network. And nobody voted on any of it.
     </p>
 
     <button type="button" data-open-action
@@ -24,3 +63,51 @@
     </button>
   </div>
 </section>
+
+<style>
+  @keyframes cone-sweep {
+    0%   { transform: rotate(-20deg); animation-timing-function: ease-in-out; }
+    38%  { transform: rotate(18deg);  animation-timing-function: cubic-bezier(0.7, 0, 0.3, 1); }
+    43%  { transform: rotate(-8deg);  animation-timing-function: linear; }
+    53%  { transform: rotate(-8deg);  animation-timing-function: ease-in-out; }
+    83%  { transform: rotate(20deg);  animation-timing-function: cubic-bezier(0.7, 0, 0.3, 1); }
+    88%  { transform: rotate(2deg);   animation-timing-function: linear; }
+    95%  { transform: rotate(2deg);   animation-timing-function: ease-in-out; }
+    100% { transform: rotate(-20deg); }
+  }
+
+  .hero-cone {
+    animation: cone-sweep var(--dur, 12s) var(--del, 0s) infinite;
+    will-change: transform;
+  }
+
+  .hero-cone-outer {
+    display: block;
+  }
+
+  @media (max-width: 767px) {
+    .hero-cone-outer {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-cone {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.hero-cone').forEach((cone) => {
+    const origin = cone.getAttribute('data-origin') || '0 0';
+    const [cx, cy] = origin.split(' ');
+    const el = cone as SVGElement;
+    el.style.transformOrigin = `${cx}px ${cy}px`;
+    el.style.setProperty('--dur', `${10 + Math.random() * 8}s`);
+    el.style.setProperty('--del', `${-Math.random() * 16}s`);
+    if (Math.random() > 0.5) {
+      el.style.animationDirection = 'reverse';
+    }
+  });
+</script>
