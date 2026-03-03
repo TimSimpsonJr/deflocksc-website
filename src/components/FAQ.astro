@@ -23,7 +23,7 @@ const faqs = [
 ];
 ---
 
-<section class="bg-[#0f172a] py-20 md:py-28">
+<section class="bg-[#171717] py-20 md:py-28">
   <div class="max-w-4xl mx-auto px-6">
     <h2 class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-10">
       But what about&hellip;
@@ -31,14 +31,14 @@ const faqs = [
 
     <div class="space-y-3">
       {faqs.map((faq, i) => (
-        <details class="faq-item group border-l-[3px] border-[#1e293b]" data-faq={i}>
+        <details class="faq-item group border-l-[3px] border-[#262626]" data-faq={i} open={i === 0 || undefined}>
           <summary class="flex items-center justify-between cursor-pointer py-4 px-5 list-none [&::-webkit-details-marker]:hidden">
             <span class="text-white font-bold text-base pr-4">{faq.question}</span>
             <span class="faq-icon text-[#ef4444] font-bold text-xl flex-shrink-0 transition-transform duration-300">+</span>
           </summary>
           <div class="faq-content">
             <div class="faq-inner px-5 pb-5">
-              <p class="text-[#94a3b8] text-base leading-[1.7]">{faq.answer}</p>
+              <p class="text-[#a3a3a3] text-base leading-[1.7]">{faq.answer}</p>
             </div>
           </div>
         </details>
@@ -79,7 +79,7 @@ const faqs = [
   }
 
   details.closing {
-    border-color: #1e293b;
+    border-color: #262626;
   }
 
   details.closing .faq-icon {

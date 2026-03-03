@@ -48,7 +48,7 @@
 
 /* Section glow accent */
 .section-glow {
-  background: radial-gradient(ellipse at center, rgba(148, 163, 184, 0.6) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(163, 163, 163, 0.6) 0%, transparent 70%);
 }
 
 /* Glow frame — reusable container with cursor-reactive glow */
@@ -60,7 +60,7 @@
   padding-top: 24px;
   padding-bottom: 12px;
   border-radius: 0.75rem;
-  background: rgba(148, 163, 184, 0.12);
+  background: rgba(163, 163, 163, 0.12);
 }
 
 .glow-frame::before {
@@ -71,8 +71,8 @@
   border-radius: inherit;
   background: radial-gradient(
     600px circle at var(--frame-x) var(--frame-y),
-    rgba(148, 163, 184, 0.35),
-    rgba(148, 163, 184, 0.1) 35%,
+    rgba(163, 163, 163, 0.35),
+    rgba(163, 163, 163, 0.1) 35%,
     transparent 55%
   );
   opacity: 0;

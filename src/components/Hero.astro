@@ -1,27 +1,20 @@
 ---
 ---
 
-<section class="bg-[#0f172a] py-24 md:py-32 relative overflow-hidden">
+<section class="bg-[#171717] py-24 md:py-32 relative overflow-hidden">
   <!-- Subtle gradient background -->
-  <div class="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#0f1b2d] to-[#0f172a] opacity-80"></div>
-
-  <!-- Surveillance light cones — clip container prevents blur bleed into nav -->
-  <div class="absolute inset-0 overflow-hidden pointer-events-none" style="clip-path: inset(0);">
-    <div class="hero-spotlight hero-spotlight-1 absolute top-0 left-[-15%] w-[80vw] h-[120%] blur-[12px] md:blur-[20px]"></div>
-    <div class="hero-spotlight hero-spotlight-2 absolute top-0 right-[-10%] w-[60vw] h-[120%] blur-[12px] md:blur-[20px]"></div>
-    <div class="hero-spotlight hero-spotlight-3 absolute top-0 left-[40%] w-[50vw] h-[90%] blur-[12px] md:blur-[20px] hidden md:block"></div>
-  </div>
+  <div class="absolute inset-0 bg-gradient-to-br from-[#171717] via-[#1a1a1a] to-[#171717] opacity-80"></div>
 
   <div class="max-w-4xl mx-auto px-6 relative z-10 text-center">
     <h1 class="text-white font-black text-3xl md:text-5xl lg:text-6xl tracking-[-0.02em] leading-[1.1] mb-8">
       In 1984, the Thought Police weren't looking for criminals. Neither is Flock Safety&nbsp;&mdash; 99% of the plates they scan belong to people suspected of nothing.
     </h1>
 
-    <p class="text-[#94a3b8] font-medium text-lg md:text-xl mb-6 leading-relaxed">
+    <p class="text-[#a3a3a3] font-medium text-lg md:text-xl mb-6 leading-relaxed">
       155 cameras are watching Upstate South Carolina right now. Every car that passes gets photographed. That data goes into a national network. And nobody voted on any of it.
     </p>
 
-    <p class="text-[#cbd5e1] text-base md:text-lg mb-10 leading-relaxed max-w-3xl mx-auto">
+    <p class="text-[#d4d4d4] text-base md:text-lg mb-10 leading-relaxed max-w-3xl mx-auto">
       Your local police didn't build this alone. Flock Safety connects every camera to a national network. Agencies from other states, including federal authorities, can search it without asking you or your city. Your police can't shut that door. And neither can you.
     </p>
 
@@ -31,56 +24,3 @@
     </button>
   </div>
 </section>
-
-<style>
-  .hero-spotlight {
-    transform-origin: 50% 0%;
-    background: conic-gradient(
-      from 160deg at 50% 0%,
-      transparent 0deg,
-      rgba(148, 163, 184, 0.10) 15deg,
-      rgba(148, 163, 184, 0.20) 20deg,
-      rgba(148, 163, 184, 0.10) 25deg,
-      transparent 40deg
-    );
-  }
-  .hero-spotlight-2 {
-    background: conic-gradient(
-      from 160deg at 50% 0%,
-      transparent 0deg,
-      rgba(186, 230, 253, 0.08) 15deg,
-      rgba(186, 230, 253, 0.15) 20deg,
-      rgba(186, 230, 253, 0.08) 25deg,
-      transparent 40deg
-    );
-  }
-  .hero-spotlight-3 {
-    background: conic-gradient(
-      from 160deg at 50% 0%,
-      transparent 0deg,
-      rgba(226, 232, 240, 0.05) 15deg,
-      rgba(226, 232, 240, 0.08) 20deg,
-      rgba(226, 232, 240, 0.05) 25deg,
-      transparent 40deg
-    );
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .hero-spotlight-1 {
-      animation: sweep-1 8s ease-in-out infinite alternate;
-    }
-    .hero-spotlight-2 {
-      animation: sweep-2 10s ease-in-out infinite alternate;
-      animation-delay: -4s;
-    }
-  }
-
-  @keyframes sweep-1 {
-    from { transform: rotate(-15deg); }
-    to   { transform: rotate(15deg); }
-  }
-  @keyframes sweep-2 {
-    from { transform: rotate(25deg); }
-    to   { transform: rotate(5deg); }
-  }
-</style>

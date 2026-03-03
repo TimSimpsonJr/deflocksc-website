@@ -8,14 +8,14 @@ import localCouncils from '../data/local-councils.json';
      role="dialog" aria-modal="true" aria-label="Contact your representatives">
 
   <!-- Backdrop + centering wrapper -->
-  <div id="action-modal-backdrop" class="min-h-full bg-[#0f172a] overflow-y-auto md:bg-black/70 md:backdrop-blur-sm md:flex md:items-start md:justify-center md:py-12">
+  <div id="action-modal-backdrop" class="min-h-full bg-[#171717] overflow-y-auto md:bg-black/70 md:backdrop-blur-sm md:flex md:items-start md:justify-center md:py-12">
 
     <!-- Modal card (full-screen mobile, centered card desktop) -->
-    <div id="action-modal-card" class="min-h-full md:min-h-0 md:bg-[#0f172a] md:border md:border-[#334155] md:rounded-xl md:w-full md:max-w-2xl md:max-h-[85vh] md:overflow-y-auto md:relative">
+    <div id="action-modal-card" class="min-h-full md:min-h-0 md:bg-[#171717] md:border md:border-[#404040] md:rounded-xl md:w-full md:max-w-2xl md:max-h-[85vh] md:overflow-y-auto md:relative">
       <!-- Close button -->
       <button id="action-modal-close" type="button"
-        class="fixed top-4 right-4 z-10 w-10 h-10 rounded-full bg-[#1e293b] hover:bg-[#334155]
-               text-[#94a3b8] hover:text-white flex items-center justify-center transition-colors cursor-pointer
+        class="fixed top-4 right-4 z-10 w-10 h-10 rounded-full bg-[#262626] hover:bg-[#404040]
+               text-[#a3a3a3] hover:text-white flex items-center justify-center transition-colors cursor-pointer
                md:absolute md:top-3 md:right-3"
         aria-label="Close">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,16 +40,16 @@ import localCouncils from '../data/local-councils.json';
           >
             Find My Reps
           </button>
-          <p class="text-[#64748b] text-xs italic mt-3 max-w-sm mx-auto">
+          <p class="text-[#737373] text-xs italic mt-3 max-w-sm mx-auto">
             Your location is matched entirely in your browser. No data is sent to any server.
           </p>
         </div>
 
         <!-- Divider -->
         <div class="flex items-center gap-4 w-full">
-          <div class="flex-1 h-px bg-[#334155]"></div>
-          <span class="text-[#64748b] text-sm">or enter your address</span>
-          <div class="flex-1 h-px bg-[#334155]"></div>
+          <div class="flex-1 h-px bg-[#404040]"></div>
+          <span class="text-[#737373] text-sm">or enter your address</span>
+          <div class="flex-1 h-px bg-[#404040]"></div>
         </div>
 
         <!-- 2. Address input (secondary) -->
@@ -62,44 +62,44 @@ import localCouncils from '../data/local-councils.json';
               autocomplete="street-address"
               placeholder="123 Main St, Greenville, SC"
               required
-              class="flex-1 bg-[#1e293b] border border-[#334155] text-white rounded px-4 py-3 text-base placeholder-[#64748b] focus:outline-none focus:border-[#3b82f6] focus:ring-1 focus:ring-[#3b82f6] transition-colors"
+              class="flex-1 bg-[#262626] border border-[#404040] text-white rounded px-4 py-3 text-base placeholder-[#737373] focus:outline-none focus:border-[#a3a3a3] focus:ring-1 focus:ring-[#a3a3a3] transition-colors"
             />
             <button
               type="submit"
-              class="bg-[#334155] hover:bg-[#475569] text-white font-medium rounded px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer whitespace-nowrap"
+              class="bg-[#404040] hover:bg-[#475569] text-white font-medium rounded px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer whitespace-nowrap"
             >
               Look Up
             </button>
           </div>
-          <p class="text-[#64748b] text-xs italic mt-2">
+          <p class="text-[#737373] text-xs italic mt-2">
             Your address is sent to the US Census Bureau's geocoding service. No other data is shared.
           </p>
         </form>
 
         <!-- 3. Manual selection (tertiary) -->
         <details id="action-manual-details" class="w-full">
-          <summary class="text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium cursor-pointer transition-colors text-center">
+          <summary class="text-[#a3a3a3] hover:text-[#d4d4d4] text-sm font-medium cursor-pointer transition-colors text-center">
             I already know my district
           </summary>
           <div class="mt-4 space-y-3">
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label for="manual-senate" class="text-[#94a3b8] text-xs block mb-1">Senate District</label>
-                <select id="manual-senate" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                <label for="manual-senate" class="text-[#a3a3a3] text-xs block mb-1">Senate District</label>
+                <select id="manual-senate" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
                   <option value="">Select...</option>
                 </select>
               </div>
               <div>
-                <label for="manual-house" class="text-[#94a3b8] text-xs block mb-1">House District</label>
-                <select id="manual-house" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                <label for="manual-house" class="text-[#a3a3a3] text-xs block mb-1">House District</label>
+                <select id="manual-house" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
                   <option value="">Select...</option>
                 </select>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label for="manual-county" class="text-[#94a3b8] text-xs block mb-1">County</label>
-                <select id="manual-county" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                <label for="manual-county" class="text-[#a3a3a3] text-xs block mb-1">County</label>
+                <select id="manual-county" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
                   <option value="">Select...</option>
                   <option value="greenville">Greenville</option>
                   <option value="spartanburg">Spartanburg</option>
@@ -109,28 +109,28 @@ import localCouncils from '../data/local-councils.json';
                 </select>
               </div>
               <div>
-                <label for="manual-county-district" class="text-[#94a3b8] text-xs block mb-1">County District</label>
-                <select id="manual-county-district" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                <label for="manual-county-district" class="text-[#a3a3a3] text-xs block mb-1">County District</label>
+                <select id="manual-county-district" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
                   <option value="">Select county first</option>
                 </select>
               </div>
             </div>
             <div id="manual-city-row" class="grid grid-cols-2 gap-3 hidden">
               <div>
-                <label for="manual-city" class="text-[#94a3b8] text-xs block mb-1">City</label>
-                <select id="manual-city" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                <label for="manual-city" class="text-[#a3a3a3] text-xs block mb-1">City</label>
+                <select id="manual-city" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
                   <option value="">None</option>
                 </select>
               </div>
               <div>
-                <label for="manual-city-district" class="text-[#94a3b8] text-xs block mb-1">City District</label>
-                <select id="manual-city-district" class="w-full bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#3b82f6]">
+                <label for="manual-city-district" class="text-[#a3a3a3] text-xs block mb-1">City District</label>
+                <select id="manual-city-district" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
                   <option value="">Select city first</option>
                 </select>
               </div>
             </div>
-            <p class="text-[#64748b] text-xs">
-              Don't know your district? <a href="https://www.scstatehouse.gov/legislatorssearch.php" target="_blank" rel="noopener" class="text-[#3b82f6] hover:text-[#60a5fa] underline">Look it up on scstatehouse.gov</a>
+            <p class="text-[#737373] text-xs">
+              Don't know your district? <a href="https://www.scstatehouse.gov/legislatorssearch.php" target="_blank" rel="noopener" class="text-[#a3a3a3] hover:text-[#d4d4d4] underline">Look it up on scstatehouse.gov</a>
             </p>
             <button
               id="action-manual-submit"
@@ -148,8 +148,8 @@ import localCouncils from '../data/local-councils.json';
     <!-- Loading State -->
     <div id="action-loading" class="hidden" aria-live="polite">
       <div class="flex flex-col items-center justify-center py-12 gap-4">
-        <div class="w-10 h-10 border-4 border-[#334155] border-t-[#ef4444] rounded-full animate-spin"></div>
-        <p class="text-[#94a3b8] text-sm">Finding your representatives...</p>
+        <div class="w-10 h-10 border-4 border-[#404040] border-t-[#ef4444] rounded-full animate-spin"></div>
+        <p class="text-[#a3a3a3] text-sm">Finding your representatives...</p>
       </div>
     </div>
 
@@ -160,7 +160,7 @@ import localCouncils from '../data/local-councils.json';
         <button
           id="action-reset"
           type="button"
-          class="text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium transition-colors cursor-pointer bg-transparent border-none min-h-[44px]"
+          class="text-[#a3a3a3] hover:text-[#d4d4d4] text-sm font-medium transition-colors cursor-pointer bg-transparent border-none min-h-[44px]"
         >
           &larr; Look up a different address
         </button>
@@ -174,7 +174,7 @@ import localCouncils from '../data/local-councils.json';
         <button
           id="action-retry"
           type="button"
-          class="bg-[#334155] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer"
+          class="bg-[#404040] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer"
         >
           Try again
         </button>
@@ -631,21 +631,21 @@ import localCouncils from '../data/local-councils.json';
 
       // Group wrapper
       var groupDiv = document.createElement('div');
-      groupDiv.className = gi > 0 ? 'mt-8 pt-8 border-t border-[#334155]' : '';
+      groupDiv.className = gi > 0 ? 'mt-8 pt-8 border-t border-[#404040]' : '';
 
       // Group header
       var headerLabel = group.category === 'state'
         ? ('YOUR ' + group.label.toUpperCase())
         : group.label.toUpperCase();
       var header = document.createElement('h3');
-      header.className = 'text-[#64748b] text-xs font-bold tracking-wider uppercase mb-4';
+      header.className = 'text-[#737373] text-xs font-bold tracking-wider uppercase mb-4';
       header.textContent = headerLabel;
 
       // Wrong-district link for local groups with council key
       if (group.category === 'local' && (group.countyKey || group.cityKey)) {
         var wrongLink = document.createElement('button');
         wrongLink.type = 'button';
-        wrongLink.className = 'text-[#3b82f6] hover:text-[#60a5fa] text-xs font-medium transition-colors cursor-pointer bg-transparent border-none ml-2';
+        wrongLink.className = 'text-[#a3a3a3] hover:text-[#d4d4d4] text-xs font-medium transition-colors cursor-pointer bg-transparent border-none ml-2';
         wrongLink.textContent = group.matchedDistrict ? 'Wrong district?' : 'Select your district';
         wrongLink.setAttribute('data-action', 'wrong-district');
         wrongLink.setAttribute('data-group', gi);
@@ -669,7 +669,7 @@ import localCouncils from '../data/local-councils.json';
         nameSpan.className = 'text-white font-semibold block';
         nameSpan.textContent = rep.name;
         var officeSpan = document.createElement('span');
-        officeSpan.className = 'text-[#94a3b8] text-sm block';
+        officeSpan.className = 'text-[#a3a3a3] text-sm block';
         officeSpan.textContent = rep.office;
         infoDiv.appendChild(nameSpan);
         infoDiv.appendChild(officeSpan);
@@ -677,7 +677,7 @@ import localCouncils from '../data/local-councils.json';
         // District badge
         if (rep.isMatchedDistrict) {
           var badge = document.createElement('span');
-          badge.className = 'text-[#3b82f6] text-xs font-medium';
+          badge.className = 'text-[#a3a3a3] text-xs font-medium';
           badge.textContent = 'Your district';
           infoDiv.appendChild(badge);
         }
@@ -685,7 +685,7 @@ import localCouncils from '../data/local-councils.json';
         if (rep.phone) {
           var phoneLink = document.createElement('a');
           phoneLink.href = 'tel:' + rep.phone.replace(/[^+\d]/g, '');
-          phoneLink.className = 'text-[#3b82f6] hover:text-[#60a5fa] text-sm block transition-colors';
+          phoneLink.className = 'text-[#a3a3a3] hover:text-[#d4d4d4] text-sm block transition-colors';
           phoneLink.textContent = rep.phone;
           infoDiv.appendChild(phoneLink);
         }
@@ -718,7 +718,7 @@ import localCouncils from '../data/local-councils.json';
         var noRepDiv = document.createElement('div');
         noRepDiv.className = 'py-2';
         var noRepText = document.createElement('p');
-        noRepText.className = 'text-[#94a3b8] text-sm italic';
+        noRepText.className = 'text-[#a3a3a3] text-sm italic';
         noRepText.textContent = 'Enter a full street address to find your specific ' + group.label.toLowerCase() + '.';
         noRepDiv.appendChild(noRepText);
         repListDiv.appendChild(noRepDiv);
@@ -729,7 +729,7 @@ import localCouncils from '../data/local-councils.json';
       // Group-level buttons for local councils (email all + copy) — not for local-matched
       if (group.category === 'local') {
         var groupBtnRow = document.createElement('div');
-        groupBtnRow.className = 'flex gap-2 mt-4 pt-4 border-t border-[#334155]';
+        groupBtnRow.className = 'flex gap-2 mt-4 pt-4 border-t border-[#404040]';
 
         // Collect unique council emails (non-empty, deduplicated)
         var emailSet = new Set();
@@ -753,7 +753,7 @@ import localCouncils from '../data/local-councils.json';
         }
 
         var copyGroupBtn = document.createElement('button');
-        copyGroupBtn.className = 'bg-[#334155] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer';
+        copyGroupBtn.className = 'bg-[#404040] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer';
         copyGroupBtn.textContent = 'Copy Letter';
         copyGroupBtn.setAttribute('data-group', gi);
         copyGroupBtn.setAttribute('data-action', 'copy-local');
@@ -768,7 +768,7 @@ import localCouncils from '../data/local-councils.json';
       details.className = 'mt-4';
 
       var summary = document.createElement('summary');
-      summary.className = 'text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium cursor-pointer transition-colors';
+      summary.className = 'text-[#a3a3a3] hover:text-[#d4d4d4] text-sm font-medium cursor-pointer transition-colors';
       summary.textContent = 'Preview & edit letter';
       details.appendChild(summary);
 
@@ -777,14 +777,14 @@ import localCouncils from '../data/local-councils.json';
 
       // Subject line (read-only display)
       var subjectP = document.createElement('p');
-      subjectP.className = 'text-[#94a3b8] text-sm';
-      subjectP.innerHTML = '<span class="text-[#64748b]">Subject:</span> ' + escapeHtml(group.subject);
+      subjectP.className = 'text-[#a3a3a3] text-sm';
+      subjectP.innerHTML = '<span class="text-[#737373]">Subject:</span> ' + escapeHtml(group.subject);
       previewDiv.appendChild(subjectP);
 
       // Textarea with letter body
       var textarea = document.createElement('textarea');
       textarea.id = groupId + '-body';
-      textarea.className = 'bg-[#0f172a] border border-[#334155] text-[#cbd5e1] rounded p-4 w-full text-sm min-h-[200px] focus:outline-none focus:border-[#3b82f6] focus:ring-1 focus:ring-[#3b82f6] transition-colors resize-y';
+      textarea.className = 'bg-[#171717] border border-[#404040] text-[#d4d4d4] rounded p-4 w-full text-sm min-h-[200px] focus:outline-none focus:border-[#a3a3a3] focus:ring-1 focus:ring-[#a3a3a3] transition-colors resize-y';
 
       // Replace [NAME] depending on category
       var prefilledBody = group.body;
@@ -801,7 +801,7 @@ import localCouncils from '../data/local-councils.json';
 
       if ((group.category === 'state' || group.category === 'local-matched') && group.reps.length > 1) {
         var noteP = document.createElement('p');
-        noteP.className = 'text-[#64748b] text-xs italic';
+        noteP.className = 'text-[#737373] text-xs italic';
         noteP.textContent = 'The greeting will be personalized for each representative when you click Send Email.';
         previewDiv.appendChild(noteP);
       }
@@ -866,7 +866,7 @@ import localCouncils from '../data/local-councils.json';
       dropdownDiv.className = 'wrong-district-dropdown mt-2 mb-3 flex items-center gap-2';
 
       var sel = document.createElement('select');
-      sel.className = 'bg-[#1e293b] border border-[#334155] text-white rounded px-3 py-1 text-sm focus:outline-none focus:border-[#3b82f6]';
+      sel.className = 'bg-[#262626] border border-[#404040] text-white rounded px-3 py-1 text-sm focus:outline-none focus:border-[#a3a3a3]';
       sel.innerHTML = '<option value="">Select district...</option>';
 
       // countyKey and cityKey are already prefixed (e.g. 'county:greenville', 'place:greenville')

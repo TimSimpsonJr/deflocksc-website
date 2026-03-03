@@ -2,7 +2,7 @@
 import bills from '../data/bills.json';
 ---
 
-<section class="bg-[#1e293b] py-20 md:py-28 relative overflow-hidden">
+<section class="bg-[#262626] py-20 md:py-28 relative overflow-hidden">
   <!-- Section glow accent -->
   <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[300px] blur-[64px] opacity-[0.15] md:opacity-[0.18] pointer-events-none"></div>
 
@@ -11,18 +11,18 @@ import bills from '../data/bills.json';
       Three Bills. All Stalled. Your Legislators Need to Hear From You.
     </h2>
 
-    <p class="text-[#cbd5e1] text-base leading-relaxed mb-10">
+    <p class="text-[#d4d4d4] text-base leading-relaxed mb-10">
       Three bills to rein in license plate cameras are sitting in SC committee right now. None have had a hearing. As of February 2026, they're just waiting. That changes when legislators hear from you.
     </p>
 
-    <!-- Bill cards in glow frame -->
-    <div id="bill-frame" class="glow-frame" data-glow-frame>
-      <div class="space-y-4 mb-6 relative z-[3]">
+    <!-- Bill cards in frame -->
+    <div id="bill-frame" class="bg-[rgba(163,163,163,0.12)] rounded-xl p-5 md:p-6">
+      <h3 class="text-white font-bold text-lg tracking-[-0.01em] mb-5">Bill Tracker</h3>
+      <div class="space-y-4 mb-6">
         {bills.map((bill: any, i: number) => (
           <div
-            class="bill-card bg-[#0f172a] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#263548] hover:translate-x-1"
+            class="bill-card bg-[#171717] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#2e2e2e] hover:translate-x-1"
             data-bill={i}
-            data-spotlight
           >
             <div class="flex items-start justify-between gap-4 mb-2">
               <span class="text-[#ef4444] font-extrabold text-lg">{bill.bill}</span>
@@ -30,15 +30,15 @@ import bills from '../data/bills.json';
                 {bill.status}
               </span>
             </div>
-            <p class="text-[#cbd5e1] text-sm mb-2">{bill.title}</p>
-            <p class="text-[#475569] text-xs font-medium">Click for details</p>
+            <p class="text-[#d4d4d4] text-sm mb-2">{bill.title}</p>
+            <p class="text-[#525252] text-xs font-medium">Click for details</p>
           </div>
         ))}
       </div>
 
       <!-- Last updated + status note -->
-      <p class="text-[#64748b] text-sm mb-4 relative z-[3]">Last updated: February 2026</p>
-      <div class="text-[#94a3b8] text-sm leading-relaxed space-y-3 relative z-[3]">
+      <p class="text-[#737373] text-sm mb-4">Last updated: February 2026</p>
+      <div class="text-[#a3a3a3] text-sm leading-relaxed space-y-3">
         <p>
           <em>S447 has gotten the furthest: it cleared a Senate Judiciary subcommittee, but the full committee hasn't acted. H3155 and H4013 haven't had any committee action at all. Meanwhile, a separate lawsuit (SCPIF v. SLED) is challenging the state's existing license plate database in court. How that turns out may affect how urgently legislators move.</em>
         </p>
@@ -50,9 +50,9 @@ import bills from '../data/bills.json';
   </div>
 
   <!-- Modal backdrop -->
-  <div id="bill-modal-backdrop" class="fixed inset-0 z-[100] bg-[rgba(2,6,23,0.85)] hidden opacity-0 transition-opacity duration-200">
+  <div id="bill-modal-backdrop" class="fixed inset-0 z-[100] bg-[rgba(10,10,10,0.85)] hidden opacity-0 transition-opacity duration-200 flex items-center justify-center p-5">
     <!-- Modal card -->
-    <div id="bill-modal" role="dialog" aria-modal="true" aria-labelledby="modal-bill-id" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-[90vw] max-w-[560px] max-h-[85vh] flex flex-col bg-[#1e293b] border-l-4 border-[#ef4444] rounded-lg opacity-0 translate-y-5 transition-all duration-250 ease-out">
+    <div id="bill-modal" role="dialog" aria-modal="true" aria-labelledby="modal-bill-id" class="w-[90vw] max-w-[560px] max-h-[85vh] flex flex-col bg-[#262626] border-l-4 border-[#ef4444] rounded-lg opacity-0 translate-y-5 transition-all duration-250 ease-out">
       <!-- Fixed header -->
       <div class="flex-shrink-0 p-6 md:p-8 pb-4 flex items-start justify-between gap-4">
         <div>
@@ -62,7 +62,7 @@ import bills from '../data/bills.json';
           <p id="modal-bill-title" class="text-white font-bold text-lg"></p>
         </div>
         <!-- Close button -->
-        <button id="bill-modal-close" class="text-[#64748b] hover:text-white transition-colors text-xl leading-none cursor-pointer flex-shrink-0" aria-label="Close">&times;</button>
+        <button id="bill-modal-close" class="text-[#737373] hover:text-white transition-colors text-xl leading-none cursor-pointer flex-shrink-0" aria-label="Close">&times;</button>
       </div>
 
       <!-- Scrollable body -->
@@ -70,21 +70,21 @@ import bills from '../data/bills.json';
         <!-- Metadata row -->
         <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-6">
           <div>
-            <span class="text-[#64748b]">Status:</span>
+            <span class="text-[#737373]">Status:</span>
             <span id="modal-bill-status" class="text-[#fbbf24] font-bold ml-1"></span>
           </div>
           <div id="modal-last-action-row">
-            <span class="text-[#64748b]">Last Action:</span>
-            <span id="modal-bill-last-action" class="text-[#94a3b8] ml-1"></span>
+            <span class="text-[#737373]">Last Action:</span>
+            <span id="modal-bill-last-action" class="text-[#a3a3a3] ml-1"></span>
           </div>
         </div>
 
         <!-- Description -->
-        <p id="modal-bill-description" class="text-[#94a3b8] text-sm leading-relaxed"></p>
+        <p id="modal-bill-description" class="text-[#a3a3a3] text-sm leading-relaxed"></p>
       </div>
 
       <!-- Fixed footer -->
-      <div class="flex-shrink-0 p-6 md:p-8 pt-4 border-t border-[#334155]">
+      <div class="flex-shrink-0 p-6 md:p-8 pt-4 border-t border-[#404040]">
         <div class="flex flex-col items-start gap-3 min-[520px]:flex-row-reverse min-[520px]:justify-between min-[520px]:items-center">
           <a href="#take-action" id="modal-cta" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.05em] px-6 py-3 rounded transition-colors">
             Email Your Legislators
@@ -201,13 +201,4 @@ import bills from '../data/bills.json';
   // Close modal when clicking CTA (since it navigates to #take-action)
   document.getElementById('modal-cta')?.addEventListener('click', closeModal);
 
-  // Glow frame cursor tracking
-  var billFrame = document.getElementById('bill-frame');
-  if (billFrame) {
-    billFrame.addEventListener('pointermove', function(e) {
-      var rect = billFrame.getBoundingClientRect();
-      billFrame.style.setProperty('--frame-x', (e.clientX - rect.left) + 'px');
-      billFrame.style.setProperty('--frame-y', (e.clientY - rect.top) + 'px');
-    }, { passive: true });
-  }
 </script>
