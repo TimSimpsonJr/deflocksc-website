@@ -396,6 +396,1163 @@
       "atLarge": true,
       "hasBoundary": false,
       "notes": "4 council members + mayor, all elected at-large. Council-Manager form of government."
+    },
+
+    {
+      "id": "county:abbeville",
+      "name": "Abbeville County Council",
+      "type": "county",
+      "county": "Abbeville",
+      "adapter": "manual",
+      "url": "https://abbevillecountysc.com/county-council/",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-abbeville.json",
+      "boundaryConfig": {
+        "countyFips": "45001",
+        "countyName": "Abbeville"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:abbeville",
+      "name": "Abbeville City Council",
+      "type": "place",
+      "county": "Abbeville",
+      "adapter": "manual",
+      "url": "https://www.abbevillecitysc.com/189/City-Council",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:aiken",
+      "name": "Aiken County Council",
+      "type": "county",
+      "county": "Aiken",
+      "adapter": "manual",
+      "url": "https://www.aikencountysc.gov/528/County-Council",
+      "districts": 8,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-aiken.json",
+      "boundaryConfig": {
+        "countyFips": "45003",
+        "countyName": "Aiken"
+      },
+      "notes": "8 single-member districts + chairman elected at-large. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:aiken",
+      "name": "Aiken City Council",
+      "type": "place",
+      "county": "Aiken",
+      "adapter": "manual",
+      "url": "https://www.cityofaikensc.gov/government/city-council/",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:allendale",
+      "name": "Allendale County Council",
+      "type": "county",
+      "county": "Allendale",
+      "adapter": "manual",
+      "url": "",
+      "districts": 5,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-allendale.json",
+      "boundaryConfig": {
+        "countyFips": "45005",
+        "countyName": "Allendale"
+      },
+      "notes": "District count unverified. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:allendale",
+      "name": "Allendale Town Council",
+      "type": "place",
+      "county": "Allendale",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:bamberg",
+      "name": "Bamberg County Council",
+      "type": "county",
+      "county": "Bamberg",
+      "adapter": "manual",
+      "url": "https://www.bambergcounty.sc.gov/county-council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-bamberg.json",
+      "boundaryConfig": {
+        "countyFips": "45009",
+        "countyName": "Bamberg"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:bamberg",
+      "name": "Bamberg City Council",
+      "type": "place",
+      "county": "Bamberg",
+      "adapter": "manual",
+      "url": "https://www.cityofbambergsc.gov/citycouncilofficials",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:barnwell",
+      "name": "Barnwell County Council",
+      "type": "county",
+      "county": "Barnwell",
+      "adapter": "manual",
+      "url": "https://www.barnwellcountysc.us/173/Barnwell-County-Council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-barnwell.json",
+      "boundaryConfig": {
+        "countyFips": "45011",
+        "countyName": "Barnwell"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:barnwell",
+      "name": "Barnwell City Council",
+      "type": "place",
+      "county": "Barnwell",
+      "adapter": "manual",
+      "url": "https://www.cityofbarnwell.com/government",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:berkeley",
+      "name": "Berkeley County Council",
+      "type": "county",
+      "county": "Berkeley",
+      "adapter": "manual",
+      "url": "https://berkeleycountysc.gov/dept/council/",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-berkeley.json",
+      "boundaryConfig": {
+        "countyFips": "45015",
+        "countyName": "Berkeley"
+      },
+      "notes": "7 single-member districts + county supervisor. Supervisor-Council form of government. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:moncks-corner",
+      "name": "Moncks Corner Town Council",
+      "type": "place",
+      "county": "Berkeley",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+    {
+      "id": "place:goose-creek",
+      "name": "Goose Creek City Council",
+      "type": "place",
+      "county": "Berkeley",
+      "adapter": "manual",
+      "url": "https://www.goosecreeksc.gov/government/mayor-and-city-council",
+      "districts": 6,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "6 council members + mayor, all elected at-large. Pop. ~46k."
+    },
+
+    {
+      "id": "county:calhoun",
+      "name": "Calhoun County Council",
+      "type": "county",
+      "county": "Calhoun",
+      "adapter": "manual",
+      "url": "https://calhouncounty.sc.gov/officials",
+      "districts": 5,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-calhoun.json",
+      "boundaryConfig": {
+        "countyFips": "45017",
+        "countyName": "Calhoun"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:st-matthews",
+      "name": "St. Matthews Town Council",
+      "type": "place",
+      "county": "Calhoun",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:cherokee",
+      "name": "Cherokee County Council",
+      "type": "county",
+      "county": "Cherokee",
+      "adapter": "manual",
+      "url": "https://cherokeecountysc.gov/county-council-administration/",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-cherokee.json",
+      "boundaryConfig": {
+        "countyFips": "45021",
+        "countyName": "Cherokee"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:gaffney",
+      "name": "Gaffney City Council",
+      "type": "place",
+      "county": "Cherokee",
+      "adapter": "manual",
+      "url": "https://www.cityofgaffney-sc.gov/184/City-Council",
+      "districts": 6,
+      "atLarge": false,
+      "hasBoundary": false,
+      "notes": "6 district seats + mayor."
+    },
+
+    {
+      "id": "county:chester",
+      "name": "Chester County Council",
+      "type": "county",
+      "county": "Chester",
+      "adapter": "manual",
+      "url": "https://chestercountysc.gov/government/chester-county-council/",
+      "districts": 6,
+      "atLarge": true,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-chester.json",
+      "boundaryConfig": {
+        "countyFips": "45023",
+        "countyName": "Chester"
+      },
+      "notes": "6 single-member districts + 1 at-large seat. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:chester",
+      "name": "Chester City Council",
+      "type": "place",
+      "county": "Chester",
+      "adapter": "manual",
+      "url": "https://www.chestersc.org/",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:chesterfield",
+      "name": "Chesterfield County Council",
+      "type": "county",
+      "county": "Chesterfield",
+      "adapter": "manual",
+      "url": "https://www.chesterfieldcountysc.com/countycouncil",
+      "districts": 9,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-chesterfield.json",
+      "boundaryConfig": {
+        "countyFips": "45025",
+        "countyName": "Chesterfield"
+      },
+      "notes": "9 single-member districts. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:chesterfield",
+      "name": "Chesterfield Town Council",
+      "type": "place",
+      "county": "Chesterfield",
+      "adapter": "manual",
+      "url": "https://www.chesterfield-sc.com/government",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:clarendon",
+      "name": "Clarendon County Council",
+      "type": "county",
+      "county": "Clarendon",
+      "adapter": "manual",
+      "url": "https://www.clarendoncountysc.gov/our-government/council/",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-clarendon.json",
+      "boundaryConfig": {
+        "countyFips": "45027",
+        "countyName": "Clarendon"
+      },
+      "notes": "District count unverified. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:manning",
+      "name": "Manning City Council",
+      "type": "place",
+      "county": "Clarendon",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:colleton",
+      "name": "Colleton County Council",
+      "type": "county",
+      "county": "Colleton",
+      "adapter": "manual",
+      "url": "https://www.colletoncounty.org/county-council",
+      "districts": 5,
+      "atLarge": true,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-colleton.json",
+      "boundaryConfig": {
+        "countyFips": "45029",
+        "countyName": "Colleton"
+      },
+      "notes": "2 Eastern district seats + 2 Western district seats + 1 at-large seat. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:walterboro",
+      "name": "Walterboro City Council",
+      "type": "place",
+      "county": "Colleton",
+      "adapter": "manual",
+      "url": "https://www.walterborosc.org/city-council",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:darlington",
+      "name": "Darlington County Council",
+      "type": "county",
+      "county": "Darlington",
+      "adapter": "manual",
+      "url": "https://www.darcosc.com/government/county_council/index.php",
+      "districts": 8,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-darlington.json",
+      "boundaryConfig": {
+        "countyFips": "45031",
+        "countyName": "Darlington"
+      },
+      "notes": "8 single-member districts. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:darlington",
+      "name": "Darlington City Council",
+      "type": "place",
+      "county": "Darlington",
+      "adapter": "manual",
+      "url": "https://www.cityofdarlington.com/mayor-council/",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:dillon",
+      "name": "Dillon County Council",
+      "type": "county",
+      "county": "Dillon",
+      "adapter": "manual",
+      "url": "https://dilloncounty.sc.gov/administrator/county-council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-dillon.json",
+      "boundaryConfig": {
+        "countyFips": "45033",
+        "countyName": "Dillon"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:dillon",
+      "name": "Dillon City Council",
+      "type": "place",
+      "county": "Dillon",
+      "adapter": "manual",
+      "url": "https://cityofdillonsc.gov/citycouncil",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:dorchester",
+      "name": "Dorchester County Council",
+      "type": "county",
+      "county": "Dorchester",
+      "adapter": "manual",
+      "url": "https://www.dorchestercountysc.gov/government/county-council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-dorchester.json",
+      "boundaryConfig": {
+        "countyFips": "45035",
+        "countyName": "Dorchester"
+      },
+      "notes": "7 single-member districts, 4-year terms. Council-Administrator form. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:st-george",
+      "name": "St. George Town Council",
+      "type": "place",
+      "county": "Dorchester",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+    {
+      "id": "place:summerville",
+      "name": "Summerville Town Council",
+      "type": "place",
+      "county": "Dorchester",
+      "adapter": "manual",
+      "url": "https://www.summervillesc.gov/253/Elected-Officials",
+      "districts": 6,
+      "atLarge": false,
+      "hasBoundary": false,
+      "notes": "6 single-member districts + mayor. Pop. ~55k."
+    },
+
+    {
+      "id": "county:edgefield",
+      "name": "Edgefield County Council",
+      "type": "county",
+      "county": "Edgefield",
+      "adapter": "manual",
+      "url": "https://edgefieldcounty.sc.gov/county-council/",
+      "districts": 5,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-edgefield.json",
+      "boundaryConfig": {
+        "countyFips": "45037",
+        "countyName": "Edgefield"
+      },
+      "notes": "5 council members, 2-year terms. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:edgefield",
+      "name": "Edgefield Town Council",
+      "type": "place",
+      "county": "Edgefield",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:fairfield",
+      "name": "Fairfield County Council",
+      "type": "county",
+      "county": "Fairfield",
+      "adapter": "manual",
+      "url": "https://www.fairfieldsc.com/departments/county-council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-fairfield.json",
+      "boundaryConfig": {
+        "countyFips": "45039",
+        "countyName": "Fairfield"
+      },
+      "notes": "7 single-member districts. Nonpartisan elections. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:winnsboro",
+      "name": "Winnsboro Town Council",
+      "type": "place",
+      "county": "Fairfield",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:florence",
+      "name": "Florence County Council",
+      "type": "county",
+      "county": "Florence",
+      "adapter": "manual",
+      "url": "https://www.florenceco.org/council/",
+      "districts": 9,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-florence.json",
+      "boundaryConfig": {
+        "countyFips": "45041",
+        "countyName": "Florence"
+      },
+      "notes": "9 single-member districts, 4-year terms. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:florence",
+      "name": "Florence City Council",
+      "type": "place",
+      "county": "Florence",
+      "adapter": "manual",
+      "url": "https://www.cityofflorencesc.gov/city-council",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:georgetown",
+      "name": "Georgetown County Council",
+      "type": "county",
+      "county": "Georgetown",
+      "adapter": "manual",
+      "url": "https://www.gtcounty.org/291/County-Council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-georgetown.json",
+      "boundaryConfig": {
+        "countyFips": "45043",
+        "countyName": "Georgetown"
+      },
+      "notes": "7 single-member districts. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:georgetown",
+      "name": "Georgetown City Council",
+      "type": "place",
+      "county": "Georgetown",
+      "adapter": "manual",
+      "url": "https://www.georgetownsc.gov/governmental_services/city_council.php",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:greenwood",
+      "name": "Greenwood County Council",
+      "type": "county",
+      "county": "Greenwood",
+      "adapter": "manual",
+      "url": "https://www.greenwoodcounty-sc.gov/county-council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-greenwood.json",
+      "boundaryConfig": {
+        "countyFips": "45047",
+        "countyName": "Greenwood"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:greenwood",
+      "name": "Greenwood City Council",
+      "type": "place",
+      "county": "Greenwood",
+      "adapter": "manual",
+      "url": "https://www.cityofgreenwoodsc.com/government/city_council.php",
+      "districts": 6,
+      "atLarge": false,
+      "hasBoundary": false,
+      "notes": "6 district seats + mayor elected at-large."
+    },
+
+    {
+      "id": "county:hampton",
+      "name": "Hampton County Council",
+      "type": "county",
+      "county": "Hampton",
+      "adapter": "manual",
+      "url": "https://hamptoncountysc.org/2/County-Council",
+      "districts": 5,
+      "atLarge": true,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-hampton.json",
+      "boundaryConfig": {
+        "countyFips": "45049",
+        "countyName": "Hampton"
+      },
+      "notes": "5 council members elected at-large. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:hampton",
+      "name": "Hampton Town Council",
+      "type": "place",
+      "county": "Hampton",
+      "adapter": "manual",
+      "url": "https://www.hamptonsc.gov/mayor-council",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:jasper",
+      "name": "Jasper County Council",
+      "type": "county",
+      "county": "Jasper",
+      "adapter": "manual",
+      "url": "https://www.jaspercountysc.gov/government/council/",
+      "districts": 5,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-jasper.json",
+      "boundaryConfig": {
+        "countyFips": "45053",
+        "countyName": "Jasper"
+      },
+      "notes": "5 council members elected by township districts. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:ridgeland",
+      "name": "Ridgeland Town Council",
+      "type": "place",
+      "county": "Jasper",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:kershaw",
+      "name": "Kershaw County Council",
+      "type": "county",
+      "county": "Kershaw",
+      "adapter": "manual",
+      "url": "https://www.kershaw.sc.gov/county-council/council-members",
+      "districts": 6,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-kershaw.json",
+      "boundaryConfig": {
+        "countyFips": "45055",
+        "countyName": "Kershaw"
+      },
+      "notes": "6 single-member districts + chairman elected at-large. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:camden",
+      "name": "Camden City Council",
+      "type": "place",
+      "county": "Kershaw",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:lancaster",
+      "name": "Lancaster County Council",
+      "type": "county",
+      "county": "Lancaster",
+      "adapter": "manual",
+      "url": "https://www.lancastercountysc.gov/351/Lancaster-County-Council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-lancaster.json",
+      "boundaryConfig": {
+        "countyFips": "45057",
+        "countyName": "Lancaster"
+      },
+      "notes": "7 single-member districts, 4-year terms. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:lancaster",
+      "name": "Lancaster City Council",
+      "type": "place",
+      "county": "Lancaster",
+      "adapter": "manual",
+      "url": "https://www.lancastercitysc.com/227/City-Council",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:lee",
+      "name": "Lee County Council",
+      "type": "county",
+      "county": "Lee",
+      "adapter": "manual",
+      "url": "https://www.leecountysc.org/council/members/",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-lee.json",
+      "boundaryConfig": {
+        "countyFips": "45061",
+        "countyName": "Lee"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:bishopville",
+      "name": "Bishopville City Council",
+      "type": "place",
+      "county": "Lee",
+      "adapter": "manual",
+      "url": "https://cityofbishopvillesc.com/",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:marion",
+      "name": "Marion County Council",
+      "type": "county",
+      "county": "Marion",
+      "adapter": "manual",
+      "url": "https://www.marionsc.org/government/county_council/index.php",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-marion.json",
+      "boundaryConfig": {
+        "countyFips": "45067",
+        "countyName": "Marion"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:marion",
+      "name": "Marion City Council",
+      "type": "place",
+      "county": "Marion",
+      "adapter": "manual",
+      "url": "https://marionsc.gov/city-council-marion-sc/",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:marlboro",
+      "name": "Marlboro County Council",
+      "type": "county",
+      "county": "Marlboro",
+      "adapter": "manual",
+      "url": "https://marlborocounty.sc.gov/government_/council.php",
+      "districts": 8,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-marlboro.json",
+      "boundaryConfig": {
+        "countyFips": "45069",
+        "countyName": "Marlboro"
+      },
+      "notes": "8 single-member districts. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:bennettsville",
+      "name": "Bennettsville City Council",
+      "type": "place",
+      "county": "Marlboro",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:mccormick",
+      "name": "McCormick County Council",
+      "type": "county",
+      "county": "McCormick",
+      "adapter": "manual",
+      "url": "https://www.mccormickcountysc.org/",
+      "districts": 5,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-mccormick.json",
+      "boundaryConfig": {
+        "countyFips": "45065",
+        "countyName": "McCormick"
+      },
+      "notes": "District count unverified. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:mccormick",
+      "name": "McCormick Town Council",
+      "type": "place",
+      "county": "McCormick",
+      "adapter": "manual",
+      "url": "https://www.townofmccormicksc.com/government/town-officials-staff/",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:newberry",
+      "name": "Newberry County Council",
+      "type": "county",
+      "county": "Newberry",
+      "adapter": "manual",
+      "url": "https://www.newberrycounty.gov/county-council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-newberry.json",
+      "boundaryConfig": {
+        "countyFips": "45071",
+        "countyName": "Newberry"
+      },
+      "notes": "7 single-member districts, 4-year terms. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:newberry",
+      "name": "Newberry City Council",
+      "type": "place",
+      "county": "Newberry",
+      "adapter": "manual",
+      "url": "https://www.cityofnewberry.com/government/city_council.php",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:oconee",
+      "name": "Oconee County Council",
+      "type": "county",
+      "county": "Oconee",
+      "adapter": "manual",
+      "url": "https://oconeesc.com/council-home/council-information",
+      "districts": 5,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-oconee.json",
+      "boundaryConfig": {
+        "countyFips": "45073",
+        "countyName": "Oconee"
+      },
+      "notes": "5 single-member districts. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:walhalla",
+      "name": "Walhalla City Council",
+      "type": "place",
+      "county": "Oconee",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:orangeburg",
+      "name": "Orangeburg County Council",
+      "type": "county",
+      "county": "Orangeburg",
+      "adapter": "manual",
+      "url": "https://www.orangeburgcounty.org/288/County-Council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-orangeburg.json",
+      "boundaryConfig": {
+        "countyFips": "45075",
+        "countyName": "Orangeburg"
+      },
+      "notes": "7 single-member districts, 4-year terms. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:orangeburg",
+      "name": "Orangeburg City Council",
+      "type": "place",
+      "county": "Orangeburg",
+      "adapter": "manual",
+      "url": "https://www.orangeburg.sc.us/city-council",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:saluda",
+      "name": "Saluda County Council",
+      "type": "county",
+      "county": "Saluda",
+      "adapter": "manual",
+      "url": "https://saludacounty.sc.gov/county-council",
+      "districts": 5,
+      "atLarge": true,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-saluda.json",
+      "boundaryConfig": {
+        "countyFips": "45081",
+        "countyName": "Saluda"
+      },
+      "notes": "1 at-large chairman + 4 single-member districts. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:saluda",
+      "name": "Saluda Town Council",
+      "type": "place",
+      "county": "Saluda",
+      "adapter": "manual",
+      "url": "https://www.townofsaluda.com/town-council",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:sumter",
+      "name": "Sumter County Council",
+      "type": "county",
+      "county": "Sumter",
+      "adapter": "manual",
+      "url": "https://www.sumtercountysc.gov/our_council/council_information/council_frequently_asked_questions.php",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-sumter.json",
+      "boundaryConfig": {
+        "countyFips": "45085",
+        "countyName": "Sumter"
+      },
+      "notes": "7 single-member districts, 4-year staggered terms. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:sumter",
+      "name": "Sumter City Council",
+      "type": "place",
+      "county": "Sumter",
+      "adapter": "manual",
+      "url": "https://www.sumtersc.gov/city-council",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:union",
+      "name": "Union County Council",
+      "type": "county",
+      "county": "Union",
+      "adapter": "manual",
+      "url": "",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-union.json",
+      "boundaryConfig": {
+        "countyFips": "45087",
+        "countyName": "Union"
+      },
+      "notes": "District count unverified. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:union",
+      "name": "Union City Council",
+      "type": "place",
+      "county": "Union",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "county:williamsburg",
+      "name": "Williamsburg County Council",
+      "type": "county",
+      "county": "Williamsburg",
+      "adapter": "manual",
+      "url": "",
+      "districts": 9,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
+      "boundaryFile": "county-williamsburg.json",
+      "boundaryConfig": {
+        "countyFips": "45089",
+        "countyName": "Williamsburg"
+      },
+      "notes": "District count unverified. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "place:kingstree",
+      "name": "Kingstree Town Council",
+      "type": "place",
+      "county": "Williamsburg",
+      "adapter": "manual",
+      "url": "",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "District count unverified."
+    },
+
+    {
+      "id": "place:mount-pleasant",
+      "name": "Mount Pleasant Town Council",
+      "type": "place",
+      "county": "Charleston",
+      "adapter": "manual",
+      "url": "https://www.tompsc.com/91/Town-Council",
+      "districts": 8,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "8 council members + mayor, all elected at-large. Pop. ~91k."
     }
   ]
 }
