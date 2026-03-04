@@ -1,0 +1,147 @@
+{
+  "state": {
+    "openStatesUrl": "https://data.openstates.org/people/current/sc.csv",
+    "updateSchedule": "weekly",
+    "boundaries": [
+      {
+        "id": "state:sc:senate",
+        "name": "SC Senate Districts",
+        "boundarySource": "tiger",
+        "boundaryUrl": "https://www2.census.gov/geo/tiger/TIGER2024/SLDU/tl_2024_45_sldu.zip",
+        "boundaryDistrictField": "SLDUST",
+        "boundaryFile": "sldu.json"
+      },
+      {
+        "id": "state:sc:house",
+        "name": "SC House Districts",
+        "boundarySource": "tiger",
+        "boundaryUrl": "https://www2.census.gov/geo/tiger/TIGER2024/SLDL/tl_2024_45_sldl.zip",
+        "boundaryDistrictField": "SLDLST",
+        "boundaryFile": "sldl.json"
+      }
+    ]
+  },
+  "jurisdictions": [
+    {
+      "id": "county:greenville",
+      "name": "Greenville County Council",
+      "type": "county",
+      "county": "Greenville",
+      "adapter": "greenville_county",
+      "url": "https://greenvillecounty.org/council",
+      "districts": 12,
+      "districtRange": "17-28",
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "arcgis",
+      "boundaryUrl": "https://www.gcgis.org/arcgis/rest/services/GreenvilleJS/Map_Layers_JS/MapServer/90",
+      "boundaryDistrictField": "DISTRICT",
+      "boundaryFile": "county-greenville.json",
+      "notes": ""
+    },
+    {
+      "id": "place:greenville",
+      "name": "Greenville City Council",
+      "type": "place",
+      "county": "Greenville",
+      "adapter": "greenville_city",
+      "url": "https://www.greenvillesc.gov/149/City-Council",
+      "districts": 4,
+      "atLarge": true,
+      "hasBoundary": true,
+      "boundarySource": "arcgis",
+      "boundaryUrl": "https://citygis.greenvillesc.gov/arcgis/rest/services/AddressSearch/Boundaries/MapServer/2",
+      "boundaryDistrictField": "DISTRICT",
+      "boundaryFile": "place-greenville.json",
+      "notes": "4 district seats + 2 at-large council members + mayor"
+    },
+    {
+      "id": "county:spartanburg",
+      "name": "Spartanburg County Council",
+      "type": "county",
+      "county": "Spartanburg",
+      "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://spartanburgcounty.org",
+        "councilPageId": "189"
+      },
+      "url": "https://spartanburgcounty.org/189/County-Council",
+      "districts": 6,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "arcgis",
+      "boundaryUrl": "https://maps.spartanburgcounty.org/server/rest/services/GIS/County_Council/MapServer/0",
+      "boundaryDistrictField": "CoCouncil",
+      "boundaryFile": "county-spartanburg.json",
+      "notes": "6 district seats + chairman"
+    },
+    {
+      "id": "place:spartanburg",
+      "name": "Spartanburg City Council",
+      "type": "place",
+      "county": "Spartanburg",
+      "adapter": "manual",
+      "url": "https://www.cityofspartanburg.org/city-council",
+      "districts": 6,
+      "atLarge": false,
+      "hasBoundary": false,
+      "notes": "6 district seats + mayor"
+    },
+    {
+      "id": "county:anderson",
+      "name": "Anderson County Council",
+      "type": "county",
+      "county": "Anderson",
+      "adapter": "manual",
+      "url": "https://andersoncountysc.org/county-council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "arcgis",
+      "boundaryUrl": "https://propertyviewer.andersoncountysc.org/arcgis/rest/services/Opengov/MAT/MapServer/5",
+      "boundaryDistrictField": "DISTRICT",
+      "boundaryFile": "county-anderson.json",
+      "notes": "Individual emails not published. Use Clerk to Council (rdwatts@andersoncountysc.org) as fallback. ArcGIS district field uses word-based names (One, Two, ... Seven) instead of numbers."
+    },
+    {
+      "id": "place:anderson",
+      "name": "Anderson City Council",
+      "type": "place",
+      "county": "Anderson",
+      "adapter": "manual",
+      "url": "https://www.cityofandersonsc.com/city-council",
+      "districts": 8,
+      "atLarge": true,
+      "hasBoundary": false,
+      "notes": "Seats 1-8, at-large. Seat 2 currently vacant."
+    },
+    {
+      "id": "county:pickens",
+      "name": "Pickens County Council",
+      "type": "county",
+      "county": "Pickens",
+      "adapter": "manual",
+      "url": "https://www.co.pickens.sc.us/county_council/index.php",
+      "districts": 6,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryFile": "county-pickens.json",
+      "notes": "FIPS 45077. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    },
+    {
+      "id": "county:laurens",
+      "name": "Laurens County Council",
+      "type": "county",
+      "county": "Laurens",
+      "adapter": "manual",
+      "url": "https://www.laurenscountysc.gov/government/county-council",
+      "districts": 7,
+      "atLarge": false,
+      "hasBoundary": true,
+      "boundarySource": "scrfa",
+      "boundaryFile": "county-laurens.json",
+      "notes": "FIPS 45059. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+    }
+  ]
+}
