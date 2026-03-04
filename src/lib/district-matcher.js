@@ -7,28 +7,29 @@
  */
 
 import { pointInPolygon, computeBBox, pointInBBox } from './geo-utils.js';
+import registry from '../data/registry.json';
 
 // Re-export pointInPolygon for consumers that imported it from here
 export { pointInPolygon };
 
-// --- Boundary file configuration ---
+// --- Boundary file configuration (derived from registry.json) ---
 
-const COUNTY_FILES = {
-  greenville: 'county-greenville.json',
-  spartanburg: 'county-spartanburg.json',
-  anderson: 'county-anderson.json',
-  pickens: 'county-pickens.json',
-  laurens: 'county-laurens.json',
-};
+const COUNTY_FILES = {};
+const CITY_FILES = {};
+const COUNTY_CITIES = {};
 
-const CITY_FILES = {
-  greenville: 'place-greenville.json',
-};
-
-// Which cities are within which counties (for targeted city lookups)
-const COUNTY_CITIES = {
-  greenville: ['greenville'],
-};
+for (const j of registry.jurisdictions) {
+  if (!j.hasBoundary || !j.boundaryFile) continue;
+  const countyLower = j.county.toLowerCase();
+  if (j.type === 'county') {
+    COUNTY_FILES[countyLower] = j.boundaryFile;
+  } else if (j.type === 'place') {
+    const cityName = j.id.split(':')[1];
+    CITY_FILES[cityName] = j.boundaryFile;
+    if (!COUNTY_CITIES[countyLower]) COUNTY_CITIES[countyLower] = [];
+    COUNTY_CITIES[countyLower].push(cityName);
+  }
+}
 
 // SC rough bounding box for early rejection
 const SC_BBOX = { minLat: 32, maxLat: 35.3, minLng: -83.5, maxLng: -78.5 };
