@@ -212,3 +212,28 @@ Flow: user coordinates --> load GeoJSON boundary file --> point-in-polygon test 
 - **Section glows:** multi-layer `radial-gradient` backgrounds with organic positioning, layered behind content (`relative z-10`).
 - **Spotlight:** mouse-tracking card highlight via CSS custom properties (`--mouse-x`, `--mouse-y`), initialized in Base.astro's inline script. Applied to any element with `data-spotlight`.
 - **Hero light cones:** SVG overlays on the camera image with CSS keyframe sweep animations and randomized timing. Outer cones hidden on mobile.
+
+## Blog Publishing
+
+Blog posts originate in an Obsidian vault and are published to the site via `scripts/publish.py`. The script scans the vault for markdown files with `publish: deflocksc` in their YAML frontmatter, then:
+
+1. Strips vault-internal metadata (tags prefixed with `area-`, `type-`, `status-`)
+2. Converts `[[wikilinks]]` to plain text
+3. Validates required fields (`title`, `date`, `summary`)
+4. Copies processed files into `src/content/blog/`
+
+Run it with `python scripts/publish.py`. The vault path is hardcoded at the top of the script -- update `VAULT_PATH` if you fork the project.
+
+## Map Style Customization
+
+The camera map uses a custom dark style derived from OpenFreeMap. `scripts/build-map-style.mjs` fetches the base OpenFreeMap dark style and remaps its neutral gray palette to the site's dark-blue color scheme (slate tones from `#0f172a` to `#94a3b8`).
+
+Run it with `node scripts/build-map-style.mjs`. The output is `public/map-style.json`, which MapLibre loads at runtime. If you change the site's color palette, update the color map in `buildExactMap()` to match.
+
+## Known Issues
+
+- **`define:vars` import limitation:** Astro's `define:vars` scripts cannot use ES module imports. The ActionModal works around this by inlining district-matcher functions with a `dm` prefix rather than importing from `src/lib/district-matcher.js`.
+- **Census geocoder CORS:** The Census geocoder API has no CORS headers. The site uses JSONP (`format=jsonp&callback=NAME`) instead of `fetch()`.
+- **Census API geography keys:** Key names include a year prefix (e.g., `"2024 State Legislative Districts - Upper"` instead of `"State Legislative Districts - Upper"`). The district matcher uses fallback lookups for both formats.
+- **CSS blur bleed:** `filter: blur()` bleeds past `overflow: hidden`. Fix with `clip-path: inset(0)` on a wrapping container.
+- **Grid + flex overflow:** CSS Grid items default to `min-width: auto`, so flex children (carousel cards with `min-width: 100%`) can push a grid column wider than the viewport. Fix with `min-w-0` on grid items.

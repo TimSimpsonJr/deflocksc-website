@@ -118,3 +118,5 @@ Or enrich an existing note with additional sources:
 ```
 
 The output is a formatted Obsidian note with inline citations, tags, and wikilinks. From there, distill the research into site copy, FAQ entries, or letter templates as needed.
+
+> **Note:** The research-workflow repository is a separate open-source project. If the link above returns a 404, the repo may not yet be public. Check back or contact the maintainer.
