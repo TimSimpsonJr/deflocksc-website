@@ -154,8 +154,8 @@ Each pipeline has a corresponding GitHub Actions workflow. For adapter architect
 |---|---|---|---|
 | Bill status | `scripts/scraper.py` | `src/data/bills.json` | Weekly Mon (session), monthly (off) |
 | State legislators | `scripts/scrape_reps/state.py` | `src/data/state-legislators.json` | Weekly Mon |
-| Local councils | `scripts/scrape_reps/adapters/*` | `src/data/local-councils.json` | Weekly Mon |
-| District boundaries | `scripts/build-districts.py` | `public/districts/*.json` | Manual only |
+| Local councils | `scripts/scrape_reps/adapters/*` | `src/data/local-councils.json` | Monthly 1st |
+| District boundaries | `scripts/build-districts.py` | `public/districts/*.json` | Monthly 1st |
 | Camera data | `scripts/fetch-camera-data.mjs` | `public/camera-data.json` | Weekly Wed |
 
 ## Client-Side Systems
