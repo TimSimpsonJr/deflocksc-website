@@ -2,7 +2,14 @@
 import actionLetters from '../data/action-letters.json';
 import stateLegislators from '../data/state-legislators.json';
 import localCouncils from '../data/local-councils.json';
-import registry from '../data/registry.json';
+import registryFull from '../data/registry.json';
+
+// Project only fields needed client-side (avoid leaking adapter config, ArcGIS URLs, etc.)
+const registry = {
+  jurisdictions: registryFull.jurisdictions.map(({ id, name, type, county, hasBoundary, boundaryFile, districts, districtRange }) => ({
+    id, name, type, county, hasBoundary, boundaryFile, districts, districtRange
+  }))
+};
 ---
 
 <div id="action-modal" class="fixed inset-0 z-[60] hidden"
@@ -486,7 +493,7 @@ import registry from '../data/registry.json';
         category: 'state',
         subject: senateLetter.subject,
         body: senateLetter.body,
-        reps: senator ? [{ name: senator.name, party: senator.party || '', office: 'State Senator, District ' + match.senate, email: senator.email, phone: senator.phone || '' }] : []
+        reps: senator ? [{ name: senator.name, party: senator.party || '', office: 'State Senator, District ' + match.senate, email: senator.email, phone: senator.phone || '', photoUrl: senator.photoUrl || '', website: senator.website || '' }] : []
       });
     }
 
@@ -499,7 +506,7 @@ import registry from '../data/registry.json';
         category: 'state',
         subject: houseLetter.subject,
         body: houseLetter.body,
-        reps: houseRep ? [{ name: houseRep.name, party: houseRep.party || '', office: 'State Representative, District ' + match.house, email: houseRep.email, phone: houseRep.phone || '' }] : []
+        reps: houseRep ? [{ name: houseRep.name, party: houseRep.party || '', office: 'State Representative, District ' + match.house, email: houseRep.email, phone: houseRep.phone || '', photoUrl: houseRep.photoUrl || '', website: houseRep.website || '' }] : []
       });
     }
 
@@ -711,6 +718,16 @@ import registry from '../data/registry.json';
 
         // Rep info
         var infoDiv = document.createElement('div');
+        infoDiv.className = 'flex items-start gap-3';
+        if (rep.photoUrl) {
+          var photoImg = document.createElement('img');
+          photoImg.src = rep.photoUrl;
+          photoImg.alt = '';
+          photoImg.className = 'w-10 h-10 rounded-full object-cover flex-shrink-0 mt-0.5';
+          photoImg.loading = 'lazy';
+          infoDiv.appendChild(photoImg);
+        }
+        var textDiv = document.createElement('div');
         var nameSpan = document.createElement('span');
         nameSpan.className = 'text-white font-semibold block';
         nameSpan.textContent = rep.name;
@@ -723,15 +740,15 @@ import registry from '../data/registry.json';
         var officeSpan = document.createElement('span');
         officeSpan.className = 'text-[#a3a3a3] text-sm block';
         officeSpan.textContent = rep.office;
-        infoDiv.appendChild(nameSpan);
-        infoDiv.appendChild(officeSpan);
+        textDiv.appendChild(nameSpan);
+        textDiv.appendChild(officeSpan);
 
         // District badge
         if (rep.isMatchedDistrict) {
           var badge = document.createElement('span');
           badge.className = 'text-[#a3a3a3] text-xs font-medium';
           badge.textContent = 'Your district';
-          infoDiv.appendChild(badge);
+          textDiv.appendChild(badge);
         }
 
         if (rep.phone) {
@@ -739,8 +756,18 @@ import registry from '../data/registry.json';
           phoneLink.href = 'tel:' + rep.phone.replace(/[^+\d]/g, '');
           phoneLink.className = 'text-[#fbbf24] hover:text-[#fcd34d] text-sm block transition-colors';
           phoneLink.textContent = rep.phone;
-          infoDiv.appendChild(phoneLink);
+          textDiv.appendChild(phoneLink);
         }
+        if (rep.website) {
+          var siteLink = document.createElement('a');
+          siteLink.href = rep.website;
+          siteLink.target = '_blank';
+          siteLink.rel = 'noopener noreferrer';
+          siteLink.className = 'text-[#a3a3a3] hover:text-white text-xs block transition-colors';
+          siteLink.textContent = 'Profile \u2192';
+          textDiv.appendChild(siteLink);
+        }
+        infoDiv.appendChild(textDiv);
         repDiv.appendChild(infoDiv);
 
         // Individual buttons for all reps (state, local-matched, and local)
@@ -1129,30 +1156,28 @@ import registry from '../data/registry.json';
   })();
 
   // Build county district ranges and county-to-city mapping from registry
+  // Note: unlike the DM_* loop above, this includes ALL jurisdictions (not just hasBoundary)
+  // because the manual dropdown path works without boundary files.
   var COUNTY_DISTRICT_RANGES = {};
   var COUNTY_CITIES_MAP = {};
+  function _parseRange(rangeStr, fallbackEnd) {
+    if (!rangeStr) return { start: 1, end: fallbackEnd };
+    var parts = rangeStr.split('-');
+    var s = parseInt(parts[0]), e = parseInt(parts[1]);
+    return (!isNaN(s) && !isNaN(e)) ? { start: s, end: e } : { start: 1, end: fallbackEnd };
+  }
   for (var _rj = 0; _rj < registry.jurisdictions.length; _rj++) {
     var _jj = registry.jurisdictions[_rj];
     var _cLower = _jj.county.toLowerCase();
     if (_jj.type === 'county') {
-      if (_jj.districtRange) {
-        var _parts = _jj.districtRange.split('-');
-        COUNTY_DISTRICT_RANGES[_cLower] = { start: parseInt(_parts[0]), end: parseInt(_parts[1]) };
-      } else {
-        COUNTY_DISTRICT_RANGES[_cLower] = { start: 1, end: _jj.districts };
-      }
+      COUNTY_DISTRICT_RANGES[_cLower] = _parseRange(_jj.districtRange, _jj.districts);
     } else if (_jj.type === 'place') {
       var _cityId = _jj.id.split(':')[1];
-      var _cityStart = 1;
-      var _cityEnd = _jj.districts;
-      if (_jj.districtRange) {
-        var _cparts = _jj.districtRange.split('-');
-        _cityStart = parseInt(_cparts[0]);
-        _cityEnd = parseInt(_cparts[1]);
-      }
+      var _cityRange = _parseRange(_jj.districtRange, _jj.districts);
       if (!COUNTY_CITIES_MAP[_cLower]) COUNTY_CITIES_MAP[_cLower] = [];
-      var _cityLabel = _cityId.charAt(0).toUpperCase() + _cityId.slice(1);
-      COUNTY_CITIES_MAP[_cLower].push({ value: _cityId, label: _cityLabel, start: _cityStart, end: _cityEnd });
+      // Extract display name from registry name (e.g. "Greenville City Council" → "Greenville")
+      var _cityLabel = _jj.name ? _jj.name.replace(/\s+(City|Town)\s+Council$/i, '').replace(/\s+Council$/i, '') : _cityId.split('-').map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
+      COUNTY_CITIES_MAP[_cLower].push({ value: _cityId, label: _cityLabel, start: _cityRange.start, end: _cityRange.end });
     }
   }
 
