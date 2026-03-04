@@ -728,8 +728,12 @@ const registry = {
           infoDiv.appendChild(photoImg);
         }
         var textDiv = document.createElement('div');
+
+        // Name row: name + party + profile link inline
+        var nameRow = document.createElement('div');
+        nameRow.className = 'flex items-baseline gap-2';
         var nameSpan = document.createElement('span');
-        nameSpan.className = 'text-white font-semibold block';
+        nameSpan.className = 'text-white font-semibold';
         nameSpan.textContent = rep.name;
         if (rep.party) {
           var partySpan = document.createElement('span');
@@ -737,16 +741,27 @@ const registry = {
           partySpan.textContent = '(' + rep.party + ')';
           nameSpan.appendChild(partySpan);
         }
+        nameRow.appendChild(nameSpan);
+        if (rep.website) {
+          var siteLink = document.createElement('a');
+          siteLink.href = rep.website;
+          siteLink.target = '_blank';
+          siteLink.rel = 'noopener noreferrer';
+          siteLink.className = 'text-[#a3a3a3] hover:text-white text-xs transition-colors';
+          siteLink.textContent = 'Profile \u2192';
+          nameRow.appendChild(siteLink);
+        }
+        textDiv.appendChild(nameRow);
+
         var officeSpan = document.createElement('span');
         officeSpan.className = 'text-[#a3a3a3] text-sm block';
         officeSpan.textContent = rep.office;
-        textDiv.appendChild(nameSpan);
         textDiv.appendChild(officeSpan);
 
         // District badge
         if (rep.isMatchedDistrict) {
           var badge = document.createElement('span');
-          badge.className = 'text-[#a3a3a3] text-xs font-medium';
+          badge.className = 'text-[#a3a3a3] text-xs font-medium block';
           badge.textContent = 'Your district';
           textDiv.appendChild(badge);
         }
@@ -757,15 +772,6 @@ const registry = {
           phoneLink.className = 'text-[#fbbf24] hover:text-[#fcd34d] text-sm block transition-colors';
           phoneLink.textContent = rep.phone;
           textDiv.appendChild(phoneLink);
-        }
-        if (rep.website) {
-          var siteLink = document.createElement('a');
-          siteLink.href = rep.website;
-          siteLink.target = '_blank';
-          siteLink.rel = 'noopener noreferrer';
-          siteLink.className = 'text-[#a3a3a3] hover:text-white text-xs block transition-colors';
-          siteLink.textContent = 'Profile \u2192';
-          textDiv.appendChild(siteLink);
         }
         infoDiv.appendChild(textDiv);
         repDiv.appendChild(infoDiv);
@@ -946,6 +952,7 @@ const registry = {
 
       var sel = document.createElement('select');
       sel.className = 'bg-[#262626] border border-[#404040] text-white rounded px-3 py-1 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]';
+      sel.setAttribute('aria-label', 'Select your district');
       sel.innerHTML = '<option value="">Select district...</option>';
 
       // countyKey and cityKey are already prefixed (e.g. 'county:greenville', 'place:greenville')
@@ -1015,8 +1022,8 @@ const registry = {
         throw new Error("Your location didn't match any SC legislative districts. Try typing your street address instead.");
       }
       var groups = buildGroups(match);
-      renderResults(groups);
       showState('results');
+      renderResults(groups);
       document.getElementById('action-results')?.focus();
     } catch (err) {
       if (err.code === 1) {
@@ -1042,8 +1049,8 @@ const registry = {
       if (geo.senate) match.senate = geo.senate;
       if (geo.house) match.house = geo.house;
       var groups = buildGroups(match);
-      renderResults(groups);
       showState('results');
+      renderResults(groups);
       document.getElementById('action-results')?.focus();
     } catch (err) {
       showError(err.message || 'The address lookup did not return results. Check the address and try again, or select your district manually below.');
@@ -1065,8 +1072,8 @@ const registry = {
       return;
     }
     var groups = buildGroups(match);
-    renderResults(groups);
     showState('results');
+    renderResults(groups);
     document.getElementById('action-results')?.focus();
   });
 
