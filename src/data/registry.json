@@ -324,12 +324,7 @@
       "name": "York County Council",
       "type": "county",
       "county": "York",
-      "adapter": "civicplus",
-      "adapterConfig": {
-        "baseUrl": "https://www.yorkcountygov.com",
-        "councilPageId": "375",
-        "directoryDeptId": "100"
-      },
+      "adapter": "manual",
       "url": "https://www.yorkcountygov.com/375/County-Council",
       "districts": 7,
       "atLarge": false,
