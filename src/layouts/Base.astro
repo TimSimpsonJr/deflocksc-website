@@ -7,9 +7,12 @@ import ActionModal from '../components/ActionModal.astro';
 interface Props {
   title?: string;
   description?: string;
+  ogImage?: string;
 }
 
-const { title = "DeflockSC", description = "242 cameras are tracking drivers across Upstate SC with no public vote and no oversight. Fight back." } = Astro.props;
+const { title = "DeflockSC", description = "242 cameras are tracking drivers across Upstate SC with no public vote and no oversight. Fight back.", ogImage = "/og-image.png" } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://deflocksc.netlify.app");
+const ogImageURL = new URL(ogImage, Astro.site ?? "https://deflocksc.netlify.app").href;
 ---
 
 <html lang="en">
@@ -24,6 +27,13 @@ const { title = "DeflockSC", description = "242 cameras are tracking drivers acr
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:url" content={canonicalURL} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
 
     <meta name="theme-color" content="#171717" />
     <link rel="alternate" type="application/rss+xml" title="DeflockSC Blog" href="/rss.xml" />
