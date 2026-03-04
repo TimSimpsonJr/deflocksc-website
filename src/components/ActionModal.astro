@@ -25,7 +25,10 @@ import localCouncils from '../data/local-councils.json';
 
       <!-- Content container -->
       <div class="px-6 pt-16 pb-12 md:px-8 md:pt-8 md:pb-8">
-        <h2 class="text-2xl md:text-3xl font-[900] text-white leading-tight mb-8 text-center">Email Your Representatives</h2>
+        <h2 class="text-2xl md:text-3xl font-[900] text-white leading-tight mb-4 text-center">Find Your Representatives</h2>
+        <p class="text-[#a3a3a3] text-sm leading-relaxed mb-8 text-center max-w-md mx-auto">
+          We'll find your state legislators and local council members, with phone numbers and a draft letter written for each one. One lookup, every rep who needs to hear from you.
+        </p>
 
     <!-- Input State -->
     <div id="action-input">
@@ -62,7 +65,7 @@ import localCouncils from '../data/local-councils.json';
               autocomplete="street-address"
               placeholder="123 Main St, Greenville, SC"
               required
-              class="flex-1 bg-[#262626] border border-[#404040] text-white rounded px-4 py-3 text-base placeholder-[#737373] focus:outline-none focus:border-[#a3a3a3] focus:ring-1 focus:ring-[#a3a3a3] transition-colors"
+              class="flex-1 bg-[#262626] border border-[#404040] text-white rounded px-4 py-3 text-base placeholder-[#737373] focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4] transition-colors"
             />
             <button
               type="submit"
@@ -85,13 +88,13 @@ import localCouncils from '../data/local-councils.json';
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="manual-senate" class="text-[#a3a3a3] text-xs block mb-1">Senate District</label>
-                <select id="manual-senate" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
+                <select id="manual-senate" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select...</option>
                 </select>
               </div>
               <div>
                 <label for="manual-house" class="text-[#a3a3a3] text-xs block mb-1">House District</label>
-                <select id="manual-house" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
+                <select id="manual-house" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select...</option>
                 </select>
               </div>
@@ -99,7 +102,7 @@ import localCouncils from '../data/local-councils.json';
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="manual-county" class="text-[#a3a3a3] text-xs block mb-1">County</label>
-                <select id="manual-county" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
+                <select id="manual-county" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select...</option>
                   <option value="greenville">Greenville</option>
                   <option value="spartanburg">Spartanburg</option>
@@ -110,7 +113,7 @@ import localCouncils from '../data/local-councils.json';
               </div>
               <div>
                 <label for="manual-county-district" class="text-[#a3a3a3] text-xs block mb-1">County District</label>
-                <select id="manual-county-district" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
+                <select id="manual-county-district" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select county first</option>
                 </select>
               </div>
@@ -118,13 +121,13 @@ import localCouncils from '../data/local-councils.json';
             <div id="manual-city-row" class="grid grid-cols-2 gap-3 hidden">
               <div>
                 <label for="manual-city" class="text-[#a3a3a3] text-xs block mb-1">City</label>
-                <select id="manual-city" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
+                <select id="manual-city" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">None</option>
                 </select>
               </div>
               <div>
                 <label for="manual-city-district" class="text-[#a3a3a3] text-xs block mb-1">City District</label>
-                <select id="manual-city-district" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#a3a3a3]">
+                <select id="manual-city-district" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select city first</option>
                 </select>
               </div>
@@ -154,7 +157,7 @@ import localCouncils from '../data/local-councils.json';
     </div>
 
     <!-- Results State -->
-    <div id="action-results" class="hidden">
+    <div id="action-results" class="hidden" aria-live="polite" tabindex="-1">
       <div id="action-results-list"></div>
       <div class="text-center mt-8">
         <button
@@ -185,6 +188,26 @@ import localCouncils from '../data/local-councils.json';
     </div>
   </div>
 </div>
+
+<style>
+  /* Fix iOS Safari rendering disclosure triangles as emoji */
+  #action-modal summary {
+    list-style: none;
+  }
+  #action-modal summary::-webkit-details-marker {
+    display: none;
+  }
+  #action-modal summary::before {
+    content: '\25B8';
+    display: inline-block;
+    margin-right: 0.4em;
+    transition: transform 200ms;
+    font-family: system-ui, sans-serif;
+  }
+  #action-modal details[open] > summary::before {
+    transform: rotate(90deg);
+  }
+</style>
 
 <script define:vars={{ actionLetters, stateLegislators, localCouncils }}>
   // --- District Matcher (inlined from src/lib/district-matcher.js) ---
@@ -800,7 +823,7 @@ import localCouncils from '../data/local-councils.json';
       // Textarea with letter body
       var textarea = document.createElement('textarea');
       textarea.id = groupId + '-body';
-      textarea.className = 'bg-[#171717] border border-[#404040] text-[#d4d4d4] rounded p-4 w-full text-sm min-h-[200px] focus:outline-none focus:border-[#a3a3a3] focus:ring-1 focus:ring-[#a3a3a3] transition-colors resize-y';
+      textarea.className = 'bg-[#171717] border border-[#404040] text-[#d4d4d4] rounded p-4 w-full text-sm min-h-[200px] focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4] transition-colors resize-y';
 
       // Replace [NAME] depending on category
       var prefilledBody = group.body;
@@ -882,7 +905,7 @@ import localCouncils from '../data/local-councils.json';
       dropdownDiv.className = 'wrong-district-dropdown mt-2 mb-3 flex items-center gap-2';
 
       var sel = document.createElement('select');
-      sel.className = 'bg-[#262626] border border-[#404040] text-white rounded px-3 py-1 text-sm focus:outline-none focus:border-[#a3a3a3]';
+      sel.className = 'bg-[#262626] border border-[#404040] text-white rounded px-3 py-1 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]';
       sel.innerHTML = '<option value="">Select district...</option>';
 
       // countyKey and cityKey are already prefixed (e.g. 'county:greenville', 'place:greenville')
@@ -954,6 +977,7 @@ import localCouncils from '../data/local-councils.json';
       var groups = buildGroups(match);
       renderResults(groups);
       showState('results');
+      document.getElementById('action-results')?.focus();
     } catch (err) {
       if (err.code === 1) {
         showError('Location access was blocked by your browser. You can type your address below instead.');
@@ -980,6 +1004,7 @@ import localCouncils from '../data/local-councils.json';
       var groups = buildGroups(match);
       renderResults(groups);
       showState('results');
+      document.getElementById('action-results')?.focus();
     } catch (err) {
       showError(err.message || 'The address lookup did not return results. Check the address and try again, or select your district manually below.');
     }
@@ -1002,6 +1027,7 @@ import localCouncils from '../data/local-councils.json';
     var groups = buildGroups(match);
     renderResults(groups);
     showState('results');
+    document.getElementById('action-results')?.focus();
   });
 
   // Reset button

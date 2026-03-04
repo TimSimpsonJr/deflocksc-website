@@ -63,7 +63,7 @@
 
     <button type="button" data-open-action
       class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer">
-      Email Your Legislators
+      Contact Your Reps
     </button>
   </div>
 </section>
@@ -83,6 +83,8 @@
   .hero-cone {
     animation: cone-sweep var(--dur, 12s) var(--del, 0s) infinite;
     will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 
   .hero-cone-outer {

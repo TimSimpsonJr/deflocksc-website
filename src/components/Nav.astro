@@ -5,54 +5,11 @@
   <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
     <a href="/" class="text-white font-black text-xl tracking-[-0.02em]">DeflockSC</a>
 
-    <!-- Desktop nav -->
-    <div class="hidden md:flex items-center gap-8">
-      <button type="button" data-open-action class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors cursor-pointer">Take Action</button>
-    </div>
-
-    <!-- Mobile hamburger -->
-    <button id="menu-toggle" class="md:hidden text-white p-2.5" aria-label="Toggle menu" aria-expanded="false">
-      <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-      <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-  </div>
-
-  <!-- Mobile menu -->
-  <div id="mobile-menu" class="hidden md:hidden border-t border-[#262626] bg-[#171717]">
-    <div class="px-6 py-4 flex flex-col gap-4">
-      <button type="button" data-open-action class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors text-center cursor-pointer w-full">Take Action</button>
-    </div>
+    <button type="button" data-open-action class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors cursor-pointer">Take Action</button>
   </div>
 </nav>
 
 <script>
-  const toggle = document.getElementById('menu-toggle');
-  const menu = document.getElementById('mobile-menu');
-  const iconOpen = document.getElementById('menu-icon-open');
-  const iconClose = document.getElementById('menu-icon-close');
-
-  toggle?.addEventListener('click', () => {
-    const isOpen = !menu?.classList.contains('hidden');
-    menu?.classList.toggle('hidden');
-    iconOpen?.classList.toggle('hidden');
-    iconClose?.classList.toggle('hidden');
-    toggle.setAttribute('aria-expanded', String(!isOpen));
-  });
-
-  // Close mobile menu when clicking a link
-  menu?.querySelectorAll('a, button').forEach(link => {
-    link.addEventListener('click', () => {
-      menu.classList.add('hidden');
-      iconOpen?.classList.remove('hidden');
-      iconClose?.classList.add('hidden');
-      toggle?.setAttribute('aria-expanded', 'false');
-    });
-  });
-
   // Fade in nav background as soon as user scrolls
   const nav = document.querySelector('nav');
 

@@ -23,8 +23,6 @@ for (let i = 0; i < totalCards; i++) {
   const dot = document.createElement('button');
   dot.className = `carousel-dot${i === 0 ? ' active' : ''}`;
   dot.setAttribute('aria-label', `Go to factoid ${i + 1}`);
-  dot.setAttribute('role', 'tab');
-  dot.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
   dot.addEventListener('click', () => {
     stopAuto();
     goToSlide(i);
@@ -35,7 +33,6 @@ for (let i = 0; i < totalCards; i++) {
 function goToSlide(n: number) {
   dotsContainer?.querySelectorAll('.carousel-dot').forEach((d) => {
     d.classList.remove('active');
-    d.setAttribute('aria-selected', 'false');
   });
   currentSlide = ((n % totalCards) + totalCards) % totalCards;
   if (track) {
@@ -43,7 +40,6 @@ function goToSlide(n: number) {
   }
   const activeDot = dotsContainer?.querySelectorAll('.carousel-dot')[currentSlide];
   activeDot?.classList.add('active');
-  activeDot?.setAttribute('aria-selected', 'true');
 
   // Update tabindex - only current slide is focusable
   cards.forEach((card, i) => {
@@ -91,6 +87,40 @@ document.addEventListener('visibilitychange', () => {
   } else if (!userInteracted) {
     startAuto();
   }
+});
+
+// Touch swipe navigation
+let touchStartX = 0;
+let touchStartY = 0;
+let isSwiping = false;
+
+carousel?.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  isSwiping = false;
+}, { passive: true });
+
+carousel?.addEventListener('touchmove', (e) => {
+  if (!touchStartX) return;
+  const dx = e.touches[0].clientX - touchStartX;
+  const dy = e.touches[0].clientY - touchStartY;
+  // Only treat as swipe if horizontal movement exceeds vertical
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+    isSwiping = true;
+    e.preventDefault();
+  }
+}, { passive: false });
+
+carousel?.addEventListener('touchend', (e) => {
+  if (!isSwiping) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) {
+    stopAuto();
+    goToSlide(currentSlide + (dx < 0 ? 1 : -1));
+  }
+  touchStartX = 0;
+  touchStartY = 0;
+  isSwiping = false;
 });
 
 // Arrow key navigation on carousel

@@ -30,9 +30,9 @@ import bills from '../data/bills.json';
             role="button"
             aria-label={`View details for ${bill.bill}: ${bill.title}`}
           >
-            <div class="flex items-start justify-between gap-4 mb-2">
+            <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 mb-2">
               <span class="text-[#ef4444] font-extrabold text-lg">{bill.bill}</span>
-              <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase tracking-[0.05em] bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded whitespace-nowrap">
+              <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase tracking-[0.05em] bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded">
                 {bill.status}
               </span>
             </div>
@@ -93,7 +93,7 @@ import bills from '../data/bills.json';
       <div class="flex-shrink-0 p-6 md:p-8 pt-4 border-t border-[#404040]">
         <div class="flex flex-col items-start gap-3 min-[520px]:flex-row-reverse min-[520px]:justify-between min-[520px]:items-center">
           <a href="#take-action" id="modal-cta" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.05em] px-6 py-3 rounded transition-colors">
-            Email Your Legislators
+            Contact Your Reps
           </a>
           <a id="modal-bill-link" href="#" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors">
             Read full text on scstatehouse.gov<span class="sr-only"> (opens in new tab)</span> &rarr;

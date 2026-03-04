@@ -19,6 +19,37 @@ interface DeflockCamera {
   tags?: Record<string, string>;
 }
 
+// --- Vendor image lookup ---
+
+const vendorImages = new Map<string, string>();
+
+async function loadVendorImages(): Promise<void> {
+  try {
+    const res = await fetch('https://cms.deflock.me/items/lprVendors');
+    if (!res.ok) return;
+    const { data } = await res.json();
+    for (const vendor of data) {
+      if (vendor.urls?.length && vendor.fullName) {
+        vendorImages.set(vendor.fullName, vendor.urls[0].url);
+      }
+    }
+  } catch {
+    // Non-critical — popups just won't have vendor images
+  }
+}
+
+function getVendorImageUrl(manufacturer: string | null): string | null {
+  if (!manufacturer) return null;
+  return vendorImages.get(manufacturer) ?? null;
+}
+
+// --- Wikimedia thumbnail URL ---
+
+function wikimediaThumbnailUrl(filename: string): string {
+  const clean = filename.replace(/^File:/, '').replace(/ /g, '_');
+  return `https://commons.wikimedia.org/w/thumb.php?f=${encodeURIComponent(clean)}&w=300`;
+}
+
 // --- Direction parsing ---
 
 function parseDirection(tags: Record<string, string> | undefined): number | null {
@@ -100,11 +131,21 @@ function showCameraPopup(e: maplibregl.MapMouseEvent & { features?: maplibregl.M
   const manufacturer = props.manufacturer && props.manufacturer !== 'null' ? props.manufacturer : null;
   const operator = props.operator && props.operator !== 'null' ? props.operator : null;
   const direction = props.direction != null && props.direction !== 'null' ? Number(props.direction) : null;
+  const wikimedia = props.wikimedia_commons && props.wikimedia_commons !== 'null' ? props.wikimedia_commons : null;
+
+  // Resolve image: wikimedia photo takes priority, then vendor reference image
+  const imageUrl = wikimedia
+    ? wikimediaThumbnailUrl(wikimedia)
+    : getVendorImageUrl(manufacturer);
 
   let html = '<div class="camera-popup">';
 
-  // Placeholder image area
-  html += '<div class="camera-popup-img"><span>ALPR Camera</span></div>';
+  if (imageUrl) {
+    const label = manufacturer ? `${manufacturer} LPR` : 'ALPR Camera';
+    html += `<div class="camera-popup-img"><img src="${imageUrl}" alt="${label}" loading="lazy" /><span class="camera-popup-img-label">${label}</span></div>`;
+  } else {
+    html += '<div class="camera-popup-img camera-popup-img-empty"><span>ALPR Camera</span></div>';
+  }
 
   // Manufacturer
   if (manufacturer) {
@@ -285,7 +326,10 @@ function initMap() {
 
   map.on('load', async () => {
     try {
-      const res = await fetch('/camera-data.json');
+      const [res] = await Promise.all([
+        fetch('/camera-data.json'),
+        loadVendorImages(),
+      ]);
       if (!res.ok) throw new Error(`Failed to load camera data: ${res.status}`);
       const cameras: DeflockCamera[] = await res.json();
 
@@ -305,6 +349,7 @@ function initMap() {
               hasDirection: direction !== null,
               manufacturer: cam.tags?.manufacturer || null,
               operator: cam.tags?.operator || null,
+              wikimedia_commons: cam.tags?.wikimedia_commons || null,
             },
           };
         }),

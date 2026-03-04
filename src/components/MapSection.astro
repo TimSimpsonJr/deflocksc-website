@@ -17,7 +17,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
       </p>
 
       <p>
-        <strong class="text-white">Greenville:</strong> 30 cameras went up in January 2021, paid for with federal civil asset forfeiture funds. No city ordinance. No council vote on oversight. That was five years ago. There are still no rules about who sees the data, how long it's kept, or who checks how it's used.
+        <strong class="text-white">Greenville:</strong> Greenville PD runs 57 Flock cameras. The first batch went up in January 2021, paid for with federal civil asset forfeiture funds. No city ordinance. No council vote on oversight. There are still no rules about who sees the data, how long it's kept, or who checks how it's used.
       </p>
 
       <p>
@@ -29,7 +29,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
       </p>
 
       <p>
-        <strong class="text-white">The official count undersells it.</strong> When Greenville went looking for more cameras, its own RFP required the new ones to connect with HOA and neighborhood cameras too. The city's SafeWatch program asks residents to register their Ring and Nest cameras for police use on demand. At least one Greenville HOA already runs its own license plate reader. The 30-camera figure is a floor, not a ceiling.
+        <strong class="text-white">The official count undersells it.</strong> When Greenville went looking for more cameras, its own RFP required the new ones to connect with HOA and neighborhood cameras too. The city's SafeWatch program asks residents to register their Ring and Nest cameras for police use on demand. At least one Greenville HOA already runs its own license plate reader. The 57-camera figure is a floor, not a ceiling.
       </p>
     </div>
 
@@ -186,14 +186,40 @@ import 'maplibre-gl/dist/maplibre-gl.css';
   }
 
   :global(.camera-popup-img) {
+    position: relative;
     background: #171717;
-    height: 100px;
+    height: 120px;
+    overflow: hidden;
+  }
+
+  :global(.camera-popup-img img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  :global(.camera-popup-img-label) {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #d4d4d4;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  :global(.camera-popup-img-empty) {
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  :global(.camera-popup-img span) {
+  :global(.camera-popup-img-empty span) {
     color: #525252;
     font-size: 13px;
     font-weight: 500;
