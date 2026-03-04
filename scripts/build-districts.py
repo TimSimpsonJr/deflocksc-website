@@ -5,26 +5,16 @@ Downloads boundary shapefiles/GeoJSON from public sources, filters to target
 jurisdictions, simplifies geometries for compact file size, and outputs GeoJSON
 files to public/districts/ with only the district number property.
 
+Reads src/data/registry.json to determine which boundaries to build and how
+to fetch them. Supports three boundary source types:
+    - tiger:  Census TIGER/Line shapefiles (state legislative districts)
+    - arcgis: ArcGIS REST endpoint (county/city council districts)
+    - scrfa:  SC RFA statewide county council shapefile (filtered by FIPS)
+
 This is a run-once script. Re-run only if redistricting happens.
 
 Dependencies (install with pip):
     pip install requests geopandas shapely
-
-Data sources:
-    - SC Senate (SLDU): US Census Bureau TIGER/Line 2024
-    - SC House (SLDL): US Census Bureau TIGER/Line 2024
-    - Greenville County Council (districts 17-28):
-        Greenville County GIS (gcgis.org) ArcGIS REST API
-    - Spartanburg County Council (districts 1-6):
-        Spartanburg County GIS ArcGIS REST API
-    - Anderson County Council (districts 1-7):
-        Anderson County GIS ArcGIS REST API
-    - Pickens County Council (districts 1-6):
-        SC RFA statewide county council districts shapefile
-    - Laurens County Council (districts 1-7):
-        SC RFA statewide county council districts shapefile
-    - Greenville City Council (districts 1-4):
-        City of Greenville GIS ArcGIS REST API
 
 Usage:
     python scripts/build-districts.py
@@ -57,6 +47,7 @@ except ImportError:
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.join(SCRIPT_DIR, "..")
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "public", "districts")
+REGISTRY_PATH = os.path.join(PROJECT_ROOT, "src", "data", "registry.json")
 
 # Geometry simplification tolerance in degrees (~0.001 deg ~ 111m at equator).
 # This keeps files compact for browser use.
@@ -67,64 +58,6 @@ SIMPLIFY_TOLERANCE = 0.001
 COORD_PRECISION = 5
 
 HEADERS = {"User-Agent": "DeflockSC-DistrictBuilder/1.0 (+https://deflocksc.org)"}
-
-# --- Census TIGER/Line URLs ---
-# SC FIPS code: 45
-# TIGER/Line 2024 shapefiles for state legislative districts
-TIGER_SLDU_URL = "https://www2.census.gov/geo/tiger/TIGER2024/SLDU/tl_2024_45_sldu.zip"
-TIGER_SLDL_URL = "https://www2.census.gov/geo/tiger/TIGER2024/SLDL/tl_2024_45_sldl.zip"
-
-# --- SC RFA statewide county council districts shapefile ---
-# Contains all county council districts for the entire state.
-# Used as fallback for counties without their own ArcGIS REST API.
-# Download from: https://rfa.sc.gov/programs-services/precinct-demographics/jurisdictional-mapping/political-gis-data
-RFA_COUNTY_COUNCIL_URL = "https://rfa.sc.gov/media/8135"
-
-# --- ArcGIS REST API endpoints ---
-# These return GeoJSON directly when queried with f=geojson.
-
-# Greenville County Council Districts (layer 90 in GreenvilleJS/Map_Layers_JS)
-# Districts 17-28, field: DISTRICT (SmallInteger)
-GREENVILLE_COUNTY_COUNCIL_URL = (
-    "https://www.gcgis.org/arcgis/rest/services/GreenvilleJS/Map_Layers_JS/MapServer/90"
-)
-
-# City of Greenville Council Districts (layer 2 in AddressSearch/Boundaries)
-# Districts 1-4, field: DISTRICT (SmallInteger)
-GREENVILLE_CITY_COUNCIL_URL = (
-    "https://citygis.greenvillesc.gov/arcgis/rest/services/AddressSearch/Boundaries/MapServer/2"
-)
-
-# Spartanburg County Council (layer 0 in GIS/County_Council)
-# Field: CoCouncil (numeric)
-SPARTANBURG_COUNTY_COUNCIL_URL = (
-    "https://maps.spartanburgcounty.org/server/rest/services/GIS/County_Council/MapServer/0"
-)
-
-# Anderson County Council Districts (layer 5 in Opengov/MAT)
-# Field: DISTRICT (text, e.g. "One", "Two" ... "Seven")
-ANDERSON_COUNTY_COUNCIL_URL = (
-    "https://propertyviewer.andersoncountysc.org/arcgis/rest/services/Opengov/MAT/MapServer/5"
-)
-
-# FIPS codes for counties we need from the RFA statewide shapefile
-# Used to filter the statewide file to just the counties we need.
-COUNTY_FIPS = {
-    "pickens": "45077",   # Pickens County FIPS (state 45 + county 077)
-    "laurens": "45059",   # Laurens County FIPS (state 45 + county 059)
-}
-
-# Anderson district name-to-number mapping (the Anderson ArcGIS layer
-# stores district names as words instead of numbers)
-ANDERSON_DISTRICT_NAMES = {
-    "One": "1",
-    "Two": "2",
-    "Three": "3",
-    "Four": "4",
-    "Five": "5",
-    "Six": "6",
-    "Seven": "7",
-}
 
 
 # ---------------------------------------------------------------------------
@@ -264,164 +197,17 @@ def query_arcgis_geojson(base_url, description, where="1=1"):
     return gdf
 
 
-# ---------------------------------------------------------------------------
-# Build functions for each district file
-# ---------------------------------------------------------------------------
-
-def build_sldu(dry_run=False):
+def _download_rfa_statewide(url):
     """
-    Build SC Senate district boundaries from Census TIGER/Line.
-
-    Source: US Census Bureau TIGER/Line 2024, SLDU (State Legislative
-    District Upper Chamber). SC-specific file (STATEFP=45).
-    District number field: SLDUST (string, zero-padded).
-    """
-    print("\n=== SC Senate Districts (SLDU) ===")
-    output_path = os.path.join(OUTPUT_DIR, "sldu.json")
-
-    if dry_run:
-        print(f"  Would download: {TIGER_SLDU_URL}")
-        print(f"  Would write: {output_path}")
-        return
-
-    gdf = download_shapefile_zip(TIGER_SLDU_URL, "TIGER/Line 2024 SC Senate districts")
-
-    # Filter to SC (should already be SC-only since we downloaded the SC file,
-    # but verify just in case)
-    if "STATEFP" in gdf.columns:
-        gdf = gdf[gdf["STATEFP"] == "45"]
-
-    # Reproject to WGS84 if needed
-    if gdf.crs and gdf.crs.to_epsg() != 4326:
-        gdf = gdf.to_crs(epsg=4326)
-
-    # The district number field is SLDUST (e.g., "001", "046")
-    simplify_and_export(gdf, output_path, "SLDUST")
-
-
-def build_sldl(dry_run=False):
-    """
-    Build SC House district boundaries from Census TIGER/Line.
-
-    Source: US Census Bureau TIGER/Line 2024, SLDL (State Legislative
-    District Lower Chamber). SC-specific file (STATEFP=45).
-    District number field: SLDLST (string, zero-padded).
-    """
-    print("\n=== SC House Districts (SLDL) ===")
-    output_path = os.path.join(OUTPUT_DIR, "sldl.json")
-
-    if dry_run:
-        print(f"  Would download: {TIGER_SLDL_URL}")
-        print(f"  Would write: {output_path}")
-        return
-
-    gdf = download_shapefile_zip(TIGER_SLDL_URL, "TIGER/Line 2024 SC House districts")
-
-    if "STATEFP" in gdf.columns:
-        gdf = gdf[gdf["STATEFP"] == "45"]
-
-    if gdf.crs and gdf.crs.to_epsg() != 4326:
-        gdf = gdf.to_crs(epsg=4326)
-
-    simplify_and_export(gdf, output_path, "SLDLST")
-
-
-def build_greenville_county(dry_run=False):
-    """
-    Build Greenville County Council district boundaries.
-
-    Source: Greenville County GIS (gcgis.org)
-    ArcGIS REST API: GreenvilleJS/Map_Layers_JS/MapServer/90
-    Districts 17-28, field: DISTRICT (SmallInteger)
-    """
-    print("\n=== Greenville County Council Districts ===")
-    output_path = os.path.join(OUTPUT_DIR, "county-greenville.json")
-
-    if dry_run:
-        print(f"  Would query: {GREENVILLE_COUNTY_COUNCIL_URL}")
-        print(f"  Would write: {output_path}")
-        return
-
-    gdf = query_arcgis_geojson(
-        GREENVILLE_COUNTY_COUNCIL_URL,
-        "Greenville County Council districts",
-    )
-
-    simplify_and_export(gdf, output_path, "DISTRICT")
-
-
-def build_spartanburg_county(dry_run=False):
-    """
-    Build Spartanburg County Council district boundaries.
-
-    Source: Spartanburg County GIS
-    ArcGIS REST API: GIS/County_Council/MapServer/0
-    Field: CoCouncil (numeric district number)
-    """
-    print("\n=== Spartanburg County Council Districts ===")
-    output_path = os.path.join(OUTPUT_DIR, "county-spartanburg.json")
-
-    if dry_run:
-        print(f"  Would query: {SPARTANBURG_COUNTY_COUNCIL_URL}")
-        print(f"  Would write: {output_path}")
-        return
-
-    gdf = query_arcgis_geojson(
-        SPARTANBURG_COUNTY_COUNCIL_URL,
-        "Spartanburg County Council districts",
-    )
-
-    # The field is CoCouncil (numeric). Convert to string for our output.
-    simplify_and_export(gdf, output_path, "CoCouncil")
-
-
-def build_anderson_county(dry_run=False):
-    """
-    Build Anderson County Council district boundaries.
-
-    Source: Anderson County GIS
-    ArcGIS REST API: Opengov/MAT/MapServer/5
-    Field: DISTRICT (text, e.g. "One", "Two" ... "Seven")
-
-    Note: Anderson stores district names as words. We convert them to numbers.
-    """
-    print("\n=== Anderson County Council Districts ===")
-    output_path = os.path.join(OUTPUT_DIR, "county-anderson.json")
-
-    if dry_run:
-        print(f"  Would query: {ANDERSON_COUNTY_COUNCIL_URL}")
-        print(f"  Would write: {output_path}")
-        return
-
-    gdf = query_arcgis_geojson(
-        ANDERSON_COUNTY_COUNCIL_URL,
-        "Anderson County Council districts",
-    )
-
-    def transform_anderson_district(val):
-        """Convert word district names to numbers."""
-        return ANDERSON_DISTRICT_NAMES.get(val, val)
-
-    simplify_and_export(
-        gdf, output_path, "DISTRICT", district_transform=transform_anderson_district
-    )
-
-
-def _download_rfa_statewide(dry_run=False):
-    """
-    Download and cache the SC RFA statewide county council districts shapefile.
-    Returns a GeoDataFrame, or None if dry_run.
+    Download the SC RFA statewide county council districts shapefile.
+    Returns a GeoDataFrame.
 
     This file contains county council districts for ALL SC counties.
     We filter it to extract specific counties that don't have their own
     ArcGIS REST endpoints.
     """
-    if dry_run:
-        print(f"  Would download SC RFA statewide county council file: {RFA_COUNTY_COUNCIL_URL}")
-        return None
-
     return download_shapefile_zip(
-        RFA_COUNTY_COUNCIL_URL,
+        url,
         "SC RFA statewide county council districts",
     )
 
@@ -499,81 +285,125 @@ def _extract_county_from_rfa(rfa_gdf, county_fips, county_name, output_path, dis
     simplify_and_export(county_gdf, output_path, district_field)
 
 
-def build_pickens_county(dry_run=False, rfa_gdf=None):
-    """
-    Build Pickens County Council district boundaries.
+# ---------------------------------------------------------------------------
+# Generic build functions (dispatched by boundarySource)
+# ---------------------------------------------------------------------------
 
-    Source: SC RFA statewide county council districts shapefile.
-    Pickens County does not have a publicly accessible ArcGIS REST API
-    endpoint for council districts. Their open data portal
-    (pcgis-pickenscosc.opendata.arcgis.com) has parcels, addresses, and
-    tax districts but not council districts.
-
-    Fallback: SC RFA statewide file filtered to Pickens County (FIPS 077).
+def build_tiger(entry, output_path, dry_run=False):
     """
-    print("\n=== Pickens County Council Districts ===")
-    output_path = os.path.join(OUTPUT_DIR, "county-pickens.json")
+    Build district boundaries from Census TIGER/Line shapefile.
+
+    Reads boundaryUrl and boundaryDistrictField from the registry entry.
+    """
+    url = entry["boundaryUrl"]
+    district_field = entry["boundaryDistrictField"]
+    name = entry["name"]
 
     if dry_run:
-        print(f"  Would extract from SC RFA statewide file")
+        print(f"  Source: Census TIGER/Line shapefile")
+        print(f"  Would download: {url}")
+        print(f"  Would write: {output_path}")
+        return
+
+    gdf = download_shapefile_zip(url, f"TIGER/Line {name}")
+
+    # Filter to SC (should already be SC-only, but verify)
+    if "STATEFP" in gdf.columns:
+        gdf = gdf[gdf["STATEFP"] == "45"]
+
+    # Reproject to WGS84 if needed
+    if gdf.crs and gdf.crs.to_epsg() != 4326:
+        gdf = gdf.to_crs(epsg=4326)
+
+    simplify_and_export(gdf, output_path, district_field)
+
+
+def build_arcgis(entry, output_path, dry_run=False):
+    """
+    Build district boundaries from an ArcGIS REST API endpoint.
+
+    Reads boundaryUrl, boundaryDistrictField, and optional
+    boundaryConfig.districtNameMap from the registry entry.
+    """
+    url = entry["boundaryUrl"]
+    district_field = entry["boundaryDistrictField"]
+    name = entry["name"]
+    config = entry.get("boundaryConfig", {})
+
+    if dry_run:
+        print(f"  Source: ArcGIS REST API")
+        print(f"  Would query: {url}")
+        print(f"  Would write: {output_path}")
+        return
+
+    gdf = query_arcgis_geojson(url, f"{name} districts")
+
+    # Build district transform from config if a name map is provided
+    # (e.g., Anderson County: "One" -> "1", "Two" -> "2", etc.)
+    district_transform = None
+    name_map = config.get("districtNameMap")
+    if name_map:
+        district_transform = lambda val, m=name_map: m.get(val, val)
+
+    simplify_and_export(gdf, output_path, district_field, district_transform=district_transform)
+
+
+def build_scrfa(entry, output_path, rfa_gdf, dry_run=False):
+    """
+    Build district boundaries by extracting from the SC RFA statewide shapefile.
+
+    Reads boundaryConfig.countyFips, boundaryConfig.countyName, and optional
+    boundaryDistrictField from the registry entry.
+    """
+    config = entry.get("boundaryConfig", {})
+    county_fips = config.get("countyFips")
+    county_name = config.get("countyName", entry.get("county", "Unknown"))
+    district_field = entry.get("boundaryDistrictField")  # may be None; _extract will auto-detect
+
+    if dry_run:
+        print(f"  Source: SC RFA statewide county council shapefile")
+        print(f"  Would extract {county_name} (FIPS {county_fips})")
         print(f"  Would write: {output_path}")
         return
 
     if rfa_gdf is None:
-        print("  ERROR: RFA statewide data not available. Cannot build Pickens County.")
+        print(f"  ERROR: RFA statewide data not available. Cannot build {entry['name']}.")
         return
 
-    _extract_county_from_rfa(rfa_gdf, COUNTY_FIPS["pickens"], "Pickens", output_path)
+    _extract_county_from_rfa(rfa_gdf, county_fips, county_name, output_path, district_field)
 
 
-def build_laurens_county(dry_run=False, rfa_gdf=None):
+# ---------------------------------------------------------------------------
+# Registry loading and dispatch
+# ---------------------------------------------------------------------------
+
+BUILDERS = {
+    "tiger": build_tiger,
+    "arcgis": build_arcgis,
+    "scrfa": build_scrfa,
+}
+
+
+def load_registry():
+    """Load and return the registry.json data."""
+    with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def collect_boundary_entries(registry):
     """
-    Build Laurens County Council district boundaries.
-
-    Source: SC RFA statewide county council districts shapefile.
-    Laurens County does not have a publicly accessible ArcGIS REST API
-    for council districts. Their GIS presence is limited to a property
-    parcel viewer (laurenscountygis.org).
-
-    Fallback: SC RFA statewide file filtered to Laurens County (FIPS 059).
+    Collect all boundary entries from the registry, yielding tuples of
+    (entry_dict, output_filename) for state boundaries and local jurisdictions
+    with hasBoundary: true.
     """
-    print("\n=== Laurens County Council Districts ===")
-    output_path = os.path.join(OUTPUT_DIR, "county-laurens.json")
+    # State-level boundaries (e.g., senate and house districts)
+    for entry in registry.get("state", {}).get("boundaries", []):
+        yield entry
 
-    if dry_run:
-        print(f"  Would extract from SC RFA statewide file")
-        print(f"  Would write: {output_path}")
-        return
-
-    if rfa_gdf is None:
-        print("  ERROR: RFA statewide data not available. Cannot build Laurens County.")
-        return
-
-    _extract_county_from_rfa(rfa_gdf, COUNTY_FIPS["laurens"], "Laurens", output_path)
-
-
-def build_greenville_city(dry_run=False):
-    """
-    Build Greenville City Council district boundaries.
-
-    Source: City of Greenville GIS
-    ArcGIS REST API: AddressSearch/Boundaries/MapServer/2
-    Districts 1-4, field: DISTRICT (SmallInteger)
-    """
-    print("\n=== Greenville City Council Districts ===")
-    output_path = os.path.join(OUTPUT_DIR, "place-greenville.json")
-
-    if dry_run:
-        print(f"  Would query: {GREENVILLE_CITY_COUNCIL_URL}")
-        print(f"  Would write: {output_path}")
-        return
-
-    gdf = query_arcgis_geojson(
-        GREENVILLE_CITY_COUNCIL_URL,
-        "Greenville City Council districts",
-    )
-
-    simplify_and_export(gdf, output_path, "DISTRICT")
+    # Local jurisdiction boundaries
+    for entry in registry.get("jurisdictions", []):
+        if entry.get("hasBoundary"):
+            yield entry
 
 
 # ---------------------------------------------------------------------------
@@ -591,6 +421,10 @@ def main():
     )
     args = parser.parse_args()
 
+    # Load registry
+    registry = load_registry()
+    print(f"Loaded registry from {REGISTRY_PATH}")
+
     # Create output directory
     if not args.dry_run:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -601,68 +435,55 @@ def main():
 
     errors = []
 
-    # --- State legislative districts (Census TIGER/Line) ---
-    try:
-        build_sldu(dry_run=args.dry_run)
-    except Exception as e:
-        print(f"  ERROR: {e}")
-        errors.append(("sldu.json", str(e)))
-
-    try:
-        build_sldl(dry_run=args.dry_run)
-    except Exception as e:
-        print(f"  ERROR: {e}")
-        errors.append(("sldl.json", str(e)))
-
-    # --- County council districts with direct ArcGIS endpoints ---
-    try:
-        build_greenville_county(dry_run=args.dry_run)
-    except Exception as e:
-        print(f"  ERROR: {e}")
-        errors.append(("county-greenville.json", str(e)))
-
-    try:
-        build_spartanburg_county(dry_run=args.dry_run)
-    except Exception as e:
-        print(f"  ERROR: {e}")
-        errors.append(("county-spartanburg.json", str(e)))
-
-    try:
-        build_anderson_county(dry_run=args.dry_run)
-    except Exception as e:
-        print(f"  ERROR: {e}")
-        errors.append(("county-anderson.json", str(e)))
-
-    # --- County council districts from RFA statewide shapefile ---
-    # Download the statewide file once, then extract each county.
+    # Lazy-loaded RFA statewide GeoDataFrame (downloaded once, shared by all
+    # scrfa entries). We track the URL from the first scrfa entry we see.
     rfa_gdf = None
-    try:
-        rfa_gdf = _download_rfa_statewide(dry_run=args.dry_run)
-        if rfa_gdf is not None and rfa_gdf.crs and rfa_gdf.crs.to_epsg() != 4326:
-            rfa_gdf = rfa_gdf.to_crs(epsg=4326)
-    except Exception as e:
-        print(f"\n  ERROR downloading RFA statewide file: {e}")
-        print(f"  Pickens and Laurens county districts will not be generated.")
-        errors.append(("RFA statewide download", str(e)))
+    rfa_downloaded = False
 
-    try:
-        build_pickens_county(dry_run=args.dry_run, rfa_gdf=rfa_gdf)
-    except Exception as e:
-        print(f"  ERROR: {e}")
-        errors.append(("county-pickens.json", str(e)))
+    for entry in collect_boundary_entries(registry):
+        entry_id = entry.get("id", "unknown")
+        entry_name = entry.get("name", entry_id)
+        source = entry.get("boundarySource")
+        output_file = entry.get("boundaryFile")
 
-    try:
-        build_laurens_county(dry_run=args.dry_run, rfa_gdf=rfa_gdf)
-    except Exception as e:
-        print(f"  ERROR: {e}")
-        errors.append(("county-laurens.json", str(e)))
+        if not source or not output_file:
+            print(f"\n--- Skipping {entry_name}: missing boundarySource or boundaryFile ---")
+            continue
 
-    # --- City council districts ---
-    try:
-        build_greenville_city(dry_run=args.dry_run)
-    except Exception as e:
-        print(f"  ERROR: {e}")
-        errors.append(("place-greenville.json", str(e)))
+        output_path = os.path.join(OUTPUT_DIR, output_file)
+        print(f"\n=== {entry_name} ({entry_id}) ===")
+
+        builder = BUILDERS.get(source)
+        if builder is None:
+            print(f"  ERROR: Unknown boundarySource '{source}'")
+            errors.append((output_file, f"Unknown boundarySource '{source}'"))
+            continue
+
+        try:
+            if source == "scrfa":
+                # Lazy-download the RFA statewide file on first scrfa entry
+                if not rfa_downloaded:
+                    rfa_downloaded = True
+                    rfa_url = entry.get("boundaryUrl")
+                    if rfa_url and not args.dry_run:
+                        try:
+                            rfa_gdf = _download_rfa_statewide(rfa_url)
+                            if rfa_gdf is not None and rfa_gdf.crs and rfa_gdf.crs.to_epsg() != 4326:
+                                rfa_gdf = rfa_gdf.to_crs(epsg=4326)
+                        except Exception as e:
+                            print(f"\n  ERROR downloading RFA statewide file: {e}")
+                            print(f"  Counties using scrfa source will not be generated.")
+                            errors.append(("RFA statewide download", str(e)))
+                    elif args.dry_run:
+                        rfa_url = entry.get("boundaryUrl", "unknown")
+                        print(f"  (RFA statewide file would be downloaded from {rfa_url})")
+
+                build_scrfa(entry, output_path, rfa_gdf, dry_run=args.dry_run)
+            else:
+                builder(entry, output_path, dry_run=args.dry_run)
+        except Exception as e:
+            print(f"  ERROR: {e}")
+            errors.append((output_file, str(e)))
 
     # --- Summary ---
     print("\n" + "=" * 60)

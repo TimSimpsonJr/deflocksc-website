@@ -101,6 +101,17 @@
       "boundaryUrl": "https://propertyviewer.andersoncountysc.org/arcgis/rest/services/Opengov/MAT/MapServer/5",
       "boundaryDistrictField": "DISTRICT",
       "boundaryFile": "county-anderson.json",
+      "boundaryConfig": {
+        "districtNameMap": {
+          "One": "1",
+          "Two": "2",
+          "Three": "3",
+          "Four": "4",
+          "Five": "5",
+          "Six": "6",
+          "Seven": "7"
+        }
+      },
       "notes": "Individual emails not published. Use Clerk to Council (rdwatts@andersoncountysc.org) as fallback. ArcGIS district field uses word-based names (One, Two, ... Seven) instead of numbers."
     },
     {
@@ -126,8 +137,13 @@
       "atLarge": false,
       "hasBoundary": true,
       "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
       "boundaryFile": "county-pickens.json",
-      "notes": "FIPS 45077. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+      "boundaryConfig": {
+        "countyFips": "45077",
+        "countyName": "Pickens"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
     },
     {
       "id": "county:laurens",
@@ -140,8 +156,13 @@
       "atLarge": false,
       "hasBoundary": true,
       "boundarySource": "scrfa",
+      "boundaryUrl": "https://rfa.sc.gov/media/8135",
       "boundaryFile": "county-laurens.json",
-      "notes": "FIPS 45059. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+      "boundaryConfig": {
+        "countyFips": "45059",
+        "countyName": "Laurens"
+      },
+      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
     }
   ]
 }
