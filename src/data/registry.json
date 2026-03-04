@@ -270,7 +270,8 @@
       "adapter": "civicplus",
       "adapterConfig": {
         "baseUrl": "https://www.lexsc.gov",
-        "councilPageId": "255"
+        "councilPageId": "255",
+        "directoryDeptId": "17"
       },
       "url": "https://www.lexsc.gov/255/Mayor-Council",
       "districts": 5,
@@ -326,7 +327,8 @@
       "adapter": "civicplus",
       "adapterConfig": {
         "baseUrl": "https://www.yorkcountygov.com",
-        "councilPageId": "375"
+        "councilPageId": "375",
+        "directoryDeptId": "100"
       },
       "url": "https://www.yorkcountygov.com/375/County-Council",
       "districts": 7,
@@ -389,7 +391,8 @@
       "adapter": "civicplus",
       "adapterConfig": {
         "baseUrl": "https://www.cityofbeaufort.org",
-        "councilPageId": "221"
+        "councilPageId": "221",
+        "directoryDeptId": "19"
       },
       "url": "https://www.cityofbeaufort.org/221/City-Council",
       "districts": 4,
@@ -435,7 +438,12 @@
       "name": "Aiken County Council",
       "type": "county",
       "county": "Aiken",
-      "adapter": "manual",
+      "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.aikencountysc.gov",
+        "councilPageId": "528",
+        "directoryDeptId": "117"
+      },
       "url": "https://www.aikencountysc.gov/528/County-Council",
       "districts": 8,
       "atLarge": false,
@@ -447,7 +455,7 @@
         "countyFips": "45003",
         "countyName": "Aiken"
       },
-      "notes": "8 single-member districts + chairman elected at-large. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+      "notes": "8 single-member districts + chairman elected at-large. CivicPlus website. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
     },
     {
       "id": "place:aiken",
@@ -531,7 +539,12 @@
       "name": "Barnwell County Council",
       "type": "county",
       "county": "Barnwell",
-      "adapter": "manual",
+      "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.barnwellcountysc.us",
+        "councilPageId": "173",
+        "directoryDeptId": "17"
+      },
       "url": "https://www.barnwellcountysc.us/173/Barnwell-County-Council",
       "districts": 7,
       "atLarge": false,
@@ -543,7 +556,7 @@
         "countyFips": "45011",
         "countyName": "Barnwell"
       },
-      "notes": "Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+      "notes": "CivicPlus website. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
     },
     {
       "id": "place:barnwell",
@@ -894,12 +907,17 @@
       "name": "Summerville Town Council",
       "type": "place",
       "county": "Dorchester",
-      "adapter": "manual",
+      "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.summervillesc.gov",
+        "councilPageId": "253",
+        "directoryDeptId": "29"
+      },
       "url": "https://www.summervillesc.gov/253/Elected-Officials",
       "districts": 6,
       "atLarge": false,
       "hasBoundary": false,
-      "notes": "6 single-member districts + mayor. Pop. ~55k."
+      "notes": "6 single-member districts + mayor. CivicPlus website. Pop. ~55k."
     },
 
     {
@@ -1003,7 +1021,12 @@
       "name": "Georgetown County Council",
       "type": "county",
       "county": "Georgetown",
-      "adapter": "manual",
+      "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.gtcounty.org",
+        "councilPageId": "291",
+        "directoryDeptId": "90"
+      },
       "url": "https://www.gtcounty.org/291/County-Council",
       "districts": 7,
       "atLarge": false,
@@ -1015,7 +1038,7 @@
         "countyFips": "45043",
         "countyName": "Georgetown"
       },
-      "notes": "7 single-member districts. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+      "notes": "7 single-member districts. CivicPlus website. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
     },
     {
       "id": "place:georgetown",
@@ -1067,7 +1090,12 @@
       "name": "Hampton County Council",
       "type": "county",
       "county": "Hampton",
-      "adapter": "manual",
+      "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://hamptoncountysc.org",
+        "councilPageId": "2",
+        "directoryDeptId": "71"
+      },
       "url": "https://hamptoncountysc.org/2/County-Council",
       "districts": 5,
       "atLarge": true,
@@ -1079,7 +1107,7 @@
         "countyFips": "45049",
         "countyName": "Hampton"
       },
-      "notes": "5 council members elected at-large. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+      "notes": "5 council members elected at-large. CivicPlus website. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
     },
     {
       "id": "place:hampton",
@@ -1163,7 +1191,12 @@
       "name": "Lancaster County Council",
       "type": "county",
       "county": "Lancaster",
-      "adapter": "manual",
+      "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.lancastercountysc.gov",
+        "councilPageId": "351",
+        "directoryDeptId": "58"
+      },
       "url": "https://www.lancastercountysc.gov/351/Lancaster-County-Council",
       "districts": 7,
       "atLarge": false,
@@ -1175,19 +1208,24 @@
         "countyFips": "45057",
         "countyName": "Lancaster"
       },
-      "notes": "7 single-member districts, 4-year terms. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+      "notes": "7 single-member districts, 4-year terms. CivicPlus website. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
     },
     {
       "id": "place:lancaster",
       "name": "Lancaster City Council",
       "type": "place",
       "county": "Lancaster",
-      "adapter": "manual",
+      "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.lancastercitysc.com",
+        "councilPageId": "227",
+        "directoryDeptId": "27"
+      },
       "url": "https://www.lancastercitysc.com/227/City-Council",
       "districts": 4,
       "atLarge": true,
       "hasBoundary": false,
-      "notes": "District count unverified."
+      "notes": "CivicPlus website. District count unverified."
     },
 
     {
@@ -1387,7 +1425,12 @@
       "name": "Orangeburg County Council",
       "type": "county",
       "county": "Orangeburg",
-      "adapter": "manual",
+      "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.orangeburgcounty.org",
+        "councilPageId": "288",
+        "directoryDeptId": "65"
+      },
       "url": "https://www.orangeburgcounty.org/288/County-Council",
       "districts": 7,
       "atLarge": false,
@@ -1399,7 +1442,7 @@
         "countyFips": "45075",
         "countyName": "Orangeburg"
       },
-      "notes": "7 single-member districts, 4-year terms. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
+      "notes": "7 single-member districts, 4-year terms. CivicPlus website. Boundary from SC Revenue & Fiscal Affairs statewide county council districts shapefile."
     },
     {
       "id": "place:orangeburg",
@@ -1547,12 +1590,17 @@
       "name": "Mount Pleasant Town Council",
       "type": "place",
       "county": "Charleston",
-      "adapter": "manual",
+      "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.tompsc.com",
+        "councilPageId": "91",
+        "directoryDeptId": "23"
+      },
       "url": "https://www.tompsc.com/91/Town-Council",
       "districts": 8,
       "atLarge": true,
       "hasBoundary": false,
-      "notes": "8 council members + mayor, all elected at-large. Pop. ~91k."
+      "notes": "8 council members + mayor, all elected at-large. CivicPlus website. Pop. ~91k."
     }
   ]
 }
