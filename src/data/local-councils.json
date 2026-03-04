@@ -2,104 +2,438 @@
   "place:greenville": {
     "label": "Greenville City Council",
     "members": [
-      { "name": "Knox White", "title": "Mayor", "email": "kwhite@greenvillesc.gov", "phone": "(864) 467-4590" },
-      { "name": "John DeWorken", "title": "Council Member, District 1", "email": "jdeworken@greenvillesc.gov", "phone": "(864) 905-5529" },
-      { "name": "Lillian Brock Flemming", "title": "Council Member, District 2", "email": "lflemming@greenvillesc.gov", "phone": "(864) 241-8677" },
-      { "name": "Ken Gibson", "title": "Council Member, District 3", "email": "kgibson@greenvillesc.gov", "phone": "(864) 982-4298" },
-      { "name": "Wil Brasington", "title": "Council Member, District 4", "email": "wbrasington@greenvillesc.gov", "phone": "(864) 421-3047" },
-      { "name": "Dorothy Dowe", "title": "Council Member, At Large", "email": "ddowe@greenvillesc.gov", "phone": "(864) 884-4444" },
-      { "name": "Tina Belge", "title": "Council Member, At Large", "email": "tbelge@greenvillesc.gov", "phone": "(864) 270-9962" }
+      {
+        "name": "Knox White",
+        "title": "Mayor",
+        "email": "kwhite@greenvillesc.gov",
+        "phone": "(864) 467-4590"
+      },
+      {
+        "name": "John DeWorken",
+        "title": "Council Member, District 1",
+        "email": "jdeworken@greenvillesc.gov",
+        "phone": "(864) 905-5529"
+      },
+      {
+        "name": "Lillian Brock Flemming",
+        "title": "Council Member, District 2",
+        "email": "lflemming@greenvillesc.gov",
+        "phone": "(864) 241-8677"
+      },
+      {
+        "name": "Ken Gibson",
+        "title": "Council Member, District 3",
+        "email": "kgibson@greenvillesc.gov",
+        "phone": "(864) 982-4298"
+      },
+      {
+        "name": "Wil Brasington",
+        "title": "Council Member, District 4",
+        "email": "wbrasington@greenvillesc.gov",
+        "phone": "(864) 421-3047"
+      },
+      {
+        "name": "Dorothy Dowe",
+        "title": "Council Member, At Large",
+        "email": "ddowe@greenvillesc.gov",
+        "phone": "(864) 884-4444"
+      },
+      {
+        "name": "Tina Belge",
+        "title": "Council Member, At Large",
+        "email": "tbelge@greenvillesc.gov",
+        "phone": "(864) 270-9962"
+      }
     ]
   },
   "county:greenville": {
     "label": "Greenville County Council",
     "members": [
-      { "name": "Joey Russo", "title": "Council Member, District 17", "email": "JRusso@greenvillecounty.org", "phone": "(864) 483-0689" },
-      { "name": "Kelly Long", "title": "Council Member, District 18", "email": "KeLong@greenvillecounty.org", "phone": "(864) 410-6172" },
-      { "name": "Benton Blount", "title": "Chairman, District 19", "email": "BBlount@greenvillecounty.org", "phone": "(864) 483-2474" },
-      { "name": "Steve Shaw", "title": "Council Member, District 20", "email": "SShaw@greenvillecounty.org", "phone": "(864) 553-9713" },
-      { "name": "Curt McGahhey", "title": "Council Member, District 21", "email": "CMcGahhey@greenvillecounty.org", "phone": "(864) 398-0721" },
-      { "name": "Frank Farmer", "title": "Council Member, District 22", "email": "FFarmer@greenvillecounty.org", "phone": "(864) 398-0880" },
-      { "name": "Alan Mitchell", "title": "Council Member, District 23", "email": "AMitchell@greenvillecounty.org", "phone": "(864) 483-6952" },
-      { "name": "Liz Seman", "title": "Council Member, District 24", "email": "LSeman@greenvillecounty.org", "phone": "(864) 501-4126" },
-      { "name": "Ennis Fant, Sr.", "title": "Council Member, District 25", "email": "EFant@greenvillecounty.org", "phone": "(864) 483-2433" },
-      { "name": "Rick Bradley", "title": "Vice Chair, District 26", "email": "RBradley@greenvillecounty.org", "phone": "(864) 483-3090" },
-      { "name": "Garey Collins", "title": "Council Member, District 27", "email": "GCollins@greenvillecounty.org", "phone": "(864) 398-2709" },
-      { "name": "Dan Tripp", "title": "Council Member, District 28", "email": "DTripp@greenvillecounty.org", "phone": "(864) 915-9212" }
+      {
+        "name": "Joey Russo",
+        "title": "Council Member, District 17",
+        "email": "JRusso@greenvillecounty.org",
+        "phone": "(864) 483-0689",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Kelly Long",
+        "title": "Council Member, District 18",
+        "email": "KeLong@greenvillecounty.org",
+        "phone": "(864) 410-6172",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Benton Blount",
+        "title": "Chairman, District 19",
+        "email": "BBlount@greenvillecounty.org",
+        "phone": "(864) 483-2474",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Steve Shaw",
+        "title": "Council Member, District 20",
+        "email": "SShaw@greenvillecounty.org",
+        "phone": "(864) 553-9713",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Curt McGahhey",
+        "title": "Council Member, District 21",
+        "email": "CMcGahhey@greenvillecounty.org",
+        "phone": "(864) 398-0721",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Frank Farmer",
+        "title": "Council Member, District 22",
+        "email": "FFarmer@greenvillecounty.org",
+        "phone": "(864) 398-0880",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Alan Mitchell",
+        "title": "Council Member, District 23",
+        "email": "AMitchell@greenvillecounty.org",
+        "phone": "(864) 483-6952",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Liz Seman",
+        "title": "Council Member, District 24",
+        "email": "LSeman@greenvillecounty.org",
+        "phone": "(864) 501-4126",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Ennis Fant, Sr.",
+        "title": "Council Member, District 25",
+        "email": "efant@greenvillecounty.org",
+        "phone": "(864) 483-2433",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Rick Bradley",
+        "title": "Vice Chair, District 26",
+        "email": "RBradley@greenvillecounty.org",
+        "phone": "(864) 483-3090",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Garey Collins",
+        "title": "Council Member, District 27",
+        "email": "GCollins@greenvillecounty.org",
+        "phone": "(864) 398-2709",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      },
+      {
+        "name": "Dan Tripp",
+        "title": "Council Member, District 28",
+        "email": "DTripp@greenvillecounty.org",
+        "phone": "(864) 915-9212",
+        "source": "greenvillecounty",
+        "lastUpdated": "2026-03-03"
+      }
     ]
   },
   "place:spartanburg": {
     "label": "Spartanburg City Council",
     "members": [
-      { "name": "Jerome Rice", "title": "Mayor", "email": "Jerome.Rice@cityofspartanburg.org", "phone": "(864) 596-2796" },
-      { "name": "Meghan Smith", "title": "Council Member, District 1", "email": "mesmith@cityofspartanburg.org", "phone": "(864) 596-2796" },
-      { "name": "Leslie Rodgers", "title": "Council Member, District 2", "email": "lrodgers@cityofspartanburg.org", "phone": "(864) 596-2796" },
-      { "name": "Ruth Littlejohn", "title": "Council Member, District 3", "email": "rlittlejohn@cityofspartanburg.org", "phone": "(864) 596-2796" },
-      { "name": "Jamie Fulmer", "title": "Council Member, District 4", "email": "jfulmer@cityofspartanburg.org", "phone": "(864) 596-2796" },
-      { "name": "Janie Salley", "title": "Council Member, District 5", "email": "jsalley@cityofspartanburg.org", "phone": "(864) 596-2796" },
-      { "name": "Erica Brown", "title": "Council Member, District 6", "email": "ebrown@cityofspartanburg.org", "phone": "(864) 596-2796" }
+      {
+        "name": "Jerome Rice",
+        "title": "Mayor",
+        "email": "Jerome.Rice@cityofspartanburg.org",
+        "phone": "(864) 596-2796"
+      },
+      {
+        "name": "Meghan Smith",
+        "title": "Council Member, District 1",
+        "email": "mesmith@cityofspartanburg.org",
+        "phone": "(864) 596-2796"
+      },
+      {
+        "name": "Leslie Rodgers",
+        "title": "Council Member, District 2",
+        "email": "lrodgers@cityofspartanburg.org",
+        "phone": "(864) 596-2796"
+      },
+      {
+        "name": "Ruth Littlejohn",
+        "title": "Council Member, District 3",
+        "email": "rlittlejohn@cityofspartanburg.org",
+        "phone": "(864) 596-2796"
+      },
+      {
+        "name": "Jamie Fulmer",
+        "title": "Council Member, District 4",
+        "email": "jfulmer@cityofspartanburg.org",
+        "phone": "(864) 596-2796"
+      },
+      {
+        "name": "Janie Salley",
+        "title": "Council Member, District 5",
+        "email": "jsalley@cityofspartanburg.org",
+        "phone": "(864) 596-2796"
+      },
+      {
+        "name": "Erica Brown",
+        "title": "Council Member, District 6",
+        "email": "ebrown@cityofspartanburg.org",
+        "phone": "(864) 596-2796"
+      }
     ]
   },
   "county:spartanburg": {
     "label": "Spartanburg County Council",
     "members": [
-      { "name": "A. Manning Lynch", "title": "Chairman", "email": "mlynch@spartanburgcounty.org", "phone": "(864) 596-2528" },
-      { "name": "Monier Abusaft", "title": "Council Member, District 1", "email": "mabusaft@spartanburgcounty.org", "phone": "(706) 346-4465" },
-      { "name": "Jack Mabry", "title": "Council Member, District 2", "email": "jmabry@spartanburgcounty.org", "phone": "(864) 596-2528" },
-      { "name": "Paul Abbott", "title": "Council Member, District 3", "email": "pabbott@spartanburgcounty.org", "phone": "(864) 542-6335" },
-      { "name": "Grant DeShields", "title": "Council Member, District 4", "email": "gdeshields@spartanburgcounty.org", "phone": "(864) 596-2528" },
-      { "name": "Bob Walker", "title": "Council Member, District 5", "email": "bwalker@spartanburgcounty.org", "phone": "(864) 590-0409" },
-      { "name": "Jessica Coker", "title": "Council Member, District 6", "email": "jcoker@spartanburgcounty.org", "phone": "(864) 680-3297" }
+      {
+        "name": "A. Manning Lynch",
+        "title": "Chairman",
+        "email": "mlynch@spartanburgcounty.org",
+        "phone": "(864) 596-2528"
+      },
+      {
+        "name": "Monier Abusaft",
+        "title": "Council Member, District 1",
+        "email": "mabusaft@spartanburgcounty.org",
+        "phone": "(706) 346-4465"
+      },
+      {
+        "name": "Jack Mabry",
+        "title": "Council Member, District 2",
+        "email": "jmabry@spartanburgcounty.org",
+        "phone": "(864) 596-2528"
+      },
+      {
+        "name": "Paul Abbott",
+        "title": "Council Member, District 3",
+        "email": "pabbott@spartanburgcounty.org",
+        "phone": "(864) 542-6335"
+      },
+      {
+        "name": "Grant DeShields",
+        "title": "Council Member, District 4",
+        "email": "gdeshields@spartanburgcounty.org",
+        "phone": "(864) 596-2528"
+      },
+      {
+        "name": "Bob Walker",
+        "title": "Council Member, District 5",
+        "email": "bwalker@spartanburgcounty.org",
+        "phone": "(864) 590-0409"
+      },
+      {
+        "name": "Jessica Coker",
+        "title": "Council Member, District 6",
+        "email": "jcoker@spartanburgcounty.org",
+        "phone": "(864) 680-3297"
+      }
     ]
   },
   "place:anderson": {
     "label": "Anderson City Council",
     "members": [
-      { "name": "Terence Roberts", "title": "Mayor", "email": "troberts@cityofandersonsc.com", "phone": "(864) 231-1135" },
-      { "name": "Kyle Newton", "title": "Council Member, Seat 1", "email": "knewton@cityofandersonsc.com", "phone": "(864) 712-5725" },
-      { "name": "Vacant", "title": "Council Member, Seat 2", "email": "", "phone": "" },
-      { "name": "Jeff Roberts", "title": "Mayor Pro Tem, Seat 3", "email": "jeffroberts@cityofandersonsc.com", "phone": "(864) 226-8837" },
-      { "name": "Tony Stewart", "title": "Council Member, Seat 4", "email": "tstewart@cityofandersonsc.com", "phone": "(864) 915-1122" },
-      { "name": "Beatrice Thompson", "title": "Council Member, Seat 5", "email": "bthompson@cityofandersonsc.com", "phone": "(864) 224-1990" },
-      { "name": "Greg Steele", "title": "Council Member, Seat 6", "email": "gsteele@cityofandersonsc.com", "phone": "(864) 651-2351" },
-      { "name": "Matt Harbin", "title": "Council Member, At Large Seat 7", "email": "mharbin@cityofandersonsc.com", "phone": "(864) 376-4968" },
-      { "name": "John Roberts", "title": "Council Member, At Large Seat 8", "email": "jroberts@cityofandersonsc.com", "phone": "(864) 261-1311" }
+      {
+        "name": "Terence Roberts",
+        "title": "Mayor",
+        "email": "troberts@cityofandersonsc.com",
+        "phone": "(864) 231-1135"
+      },
+      {
+        "name": "Kyle Newton",
+        "title": "Council Member, Seat 1",
+        "email": "knewton@cityofandersonsc.com",
+        "phone": "(864) 712-5725"
+      },
+      {
+        "name": "Vacant",
+        "title": "Council Member, Seat 2",
+        "email": "",
+        "phone": ""
+      },
+      {
+        "name": "Jeff Roberts",
+        "title": "Mayor Pro Tem, Seat 3",
+        "email": "jeffroberts@cityofandersonsc.com",
+        "phone": "(864) 226-8837"
+      },
+      {
+        "name": "Tony Stewart",
+        "title": "Council Member, Seat 4",
+        "email": "tstewart@cityofandersonsc.com",
+        "phone": "(864) 915-1122"
+      },
+      {
+        "name": "Beatrice Thompson",
+        "title": "Council Member, Seat 5",
+        "email": "bthompson@cityofandersonsc.com",
+        "phone": "(864) 224-1990"
+      },
+      {
+        "name": "Greg Steele",
+        "title": "Council Member, Seat 6",
+        "email": "gsteele@cityofandersonsc.com",
+        "phone": "(864) 651-2351"
+      },
+      {
+        "name": "Matt Harbin",
+        "title": "Council Member, At Large Seat 7",
+        "email": "mharbin@cityofandersonsc.com",
+        "phone": "(864) 376-4968"
+      },
+      {
+        "name": "John Roberts",
+        "title": "Council Member, At Large Seat 8",
+        "email": "jroberts@cityofandersonsc.com",
+        "phone": "(864) 261-1311"
+      }
     ]
   },
   "county:anderson": {
     "label": "Anderson County Council",
     "note": "Individual council member emails are not publicly listed on the county website (site experiencing technical issues). Contact Clerk to Council Renee Watts at rdwatts@andersoncountysc.org or (864) 260-1036.",
     "members": [
-      { "name": "Chris N. Sullivan", "title": "Council Member, District 1", "email": "rdwatts@andersoncountysc.org", "phone": "(864) 356-2007" },
-      { "name": "Glenn A. Davis", "title": "Council Member, District 2", "email": "rdwatts@andersoncountysc.org", "phone": "(864) 965-8734" },
-      { "name": "Greg Elgin", "title": "Council Member, District 3", "email": "rdwatts@andersoncountysc.org", "phone": "(864) 505-1815" },
-      { "name": "Brett Sanders", "title": "Vice Chairman, District 4", "email": "rdwatts@andersoncountysc.org", "phone": "(864) 934-7053" },
-      { "name": "Tommy Dunn", "title": "Chairman, District 5", "email": "rdwatts@andersoncountysc.org", "phone": "(864) 844-3765" },
-      { "name": "Jimmy Davis", "title": "Council Member, District 6", "email": "rdwatts@andersoncountysc.org", "phone": "(864) 508-4788" },
-      { "name": "M. Cindy Wilson", "title": "Council Member, District 7", "email": "rdwatts@andersoncountysc.org", "phone": "(864) 261-3980" }
+      {
+        "name": "Chris N. Sullivan",
+        "title": "Council Member, District 1",
+        "email": "rdwatts@andersoncountysc.org",
+        "phone": "(864) 356-2007"
+      },
+      {
+        "name": "Glenn A. Davis",
+        "title": "Council Member, District 2",
+        "email": "rdwatts@andersoncountysc.org",
+        "phone": "(864) 965-8734"
+      },
+      {
+        "name": "Greg Elgin",
+        "title": "Council Member, District 3",
+        "email": "rdwatts@andersoncountysc.org",
+        "phone": "(864) 505-1815"
+      },
+      {
+        "name": "Brett Sanders",
+        "title": "Vice Chairman, District 4",
+        "email": "rdwatts@andersoncountysc.org",
+        "phone": "(864) 934-7053"
+      },
+      {
+        "name": "Tommy Dunn",
+        "title": "Chairman, District 5",
+        "email": "rdwatts@andersoncountysc.org",
+        "phone": "(864) 844-3765"
+      },
+      {
+        "name": "Jimmy Davis",
+        "title": "Council Member, District 6",
+        "email": "rdwatts@andersoncountysc.org",
+        "phone": "(864) 508-4788"
+      },
+      {
+        "name": "M. Cindy Wilson",
+        "title": "Council Member, District 7",
+        "email": "rdwatts@andersoncountysc.org",
+        "phone": "(864) 261-3980"
+      }
     ]
   },
   "county:pickens": {
     "label": "Pickens County Council",
     "members": [
-      { "name": "C. Claiborne Linvill", "title": "Council Member, District 1", "email": "clinvill@pickenscountysc.gov", "phone": "(864) 765-1496" },
-      { "name": "Chris Lollis", "title": "Vice Chairman, District 2", "email": "clollis@pickenscountysc.gov", "phone": "(864) 549-6503" },
-      { "name": "Alex Saitta", "title": "Chairman, District 3", "email": "asaitta@pickenscountysc.gov", "phone": "(864) 997-4265" },
-      { "name": "Scott Lang", "title": "Council Member, District 4", "email": "slang@pickenscountysc.gov", "phone": "(864) 997-8900" },
-      { "name": "Chris Bowers", "title": "Council Member, District 5", "email": "cbowers@pickenscountysc.gov", "phone": "(864) 293-0700" },
-      { "name": "Dr. A.D. Holloway", "title": "Council Member, District 6", "email": "dholloway@pickenscountysc.gov", "phone": "(864) 997-8665" }
+      {
+        "name": "C. Claiborne Linvill",
+        "title": "Council Member, District 1",
+        "email": "clinvill@pickenscountysc.gov",
+        "phone": "(864) 765-1496"
+      },
+      {
+        "name": "Chris Lollis",
+        "title": "Vice Chairman, District 2",
+        "email": "clollis@pickenscountysc.gov",
+        "phone": "(864) 549-6503"
+      },
+      {
+        "name": "Alex Saitta",
+        "title": "Chairman, District 3",
+        "email": "asaitta@pickenscountysc.gov",
+        "phone": "(864) 997-4265"
+      },
+      {
+        "name": "Scott Lang",
+        "title": "Council Member, District 4",
+        "email": "slang@pickenscountysc.gov",
+        "phone": "(864) 997-8900"
+      },
+      {
+        "name": "Chris Bowers",
+        "title": "Council Member, District 5",
+        "email": "cbowers@pickenscountysc.gov",
+        "phone": "(864) 293-0700"
+      },
+      {
+        "name": "Dr. A.D. Holloway",
+        "title": "Council Member, District 6",
+        "email": "dholloway@pickenscountysc.gov",
+        "phone": "(864) 997-8665"
+      }
     ]
   },
   "county:laurens": {
     "label": "Laurens County Council",
     "members": [
-      { "name": "M. Kemp Younts", "title": "Council Member, District 1", "email": "council1@laurenscountysc.gov", "phone": "(864) 681-3152" },
-      { "name": "Matthew Brownlee", "title": "Vice Chairman, District 2", "email": "mbrownlee.council2@laurenscountysc.gov", "phone": "(864) 981-6244" },
-      { "name": "Shirley Clark", "title": "Council Member, District 3", "email": "council3@laurenscountysc.gov", "phone": "(864) 983-8842" },
-      { "name": "W. Brown Patterson, Jr.", "title": "Council Member, District 4", "email": "council4@laurenscountysc.gov", "phone": "(864) 984-5484" },
-      { "name": "Jeffrey Carroll", "title": "Chairman, District 5", "email": "council5@laurenscountysc.gov", "phone": "(864) 597-6756" },
-      { "name": "Arthur Lee Philson, Jr.", "title": "Council Member, District 6", "email": "aphilson.council6@laurenscountysc.gov", "phone": "(864) 857-4072" },
-      { "name": "Justin Lane", "title": "Council Member, District 7", "email": "jlane.council7@laurenscountysc.gov", "phone": "(864) 981-6412" }
+      {
+        "name": "M. Kemp Younts",
+        "title": "Council Member, District 1",
+        "email": "council1@laurenscountysc.gov",
+        "phone": "(864) 681-3152"
+      },
+      {
+        "name": "Matthew Brownlee",
+        "title": "Vice Chairman, District 2",
+        "email": "mbrownlee.council2@laurenscountysc.gov",
+        "phone": "(864) 981-6244"
+      },
+      {
+        "name": "Shirley Clark",
+        "title": "Council Member, District 3",
+        "email": "council3@laurenscountysc.gov",
+        "phone": "(864) 983-8842"
+      },
+      {
+        "name": "W. Brown Patterson, Jr.",
+        "title": "Council Member, District 4",
+        "email": "council4@laurenscountysc.gov",
+        "phone": "(864) 984-5484"
+      },
+      {
+        "name": "Jeffrey Carroll",
+        "title": "Chairman, District 5",
+        "email": "council5@laurenscountysc.gov",
+        "phone": "(864) 597-6756"
+      },
+      {
+        "name": "Arthur Lee Philson, Jr.",
+        "title": "Council Member, District 6",
+        "email": "aphilson.council6@laurenscountysc.gov",
+        "phone": "(864) 857-4072"
+      },
+      {
+        "name": "Justin Lane",
+        "title": "Council Member, District 7",
+        "email": "jlane.council7@laurenscountysc.gov",
+        "phone": "(864) 981-6412"
+      }
     ]
   }
 }

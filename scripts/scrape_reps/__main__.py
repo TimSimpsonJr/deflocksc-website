@@ -24,7 +24,11 @@ STATE_JSON = os.path.join(PROJECT_ROOT, "src", "data", "state-legislators.json")
 LOCAL_JSON = os.path.join(PROJECT_ROOT, "src", "data", "local-councils.json")
 
 # Adapter registry -- import adapters here as they are built
-ADAPTERS = {}
+from .adapters.greenville_county import GreenvilleCountyAdapter
+
+ADAPTERS = {
+    "greenville_county": GreenvilleCountyAdapter,
+}
 
 
 def load_registry() -> dict:
