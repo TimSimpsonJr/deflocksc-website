@@ -24,9 +24,11 @@ STATE_JSON = os.path.join(PROJECT_ROOT, "src", "data", "state-legislators.json")
 LOCAL_JSON = os.path.join(PROJECT_ROOT, "src", "data", "local-councils.json")
 
 # Adapter registry -- import adapters here as they are built
+from .adapters.greenville_city import GreenvilleCityAdapter
 from .adapters.greenville_county import GreenvilleCountyAdapter
 
 ADAPTERS = {
+    "greenville_city": GreenvilleCityAdapter,
     "greenville_county": GreenvilleCountyAdapter,
 }
 
