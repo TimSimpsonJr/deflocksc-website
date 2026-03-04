@@ -15,7 +15,9 @@ const CDN_URL = "https://cdn.deflock.me/regions/20/-100.json";
 
 async function main() {
   console.log(`Fetching camera data from ${CDN_URL}...`);
-  const resp = await fetch(CDN_URL);
+  const resp = await fetch(CDN_URL, {
+    headers: { "User-Agent": "deflocksc-website/1.0 (https://github.com/TimSimpsonJr/deflocksc-website)" },
+  });
   if (!resp.ok) {
     throw new Error(`CDN responded with ${resp.status} ${resp.statusText}`);
   }
