@@ -87,6 +87,10 @@ def simplify_and_export(gdf, output_path, district_field, district_transform=Non
     for _, row in gdf.iterrows():
         geom = row.geometry
 
+        # Skip features with null geometry
+        if geom is None or geom.is_empty:
+            continue
+
         # Simplify geometry
         simplified = geom.simplify(SIMPLIFY_TOLERANCE, preserve_topology=True)
 
