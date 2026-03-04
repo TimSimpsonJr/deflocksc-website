@@ -167,6 +167,9 @@ function showCameraPopup(e: maplibregl.MapMouseEvent & { features?: maplibregl.M
 
   html += '</div>';
 
+  // Privacy-friendly analytics event (no personal data sent)
+  if (typeof umami !== 'undefined') umami.track('camera-popup-viewed');
+
   new maplibregl.Popup({ closeButton: true, maxWidth: '260px', offset: 12 })
     .setLngLat(coords)
     .setHTML(html)
@@ -377,6 +380,8 @@ window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
 
 // Mobile toggle
 document.getElementById('map-toggle')?.addEventListener('click', () => {
+  // Privacy-friendly analytics event (no personal data sent)
+  if (typeof umami !== 'undefined') umami.track('map-opened-mobile');
   document.getElementById('map-button-container')?.classList.add('hidden');
   const frame = document.getElementById('map-frame');
   if (frame) {
