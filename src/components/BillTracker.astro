@@ -92,9 +92,9 @@ import bills from '../data/bills.json';
       <!-- Fixed footer -->
       <div class="flex-shrink-0 p-6 md:p-8 pt-4 border-t border-[#404040]">
         <div class="flex flex-col items-start gap-3 min-[520px]:flex-row-reverse min-[520px]:justify-between min-[520px]:items-center">
-          <a href="#take-action" id="modal-cta" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.05em] px-6 py-3 rounded transition-colors">
+          <button type="button" id="modal-cta" data-open-action class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.05em] px-6 py-3 rounded transition-colors cursor-pointer">
             Contact Your Reps
-          </a>
+          </button>
           <a id="modal-bill-link" href="#" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors">
             Read full text on scstatehouse.gov<span class="sr-only"> (opens in new tab)</span> &rarr;
           </a>
@@ -160,7 +160,11 @@ import bills from '../data/bills.json';
 
     setTimeout(function() {
       backdrop.classList.add('hidden');
-      document.body.style.overflow = '';
+      // Only restore scroll if no other modal (e.g. action modal) is open
+      var actionOpen = !document.getElementById('action-modal')?.classList.contains('hidden');
+      if (!actionOpen) {
+        document.body.style.overflow = '';
+      }
       if (previouslyFocused) {
         previouslyFocused.focus();
       }
