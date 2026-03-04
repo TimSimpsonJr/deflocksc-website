@@ -186,6 +186,10 @@
       "type": "place",
       "county": "Charleston",
       "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.charleston-sc.gov",
+        "councilPageId": "180"
+      },
       "url": "https://www.charleston-sc.gov/180/Members-Districts",
       "districts": 12,
       "atLarge": false,
@@ -264,11 +268,15 @@
       "type": "place",
       "county": "Lexington",
       "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.lexsc.gov",
+        "councilPageId": "255"
+      },
       "url": "https://www.lexsc.gov/255/Mayor-Council",
-      "districts": 6,
+      "districts": 5,
       "atLarge": true,
       "hasBoundary": false,
-      "notes": "Mayor + 5 council members + mayor pro-tem, all elected at-large. Council-Administrator form of government."
+      "notes": "Mayor + 5 council members, all elected at-large. Council-Administrator form of government."
     },
     {
       "id": "county:horry",
@@ -278,7 +286,7 @@
       "adapter": "manual",
       "url": "https://www.horrycountysc.gov/county-council",
       "districts": 11,
-      "atLarge": true,
+      "atLarge": false,
       "hasBoundary": true,
       "boundarySource": "arcgis",
       "boundaryUrl": "https://www.horrycounty.org/gispublic/rest/services/PlanningAndZoning/PZ_Layers/MapServer/98",
@@ -293,7 +301,7 @@
       "county": "Horry",
       "adapter": "manual",
       "url": "https://www.cityofmyrtlebeach.com/government/mayor___city_council/index.php",
-      "districts": 7,
+      "districts": 6,
       "atLarge": true,
       "hasBoundary": false,
       "notes": "6 council members + mayor, all elected at-large. Council-Manager form of government."
@@ -338,7 +346,7 @@
       "name": "Rock Hill City Council",
       "type": "place",
       "county": "York",
-      "adapter": "civicplus",
+      "adapter": "manual",
       "url": "https://www.cityofrockhill.com/government/city-council",
       "districts": 6,
       "atLarge": false,
@@ -379,6 +387,10 @@
       "type": "place",
       "county": "Beaufort",
       "adapter": "civicplus",
+      "adapterConfig": {
+        "baseUrl": "https://www.cityofbeaufort.org",
+        "councilPageId": "221"
+      },
       "url": "https://www.cityofbeaufort.org/221/City-Council",
       "districts": 4,
       "atLarge": true,
