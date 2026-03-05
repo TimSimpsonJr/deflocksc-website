@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
+    "tina": "tinacms dev -c \"astro dev\"",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
@@ -12,8 +13,15 @@
   "dependencies": {
     "@astrojs/rss": "^4.0.15",
     "@tailwindcss/vite": "^4.2.1",
+    "@tinacms/cli": "^2.1.9",
     "astro": "^5.18.0",
     "maplibre-gl": "^5.19.0",
-    "tailwindcss": "^4.2.1"
+    "satori": "^0.24.1",
+    "sharp": "^0.34.5",
+    "tailwindcss": "^4.2.1",
+    "tinacms": "^3.6.1"
+  },
+  "overrides": {
+    "better-sqlite3": "^12.6.2"
   }
 }

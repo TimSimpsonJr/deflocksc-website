@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
+  const posts = (await getCollection('blog')).filter((post) => !post.data.draft);
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },
@@ -12,12 +12,25 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+
+// OG image priority: manual override > auto-generated > site default
+const ogImage = post.data.ogImage
+  ? post.data.ogImage
+  : `/blog/${post.id}/og.png`;
 ---
 
-<Base title={`${post.data.title} — DeflockSC`} description={post.data.summary}>
+<Base title={`${post.data.title} — DeflockSC`} description={post.data.summary} ogImage={ogImage}>
   <article class="py-20 md:py-28">
     <div class="max-w-3xl mx-auto px-6">
       <a href="/blog" class="text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors mb-8 inline-block">&larr; Back to Blog</a>
+
+      {post.data.featuredImage && (
+        <img
+          src={post.data.featuredImage}
+          alt=""
+          class="w-full rounded-lg mb-8 aspect-[2/1] object-cover"
+        />
+      )}
 
       <header class="mb-10">
         <time class="text-[#737373] text-sm font-medium" datetime={new Date(post.data.date).toISOString()}>
@@ -37,7 +50,8 @@ const { Content } = await render(post);
         [&_strong]:text-white
         [&_code]:bg-[#262626] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm
         [&>pre]:bg-[#262626] [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>pre]:mb-6
-        [&_pre_code]:p-0 [&_pre_code]:bg-transparent">
+        [&_pre_code]:p-0 [&_pre_code]:bg-transparent
+        [&_img]:rounded-lg [&_img]:my-6">
         <Content />
       </div>
     </div>

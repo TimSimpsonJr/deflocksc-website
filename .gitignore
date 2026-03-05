@@ -10,3 +10,4 @@ __pycache__/
 !.env.example
 .claude/
 public/dev-preview.html
+tina/__generated__/

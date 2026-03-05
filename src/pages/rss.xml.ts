@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 
 export async function GET(context: APIContext) {
-  const posts = await getCollection('blog');
+  const posts = (await getCollection('blog')).filter((post) => !post.data.draft);
   return rss({
     title: 'DeflockSC Blog',
     description: 'Campaign updates and research on license plate surveillance in South Carolina.',
