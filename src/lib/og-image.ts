@@ -1,9 +1,10 @@
 import satori from "satori";
 import sharp from "sharp";
-import fs from "node:fs/promises";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 
-const INTER_BOLD = await fs.readFile(
-  new URL("../assets/fonts/Inter-Bold.ttf", import.meta.url)
+const INTER_BOLD = await readFile(
+  resolve(process.cwd(), "src/assets/fonts/Inter-Bold.ttf")
 );
 
 export async function generateOgImage(title: string): Promise<Buffer> {
