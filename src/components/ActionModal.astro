@@ -412,6 +412,8 @@ const registry = {
     openerElement = opener || null;
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    // Privacy-friendly analytics event (no personal data sent)
+    if (typeof umami !== 'undefined') umami.track('action-modal-open');
     // Focus the address input after a tick (let the DOM settle)
     requestAnimationFrame(function() {
       var input = document.getElementById('action-address');
@@ -646,11 +648,15 @@ const registry = {
 
   // --- mailto and clipboard ---
   function buildMailto(emails, subject, body) {
+    // Privacy-friendly analytics event (no personal data sent — only event name)
+    if (typeof umami !== 'undefined') umami.track('email-rep-clicked');
     var to = emails.join(',');
     return 'mailto:' + to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
   }
 
   async function copyToClipboard(text, button) {
+    // Privacy-friendly analytics event (no personal data sent)
+    if (typeof umami !== 'undefined') umami.track('letter-copied');
     try {
       await navigator.clipboard.writeText(text);
       var original = button.textContent;
