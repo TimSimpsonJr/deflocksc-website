@@ -1,22 +1,17 @@
 import { defineConfig } from "tinacms";
 
 export default defineConfig({
-  branch: "",
-  clientId: "",
-  token: "",
-
+  branch: process.env.GITHUB_BRANCH || "master",
   build: {
     outputFolder: "admin",
     publicFolder: "public",
   },
-
   media: {
     tina: {
-      mediaRoot: "",
       publicFolder: "public",
+      mediaRoot: "uploads/blog",
     },
   },
-
   schema: {
     collections: [
       {
@@ -57,6 +52,17 @@ export default defineConfig({
             type: "boolean",
             name: "draft",
             label: "Draft",
+          },
+          {
+            type: "image",
+            name: "featuredImage",
+            label: "Featured Image",
+          },
+          {
+            type: "image",
+            name: "ogImage",
+            label: "OG Image Override",
+            description: "Custom social sharing image. If empty, one is auto-generated from the title and featured image.",
           },
           {
             type: "rich-text",
