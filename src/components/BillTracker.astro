@@ -27,7 +27,7 @@ import bills from '../data/bills.json';
             type="button"
             class="bill-card bg-[#171717] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#2e2e2e] hover:translate-x-1 focus-visible:bg-[#2e2e2e] focus-visible:translate-x-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] focus-visible:ring-offset-2 focus-visible:ring-offset-[#262626] w-full text-left"
             data-bill={i}
-            aria-label={`View details for ${bill.bill}: ${bill.title}`}
+            aria-label={`${bill.bill}: ${bill.title}`}
           >
             <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 mb-2">
               <span class="text-[#ef4444] font-extrabold text-lg">{bill.bill}</span>
