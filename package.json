@@ -16,6 +16,8 @@
     "@tinacms/cli": "^2.1.9",
     "astro": "^5.18.0",
     "maplibre-gl": "^5.19.0",
+    "satori": "^0.24.1",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.2.1",
     "tinacms": "^3.6.1"
   },
