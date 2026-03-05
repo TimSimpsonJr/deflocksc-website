@@ -42,8 +42,8 @@ const ogImageURL = new URL(ogImage, Astro.site ?? "https://deflocksc.netlify.app
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
 
-    {/* Umami Cloud Analytics – privacy-friendly, cookie-free, GDPR-compliant */}
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="c0ff812f-a062-43e1-8ac1-e5eafd527ffc" />
+    {/* Umami Cloud Analytics – proxied through our domain to avoid ad-blocker blocklists */}
+    <script defer src="/u/script.js" data-website-id="c0ff812f-a062-43e1-8ac1-e5eafd527ffc" />
   </head>
   <body class="bg-[#171717] text-[#d4d4d4] font-['Inter',sans-serif] leading-[1.7] min-h-screen">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-[#dc2626] focus:text-white focus:font-bold focus:text-sm focus:px-4 focus:py-2 focus:rounded">
