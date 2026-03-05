@@ -25,6 +25,12 @@ def scrape_bill(url: str) -> dict:
 
     result = {"status": "", "lastAction": "", "lastActionDate": ""}
 
+    # Validate we got a real HTML page (not an error page or redirect)
+    page_text = soup.get_text(strip=True)
+    if len(page_text) < 100:
+        print(f"  WARNING: Page at {url} has very little content ({len(page_text)} chars)")
+        return result
+
     cover = soup.find("div", class_="statusCoverSheet")
     if not cover:
         print(f"  WARNING: No statusCoverSheet found at {url}")
@@ -100,6 +106,19 @@ def scrape_bill(url: str) -> dict:
 def main():
     with open(BILLS_JSON, "r", encoding="utf-8") as f:
         bills = json.load(f)
+
+    if not isinstance(bills, list) or len(bills) == 0:
+        print("ERROR: bills.json is empty or not a list")
+        sys.exit(1)
+
+    # Validate bill entries have required fields
+    for i, bill in enumerate(bills):
+        for field in ("bill", "url"):
+            if not bill.get(field):
+                print(f"ERROR: bills[{i}] missing required field '{field}'")
+                sys.exit(1)
+        if not bill.get("url", "").startswith("https://"):
+            print(f"WARNING: bills[{i}] URL does not start with https://: {bill.get('url')}")
 
     changes = []
 

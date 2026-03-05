@@ -13,13 +13,28 @@ from bs4 import BeautifulSoup
 HEADERS = {"User-Agent": "DeflockSC-RepScraper/1.0 (+https://deflocksc.org)"}
 
 
+REQUIRED_CSV_COLUMNS = {"name", "current_district", "current_chamber", "current_party"}
+
+
 def download_csv(url: str) -> list[dict]:
     """Download the OpenStates CSV and return rows as dicts."""
     print(f"  Downloading {url}...")
     resp = requests.get(url, timeout=60, headers=HEADERS)
     resp.raise_for_status()
     reader = csv.DictReader(io.StringIO(resp.text))
-    return list(reader)
+    rows = list(reader)
+
+    # Validate CSV has expected columns
+    if rows:
+        actual_columns = set(rows[0].keys())
+        missing = REQUIRED_CSV_COLUMNS - actual_columns
+        if missing:
+            raise ValueError(
+                f"OpenStates CSV is missing expected columns: {missing}. "
+                f"Available: {sorted(actual_columns)}"
+            )
+
+    return rows
 
 
 def normalize_row(row: dict) -> dict:
@@ -131,6 +146,26 @@ def update_state_legislators(source_url: str, output_path: str):
             print(f"  WARNING: Unknown chamber '{chamber}' for {record['name']}")
 
     print(f"  Senate: {len(senate)} members, House: {len(house)} members")
+
+    # Sanity checks: SC has 46 senate and 124 house districts
+    if len(senate) < 37:  # 80% threshold
+        raise ValueError(
+            f"Only {len(senate)} senate members found (expected ~46). "
+            f"Data source may have changed."
+        )
+    if len(house) < 99:  # 80% threshold
+        raise ValueError(
+            f"Only {len(house)} house members found (expected ~124). "
+            f"Data source may have changed."
+        )
+
+    # Validate individual records
+    for chamber_name, chamber_data in [("senate", senate), ("house", house)]:
+        for district, record in chamber_data.items():
+            if not record.get("name"):
+                print(f"  WARNING: {chamber_name}[{district}] has no name")
+            if not record.get("email") and not record.get("phone"):
+                print(f"  WARNING: {chamber_name}[{district}] ({record.get('name', '?')}) has no email or phone")
 
     data = {"senate": senate, "house": house}
 
