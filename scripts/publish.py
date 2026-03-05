@@ -92,6 +92,9 @@ def process_content(content: str) -> str:
                 # Remove publish field
                 data.pop("publish", None)
 
+                # Mark as draft (flip to false or remove when ready to publish)
+                data["draft"] = True
+
                 # Strip vault-internal tags
                 if "tags" in data and isinstance(data["tags"], list):
                     data["tags"] = [
