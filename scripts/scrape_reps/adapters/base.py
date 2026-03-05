@@ -32,11 +32,33 @@ class BaseAdapter(abc.ABC):
             record.setdefault("lastUpdated", today)
         return raw
 
+    def validate(self, records: list[dict]) -> list[dict]:
+        """Validate normalized records have required fields.
+
+        Prints warnings for missing data but does not remove records.
+        Raises ValueError if no records were produced.
+        """
+        if not records:
+            raise ValueError(
+                f"{self.adapter_name()} adapter for '{self.id}' produced 0 records"
+            )
+
+        for i, record in enumerate(records):
+            if not record.get("name"):
+                print(f"  WARNING: {self.id} record[{i}] has no name")
+            if not record.get("title"):
+                print(f"  WARNING: {self.id} record[{i}] ({record.get('name', '?')}) has no title")
+            if not record.get("email") and not record.get("phone"):
+                print(f"  WARNING: {self.id} record[{i}] ({record.get('name', '?')}) has no email or phone")
+
+        return records
+
     def scrape(self) -> list[dict]:
-        """Full pipeline: fetch -> parse -> normalize."""
+        """Full pipeline: fetch -> parse -> normalize -> validate."""
         html = self.fetch()
         raw = self.parse(html)
-        return self.normalize(raw)
+        normalized = self.normalize(raw)
+        return self.validate(normalized)
 
     def adapter_name(self) -> str:
         """Return the adapter name for the source field."""
