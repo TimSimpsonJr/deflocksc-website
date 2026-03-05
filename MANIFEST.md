@@ -40,7 +40,7 @@ src/
     bills.json                  # SC legislature bills (populated by scraper)
     state-legislators.json      # State reps and senators
     local-councils.json         # County/city council members
-    action-letters.json         # Pre-written contact letter templates
+    action-letters.json         # 80+ locally tailored letter templates (all 46 counties)
     registry.json               # Rep data registry (adapter metadata)
   styles/
     global.css                  # Tailwind base, glow-frame, custom utilities
@@ -76,6 +76,8 @@ public/
 
 docs/
   architecture.md               # System architecture overview
+  adapting-scrapers.md           # Adding your state's rep data
+  research-workflow.md           # Creating localized copy, research, and form letters
   deployment.md                 # Netlify deployment guide
   plans/                        # Design docs and implementation plans
 ```

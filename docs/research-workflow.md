@@ -30,7 +30,7 @@ The workflow runs in four stages:
 
 ### Form Letters
 
-`src/data/action-letters.json` contains 11 jurisdiction-specific letter templates. Each letter references local facts: camera counts, specific incidents, named officials, and precedent cities that have restricted or banned Flock.
+`src/data/action-letters.json` contains 80+ jurisdiction-specific letter templates covering all 46 SC counties and many cities. Each letter references local facts: camera counts, specific incidents, named officials, and precedent cities that have restricted or banned Flock.
 
 **Letter structure.** Each entry has:
 
@@ -42,15 +42,27 @@ The workflow runs in four stages:
 
 The ActionModal matches letters to representatives by comparing each rep's district key against the `divisionPattern` values. A state senator in district 5 matches `state:sc/sldu:`, a Greenville city council member matches `state:sc/place:greenville`, and a rep in a jurisdiction without a specific letter falls back to the generic `state:sc/` template.
 
-**How the research workflow produced these letters:**
+**How the statewide letter set was produced:**
 
-1. **Jurisdiction research.** For each target jurisdiction (state legislature, 4 county councils, 3 city councils), the workflow researched ALPR deployments -- camera counts, contract details, funding sources, data-sharing agreements.
+The letter set was expanded from 11 Upstate-focused templates to 80+ statewide letters covering all 46 SC counties using a tiered research approach:
 
-2. **Incident research.** The workflow identified local incidents that make the issue concrete: the Greenville sisters handcuffed at gunpoint over a wrongly flagged rental car, the Spartanburg sheriff's federal conviction, SLED's three-year data retention with no public accountability.
+1. **County tiering.** All 46 counties were classified into three tiers based on data availability:
+   - **Tier 1** (14 counties): Known camera deployments with documented controversies. Letters lead with local incidents and specific camera counts.
+   - **Tier 2** (18 counties): Known camera deployments but less local controversy. Letters reference local deployments and the nearest Tier 1 county's cautionary example.
+   - **Tier 3** (9 counties): No confirmed ALPR deployments. Letters use a "your neighbors have cameras" framing with specific neighbor counts, arguing for proactive oversight.
 
-3. **Precedent research.** The workflow found cities and counties that have restricted or banned Flock -- Sedona, AZ (contract cancelled); Hays County, TX (contract cancelled); Cambridge, MA (strict oversight rules); Staunton, VA (contract cancelled). These precedents give each letter a "other communities did this, so can we" closing argument.
+2. **Per-county research notes.** An Obsidian note was created for each county following a standard template: known deployments (agency, count, date, source), local stories, regional context with wiki-links to neighbors, and sourced citations. These live in the Obsidian vault at `Research/{County Name} County.md` and are tagged with `#sc-county/{name}` for searchability.
 
-4. **Synthesis.** Each letter was drafted with jurisdiction-specific facts and specific asks tailored to the body's authority. State legislators are asked to push bills out of committee and amend them to cover vendors. County councils are asked to require disclosure and establish oversight policies. City councils are asked to hold public hearings and pass surveillance oversight ordinances.
+3. **Statewide reference notes.** Two index notes were created first to establish shared context: `SLED Database.md` (422M plate reads, 3-year retention, 2,000+ users, 99+ agencies) and `SC Camera Deployments.md` (per-county deployment table covering all 46 counties). Every county note wiki-links back to these references.
+
+4. **Letter drafting per tier.** Letters were drafted in batches by tier. Each letter pulls specific facts from its county research note -- camera counts, agency names, per-capita rates, regional corridor context. Letters for counties with documented incidents (wrongful stops, FOIA stonewalling, conviction of officials) lead with those. Letters for counties without local incidents lead with the nearest documented incident.
+
+5. **Three standard asks.** Every letter ends with three specific asks tailored to the body's authority:
+   - State legislators: push bills out of committee and amend to cover vendors
+   - County councils: require disclosure, establish oversight policies, hold public hearings
+   - City councils: pass surveillance oversight ordinances, require council approval for new systems
+
+6. **Humanization pass.** All letters are run through a humanization step to ensure they read as genuine constituent correspondence, not AI-generated templates.
 
 **How to create letters for your state:**
 
