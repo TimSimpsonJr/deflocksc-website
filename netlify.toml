@@ -4,3 +4,14 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Proxy Umami Cloud through our domain to avoid ad-blocker blocklists
+[[redirects]]
+  from = "/u/script.js"
+  to = "https://cloud.umami.is/script.js"
+  status = 200
+
+[[redirects]]
+  from = "/u/api/send"
+  to = "https://cloud.umami.is/api/send"
+  status = 200
