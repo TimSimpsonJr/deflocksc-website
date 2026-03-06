@@ -2,13 +2,14 @@
 import bills from '../data/bills.json';
 ---
 
-<section id="bill-tracker" aria-labelledby="bill-tracker-heading" class="bg-[#262626] py-20 md:py-28 relative overflow-hidden">
-  <!-- Section glow accent -->
-  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[300px] blur-[64px] opacity-[0.15] md:opacity-[0.18] pointer-events-none" aria-hidden="true"></div>
+<section id="bill-tracker" aria-labelledby="bill-tracker-heading" class="bg-[#111111] relative overflow-hidden">
 
-  <div class="max-w-4xl mx-auto px-6">
-    <h2 id="bill-tracker-heading" class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-6">
-      Three Bills. All Stalled. Your Legislators Need to Hear From You.
+  <!-- Section header -->
+  <div class="relative overflow-hidden px-6 md:px-12 pt-14 pb-4">
+    <div class="bills-bg-num absolute right-4 -top-6 font-bold leading-none text-[rgba(255,255,255,0.025)] pointer-events-none select-none" aria-hidden="true">04</div>
+    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#555555] mb-3">Active legislation</p>
+    <h2 id="bill-tracker-heading" class="text-[#e8e8e8] font-bold text-[clamp(1.8rem,3.5vw,2.8rem)] tracking-[-0.025em] leading-[1.05] mb-6">
+      Three bills. All stalled.
     </h2>
 
     <p class="text-[#d4d4d4] text-base leading-relaxed mb-4">
@@ -17,84 +18,43 @@ import bills from '../data/bills.json';
     <p class="text-[#d4d4d4] text-base leading-relaxed mb-10">
       <strong class="text-white">But even the strongest bill has a critical gap.</strong> All three regulate what <em>government agencies</em> can do with camera data. None address what <em>Flock</em> does with it. Flock operates the network. Flock holds the data on its servers. Flock decides which agencies can query which cameras. A 90-day retention limit means nothing if Flock keeps the data indefinitely. A ban on selling data means nothing if cross-jurisdiction search is a product feature. These bills need to be amended to regulate the network itself, not just the agencies plugged into it.
     </p>
+  </div>
 
-    <!-- Bill cards in frame -->
-    <div id="bill-frame" class="bg-[rgba(163,163,163,0.12)] rounded-xl p-5 md:p-6">
-      <h3 class="text-white font-bold text-lg tracking-[-0.01em] mb-5">Bill Tracker</h3>
-      <div class="space-y-4 mb-6">
-        {bills.map((bill: any, i: number) => (
-          <button
-            type="button"
-            class="bill-card bg-[#171717] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#2e2e2e] hover:translate-x-1 focus-visible:bg-[#2e2e2e] focus-visible:translate-x-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] focus-visible:ring-offset-2 focus-visible:ring-offset-[#262626] w-full text-left"
-            data-bill={i}
-            aria-label={`${bill.bill}: ${bill.title}`}
-          >
-            <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 mb-2">
-              <span class="text-[#ef4444] font-extrabold text-lg">{bill.bill}</span>
-              <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase tracking-[0.05em] bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded">
-                {bill.status}
-              </span>
-            </div>
-            <p class="text-[#d4d4d4] text-sm mb-2">{bill.title}</p>
-            <p class="text-[#a3a3a3] text-xs font-medium">See what this bill would change &rarr;&#xFE0E;</p>
-          </button>
-        ))}
-      </div>
+  <!-- 3-column bill grid -->
+  <div class="bills-grid grid md:grid-cols-3 bg-[rgba(255,255,255,0.07)] mx-6 md:mx-12 mb-6" style="gap:1px">
+    {bills.map((bill: any, i: number) => (
+      <button
+        type="button"
+        class="bill-col bg-[#111111] p-8 flex flex-col gap-3 text-left cursor-pointer hover:bg-[#161616] transition-colors"
+        data-bill={i}
+        aria-label={`${bill.bill}: ${bill.title}`}
+      >
+        <div class="text-[#e8e8e8] font-bold text-[2rem] tracking-[-0.03em] leading-none">{bill.bill}</div>
+        <div class="text-[#a0a0a0] text-[13px] leading-[1.5] flex-1">{bill.title}</div>
+        <div class="text-[#a0a0a0] text-xs mt-1">See what this bill would change &rarr;&#xFE0E;</div>
+        <div class="border-t border-[rgba(255,255,255,0.07)] pt-4 mt-auto font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.1em] flex items-center gap-2">
+          <span class="w-[5px] h-[5px] rounded-full bg-[#fbbf24] flex-shrink-0" aria-hidden="true"></span>
+          <span class="text-[#fbbf24]">{bill.status}</span>
+          {bill.committee && <span class="text-[#555555] ml-auto">{bill.committee}</span>}
+        </div>
+      </button>
+    ))}
+  </div>
 
-      <!-- Last updated + status note -->
-      <p class="text-[#a3a3a3] text-sm mb-4">Last updated: February 2026</p>
-      <div class="text-[#a3a3a3] text-sm leading-relaxed space-y-3">
-        <p>
-          <em>S447 has gotten the furthest: it cleared a Senate Judiciary subcommittee, but the full committee hasn't acted. H3155 and H4013 haven't had any committee action at all. Meanwhile, a separate lawsuit (SCPIF v. SLED) is challenging the state's existing license plate database in court. How that turns out may affect how urgently legislators move.</em>
-        </p>
-        <p>
-          <em>Bill status is checked automatically each week during the legislative session.</em>
-        </p>
-      </div>
+  <!-- Status notes + toolkit CTA -->
+  <div class="px-6 md:px-12 pb-14 border-t border-[rgba(255,255,255,0.07)] mt-6 pt-8">
+    <p class="text-[#a3a3a3] text-sm mb-4">Last updated: February 2026</p>
+    <div class="text-[#a3a3a3] text-sm leading-relaxed space-y-3 mb-6">
+      <p>
+        <em>S447 has gotten the furthest: it cleared a Senate Judiciary subcommittee, but the full committee hasn't acted. H3155 and H4013 haven't had any committee action at all. Meanwhile, a separate lawsuit (SCPIF v. SLED) is challenging the state's existing license plate database in court. How that turns out may affect how urgently legislators move.</em>
+      </p>
+      <p>
+        <em>Bill status is checked automatically each week during the legislative session.</em>
+      </p>
     </div>
-
-    <!-- Toolkit CTA -->
-    <div class="border-t border-[#404040] mt-10 pt-10 text-center">
-      <p class="text-[#a3a3a3] text-base mb-6">Ready to take the next step?</p>
-
-      <div class="flex flex-wrap justify-center gap-x-10 gap-y-6 mb-8">
-        <!-- FOIA Templates -->
-        <div class="flex flex-col items-center gap-2">
-          <svg class="w-8 h-8 text-[#a3a3a3]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span class="text-[#a3a3a3] text-[0.65rem] font-bold uppercase tracking-[0.08em]">FOIA Templates</span>
-        </div>
-
-        <!-- Talking Points -->
-        <div class="flex flex-col items-center gap-2">
-          <svg class="w-8 h-8 text-[#a3a3a3]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-          </svg>
-          <span class="text-[#a3a3a3] text-[0.65rem] font-bold uppercase tracking-[0.08em]">Talking Points</span>
-        </div>
-
-        <!-- Printables -->
-        <div class="flex flex-col items-center gap-2">
-          <svg class="w-8 h-8 text-[#a3a3a3]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-          </svg>
-          <span class="text-[#a3a3a3] text-[0.65rem] font-bold uppercase tracking-[0.08em]">Printables</span>
-        </div>
-
-        <!-- Legal Guide -->
-        <div class="flex flex-col items-center gap-2">
-          <svg class="w-8 h-8 text-[#a3a3a3]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-          </svg>
-          <span class="text-[#a3a3a3] text-[0.65rem] font-bold uppercase tracking-[0.08em]">Legal Guide</span>
-        </div>
-      </div>
-
-      <a href="/toolkit" class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-6 py-3 rounded transition-colors">
-        Open the Citizen Toolkit
-      </a>
-    </div>
+    <a href="/toolkit" class="inline-flex items-center gap-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.1em] px-6 py-3 transition-colors">
+      Open the Citizen Toolkit &rarr;
+    </a>
   </div>
 
   <!-- Modal backdrop -->
@@ -145,6 +105,10 @@ import bills from '../data/bills.json';
     </div>
   </div>
 </section>
+
+<style>
+  .bills-bg-num { font-size: clamp(10rem, 20vw, 18rem); }
+</style>
 
 <script define:vars={{ bills }}>
   const backdrop = document.getElementById('bill-modal-backdrop');
@@ -232,7 +196,7 @@ import bills from '../data/bills.json';
   });
 
   // Card click handlers
-  document.querySelectorAll('.bill-card').forEach(card => {
+  document.querySelectorAll('.bill-col').forEach(card => {
     card.addEventListener('click', () => {
       const index = parseInt(card.getAttribute('data-bill'));
       openModal(index);
