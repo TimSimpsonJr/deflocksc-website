@@ -1,5 +1,4 @@
 ---
-import 'maplibre-gl/dist/maplibre-gl.css';
 ---
 
 <section id="map-section" aria-labelledby="map-section-heading" class="bg-[#171717] py-20 md:py-28 relative overflow-hidden">
@@ -271,5 +270,61 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 </style>
 
 <script>
-  import '../scripts/camera-map';
+  let mapLoaded = false;
+
+  async function loadMap() {
+    if (mapLoaded) return;
+    mapLoaded = true;
+    await import('maplibre-gl/dist/maplibre-gl.css');
+    const { initMap } = await import('../scripts/camera-map');
+    initMap();
+  }
+
+  async function loadAndResize() {
+    if (mapLoaded) {
+      const { resizeMap } = await import('../scripts/camera-map');
+      resizeMap();
+    } else {
+      await loadMap();
+    }
+  }
+
+  // Desktop: lazy-load when map section scrolls into view
+  const mapContainer = document.getElementById('camera-map');
+  if (mapContainer && window.matchMedia('(min-width: 768px)').matches) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        observer.disconnect();
+        loadMap();
+      }
+    }, { rootMargin: '200px' });
+    observer.observe(mapContainer);
+  }
+
+  // Handle resize mobile -> desktop
+  window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
+    if (e.matches && !mapLoaded) loadMap();
+  });
+
+  // Mobile toggle
+  document.getElementById('map-toggle')?.addEventListener('click', () => {
+    if (typeof umami !== 'undefined') umami.track('map-opened-mobile');
+    document.getElementById('map-button-container')?.classList.add('hidden');
+    const frame = document.getElementById('map-frame');
+    if (frame) {
+      frame.classList.remove('hidden');
+      frame.classList.add('block');
+    }
+    loadAndResize();
+  });
+
+  // Frame glow cursor tracking
+  const mapFrame = document.querySelector<HTMLElement>('#map-frame[data-glow-frame]');
+  if (mapFrame) {
+    mapFrame.addEventListener('pointermove', (e: PointerEvent) => {
+      const rect = mapFrame.getBoundingClientRect();
+      mapFrame.style.setProperty('--frame-x', `${e.clientX - rect.left}px`);
+      mapFrame.style.setProperty('--frame-y', `${e.clientY - rect.top}px`);
+    }, { passive: true });
+  }
 </script>

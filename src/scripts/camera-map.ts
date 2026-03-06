@@ -368,41 +368,10 @@ function initMap() {
   });
 }
 
-// --- Bootstrap ---
+// --- Public API ---
 
-// Desktop: init immediately
-if (window.matchMedia('(min-width: 768px)').matches) {
-  initMap();
-}
+export { initMap, map };
 
-// Handle resize mobile -> desktop
-window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
-  if (e.matches && !map) initMap();
-});
-
-// Mobile toggle
-document.getElementById('map-toggle')?.addEventListener('click', () => {
-  // Privacy-friendly analytics event (no personal data sent)
-  if (typeof umami !== 'undefined') umami.track('map-opened-mobile');
-  document.getElementById('map-button-container')?.classList.add('hidden');
-  const frame = document.getElementById('map-frame');
-  if (frame) {
-    frame.classList.remove('hidden');
-    frame.classList.add('block');
-  }
-  if (!map) {
-    initMap();
-  } else {
-    map.resize();
-  }
-});
-
-// Frame glow cursor tracking
-const mapFrame = document.querySelector<HTMLElement>('#map-frame[data-glow-frame]');
-if (mapFrame) {
-  mapFrame.addEventListener('pointermove', (e: PointerEvent) => {
-    const rect = mapFrame.getBoundingClientRect();
-    mapFrame.style.setProperty('--frame-x', `${e.clientX - rect.left}px`);
-    mapFrame.style.setProperty('--frame-y', `${e.clientY - rect.top}px`);
-  }, { passive: true });
+export function resizeMap() {
+  if (map) map.resize();
 }
