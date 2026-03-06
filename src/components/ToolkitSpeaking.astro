@@ -5,7 +5,12 @@ import speakingData from '../data/toolkit-speaking.json';
  * Highlight [PLACEHOLDER] markers in talk track text with amber spans.
  */
 function highlightPlaceholders(text: string): string {
-  return text.replace(/\[([A-Z\s\/]+)\]/g, '<span class="text-[#fbbf24] font-semibold">[$1]</span>');
+  const highlighted = text.replace(/\[([A-Z\s\/]+)\]/g, '<span class="text-[#fbbf24] font-semibold">[$1]</span>');
+  // Split on double-newlines into separate <p> tags for readability
+  return highlighted
+    .split('\n\n')
+    .map((p) => `<p>${p}</p>`)
+    .join('');
 }
 ---
 
@@ -45,8 +50,8 @@ function highlightPlaceholders(text: string): string {
             {section.timing}
           </span>
         </div>
-        <p
-          class="text-[#d4d4d4] text-base leading-[1.7]"
+        <div
+          class="text-[#d4d4d4] text-base leading-[1.7] space-y-3"
           set:html={highlightPlaceholders(section.text)}
         />
       </div>
