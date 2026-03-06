@@ -57,11 +57,6 @@
   }
 }
 
-/* Section glow accent */
-.section-glow {
-  background: radial-gradient(ellipse at center, rgba(163, 163, 163, 0.6) 0%, transparent 70%);
-}
-
 /* Glow frame — reusable container with cursor-reactive glow */
 .glow-frame {
   --frame-x: 50%;
