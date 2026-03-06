@@ -1,0 +1,208 @@
+---
+---
+
+<section id="citizen-toolkit" aria-labelledby="toolkit-heading" class="bg-[#161616] border-t border-[rgba(255,255,255,0.07)]">
+
+  <!-- Section header -->
+  <div class="px-6 md:px-10 pt-14 pb-8">
+    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#555] mb-3">Citizen Toolkit</p>
+    <h2 id="toolkit-heading" class="text-[#e8e8e8] font-bold tracking-[-0.025em] leading-[1.05]"
+        style="font-size:clamp(1.8rem,3.5vw,2.8rem);">
+      Take action beyond the call.
+    </h2>
+  </div>
+
+  <!-- Bento grid — 1px gap pattern -->
+  <div class="bento-wrap px-6 md:px-10 pb-10">
+    <div class="bento-grid bg-[rgba(255,255,255,0.07)]" style="display:grid;gap:1px;">
+
+      <!-- 01 REQUEST RECORDS (col-span-2) -->
+      <div class="bento-cell" style="grid-column:span 2;border-top:2px solid #dc2626;position:relative;">
+        <p class="bento-overline">Request Records</p>
+        <h3 class="bento-heading">Four FOIA templates. Ready to file.</h3>
+        <ul class="bento-list">
+          <li>Camera location data — which roads, which neighborhoods</li>
+          <li>Data retention policy — how long your plate is kept</li>
+          <li>Federal data sharing — who outside SC can see it</li>
+          <li>Flock contract — what your city actually agreed to</li>
+        </ul>
+        <p class="bento-meta">
+          <span>4 PDF templates</span>
+          <span>Copy &amp; send</span>
+          <span>SC FOIA § 30-4-10</span>
+        </p>
+        <a href="/toolkit#request-records" class="bento-link">Go to FOIA templates →</a>
+        <div class="bento-num" aria-hidden="true">01</div>
+      </div>
+
+      <!-- 02 SPEAK UP (col-span-1) -->
+      <div class="bento-cell" style="border-top:2px solid #dc2626;position:relative;">
+        <p class="bento-overline">Speak Up</p>
+        <h3 class="bento-heading">Show up to council. Say exactly this.</h3>
+        <p class="bento-desc">Full talk track for public comment. Rebuttals for common pushback. Council handout PDF to leave behind.</p>
+        <p class="bento-meta">
+          <span>Talk track</span>
+          <span>Rebuttals</span>
+          <span>Handout PDF</span>
+        </p>
+        <a href="/toolkit#speak-up" class="bento-link">Prep your remarks →</a>
+        <div class="bento-num" aria-hidden="true">02</div>
+      </div>
+
+      <!-- 03 SPREAD THE WORD (col-span-1) -->
+      <div class="bento-cell" style="border-top:2px solid #dc2626;position:relative;">
+        <p class="bento-overline">Spread the Word</p>
+        <h3 class="bento-heading">Cards, one-pager, conversation starters.</h3>
+        <p class="bento-desc">Four business card designs. Print on Avery 8371. Leave at coffee shops, hand out at events.</p>
+        <p class="bento-meta">
+          <span>4 card designs</span>
+          <span>One-pager</span>
+          <span>Print-ready PDFs</span>
+        </p>
+        <a href="/toolkit#spread-the-word" class="bento-link">Get the materials →</a>
+        <div class="bento-num" aria-hidden="true">03</div>
+      </div>
+
+      <!-- 04 KNOW YOUR RIGHTS (col-span-2) -->
+      <div class="bento-cell" style="grid-column:span 2;border-top:2px solid #dc2626;position:relative;">
+        <p class="bento-overline">Know Your Rights</p>
+        <h3 class="bento-heading">The 4th Amendment. What SC is missing. What other states did.</h3>
+        <p class="bento-desc">Six states have passed ALPR limits. South Carolina has none. Here's the legal landscape, what the pending bills don't cover, and what you need to know before you speak.</p>
+        <p class="bento-meta">
+          <span>4th Amendment primer</span>
+          <span>State comparison</span>
+          <span>Bill gap analysis</span>
+        </p>
+        <a href="/toolkit#know-your-rights" class="bento-link">Understand the law →</a>
+        <div class="bento-num" aria-hidden="true">04</div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<style>
+  /* Desktop: 3-col grid */
+  @media (min-width: 768px) {
+    .bento-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Mobile: single column */
+  @media (max-width: 767px) {
+    .bento-grid {
+      grid-template-columns: 1fr;
+    }
+    /* Reset col-spans on mobile */
+    .bento-cell[style*="grid-column:span 2"] {
+      grid-column: span 1 !important;
+    }
+  }
+
+  .bento-cell {
+    background: #161616;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bento-overline {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 12px;
+  }
+
+  .bento-heading {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #e8e8e8;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .bento-desc {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.6;
+    flex: 1;
+    margin-bottom: 14px;
+  }
+
+  /* Bullet list variant (used in FOIA cell) */
+  .bento-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .bento-list li {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.5;
+    padding-left: 14px;
+    position: relative;
+  }
+  .bento-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.5);
+  }
+
+  .bento-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  .bento-meta span {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #555;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 3px 8px;
+  }
+
+  .bento-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #dc2626;
+    text-decoration: none;
+    margin-top: auto;
+  }
+  .bento-link:hover { color: #ef4444; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .bento-link { transition: color 0.15s; }
+  }
+
+  .bento-num {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    color: rgba(220, 38, 38, 0.15);
+    pointer-events: none;
+    user-select: none;
+  }
+</style>
