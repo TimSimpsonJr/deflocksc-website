@@ -33,7 +33,6 @@ function highlightPlaceholders(text: string): string {
   {foiaTemplates.map((tmpl) => (
     <div
       class="template-card bg-[rgba(163,163,163,0.12)] rounded-xl p-6 flex flex-col"
-      data-spotlight
     >
       <!-- Title -->
       <h4 class="text-white font-bold text-lg mb-2 relative z-10">{tmpl.title}</h4>
@@ -142,15 +141,15 @@ function highlightPlaceholders(text: string): string {
     transform: rotate(0deg);
   }
 
-  /* Spotlight mouse tracking for cards */
-  .template-card {
-    --mouse-x: -300px;
-    --mouse-y: -300px;
-  }
 </style>
 
 <script>
+  let foiaController: AbortController | null = null;
+
   function initFoiaTab() {
+    foiaController?.abort();
+    foiaController = new AbortController();
+
     // Copy-to-clipboard
     document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
       btn.addEventListener('click', async () => {
@@ -204,14 +203,6 @@ function highlightPlaceholders(text: string): string {
       });
     });
 
-    // Spotlight mouse tracking on cards
-    document.querySelectorAll<HTMLElement>('.template-card[data-spotlight]').forEach((card) => {
-      card.addEventListener('pointermove', (e) => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-        card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-      });
-    });
   }
 
   initFoiaTab();

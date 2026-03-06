@@ -68,7 +68,6 @@ const emailUrl = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${enc
     {outreachData.conversationStarters.map((starter, i) => (
       <div
         class="outreach-card bg-[rgba(163,163,163,0.12)] rounded-xl p-6 flex flex-col"
-        data-spotlight
       >
         <!-- Audience badge -->
         <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded self-start mb-3 tracking-[0.05em] relative z-10">
@@ -281,11 +280,6 @@ const emailUrl = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${enc
     }
   }
 
-  /* Spotlight mouse tracking for cards */
-  .outreach-card {
-    --mouse-x: -300px;
-    --mouse-y: -300px;
-  }
 </style>
 
 <script>
@@ -415,14 +409,6 @@ const emailUrl = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${enc
         }
       }, { signal: outreachController!.signal });
 
-      // Spotlight mouse tracking on cards
-      document.querySelectorAll<HTMLElement>('.outreach-card[data-spotlight]').forEach((card) => {
-        card.addEventListener('pointermove', (e) => {
-          const rect = card.getBoundingClientRect();
-          card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-          card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-        });
-      });
     }
   }
 

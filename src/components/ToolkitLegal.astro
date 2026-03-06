@@ -167,7 +167,11 @@ const { fourthAmendment, otherStates, billGaps } = legalData;
 </style>
 
 <script>
+  let legalController: AbortController | null = null;
+
   function initLegalTab() {
+    legalController?.abort();
+    legalController = new AbortController();
     document.querySelectorAll<HTMLDetailsElement>('.legal-details').forEach((details) => {
       const summary = details.querySelector('summary');
       summary?.addEventListener('click', (e) => {

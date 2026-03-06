@@ -140,7 +140,11 @@ function highlightPlaceholders(text: string): string {
 </style>
 
 <script>
+  let speakingController: AbortController | null = null;
+
   function initSpeakingTab() {
+    speakingController?.abort();
+    speakingController = new AbortController();
     document.querySelectorAll<HTMLDetailsElement>('.rebuttal-item').forEach((details) => {
       const summary = details.querySelector('summary');
       summary?.addEventListener('click', (e) => {
