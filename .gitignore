@@ -11,3 +11,4 @@ __pycache__/
 .claude/
 public/dev-preview.html
 tina/__generated__/
+public/admin/
