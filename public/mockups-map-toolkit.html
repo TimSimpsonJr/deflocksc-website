@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockups — Map + Toolkit Bento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #e8e8e8;
+      min-height: 100vh;
+    }
+
+    /* ── Page chrome ── */
+    .page-header {
+      background: #111;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .page-header .logo { font-weight: 800; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+    .page-header .logo span { color: #dc2626; }
+    .page-header .badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #555;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 4px 10px;
+    }
+
+    /* ── Jump nav ── */
+    .jump-nav {
+      background: #111;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 10px 40px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .jump-nav a {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #555;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .jump-nav a:hover { color: #e8e8e8; }
+
+    /* ── Section wrapper ── */
+    .mockup-group {
+      padding: 60px 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .mockup-group:last-child { border-bottom: none; }
+
+    .group-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .group-heading {
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+      color: #e8e8e8;
+      margin-bottom: 40px;
+    }
+
+    .option-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #dc2626;
+      margin-bottom: 12px;
+    }
+    .option-label .rec {
+      color: #555;
+      margin-left: 8px;
+    }
+
+    .mockup-frame {
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 60px;
+      overflow: hidden;
+    }
+    .mockup-frame:last-child { margin-bottom: 0; }
+
+    /* ─────────────────────────────────────────────────────────────
+       SHARED DESIGN TOKENS
+    ───────────────────────────────────────────────────────────── */
+    .mono { font-family: 'DM Mono', monospace; }
+    .overline {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 16px;
+    }
+    .red { color: #dc2626; }
+    .dim { color: rgba(232,232,232,0.25); }
+    .muted { color: #a0a0a0; }
+    .faint { color: #888; }
+
+    .btn-red {
+      display: inline-block;
+      background: #dc2626;
+      color: #fff;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-ghost {
+      display: inline-block;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #a0a0a0;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      text-decoration: none;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       MAP MOCK (fake map)
+    ───────────────────────────────────────────────────────────── */
+    .fake-map {
+      background: #0f1117;
+      position: relative;
+      overflow: hidden;
+    }
+    .fake-map::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 35% 55%, rgba(220,38,38,0.15) 0%, transparent 40%),
+        radial-gradient(circle at 55% 45%, rgba(220,38,38,0.08) 0%, transparent 35%),
+        radial-gradient(circle at 70% 60%, rgba(220,38,38,0.06) 0%, transparent 30%);
+    }
+    .fake-map-label {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+    }
+    .map-dot {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #dc2626;
+      opacity: 0.7;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       MAP OPTION A — DATA REPORT
+    ───────────────────────────────────────────────────────────── */
+    .map-a { background: #171717; }
+
+    .map-a-top {
+      padding: 48px 64px 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      margin-top: 28px;
+      margin-bottom: 36px;
+    }
+    .stat-cell {
+      padding: 24px 28px;
+      border-right: 1px solid rgba(255,255,255,0.07);
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-num {
+      font-size: clamp(2.4rem, 4vw, 3.5rem);
+      font-weight: 900;
+      color: #dc2626;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #555;
+    }
+
+    .city-cols {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 28px;
+    }
+    .city-col {
+      padding: 20px 24px;
+      border-right: 1px solid rgba(255,255,255,0.07);
+    }
+    .city-col:last-child { border-right: none; }
+    .city-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    .city-count {
+      font-size: 28px;
+      font-weight: 900;
+      color: #e8e8e8;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+    .city-count span { font-size: 14px; font-weight: 500; color: #555; margin-left: 4px; }
+    .city-fact {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+    .city-warning {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #dc2626;
+      border: 1px solid rgba(220,38,38,0.3);
+      padding: 2px 6px;
+      margin-top: 8px;
+    }
+
+    .map-a-footer-copy {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.7;
+      max-width: 640px;
+      padding: 0 64px 32px;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       MAP OPTION B — CINEMATIC / GHOST NUMBER
+    ───────────────────────────────────────────────────────────── */
+    .map-b { background: #0d0d0d; position: relative; overflow: hidden; }
+
+    .map-b-ghost {
+      position: absolute;
+      top: -20px;
+      right: -40px;
+      font-size: clamp(12rem, 22vw, 22rem);
+      font-weight: 900;
+      color: rgba(220,38,38,0.05);
+      letter-spacing: -0.06em;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+    }
+
+    .map-b-inner {
+      display: grid;
+      grid-template-columns: 1fr 240px;
+      gap: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .map-b-left {
+      padding: 52px 48px 48px;
+      border-right: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .map-b-heading {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -0.035em;
+      line-height: 1;
+      margin-bottom: 24px;
+    }
+    .map-b-heading .dim { display: block; color: rgba(232,232,232,0.2); }
+
+    .map-b-copy {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.75;
+      max-width: 520px;
+    }
+    .map-b-copy p + p { margin-top: 16px; }
+    .map-b-copy strong { color: #e8e8e8; }
+
+    .map-b-right {
+      padding: 52px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .map-b-stat {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .map-b-stat:first-child { padding-top: 0; }
+    .map-b-stat-num {
+      font-size: 32px;
+      font-weight: 900;
+      color: #dc2626;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .map-b-stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #555;
+      margin-top: 4px;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       MAP OPTION C — HORIZONTAL CITY CARDS
+    ───────────────────────────────────────────────────────────── */
+    .map-c { background: #161616; }
+
+    .map-c-top {
+      padding: 48px 64px 36px;
+    }
+
+    .map-c-intro {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.7;
+      max-width: 640px;
+      margin-top: 20px;
+      margin-bottom: 32px;
+    }
+
+    .city-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 36px;
+      gap: 0;
+    }
+    .city-card {
+      padding: 28px 24px;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      position: relative;
+    }
+    .city-card:last-child { border-right: none; }
+    .city-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #dc2626;
+    }
+    .city-card-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 12px;
+    }
+    .city-card-count {
+      font-size: 40px;
+      font-weight: 900;
+      color: #e8e8e8;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .city-card-unit {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 12px;
+    }
+    .city-card-fact {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.6;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 12px;
+      margin-top: 4px;
+    }
+    .city-card-fact strong { color: #e8e8e8; }
+
+    .map-c-footer-copy {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.7;
+      max-width: 640px;
+      padding: 0 64px 36px;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       TOOLKIT BENTO — SHARED
+    ───────────────────────────────────────────────────────────── */
+    .bento-section-header {
+      padding: 48px 40px 36px;
+    }
+    .bento-section-header h2 {
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      margin-top: 12px;
+    }
+
+    /* 1px-gap grid pattern */
+    .bento-grid-wrap {
+      background: rgba(255,255,255,0.07);
+      display: grid;
+      gap: 1px;
+      padding: 0 40px 40px;
+    }
+
+    .bento-cell {
+      background: #161616;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .bento-cell::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: #dc2626;
+    }
+
+    .bento-overline {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 12px;
+    }
+    .bento-heading {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #e8e8e8;
+      margin-bottom: 8px;
+    }
+    .bento-desc {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.6;
+      flex: 1;
+      margin-bottom: 16px;
+    }
+    .bento-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #444;
+      margin-bottom: 16px;
+    }
+    .bento-meta span {
+      display: inline-block;
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 3px 8px;
+      margin-right: 4px;
+      margin-bottom: 4px;
+      color: #666;
+    }
+    .bento-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #dc2626;
+      text-decoration: none;
+      margin-top: auto;
+    }
+    .bento-link:hover { color: #ef4444; }
+
+    /* card image preview (fake) */
+    .card-preview-strip {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .card-preview-thumb {
+      height: 42px;
+      flex: 1;
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-preview-thumb::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(220,38,38,0.08), transparent);
+    }
+
+    /* large number accent */
+    .bento-num {
+      font-size: 56px;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      color: rgba(220,38,38,0.15);
+      position: absolute;
+      bottom: 16px;
+      right: 20px;
+      pointer-events: none;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       BENTO OPTION A — FEATURE + 3
+    ───────────────────────────────────────────────────────────── */
+    .bento-a-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    .bento-cell-foia {
+      grid-column: span 2;
+      min-height: 240px;
+    }
+    .bento-cell-speak {
+      grid-column: span 1;
+    }
+    .bento-cell-spread {
+      grid-column: span 1;
+    }
+    .bento-cell-rights {
+      grid-column: span 2;
+    }
+
+    /* foia items list */
+    .foia-items {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .foia-item {
+      font-size: 12px;
+      color: #888;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .foia-item::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #dc2626;
+      flex-shrink: 0;
+      opacity: 0.5;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       BENTO OPTION B — 2×2 EQUAL
+    ───────────────────────────────────────────────────────────── */
+    .bento-b-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .bento-b-cta-row {
+      background: rgba(255,255,255,0.07);
+      padding: 0 40px;
+      padding-top: 1px;
+    }
+    .bento-b-cta {
+      background: #0d0d0d;
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: none;
+    }
+    .bento-b-cta span {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e8e8e8;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       BENTO OPTION C — VISUAL LEAD (SPREAD FEATURED)
+    ───────────────────────────────────────────────────────────── */
+    .bento-c-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .bento-cell-spread-tall {
+      grid-row: span 3;
+      min-height: 320px;
+    }
+    .bento-c-right-cell {
+      min-height: 100px;
+    }
+    .card-preview-tall {
+      flex: 1;
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 120px;
+    }
+    .card-preview-tall::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(220,38,38,0.06), transparent 60%);
+    }
+    .card-preview-tall-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.15);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       DIVIDER
+    ───────────────────────────────────────────────────────────── */
+    hr {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="logo">DEFLOCK<span>/</span>SC</div>
+    <div class="badge">Mockups — Map + Toolkit Bento</div>
+  </header>
+
+  <nav class="jump-nav">
+    <a href="#map-a">Map A — Data Report</a>
+    <a href="#map-b">Map B — Cinematic</a>
+    <a href="#map-c">Map C — City Cards</a>
+    <a href="#bento-a">Bento A — Feature+3</a>
+    <a href="#bento-b">Bento B — 2×2 Equal</a>
+    <a href="#bento-c">Bento C — Visual Lead</a>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       MAP SECTION
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="mockup-group" id="map-section-group">
+    <p class="group-label">Map Section</p>
+    <h2 class="group-heading">MapSection — Three Directions</h2>
+
+    <!-- ── MAP OPTION A ── -->
+    <p class="option-label" id="map-a">Option A — Data Report <span class="rec">★ Recommended</span></p>
+    <div class="mockup-frame">
+      <section class="map-a">
+
+        <div class="map-a-top">
+          <p class="overline">Upstate SC / Camera Network</p>
+          <h2 style="font-size:clamp(2rem,3.5vw,3rem);font-weight:900;letter-spacing:-0.035em;line-height:1.05;margin-bottom:28px;">
+            242 Cameras.<br>
+            <span class="dim">No rules. No vote.</span>
+          </h2>
+
+          <!-- Stat bar -->
+          <div class="stat-row">
+            <div class="stat-cell">
+              <div class="stat-num">242</div>
+              <div class="stat-label">Cameras documented<br>Upstate SC</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-num">0</div>
+              <div class="stat-label">Oversight ordinances<br>in any city or county</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-num">0</div>
+              <div class="stat-label">Public votes<br>ever taken</div>
+            </div>
+          </div>
+
+          <!-- City columns -->
+          <div class="city-cols">
+            <div class="city-col">
+              <div class="city-name">Greenville</div>
+              <div class="city-count">57 <span>cameras</span></div>
+              <div class="city-fact">First batch: Jan 2021. Paid with civil asset forfeiture funds. No council vote on oversight.</div>
+              <div class="city-warning">No rules</div>
+            </div>
+            <div class="city-col">
+              <div class="city-name">Spartanburg</div>
+              <div class="city-count">15 <span>cameras</span></div>
+              <div class="city-fact">County cameras run under Sheriff Chuck Wright — who pled guilty to federal criminal charges, May 2025.</div>
+              <div class="city-warning">No rules</div>
+            </div>
+            <div class="city-col">
+              <div class="city-name">Anderson + surrounding</div>
+              <div class="city-count">14+ <span>cameras</span></div>
+              <div class="city-fact">Cameras first, questions never. No Upstate city or county has passed an oversight ordinance.</div>
+              <div class="city-warning">No rules</div>
+            </div>
+          </div>
+        </div>
+
+        <p class="map-a-footer-copy">
+          The official count undersells it. When Greenville went looking for more cameras, its own RFP required new ones to connect with HOA and neighborhood cameras. The city's SafeWatch program asks residents to register their Ring and Nest cameras for police use on demand. The 57-camera figure is a floor, not a ceiling.
+        </p>
+
+        <!-- Fake map -->
+        <div class="fake-map" style="height:500px;">
+          <div class="map-dot" style="top:45%;left:33%;"></div>
+          <div class="map-dot" style="top:42%;left:36%;"></div>
+          <div class="map-dot" style="top:48%;left:31%;"></div>
+          <div class="map-dot" style="top:40%;left:34%;width:4px;height:4px;"></div>
+          <div class="map-dot" style="top:50%;left:55%;"></div>
+          <div class="map-dot" style="top:53%;left:57%;"></div>
+          <div class="map-dot" style="top:47%;left:52%;"></div>
+          <div class="map-dot" style="top:65%;left:42%;"></div>
+          <div class="map-dot" style="top:62%;left:45%;"></div>
+          <div class="fake-map-label">Deflock.org community camera data</div>
+        </div>
+        <div style="padding:12px 64px;background:#171717;border-top:1px solid rgba(255,255,255,0.05);">
+          <p style="font-size:11px;color:#444;">Map tiles by OpenFreeMap · Camera data from <span style="color:#555;">Deflock.org</span></p>
+        </div>
+
+      </section>
+    </div>
+
+    <!-- ── MAP OPTION B ── -->
+    <p class="option-label" id="map-b">Option B — Cinematic / Ghost Number</p>
+    <div class="mockup-frame">
+      <section class="map-b">
+        <div class="map-b-ghost" aria-hidden="true">242</div>
+
+        <div class="map-b-inner">
+          <!-- Left: copy -->
+          <div class="map-b-left">
+            <p class="overline">Upstate SC / Camera Network</p>
+            <div class="map-b-heading">
+              Cameras are<br>already watching.
+              <span class="dim">No rules attached.</span>
+            </div>
+            <div class="map-b-copy">
+              <p><strong>Flock Safety cameras are up across Upstate SC:</strong> Greenville, Spartanburg, Anderson, and surrounding areas.</p>
+              <p>Greenville PD runs 57 cameras — first batch went up January 2021, paid for with civil asset forfeiture funds. No city ordinance. No council vote on oversight. There are still no rules about who sees the data, how long it's kept, or who checks how it's used.</p>
+              <p>Spartanburg city PD runs 15 cameras. The county's were deployed under Sheriff Chuck Wright — who pled guilty to federal criminal charges in May 2025. A convicted criminal had unrestricted access to a system tracking where you drive.</p>
+              <p>The official count undersells it. Greenville's SafeWatch program asks residents to register Ring and Nest cameras for police use on demand. The 57-camera figure is a floor, not a ceiling.</p>
+            </div>
+          </div>
+
+          <!-- Right: stat column -->
+          <div class="map-b-right">
+            <div class="map-b-stat">
+              <div class="map-b-stat-num">242</div>
+              <div class="map-b-stat-label">Total cameras<br>documented</div>
+            </div>
+            <div class="map-b-stat">
+              <div class="map-b-stat-num">57</div>
+              <div class="map-b-stat-label">Greenville PD</div>
+            </div>
+            <div class="map-b-stat">
+              <div class="map-b-stat-num" style="font-size:24px;color:#555;">0</div>
+              <div class="map-b-stat-label">Oversight<br>ordinances</div>
+            </div>
+            <div class="map-b-stat" style="border-bottom:none;">
+              <div class="map-b-stat-num" style="font-size:24px;color:#555;">0</div>
+              <div class="map-b-stat-label">Public<br>votes</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fake map -->
+        <div class="fake-map" style="height:420px;">
+          <div class="map-dot" style="top:45%;left:33%;"></div>
+          <div class="map-dot" style="top:42%;left:36%;"></div>
+          <div class="map-dot" style="top:48%;left:31%;"></div>
+          <div class="map-dot" style="top:50%;left:55%;"></div>
+          <div class="map-dot" style="top:53%;left:57%;"></div>
+          <div class="map-dot" style="top:65%;left:42%;"></div>
+          <div class="fake-map-label">Deflock.org community camera data</div>
+        </div>
+        <div style="padding:12px 48px;background:#0d0d0d;border-top:1px solid rgba(255,255,255,0.05);">
+          <p style="font-size:11px;color:#333;">Map tiles by OpenFreeMap · Camera data from Deflock.org</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── MAP OPTION C ── -->
+    <p class="option-label" id="map-c">Option C — Horizontal City Cards</p>
+    <div class="mockup-frame">
+      <section class="map-c">
+
+        <div class="map-c-top">
+          <p class="overline">Upstate SC / Camera Network</p>
+          <h2 style="font-size:clamp(2rem,3vw,2.8rem);font-weight:900;letter-spacing:-0.03em;line-height:1.05;margin-bottom:16px;">
+            Cameras are already watching.
+          </h2>
+          <p class="map-c-intro">
+            Flock Safety cameras are up across Upstate SC: Greenville, Spartanburg, Anderson, and surrounding areas. No oversight rules in any city. No public vote was ever taken.
+          </p>
+
+          <!-- City cards -->
+          <div class="city-cards">
+            <div class="city-card">
+              <div class="city-card-name">Greenville</div>
+              <div class="city-card-count">57</div>
+              <div class="city-card-unit">cameras</div>
+              <div class="city-card-fact">
+                <strong>No oversight.</strong> First cameras deployed Jan 2021 using civil asset forfeiture funds. No council ordinance. No rules on data access, retention, or auditing.
+              </div>
+            </div>
+            <div class="city-card">
+              <div class="city-card-name">Spartanburg</div>
+              <div class="city-card-count">15</div>
+              <div class="city-card-unit">cameras</div>
+              <div class="city-card-fact">
+                <strong>No oversight.</strong> County cameras ran under Sheriff Chuck Wright — who pled guilty to federal criminal charges in May 2025. Convicted. Unrestricted access.
+              </div>
+            </div>
+            <div class="city-card">
+              <div class="city-card-name">Anderson + surrounding</div>
+              <div class="city-card-count">14+</div>
+              <div class="city-card-unit">cameras</div>
+              <div class="city-card-fact">
+                <strong>No oversight.</strong> Cameras first, questions never. No Upstate city or county has passed a single oversight ordinance.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="map-c-footer-copy">
+          The official count undersells it. Greenville's own RFP required new cameras to connect with HOA and neighborhood cameras. The SafeWatch program asks residents to register Ring and Nest cameras for police use on demand. 57 cameras is a floor, not a ceiling.
+        </p>
+
+        <!-- Fake map -->
+        <div class="fake-map" style="height:460px;">
+          <div class="map-dot" style="top:45%;left:33%;"></div>
+          <div class="map-dot" style="top:42%;left:36%;"></div>
+          <div class="map-dot" style="top:48%;left:31%;"></div>
+          <div class="map-dot" style="top:50%;left:55%;"></div>
+          <div class="map-dot" style="top:53%;left:57%;"></div>
+          <div class="map-dot" style="top:65%;left:42%;"></div>
+          <div class="fake-map-label">Deflock.org community camera data</div>
+        </div>
+        <div style="padding:12px 64px;background:#161616;border-top:1px solid rgba(255,255,255,0.05);">
+          <p style="font-size:11px;color:#444;">Map tiles by OpenFreeMap · Camera data from <span style="color:#555;">Deflock.org</span></p>
+        </div>
+
+      </section>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TOOLKIT BENTO
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="mockup-group" id="bento-section-group">
+    <p class="group-label">Citizen Toolkit Section (homepage)</p>
+    <h2 class="group-heading">Toolkit Bento — Three Layouts</h2>
+
+    <!-- ── BENTO OPTION A ── -->
+    <p class="option-label" id="bento-a">Option A — Feature+3 <span class="rec">★ Recommended</span></p>
+    <div class="mockup-frame" style="background:#161616;">
+      <section>
+        <div class="bento-section-header" style="background:#161616;">
+          <p class="overline">Citizen Toolkit</p>
+          <h2>Take action beyond the call.</h2>
+        </div>
+
+        <div class="bento-grid-wrap bento-a-grid">
+
+          <!-- FOIA — feature cell (col-span-2) -->
+          <div class="bento-cell bento-cell-foia" style="position:relative;">
+            <p class="bento-overline">Request Records</p>
+            <p class="bento-heading">Four FOIA templates. Ready to file.</p>
+            <div class="foia-items">
+              <div class="foia-item">Camera location data — which roads, which neighborhoods</div>
+              <div class="foia-item">Data retention policy — how long your plate is kept</div>
+              <div class="foia-item">Federal data sharing — who outside SC can see it</div>
+              <div class="foia-item">Flock contract — what your city actually agreed to</div>
+            </div>
+            <p class="bento-meta">
+              <span>4 PDF templates</span>
+              <span>Copy &amp; send</span>
+              <span>SC FOIA § 30-4-10</span>
+            </p>
+            <a href="/toolkit#request-records" class="bento-link">Go to FOIA templates →</a>
+            <div class="bento-num">01</div>
+          </div>
+
+          <!-- Speak Up -->
+          <div class="bento-cell bento-cell-speak" style="position:relative;">
+            <p class="bento-overline">Speak Up</p>
+            <p class="bento-heading">Show up to council. Say exactly this.</p>
+            <p class="bento-desc">Full talk track for public comment. Rebuttals for common pushback. Council handout PDF to leave behind.</p>
+            <p class="bento-meta"><span>Talk track</span><span>Rebuttals</span><span>Handout PDF</span></p>
+            <a href="/toolkit#speak-up" class="bento-link">Prep your remarks →</a>
+            <div class="bento-num">02</div>
+          </div>
+
+          <!-- Spread the Word -->
+          <div class="bento-cell bento-cell-spread" style="position:relative;">
+            <p class="bento-overline">Spread the Word</p>
+            <p class="bento-heading">Cards, one-pager, conversation starters.</p>
+            <p class="bento-desc">Four business card designs. Print on Avery 8371. Leave at coffee shops, hand out at events.</p>
+            <p class="bento-meta"><span>4 card designs</span><span>One-pager</span><span>Print-ready PDFs</span></p>
+            <a href="/toolkit#spread-the-word" class="bento-link">Get the materials →</a>
+            <div class="bento-num">03</div>
+          </div>
+
+          <!-- Know Your Rights — col-span-2 -->
+          <div class="bento-cell bento-cell-rights" style="position:relative;">
+            <p class="bento-overline">Know Your Rights</p>
+            <p class="bento-heading">The 4th Amendment. What SC is missing. What other states did.</p>
+            <p class="bento-desc">Six states have passed ALPR limits. South Carolina has none. Here's the legal landscape, what the pending bills don't cover, and what you need to know before you speak.</p>
+            <p class="bento-meta"><span>4th Amendment primer</span><span>State comparison</span><span>Bill gap analysis</span></p>
+            <a href="/toolkit#know-your-rights" class="bento-link">Understand the law →</a>
+            <div class="bento-num" style="right:28px;">04</div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- ── BENTO OPTION B ── -->
+    <p class="option-label" id="bento-b">Option B — 2×2 Equal Weight</p>
+    <div class="mockup-frame" style="background:#0d0d0d;">
+      <section>
+        <div class="bento-section-header" style="background:#0d0d0d;">
+          <p class="overline">Citizen Toolkit</p>
+          <h2>Take action beyond the call.</h2>
+        </div>
+
+        <div class="bento-grid-wrap bento-b-grid" style="background:rgba(255,255,255,0.07);">
+
+          <!-- FOIA -->
+          <div class="bento-cell" style="background:#0d0d0d;">
+            <p class="bento-overline">Request Records</p>
+            <p class="bento-heading">Four FOIA templates. Ready to file.</p>
+            <div class="foia-items">
+              <div class="foia-item">Camera location data</div>
+              <div class="foia-item">Data retention policy</div>
+              <div class="foia-item">Federal data sharing</div>
+              <div class="foia-item">Flock contract</div>
+            </div>
+            <a href="/toolkit#request-records" class="bento-link" style="margin-top:12px;">Go to FOIA templates →</a>
+          </div>
+
+          <!-- Spread the Word -->
+          <div class="bento-cell" style="background:#0d0d0d;">
+            <p class="bento-overline">Spread the Word</p>
+            <p class="bento-heading">Cards, one-pager, conversation starters.</p>
+            <div class="card-preview-strip">
+              <div class="card-preview-thumb"></div>
+              <div class="card-preview-thumb"></div>
+              <div class="card-preview-thumb"></div>
+              <div class="card-preview-thumb"></div>
+            </div>
+            <p class="bento-desc">Four card designs. One-pager. Print-ready PDFs.</p>
+            <a href="/toolkit#spread-the-word" class="bento-link">Get the materials →</a>
+          </div>
+
+          <!-- Speak Up -->
+          <div class="bento-cell" style="background:#0d0d0d;">
+            <p class="bento-overline">Speak Up</p>
+            <p class="bento-heading">Show up to council. Say exactly this.</p>
+            <p class="bento-desc">Talk track, rebuttals for pushback, and a council handout PDF to leave behind.</p>
+            <a href="/toolkit#speak-up" class="bento-link" style="margin-top:auto;">Prep your remarks →</a>
+          </div>
+
+          <!-- Know Your Rights -->
+          <div class="bento-cell" style="background:#0d0d0d;">
+            <p class="bento-overline">Know Your Rights</p>
+            <p class="bento-heading">4th Amendment. What SC is missing. What works.</p>
+            <p class="bento-desc">Six states have ALPR limits. South Carolina has none. Primer, state comparison, bill gap analysis.</p>
+            <a href="/toolkit#know-your-rights" class="bento-link" style="margin-top:auto;">Understand the law →</a>
+          </div>
+
+        </div>
+
+        <!-- Full-width CTA row -->
+        <div class="bento-b-cta-row">
+          <div class="bento-b-cta">
+            <span>All resources in one place.</span>
+            <a href="/toolkit" class="btn-red">See the full toolkit →</a>
+          </div>
+        </div>
+
+      </section>
+    </div>
+
+    <!-- ── BENTO OPTION C ── -->
+    <p class="option-label" id="bento-c">Option C — Visual Lead (Spread the Word featured)</p>
+    <div class="mockup-frame" style="background:#161616;">
+      <section>
+        <div class="bento-section-header" style="background:#161616;">
+          <p class="overline">Citizen Toolkit</p>
+          <h2>Take action beyond the call.</h2>
+        </div>
+
+        <div class="bento-grid-wrap bento-c-grid">
+
+          <!-- Spread the Word — tall, left column -->
+          <div class="bento-cell bento-cell-spread-tall" style="display:flex;flex-direction:column;">
+            <p class="bento-overline">Spread the Word</p>
+            <p class="bento-heading">Leave a card. Start a conversation.</p>
+            <div class="card-preview-tall">
+              <span class="card-preview-tall-label">Business card preview</span>
+            </div>
+            <p class="bento-desc">Four business card designs. One-pager. Conversation starters for any audience. Print on Avery 8371 or share digitally.</p>
+            <p class="bento-meta"><span>4 card designs</span><span>One-pager</span><span>Print-ready PDFs</span></p>
+            <a href="/toolkit#spread-the-word" class="bento-link">Get the materials →</a>
+          </div>
+
+          <!-- FOIA -->
+          <div class="bento-cell bento-c-right-cell">
+            <p class="bento-overline">Request Records</p>
+            <p class="bento-heading">Four FOIA templates.</p>
+            <p class="bento-desc">Camera locations, data retention, federal sharing, Flock contract. SC FOIA § 30-4-10 gives you the right. Use it.</p>
+            <a href="/toolkit#request-records" class="bento-link" style="margin-top:auto;">Go to FOIA templates →</a>
+          </div>
+
+          <!-- Speak Up -->
+          <div class="bento-cell bento-c-right-cell">
+            <p class="bento-overline">Speak Up</p>
+            <p class="bento-heading">Show up. Say exactly this.</p>
+            <p class="bento-desc">Full talk track + rebuttals + council handout PDF.</p>
+            <a href="/toolkit#speak-up" class="bento-link" style="margin-top:auto;">Prep your remarks →</a>
+          </div>
+
+          <!-- Know Your Rights -->
+          <div class="bento-cell bento-c-right-cell">
+            <p class="bento-overline">Know Your Rights</p>
+            <p class="bento-heading">4th Amendment. What SC is missing.</p>
+            <p class="bento-desc">Six states have ALPR limits. South Carolina has none. Legal primer, state comparison, bill gaps.</p>
+            <a href="/toolkit#know-your-rights" class="bento-link" style="margin-top:auto;">Understand the law →</a>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+  </div><!-- end bento group -->
+
+</body>
+</html>
