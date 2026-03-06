@@ -117,44 +117,16 @@ async function generateFoiaTemplates() {
 
     let y = PAGE_HEIGHT - MARGIN;
 
-    // Header bar
+    // Red accent bar (no header branding on FOIA templates)
     page.drawRectangle({
       x: MARGIN,
-      y: y - 2,
-      width: CONTENT_WIDTH,
-      height: 28,
-      color: DARK,
-    });
-    page.drawText('DeflockSC.org', {
-      x: MARGIN + 10,
-      y: y + 4,
-      size: 10,
-      font: helveticaBold,
-      color: WHITE,
-    });
-
-    const citizenLabel = 'Citizen Toolkit';
-    const labelWidth = helvetica.widthOfTextAtSize(citizenLabel, 10);
-    page.drawText(citizenLabel, {
-      x: MARGIN + CONTENT_WIDTH - labelWidth - 10,
-      y: y + 4,
-      size: 10,
-      font: helvetica,
-      color: rgb(0.7, 0.7, 0.7),
-    });
-
-    y -= 50;
-
-    // Red accent bar
-    page.drawRectangle({
-      x: MARGIN,
-      y: y + 2,
+      y,
       width: 50,
       height: 4,
       color: RED,
     });
 
-    y -= 8;
+    y -= 28;
 
     // Title
     const titleLines = wrapText(template.title, helveticaBold, 18, CONTENT_WIDTH);
@@ -186,8 +158,18 @@ async function generateFoiaTemplates() {
     page.drawText('TEMPLATE', { x: MARGIN, y, size: 8, font: helveticaBold, color: RED });
     y -= 16;
 
-    // Template body — highlight placeholders
+    // Template body — replace placeholders with form fields
+    const form = doc.getForm();
     const templateText = template.template;
+
+    // First pass: replace placeholders with underscores of equal visual width
+    // to get accurate line wrapping, then render with fields
+    const placeholderRegex = /\[([A-Z\s/()]+)\]/g;
+
+    // Collect unique placeholder names for field creation
+    const fieldCounter = new Map();
+
+    // Word-wrap the raw template (with placeholders) to get line layout
     const templateLines = wrapText(templateText, helvetica, 10, CONTENT_WIDTH - 16);
     const leading = 14;
 
@@ -206,15 +188,14 @@ async function generateFoiaTemplates() {
       if (y < MARGIN + 60) break;
 
       // Check for placeholders in the line
-      const placeholderRegex = /\[([A-Z\s/]+)\]/g;
+      const lineRegex = /\[([A-Z\s/()]+)\]/g;
       let match;
       let lastIndex = 0;
       let xOffset = templateX;
 
-      // Render line segments with placeholder highlighting
       const lineStr = line;
       let hasPlaceholder = false;
-      while ((match = placeholderRegex.exec(lineStr)) !== null) {
+      while ((match = lineRegex.exec(lineStr)) !== null) {
         hasPlaceholder = true;
         // Draw text before placeholder
         const before = lineStr.substring(lastIndex, match.index);
@@ -222,10 +203,36 @@ async function generateFoiaTemplates() {
           page.drawText(before, { x: xOffset, y, size: 10, font: helvetica, color: BLACK });
           xOffset += helvetica.widthOfTextAtSize(before, 10);
         }
-        // Draw placeholder in bold red
-        const placeholder = match[0];
-        page.drawText(placeholder, { x: xOffset, y, size: 10, font: helveticaBold, color: RED });
-        xOffset += helveticaBold.widthOfTextAtSize(placeholder, 10);
+
+        // Create form field instead of drawing placeholder text
+        const placeholderName = match[1].trim();
+        const count = fieldCounter.get(placeholderName) || 0;
+        const fieldName = count > 0
+          ? `${placeholderName}_${count}`
+          : placeholderName;
+        fieldCounter.set(placeholderName, count + 1);
+
+        const placeholderWidth = helveticaBold.widthOfTextAtSize(match[0], 10);
+        // If the placeholder is the only content on this line, use full width
+        const isAloneLine = lineStr.trim() === match[0];
+        const fieldWidth = isAloneLine
+          ? CONTENT_WIDTH - 16
+          : Math.max(placeholderWidth + 8, 80);
+
+        const textField = form.createTextField(fieldName);
+        textField.setText(placeholderName);
+        textField.addToPage(page, {
+          x: xOffset,
+          y: y - 4,
+          width: fieldWidth,
+          height: 16,
+          borderWidth: 1,
+          borderColor: rgb(0.8, 0.8, 0.8),
+          backgroundColor: rgb(1, 1, 1),
+        });
+        textField.setFontSize(10);
+
+        xOffset += fieldWidth + 2;
         lastIndex = match.index + match[0].length;
       }
 
@@ -262,20 +269,13 @@ async function generateFoiaTemplates() {
       }
     }
 
-    // Footer
+    // Footer — no branding, just the free-to-distribute note
     page.drawRectangle({
       x: MARGIN,
       y: MARGIN,
       width: CONTENT_WIDTH,
       height: 1,
       color: LIGHT_GRAY,
-    });
-    page.drawText('deflocksc.org', {
-      x: MARGIN,
-      y: MARGIN - 14,
-      size: 8,
-      font: helvetica,
-      color: GRAY,
     });
     const freeLabel = 'Free to copy and distribute';
     const freeLabelWidth = helvetica.widthOfTextAtSize(freeLabel, 8);
@@ -327,11 +327,11 @@ async function generateCouncilHandout() {
     color: WHITE,
   });
 
-  y -= 48;
+  y -= 52;
 
   // Red accent bar
-  page.drawRectangle({ x: MARGIN, y: y + 4, width: 50, height: 4, color: RED });
-  y -= 16;
+  page.drawRectangle({ x: MARGIN, y, width: 50, height: 4, color: RED });
+  y -= 30;
 
   // Main title
   page.drawText('License Plate Surveillance', {
@@ -512,8 +512,8 @@ async function generateOnePager() {
   y -= 52;
 
   // Red accent bar
-  page.drawRectangle({ x: MARGIN, y: y + 6, width: 50, height: 4, color: RED });
-  y -= 4;
+  page.drawRectangle({ x: MARGIN, y, width: 50, height: 4, color: RED });
+  y -= 30;
 
   // Title
   const titleText = data.onePager.title;
