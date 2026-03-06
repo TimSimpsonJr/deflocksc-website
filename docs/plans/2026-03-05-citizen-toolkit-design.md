@@ -90,11 +90,12 @@ Community outreach beyond government meetings.
 - Small-government conservatives: "Your local PD spent $22K on surveillance cameras without council approval"
 - General: "Your license plate was probably scanned today — here's why that matters"
 
-**Business Cards:** 3 designs, dark theme matching site aesthetic, 3.5" x 2" standard size:
+**Business Cards:** 4 designs, dark theme matching site aesthetic, 3.5" x 2" standard size:
 
-1. **Fact-focused:** "1,000+ cameras are scanning SC drivers daily" + QR code to deflocksc.org
-2. **Question-based:** "Did you know your license plate was probably scanned today?" + QR code
-3. **CTA-focused:** "Your representatives can stop mass surveillance" + QR code + URL
+1. **"In 1984, the Thought Police weren't looking for criminals. Neither is Flock Safety."** + QR code to deflocksc.org
+2. **"Your city council signed a contract that hands your movement data to the federal government — with no local veto."** + QR code
+3. **"Surveillance doesn't equal safety."** + QR code + URL
+4. **"1,000 Eyes"** — features the eye graphic (`public/toolkit/outreach/eye-graphic.png`) with "1,000 eyes on every SC road" or similar copy + QR code. Visual-forward design where the graphic is the focal point.
 
 Downloadable as:
 - Individual card images (PNG) for preview
