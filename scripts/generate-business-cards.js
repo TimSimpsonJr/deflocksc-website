@@ -217,8 +217,8 @@ async function generateHeroCard(card, qrDataUri, fontData, opts = {}) {
     .toBuffer();
 
   const cameraMeta = await sharp(cameraResized).metadata();
-  // Crop to fit within the upper portion of card (use top ~65% of card)
-  const cameraHeight = Math.min(cameraMeta.height, Math.floor(CARD_HEIGHT * 0.65));
+  // Crop to card height (resized image is ~405px, card is 400px — show full poles)
+  const cameraHeight = Math.min(cameraMeta.height, CARD_HEIGHT);
   const cameraCropped = await sharp(cameraResized)
     .extract({ left: 0, top: 0, width: CARD_WIDTH, height: cameraHeight })
     .png()
