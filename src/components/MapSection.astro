@@ -61,97 +61,87 @@
 
   </div>
 
-  <!-- Map embed area (unchanged) -->
-  <div class="relative z-10">
-    <div class="max-w-4xl mx-auto px-6 py-12">
+  <!-- Map embed area — raw feed, red top separator -->
+  <div class="relative z-10" style="border-top: 2px solid #dc2626;">
 
-      <!-- Mobile toggle button -->
-      <div id="map-button-container" class="md:hidden bg-[#1a1a1a] border border-[rgba(255,255,255,0.1)] p-8 text-center">
-        <p class="text-white font-bold text-lg mb-4">
-          Find the cameras in your neighborhood.
-        </p>
-        <button
-          id="map-toggle"
-          type="button"
-          class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer"
-        >
-          Explore the camera map &rarr;&#xFE0E;
-        </button>
-      </div>
-
-      <!-- Map container with glow frame -->
-      <div id="map-frame" class="hidden md:block glow-frame map-frame" style="position: relative; left: 50%; transform: translateX(-50%);" data-glow-frame>
-        <p class="text-white font-bold text-lg mb-4 relative z-[3] px-1">
-          Find the cameras in your neighborhood.
-        </p>
-        <div id="map-container" class="rounded-lg overflow-hidden" style="height: 600px; clip-path: inset(0);">
-          <div id="camera-map" style="width: 100%; height: 100%;" role="application" aria-label="ALPR Camera Map"></div>
-        </div>
-        <div class="map-frame-credits relative z-[3] px-3 pt-2 pb-1">
-          <p class="text-[#a3a3a3] text-xs">
-            Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
-          </p>
-          <p class="text-[#737373] text-sm mt-1">
-            Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
-          </p>
-        </div>
-      </div>
-
+    <!-- Mobile toggle button -->
+    <div id="map-button-container" class="md:hidden bg-[#1a1a1a] p-8 text-center">
+      <p class="text-white font-bold text-lg mb-4">
+        Find the cameras in your neighborhood.
+      </p>
+      <button
+        id="map-toggle"
+        type="button"
+        class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer"
+      >
+        Explore the camera map &rarr;&#xFE0E;
+      </button>
     </div>
+
+    <!-- Map -->
+    <div id="map-frame" class="hidden md:block" style="position: relative;">
+      <div class="map-badge" aria-hidden="true">
+        <span class="map-live-dot"></span>
+        ALPR Network
+      </div>
+      <div id="map-container" style="height: 600px; clip-path: inset(0);">
+        <div id="camera-map" style="width: 100%; height: 100%;" role="application" aria-label="ALPR Camera Map"></div>
+      </div>
+    </div>
+
+    <!-- Attribution -->
+    <div class="px-6 md:px-16 py-4 border-t border-[rgba(255,255,255,0.07)]">
+      <p class="text-[#a3a3a3] text-xs">
+        Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
+      </p>
+      <p class="text-[#737373] text-sm mt-1">
+        Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
+      </p>
+    </div>
+
   </div>
 
 </section>
 
 <style>
-  /* Map-specific overrides on top of .glow-frame (from global.css) */
-  .map-frame {
-    width: 100vw;
-    padding: 0;
-    padding-top: 24px;
-    padding-bottom: 12px;
-    border-radius: 0;
+  /* ALPR Network badge overlay */
+  .map-badge {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    z-index: 10;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #e8e8e8;
+    background: rgba(13, 13, 13, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
   }
 
-  @media (min-width: 768px) {
-    .map-frame {
-      width: 70vw;
-      padding: 20px;
-      padding-top: 24px;
-      padding-bottom: 12px;
-      border-radius: 0.75rem;
-    }
+  .map-live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #dc2626;
+    flex-shrink: 0;
+    animation: map-dot-blink 2s ease-in-out infinite;
   }
 
-  .map-frame #map-container {
-    position: relative;
-    z-index: 1;
-  }
-
-  .map-frame-credits p {
-    transition: color 0.4s ease;
-  }
-
-  .map-frame-credits p:first-child a {
-    color: inherit;
-  }
-
-  .map-frame:hover .map-frame-credits p:first-child {
-    color: #737373;
-  }
-
-  .map-frame-credits p:first-child a:hover {
-    color: #d4d4d4;
-    transition: color 0.2s ease;
-  }
-
-  .map-frame:hover .map-frame-credits p:last-child {
-    color: #a3a3a3;
+  @keyframes map-dot-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .map-frame-credits p {
-      transition: none;
-    }
+    .map-live-dot { animation: none; }
   }
 
   /* Dark glass zoom controls */
