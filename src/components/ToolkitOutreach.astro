@@ -10,13 +10,6 @@ const emailSubject = 'South Carolina has a surveillance camera problem';
 const emailBody = `${shareText}\n\nCheck out the toolkit: ${shareUrl}`;
 const emailUrl = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
-/** Style map for business card preview accent colors */
-const cardStyles: Record<string, string> = {
-  fact: 'border-[#fbbf24]',
-  question: 'border-[#ef4444]',
-  cta: 'border-[#dc2626]',
-  graphic: 'border-[#a3a3a3]',
-};
 ---
 
 <!-- Section 1: One-Pager -->
@@ -119,17 +112,26 @@ const cardStyles: Record<string, string> = {
   <div class="grid sm:grid-cols-2 gap-6">
     {outreachData.businessCards.map((card) => (
       <div class="flex flex-col gap-3">
-        <!-- Styled preview card (actual PNGs not yet created) -->
-        <a
-          href={`/toolkit/outreach/card-${card.id}.png`}
-          class="block group"
-          download
+        <!-- Card image preview with inline-expand lightbox -->
+        <button
+          type="button"
+          class="card-zoom block w-full rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(220,38,38,0.15)] relative"
+          data-card-id={card.id}
+          aria-label={`Preview ${card.headline} card`}
         >
-          <div class={`aspect-[3.5/2] bg-[#0a0a0a] rounded-lg border-2 ${cardStyles[card.style] || 'border-[#333]'} flex flex-col items-center justify-center p-5 text-center transition-transform group-hover:scale-[1.02]`}>
-            <p class="text-white font-bold text-sm leading-snug mb-2 px-2">{card.headline}</p>
-            <p class="text-[#fbbf24] text-xs font-semibold tracking-wider uppercase">{card.subtext}</p>
+          <img
+            src={`/toolkit/outreach/card-${card.id}.png`}
+            alt={card.headline}
+            class="w-full aspect-[3.5/2] object-cover rounded-lg"
+            loading="lazy"
+          />
+          <!-- Zoom hint overlay on hover -->
+          <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-lg">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
           </div>
-        </a>
+        </button>
 
         <!-- Download buttons -->
         <div class="flex flex-wrap gap-2">
@@ -158,6 +160,8 @@ const cardStyles: Record<string, string> = {
     ))}
   </div>
 </div>
+
+<div id="card-dimmer" class="fixed inset-0 bg-[rgba(10,10,10,0.7)] z-40 hidden cursor-pointer" aria-hidden="true"></div>
 
 <!-- Section 4: Share Links -->
 <div class="border-t border-[#333] pt-10">
@@ -236,6 +240,14 @@ const cardStyles: Record<string, string> = {
     transform: rotate(0deg);
   }
 
+  /* Inline-expand lightbox */
+  .card-zoom.expanded {
+    transform: scale(1.8);
+    z-index: 50;
+    box-shadow: 0 0 80px rgba(0,0,0,0.7);
+    position: relative;
+  }
+
   /* Spotlight mouse tracking for cards */
   .outreach-card {
     --mouse-x: -300px;
@@ -292,6 +304,39 @@ const cardStyles: Record<string, string> = {
           }, 300);
         }
       });
+    });
+
+    // Inline-expand lightbox for business card previews
+    const dimmer = document.getElementById('card-dimmer');
+    let expandedCard: HTMLElement | null = null;
+
+    function collapseCard() {
+      if (expandedCard) {
+        expandedCard.classList.remove('expanded');
+        expandedCard = null;
+      }
+      dimmer?.classList.add('hidden');
+    }
+
+    document.querySelectorAll<HTMLButtonElement>('.card-zoom').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (expandedCard === btn) {
+          collapseCard();
+        } else {
+          if (expandedCard) expandedCard.classList.remove('expanded');
+          btn.classList.add('expanded');
+          dimmer?.classList.remove('hidden');
+          expandedCard = btn;
+        }
+      });
+    });
+
+    dimmer?.addEventListener('click', collapseCard);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && expandedCard) {
+        collapseCard();
+      }
     });
 
     // Spotlight mouse tracking on cards
