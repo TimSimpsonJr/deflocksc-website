@@ -331,7 +331,7 @@ async function generateCouncilHandout() {
 
   // Red accent bar
   page.drawRectangle({ x: MARGIN, y: y + 4, width: 50, height: 4, color: RED });
-  y -= 8;
+  y -= 16;
 
   // Main title
   page.drawText('License Plate Surveillance', {
