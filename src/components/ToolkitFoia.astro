@@ -1,0 +1,219 @@
+---
+import foiaTemplates from '../data/toolkit-foia.json';
+
+/**
+ * Highlight [PLACEHOLDER] markers in template text with amber spans.
+ * Handles newlines by splitting on them and joining with <br/> for pre-wrap rendering.
+ */
+function highlightPlaceholders(text: string): string {
+  return text.replace(/\[([A-Z\s]+)\]/g, '<span class="text-[#fbbf24] font-semibold">[$1]</span>');
+}
+---
+
+<!-- Intro: FOIA explainer -->
+<div class="mb-12">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-4">
+    Request Public Records
+  </h3>
+  <p class="text-[#d4d4d4] text-base leading-[1.7] mb-3">
+    South Carolina's Freedom of Information Act
+    (<a href="https://www.scstatehouse.gov/code/t30c004.php" target="_blank" rel="noopener" class="text-[#fbbf24] underline">S.C. Code &sect; 30-4-10</a>)
+    gives every person the right to inspect and copy public records. You don't need to be
+    a resident, a voter, or a journalist. Anyone can file.
+  </p>
+  <p class="text-[#a3a3a3] text-base leading-[1.7]">
+    Agencies have 15 business days to respond. They can charge reasonable copy fees, but
+    must notify you of the cost before processing. Use the templates below to get started.
+    Fill in the bracketed fields, print or email your request, and keep a copy for your records.
+  </p>
+</div>
+
+<!-- Card grid -->
+<div class="grid md:grid-cols-2 gap-6 mb-16">
+  {foiaTemplates.map((tmpl) => (
+    <div
+      class="template-card bg-[rgba(163,163,163,0.12)] rounded-xl p-6 flex flex-col"
+      data-spotlight
+    >
+      <!-- Title -->
+      <h4 class="text-white font-bold text-lg mb-2 relative z-10">{tmpl.title}</h4>
+
+      <!-- Description -->
+      <p class="text-[#a3a3a3] text-sm leading-[1.6] mb-4 relative z-10">{tmpl.description}</p>
+
+      <!-- Why this matters (accordion) -->
+      <details class="foia-details group mb-4 relative z-10">
+        <summary class="flex items-center cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-semibold text-[#fbbf24] hover:text-[#fde68a] transition-colors">
+          <span class="foia-icon mr-2 text-xs transition-transform duration-300">&#9654;</span>
+          Why this matters
+        </summary>
+        <div class="foia-content">
+          <div class="foia-inner">
+            <p class="text-[#a3a3a3] text-sm leading-[1.6] mt-3">{tmpl.why}</p>
+          </div>
+        </div>
+      </details>
+
+      <!-- Template text -->
+      <div
+        class="template-text bg-[#1a1a1a] border border-[#333] rounded-lg p-4 text-sm text-[#d4d4d4] leading-[1.7] whitespace-pre-wrap mb-4 flex-grow relative z-10 overflow-x-auto"
+        set:html={highlightPlaceholders(tmpl.template)}
+      />
+
+      <!-- Actions row -->
+      <div class="flex flex-wrap gap-3 relative z-10">
+        <button
+          class="copy-btn bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors cursor-pointer"
+          data-template-id={tmpl.id}
+        >
+          <span class="copy-label">Copy Template</span>
+          <span class="copy-success hidden">Copied!</span>
+        </button>
+        <a
+          href={`/toolkit/foia/${tmpl.id}.pdf`}
+          class="inline-flex items-center text-sm font-semibold text-[#a3a3a3] hover:text-white transition-colors px-4 py-2.5"
+          download
+        >
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Download PDF
+        </a>
+      </div>
+    </div>
+  ))}
+</div>
+
+<!-- Filing instructions -->
+<div class="border-t border-[#333] pt-10">
+  <h3 class="text-white font-bold text-lg mb-4">How to File Your Request</h3>
+  <ol class="text-[#d4d4d4] text-base leading-[1.8] list-decimal list-inside space-y-2">
+    <li>
+      <strong class="text-white">Find the records custodian.</strong> Search your agency's
+      website for "FOIA" or "public records" to find the designated contact.
+    </li>
+    <li>
+      <strong class="text-white">Fill in the template.</strong> Replace every bracketed
+      field with your information and the agency's details.
+    </li>
+    <li>
+      <strong class="text-white">Send it.</strong> Email is fastest. If you mail it,
+      use certified mail so you have proof of delivery.
+    </li>
+    <li>
+      <strong class="text-white">Track the deadline.</strong> The agency has 15 business
+      days to respond. Mark your calendar.
+    </li>
+    <li>
+      <strong class="text-white">Follow up.</strong> If you don't hear back, send a
+      polite reminder citing the statutory deadline. If they deny your request, they must
+      explain why in writing.
+    </li>
+  </ol>
+</div>
+
+<style>
+  /* Accordion animation for "Why this matters" */
+  .foia-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms ease-out;
+  }
+
+  .foia-inner {
+    overflow: hidden;
+  }
+
+  details[open] .foia-content {
+    grid-template-rows: 1fr;
+  }
+
+  /* Rotate triangle when open */
+  details[open] .foia-icon {
+    transform: rotate(90deg);
+  }
+
+  /* Smooth close animation */
+  details.closing .foia-content {
+    grid-template-rows: 0fr;
+  }
+
+  details.closing .foia-icon {
+    transform: rotate(0deg);
+  }
+
+  /* Spotlight mouse tracking for cards */
+  .template-card {
+    --mouse-x: -300px;
+    --mouse-y: -300px;
+  }
+</style>
+
+<script>
+  function initFoiaTab() {
+    // Copy-to-clipboard
+    document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const card = btn.closest('.template-card');
+        if (!card) return;
+
+        const templateEl = card.querySelector('.template-text');
+        if (!templateEl) return;
+
+        const text = templateEl.textContent || '';
+
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          // Fallback for older browsers / insecure contexts
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+
+        const label = btn.querySelector('.copy-label');
+        const success = btn.querySelector('.copy-success');
+        if (label && success) {
+          label.classList.add('hidden');
+          success.classList.remove('hidden');
+          setTimeout(() => {
+            label.classList.remove('hidden');
+            success.classList.add('hidden');
+          }, 2000);
+        }
+      });
+    });
+
+    // Smooth close animation for details elements
+    document.querySelectorAll<HTMLDetailsElement>('.foia-details').forEach((details) => {
+      const summary = details.querySelector('summary');
+      summary?.addEventListener('click', (e) => {
+        if (details.hasAttribute('open')) {
+          e.preventDefault();
+          details.classList.add('closing');
+          setTimeout(() => {
+            details.classList.remove('closing');
+            details.removeAttribute('open');
+          }, 300);
+        }
+      });
+    });
+
+    // Spotlight mouse tracking on cards
+    document.querySelectorAll<HTMLElement>('.template-card[data-spotlight]').forEach((card) => {
+      card.addEventListener('pointermove', (e) => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+      });
+    });
+  }
+
+  initFoiaTab();
+  document.addEventListener('astro:after-swap', initFoiaTab);
+</script>

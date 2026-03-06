@@ -1,4 +1,6 @@
 ---
+import ToolkitFoia from './ToolkitFoia.astro';
+
 const tabs = [
   { id: 'request-records', label: 'Request Records' },
   { id: 'speak-up', label: 'Speak Up' },
@@ -54,10 +56,7 @@ const tabs = [
     >
       <div class="max-w-4xl mx-auto px-6 py-20 md:py-28">
         {tab.id === 'request-records' && (
-          <div class="text-center text-[#a3a3a3] py-12 border border-dashed border-[#404040] rounded-lg">
-            <p class="text-lg font-medium text-[#d4d4d4] mb-2">Request Records</p>
-            <p>FOIA templates will appear here.</p>
-          </div>
+          <ToolkitFoia />
         )}
         {tab.id === 'speak-up' && (
           <div class="text-center text-[#a3a3a3] py-12 border border-dashed border-[#404040] rounded-lg">
