@@ -1,0 +1,417 @@
+---
+import outreachData from '../data/toolkit-outreach.json';
+
+const shareUrl = 'https://deflocksc.org/toolkit';
+const shareText = '1,000+ cameras are scanning every car on SC roads with zero oversight. Here\'s what you can do about it.';
+
+const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+const emailSubject = 'South Carolina has a surveillance camera problem';
+const emailBody = `${shareText}\n\nCheck out the toolkit: ${shareUrl}`;
+const emailUrl = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+
+---
+
+<!-- Section 1: One-Pager -->
+<div class="mb-16">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-4">
+    {outreachData.onePager.title}
+  </h3>
+  <p class="text-[#a3a3a3] text-sm mb-6">
+    A quick overview you can share with anyone. Print it, email it, or read it out loud.
+  </p>
+
+  <div class="space-y-4 mb-6">
+    {outreachData.onePager.sections.map((section) => (
+      <div class="border-l-[3px] border-[#ef4444] bg-[rgba(163,163,163,0.12)] rounded-r-xl p-5">
+        <h4 class="text-white font-bold text-base mb-2">{section.heading}</h4>
+        <p class="text-[#d4d4d4] text-base leading-[1.7]">{section.text}</p>
+      </div>
+    ))}
+  </div>
+
+  <div class="flex flex-wrap gap-3">
+    <button
+      class="copy-onepager-btn bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors cursor-pointer"
+    >
+      <span class="copy-label">Copy Text</span>
+      <span class="copy-success hidden">Copied!</span>
+    </button>
+    <a
+      href="/toolkit/outreach/one-pager.pdf"
+      class="inline-flex items-center text-sm font-semibold text-[#a3a3a3] hover:text-white transition-colors px-4 py-2.5"
+      download
+    >
+      <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      Download PDF
+    </a>
+  </div>
+</div>
+
+<!-- Hidden block for copy-to-clipboard (plain text version of one-pager) -->
+<div class="onepager-text hidden" aria-hidden="true">
+{outreachData.onePager.sections.map((s) => `${s.heading}\n${s.text}`).join('\n\n')}
+</div>
+
+<!-- Section 2: Conversation Starters -->
+<div class="mb-16">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-2">
+    Conversation Starters
+  </h3>
+  <p class="text-[#a3a3a3] text-sm mb-6">
+    Pick the right opener for your audience. Click "Read more" for follow-up talking points.
+  </p>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    {outreachData.conversationStarters.map((starter, i) => (
+      <div
+        class="outreach-card bg-[rgba(163,163,163,0.12)] rounded-xl p-6 flex flex-col"
+      >
+        <!-- Audience badge -->
+        <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded self-start mb-3 tracking-[0.05em] relative z-10">
+          {starter.audience}
+        </span>
+
+        <!-- Opener -->
+        <p class="text-white font-bold text-base leading-[1.5] mb-4 relative z-10">
+          &ldquo;{starter.opener}&rdquo;
+        </p>
+
+        <!-- Expandable follow-up -->
+        <details class="convo-details group relative z-10">
+          <summary class="flex items-center cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-semibold text-[#fbbf24] hover:text-[#fde68a] transition-colors">
+            <span class="convo-icon mr-2 text-xs transition-transform duration-300">&#9654;</span>
+            Read more
+          </summary>
+          <div class="convo-content">
+            <div class="convo-inner">
+              <p class="text-[#a3a3a3] text-sm leading-[1.6] mt-3">{starter.followUp}</p>
+            </div>
+          </div>
+        </details>
+      </div>
+    ))}
+  </div>
+</div>
+
+<!-- Section 3: Business Cards -->
+<div class="mb-16">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-2">
+    Business Cards
+  </h3>
+  <p class="text-[#a3a3a3] text-sm mb-2">
+    Leave these at coffee shops, on bulletin boards, or hand them out at events.
+  </p>
+  <p class="text-[#a3a3a3] text-sm mb-6">
+    Print on Avery 8371 cardstock or any 3.5&times;2 inch business card paper.
+  </p>
+
+  <div class="grid sm:grid-cols-2 gap-6">
+    {outreachData.businessCards.map((card) => (
+      <div class="flex flex-col gap-3">
+        <!-- Card image preview with inline-expand lightbox -->
+        <button
+          type="button"
+          class="card-zoom block w-full rounded-lg overflow-hidden relative"
+          data-card-id={card.id}
+          aria-label={`Preview ${card.headline} card`}
+        >
+          <img
+            src={`/toolkit/outreach/card-${card.id}.png`}
+            alt={card.headline}
+            class="w-full aspect-[3.5/2] object-cover rounded-lg"
+            loading="lazy"
+          />
+          <!-- Zoom hint overlay on hover -->
+          <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-lg">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
+          </div>
+        </button>
+
+        <!-- Download buttons -->
+        <div class="flex flex-wrap gap-2">
+          <a
+            href={`/toolkit/outreach/card-${card.id}.png`}
+            class="inline-flex items-center text-xs font-semibold text-[#a3a3a3] hover:text-white transition-colors px-3 py-2 bg-[#262626] rounded"
+            download
+          >
+            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download Card (PNG)
+          </a>
+          <a
+            href={`/toolkit/outreach/cards-${card.id}-print.pdf`}
+            class="inline-flex items-center text-xs font-semibold text-[#a3a3a3] hover:text-white transition-colors px-3 py-2 bg-[#262626] rounded"
+            download
+          >
+            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Download Print Sheet (PDF)
+          </a>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<div id="card-dimmer" class="fixed inset-0 bg-[rgba(10,10,10,0.7)] z-40 hidden cursor-pointer" aria-hidden="true"></div>
+
+<!-- Section 4: Share Links -->
+<div class="border-t border-[#333] pt-10">
+  <h3 class="text-white font-bold text-lg mb-4">Share the Toolkit</h3>
+  <p class="text-[#a3a3a3] text-base leading-[1.7] mb-6">
+    Spread the word with a single click. Each link opens with a pre-written message you can edit before posting.
+  </p>
+
+  <div class="flex flex-wrap gap-3">
+    <!-- Twitter/X -->
+    <a
+      href={twitterUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center bg-[#262626] hover:bg-[#333] text-white font-bold text-sm px-5 py-2.5 rounded transition-colors"
+    >
+      <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </svg>
+      Share on X
+    </a>
+
+    <!-- Facebook -->
+    <a
+      href={facebookUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center bg-[#262626] hover:bg-[#333] text-white font-bold text-sm px-5 py-2.5 rounded transition-colors"
+    >
+      <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+      </svg>
+      Share on Facebook
+    </a>
+
+    <!-- Email -->
+    <a
+      href={emailUrl}
+      class="inline-flex items-center bg-[#262626] hover:bg-[#333] text-white font-bold text-sm px-5 py-2.5 rounded transition-colors"
+    >
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+      Share via Email
+    </a>
+  </div>
+</div>
+
+<style>
+  /* Conversation starter accordion animation */
+  .convo-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms ease-out;
+  }
+
+  .convo-inner {
+    overflow: hidden;
+  }
+
+  details[open] .convo-content {
+    grid-template-rows: 1fr;
+  }
+
+  /* Rotate triangle when open */
+  details[open] .convo-icon {
+    transform: rotate(90deg);
+  }
+
+  /* Smooth close animation */
+  details.closing .convo-content {
+    grid-template-rows: 0fr;
+  }
+
+  details.closing .convo-icon {
+    transform: rotate(0deg);
+  }
+
+  /* Lightbox only activates at sm+ where cards are two-column and small enough to benefit */
+  @media (min-width: 640px) {
+    .card-zoom {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .card-zoom:hover {
+      transform: scale(1.02);
+    }
+    .card-zoom.expanded {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 50;
+      width: min(85vw, 630px);
+      box-shadow: 0 0 80px rgba(0,0,0,0.7);
+      border-radius: 0.5rem;
+      animation: lightbox-in 0.2s ease-out;
+    }
+    .card-zoom.expanded.closing {
+      animation: lightbox-out 0.15s ease-in forwards;
+    }
+  }
+
+  @keyframes lightbox-in {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+  @keyframes lightbox-out {
+    from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    to   { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+  }
+
+  /* Hide zoom-hint overlay below sm (no lightbox) */
+  @media (max-width: 639px) {
+    .card-zoom .absolute {
+      display: none;
+    }
+  }
+
+</style>
+
+<script>
+  // AbortController prevents global keydown listener accumulation across Astro page transitions
+  let outreachController: AbortController | null = null;
+
+  function initOutreachTab() {
+    outreachController?.abort();
+    outreachController = new AbortController();
+
+    // Copy one-pager text
+    const copyBtn = document.querySelector<HTMLButtonElement>('.copy-onepager-btn');
+    const textEl = document.querySelector<HTMLElement>('.onepager-text');
+
+    if (copyBtn && textEl) {
+      copyBtn.addEventListener('click', async () => {
+        const text = textEl.textContent || '';
+
+        try {
+          await navigator.clipboard.writeText(text.trim());
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = text.trim();
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+
+        const label = copyBtn.querySelector('.copy-label');
+        const success = copyBtn.querySelector('.copy-success');
+        if (label && success) {
+          label.classList.add('hidden');
+          success.classList.remove('hidden');
+          setTimeout(() => {
+            label.classList.remove('hidden');
+            success.classList.add('hidden');
+          }, 2000);
+        }
+      });
+    }
+
+    // Smooth close animation for conversation starters
+    document.querySelectorAll<HTMLDetailsElement>('.convo-details').forEach((details) => {
+      const summary = details.querySelector('summary');
+      summary?.addEventListener('click', (e) => {
+        if (details.hasAttribute('open')) {
+          e.preventDefault();
+          details.classList.add('closing');
+          setTimeout(() => {
+            details.classList.remove('closing');
+            details.removeAttribute('open');
+          }, 300);
+        }
+      });
+    });
+
+    // Lightbox + spotlight only at sm+ (640px) where cards are two-column
+    const isWideEnough = window.matchMedia('(min-width: 640px)').matches;
+
+    if (isWideEnough) {
+      // Inline-expand lightbox for business card previews
+      const dimmer = document.getElementById('card-dimmer');
+      let expandedCard: HTMLElement | null = null;
+      let placeholder: HTMLElement | null = null;
+
+      function removePlaceholder() {
+        placeholder?.remove();
+        placeholder = null;
+      }
+
+      function insertPlaceholder(btn: HTMLElement) {
+        removePlaceholder();
+        placeholder = document.createElement('div');
+        placeholder.style.height = `${btn.offsetHeight}px`;
+        placeholder.style.width = `${btn.offsetWidth}px`;
+        placeholder.setAttribute('aria-hidden', 'true');
+        btn.parentElement?.insertBefore(placeholder, btn);
+      }
+
+      function collapseCard() {
+        if (expandedCard) {
+          const card = expandedCard;
+          expandedCard = null;
+          // Animate out, then clean up
+          card.classList.add('closing');
+          dimmer?.classList.add('hidden');
+          card.addEventListener('animationend', () => {
+            card.style.transition = 'none';
+            card.classList.remove('expanded', 'closing');
+            removePlaceholder();
+            requestAnimationFrame(() => { card.style.transition = ''; });
+          }, { once: true });
+          return;
+        }
+        dimmer?.classList.add('hidden');
+      }
+
+      document.querySelectorAll<HTMLButtonElement>('.card-zoom').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (expandedCard === btn) {
+            collapseCard();
+          } else {
+            // When switching cards, snap the old one closed (no animation)
+            if (expandedCard) {
+              const old = expandedCard;
+              old.style.transition = 'none';
+              old.classList.remove('expanded', 'closing');
+              removePlaceholder();
+              requestAnimationFrame(() => { old.style.transition = ''; });
+            }
+            insertPlaceholder(btn);
+            btn.classList.add('expanded');
+            dimmer?.classList.remove('hidden');
+            expandedCard = btn;
+          }
+        });
+      });
+
+      dimmer?.addEventListener('click', collapseCard);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && expandedCard) {
+          collapseCard();
+        }
+      }, { signal: outreachController!.signal });
+
+    }
+  }
+
+  initOutreachTab();
+  document.addEventListener('astro:after-swap', initOutreachTab);
+</script>

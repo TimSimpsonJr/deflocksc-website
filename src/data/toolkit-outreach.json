@@ -1,0 +1,72 @@
+{
+  "onePager": {
+    "title": "What's Happening with Surveillance Cameras in SC?",
+    "sections": [
+      {
+        "heading": "What are ALPRs?",
+        "text": "Automated License Plate Readers are cameras that scan every car that passes and log the plate, location, and timestamp. In South Carolina, over 1,000 of these cameras sit on public roads, operated by a private company called Flock Safety. Over 99% of the plates they capture belong to people not suspected of any crime."
+      },
+      {
+        "heading": "How big is the problem?",
+        "text": "SLED's statewide database has logged over 422 million plate reads, and the data is kept for three years. Flock's network lets hundreds of outside agencies - including federal ones - search your location history without a warrant. In 2025, Flock secretly gave Border Patrol access to local police cameras nationwide without telling any of those agencies. South Carolina has zero laws governing how this data is collected, shared, or deleted."
+      },
+      {
+        "heading": "Why should I care?",
+        "text": "Every trip you take is permanently recorded: doctor visits, church services, political events, school pickups. In Greenville, two sisters were pulled over at gunpoint because a Flock camera wrongly flagged their rental car as stolen. A SLED officer used the database to search for his own vehicle and falsified the record. This technology creates a detailed map of your daily life, and the people who control it have already shown they can't be trusted with it."
+      },
+      {
+        "heading": "What can I do?",
+        "text": "Contact your state legislators and ask them to support ALPR regulation bills with real retention limits and penalties for misuse. Attend your city council meeting and ask who approved data-sharing agreements with outside agencies. File a public records request for your city's full Flock contract. Talk to your neighbors. Visit deflocksc.org to find your reps and send a letter."
+      }
+    ]
+  },
+  "conversationStarters": [
+    {
+      "audience": "Neighbors",
+      "opener": "Did you know there are 1,000+ cameras scanning every car in SC?",
+      "followUp": "They're called Flock Safety cameras, and they log your plate, location, and time every time you drive past one. SLED keeps that data for three years, and there's no SC law limiting who can search it. Two women in Greenville were pulled over at gunpoint because of a bad hit from one of these cameras."
+    },
+    {
+      "audience": "Parents",
+      "opener": "Your kids' school routes are being logged by cameras feeding data to federal agencies.",
+      "followUp": "Flock Safety cameras record every car that drives past, including school drop-offs and pickups. The data goes into a network that federal agencies have accessed without telling local police. There's no opt-out, and South Carolina has no law limiting what happens to the data."
+    },
+    {
+      "audience": "Small-government conservatives",
+      "opener": "Your local PD spent $22K on surveillance cameras without a council vote.",
+      "followUp": "Greenville's cameras were funded with federal civil asset forfeiture money, bypassing normal city council appropriations. The contract gives hundreds of outside agencies access to your location data, and your city council can't veto a federal search. SC's own Transportation Secretary admitted the Legislature has never addressed privacy protections for this technology."
+    },
+    {
+      "audience": "General",
+      "opener": "Your license plate was probably scanned today.",
+      "followUp": "Flock Safety has over 1,000 cameras across South Carolina that log every car that passes. Over 99% of scans are people not suspected of anything. The company secretly gave Border Patrol access to local camera systems nationwide, then the CEO denied it on camera. Three weeks later, he admitted it. South Carolina has no law protecting you from any of this."
+    }
+  ],
+  "businessCards": [
+    {
+      "id": "1984",
+      "headline": "In 1984, the Thought Police weren't looking for criminals. Neither is Flock Safety.",
+      "subtext": "deflocksc.org",
+      "style": "fact"
+    },
+    {
+      "id": "city-council",
+      "headline": "Your city council signed a contract that hands your movement data to the federal government. No local veto. No public vote.",
+      "subtext": "deflocksc.org",
+      "style": "question"
+    },
+    {
+      "id": "surveillance",
+      "headline": "Surveillance doesn't equal safety.",
+      "subtext": "deflocksc.org",
+      "style": "cta"
+    },
+    {
+      "id": "1000-eyes",
+      "headline": "1,000 eyes on every SC road.",
+      "subtext": "deflocksc.org",
+      "style": "graphic",
+      "graphic": "/toolkit/outreach/eye-graphic.png"
+    }
+  ]
+}

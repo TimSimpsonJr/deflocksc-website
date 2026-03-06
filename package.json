@@ -25,5 +25,9 @@
   },
   "overrides": {
     "better-sqlite3": "^12.6.2"
+  },
+  "devDependencies": {
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4"
   }
 }

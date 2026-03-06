@@ -1,0 +1,170 @@
+---
+import speakingData from '../data/toolkit-speaking.json';
+
+/**
+ * Highlight [PLACEHOLDER] markers in talk track text with amber spans.
+ */
+function highlightPlaceholders(text: string): string {
+  const highlighted = text.replace(/\[([A-Z\s\/]+)\]/g, '<span class="text-[#fbbf24] font-semibold">[$1]</span>');
+  // Split on double-newlines into separate <p> tags for readability
+  return highlighted
+    .split('\n\n')
+    .map((p) => `<p>${p}</p>`)
+    .join('');
+}
+---
+
+<!-- Intro + Tips -->
+<div class="mb-12">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-4">
+    Speak at a Council Meeting
+  </h3>
+  <p class="text-[#d4d4d4] text-base leading-[1.7] mb-6">
+    {speakingData.intro}
+  </p>
+  <ul class="space-y-3">
+    {speakingData.tips.map((tip) => (
+      <li class="flex items-start gap-3 text-[#a3a3a3] text-base leading-[1.7]">
+        <span class="text-[#fbbf24] mt-1 flex-shrink-0" aria-hidden="true">&#9656;</span>
+        <span>{tip}</span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<!-- Talk Track -->
+<div class="mb-16">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-2">
+    {speakingData.talkTrack.title}
+  </h3>
+  <p class="text-[#a3a3a3] text-sm mb-6">
+    Read this straight or adapt it. The timing badges help you stay under three minutes.
+  </p>
+
+  <div class="space-y-4">
+    {speakingData.talkTrack.sections.map((section) => (
+      <div class="talk-card border-l-[3px] border-[#ef4444] bg-[rgba(163,163,163,0.12)] rounded-r-xl p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-white font-bold text-base">{section.label}</span>
+          <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded tracking-[0.05em]">
+            {section.timing}
+          </span>
+        </div>
+        <div
+          class="text-[#d4d4d4] text-base leading-[1.7] space-y-3"
+          set:html={highlightPlaceholders(section.text)}
+        />
+      </div>
+    ))}
+  </div>
+</div>
+
+<!-- Rebuttals -->
+<div class="mb-16">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-2">
+    Rebuttals
+  </h3>
+  <p class="text-[#a3a3a3] text-sm mb-6">
+    If a council member pushes back, here's how to respond. Click a claim to see the rebuttal.
+  </p>
+
+  <div class="space-y-3">
+    {speakingData.rebuttals.map((r, i) => (
+      <details class="rebuttal-item group border-l-[3px] border-[#262626]" data-rebuttal={i}>
+        <summary class="flex items-center justify-between cursor-pointer py-4 px-5 list-none [&::-webkit-details-marker]:hidden">
+          <span class="text-white font-bold text-base pr-4">&ldquo;{r.claim}&rdquo;</span>
+          <span class="rebuttal-icon text-[#ef4444] font-bold text-xl flex-shrink-0 transition-transform duration-300">+</span>
+        </summary>
+        <div class="rebuttal-content">
+          <div class="rebuttal-inner px-5 pb-5">
+            <p class="text-[#a3a3a3] text-base leading-[1.7]">{r.response}</p>
+          </div>
+        </div>
+      </details>
+    ))}
+  </div>
+</div>
+
+<!-- Council Handout Download -->
+<div class="border-t border-[#333] pt-10">
+  <h3 class="text-white font-bold text-lg mb-4">Council Handout</h3>
+  <p class="text-[#a3a3a3] text-base leading-[1.7] mb-4">
+    A one-page PDF with key facts and sources. Print copies for each council member
+    and hand them to the clerk before you speak.
+  </p>
+  <a
+    href="/toolkit/speaking/council-handout.pdf"
+    class="inline-flex items-center bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors"
+    download
+  >
+    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    Download Council Handout
+  </a>
+</div>
+
+<style>
+  /* Rebuttal accordion animation (same grid trick as FAQ) */
+  .rebuttal-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms ease-out;
+  }
+
+  .rebuttal-inner {
+    overflow: hidden;
+  }
+
+  details[open] .rebuttal-content {
+    grid-template-rows: 1fr;
+  }
+
+  /* Red border when open */
+  details[open].rebuttal-item {
+    border-color: #ef4444;
+  }
+
+  /* Rotate + to x */
+  details[open] .rebuttal-icon {
+    transform: rotate(45deg);
+  }
+
+  /* Smooth close states */
+  details.closing .rebuttal-content {
+    grid-template-rows: 0fr;
+  }
+
+  details.closing.rebuttal-item {
+    border-color: #262626;
+  }
+
+  details.closing .rebuttal-icon {
+    transform: rotate(0deg);
+  }
+</style>
+
+<script>
+  let speakingController: AbortController | null = null;
+
+  function initSpeakingTab() {
+    speakingController?.abort();
+    speakingController = new AbortController();
+    document.querySelectorAll<HTMLDetailsElement>('.rebuttal-item').forEach((details) => {
+      const summary = details.querySelector('summary');
+      summary?.addEventListener('click', (e) => {
+        if (details.hasAttribute('open')) {
+          e.preventDefault();
+          details.classList.add('closing');
+          setTimeout(() => {
+            details.classList.remove('closing');
+            details.removeAttribute('open');
+          }, 300);
+        }
+      });
+    });
+  }
+
+  initSpeakingTab();
+  document.addEventListener('astro:after-swap', initSpeakingTab);
+</script>
