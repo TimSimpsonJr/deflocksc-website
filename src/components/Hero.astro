@@ -1,7 +1,7 @@
 ---
 ---
 
-<section aria-labelledby="hero-heading" class="bg-[#0d0d0d] min-h-[88vh] flex flex-col justify-end pb-16 pt-8 relative overflow-hidden">
+<section aria-labelledby="hero-heading" class="bg-[#0d0d0d] min-h-[88vh] flex flex-col pt-[72px] pb-16 relative overflow-hidden">
   <!-- Subtle gradient background -->
   <div class="absolute inset-0 bg-gradient-to-br from-[#171717] via-[#1a1a1a] to-[#171717] opacity-80" aria-hidden="true"></div>
 
@@ -62,7 +62,7 @@
   </div>
 
   <!-- Top metadata bar -->
-  <div class="absolute top-0 left-0 right-0 z-10 px-6 md:px-12 pt-20 flex justify-between items-start pointer-events-none" aria-hidden="true">
+  <div class="relative z-10 px-6 md:px-12 flex justify-between items-start pointer-events-none" aria-hidden="true">
     <div class="font-['DM_Mono',monospace] text-[9px] uppercase tracking-[0.12em] leading-[1.8]">
       <div class="text-[#666]">Subject</div>
       <div class="text-[#999]">Automated License Plate Readers</div>
@@ -76,6 +76,9 @@
       <div class="text-[#999]">422,000,000+ Reads</div>
     </div>
   </div>
+
+  <!-- Spacer: pushes content to bottom, minimum 3rem gap -->
+  <div class="flex-grow min-h-[3rem]"></div>
 
   <!-- Bottom content -->
   <div class="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12" style="text-shadow: 0 2px 16px rgba(0,0,0,0.6);">
