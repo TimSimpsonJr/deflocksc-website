@@ -30,7 +30,7 @@ src/
     blog/[...slug]/og.png.ts    # Dynamic OG image generation per post
     rss.xml.ts                  # RSS feed
   lib/
-    district-matcher.js         # Boundary loading, district matching, Census geocoder (JSONP)
+    district-matcher.js         # Boundary loading, district matching, Census geocoder (fetch)
     geo-utils.js                # Point-in-polygon, bounding box geometry
     og-image.ts                 # Satori SVG-to-PNG for OG cards
   scripts/

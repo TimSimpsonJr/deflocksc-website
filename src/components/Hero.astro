@@ -10,13 +10,20 @@
     <div class="relative w-[650px] md:w-[1000px] lg:w-[1300px]">
 
       <!-- Camera image -->
-      <img
-        src="/hero-cameras-1300w.png"
-        srcset="/hero-cameras-650w.png 650w, /hero-cameras-1000w.png 1000w, /hero-cameras-1300w.png 1300w, /hero-cameras-2600w.png 2600w"
-        sizes="(max-width: 767px) 650px, (max-width: 1023px) 1000px, 1300px"
-        alt="" aria-hidden="true"
-        class="max-w-none w-full h-auto"
-        style="filter: blur(3px) brightness(0.90); mask-image: linear-gradient(to bottom, black 50%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);" />
+      <picture>
+        <source
+          type="image/webp"
+          srcset="/hero-cameras-650w.webp 650w, /hero-cameras-1000w.webp 1000w, /hero-cameras-1300w.webp 1300w, /hero-cameras-2600w.webp 2600w"
+          sizes="(max-width: 767px) 650px, (max-width: 1023px) 1000px, 1300px" />
+        <img
+          src="/hero-cameras-1300w.png"
+          srcset="/hero-cameras-650w.png 650w, /hero-cameras-1000w.png 1000w, /hero-cameras-1300w.png 1300w, /hero-cameras-2600w.png 2600w"
+          sizes="(max-width: 767px) 650px, (max-width: 1023px) 1000px, 1300px"
+          width="1300" height="752"
+          alt="" aria-hidden="true"
+          class="max-w-none w-full h-auto"
+          style="filter: blur(3px) brightness(0.90); mask-image: linear-gradient(to bottom, black 50%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);" />
+      </picture>
 
       <!-- Animated light cones (on top of camera image, overflow visible so cones aren't clipped at image edges) -->
       <svg id="hero-cones" class="absolute inset-0 w-full h-full"

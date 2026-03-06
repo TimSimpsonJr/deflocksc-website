@@ -15,3 +15,10 @@
   from = "/u/api/send"
   to = "https://cloud.umami.is/api/send"
   status = 200
+
+# Proxy Census Bureau geocoder to avoid CORS (API has no CORS headers)
+[[redirects]]
+  from = "/api/geocode"
+  to = "https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress"
+  status = 200
+  query = {address = ":address", benchmark = ":benchmark", vintage = ":vintage", format = ":format"}
