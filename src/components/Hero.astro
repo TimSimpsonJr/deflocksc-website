@@ -1,7 +1,7 @@
 ---
 ---
 
-<section aria-labelledby="hero-heading" class="bg-[#171717] py-24 md:py-32 relative overflow-hidden">
+<section aria-labelledby="hero-heading" class="bg-[#0d0d0d] min-h-[88vh] flex flex-col justify-end pb-16 pt-8 relative overflow-hidden">
   <!-- Subtle gradient background -->
   <div class="absolute inset-0 bg-gradient-to-br from-[#171717] via-[#1a1a1a] to-[#171717] opacity-80" aria-hidden="true"></div>
 
@@ -55,27 +55,74 @@
     </div>
   </div>
 
-  <div class="max-w-5xl mx-auto px-6 relative z-10 text-center" style="text-shadow: 0 2px 16px rgba(0,0,0,0.6);">
-    <h1 id="hero-heading" class="text-white font-black text-3xl md:text-5xl lg:text-6xl tracking-[-0.02em] leading-[1.1] mb-4">
-      In 1984, the Thought Police <br class="hidden md:block" />weren't looking for criminals. <br class="hidden md:block" />Neither is <span class="text-[#dc2626]">Flock Safety</span>
-    </h1>
+  <!-- Glitch scan bars -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div class="glitch-bar absolute left-0 right-0 h-[2px] bg-[rgba(220,38,38,0.15)]"></div>
+    <div class="glitch-bar2 absolute left-0 right-0 h-[1px] bg-[rgba(255,255,255,0.04)]"></div>
+  </div>
 
-    <p class="text-[#d4d4d4] font-semibold text-xl md:text-2xl lg:text-3xl mb-6 leading-snug">
-      99% of the plates they scan belong to people suspected of nothing.
-    </p>
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-[1fr_300px] gap-8 md:gap-16 items-center" style="text-shadow: 0 2px 16px rgba(0,0,0,0.6);">
+    <!-- Left: headline + body + CTAs -->
+    <div>
+      <p class="hero-kicker font-['DM_Mono',monospace] text-[10px] tracking-[0.18em] uppercase text-[rgba(220,38,38,0.7)] mb-6">SC · ALPR · Active · Unregulated</p>
+      <h1 id="hero-heading" class="text-white font-bold text-[clamp(3rem,7vw,5.5rem)] tracking-[-0.03em] leading-[0.95] mb-6">
+        Your plates<br>
+        are <em class="text-[#dc2626] not-italic font-bold">tracked.</em><br>
+        No vote taken.
+      </h1>
+      <p class="text-[#909090] text-base md:text-[15px] leading-[1.65] max-w-[440px] mb-8">
+        242 cameras are watching Upstate South Carolina right now. Every car that passes gets photographed. That data goes into a national network. And nobody voted on any of it.
+      </p>
+      <div class="flex items-center gap-4">
+        <button type="button" data-open-action
+          class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.08em] px-8 py-3.5 transition-colors cursor-pointer">
+          Contact Your Reps
+        </button>
+        <a href="#how-it-works" class="font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.06em] text-[#555555] hover:text-[#a0a0a0] transition-colors">
+          View Camera Map ↓
+        </a>
+      </div>
+    </div>
 
-    <p class="text-[#a3a3a3] font-medium text-lg md:text-xl mb-8 leading-relaxed">
-      242 cameras are watching Upstate South Carolina right now. Every car that passes gets photographed. That data goes into a national network. And nobody voted on any of it.
-    </p>
-
-    <button type="button" data-open-action
-      class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer">
-      Contact Your Reps
-    </button>
+    <!-- Right: data sidebar -->
+    <div class="hidden md:flex flex-col">
+      <div class="border-t border-[rgba(255,255,255,0.07)] py-4">
+        <div class="text-[#dc2626] font-bold text-3xl tracking-[-0.025em] leading-none mb-1">242</div>
+        <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.1em] text-[#555555]">Cameras · Upstate SC</div>
+      </div>
+      <div class="border-t border-[rgba(255,255,255,0.07)] py-4">
+        <div class="text-[#e8e8e8] font-bold text-3xl tracking-[-0.025em] leading-none mb-1">422M</div>
+        <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.1em] text-[#555555]">Reads in SLED database</div>
+      </div>
+      <div class="border-t border-[rgba(255,255,255,0.07)] py-4">
+        <div class="text-[#dc2626] font-bold text-3xl tracking-[-0.025em] leading-none mb-1">0</div>
+        <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.1em] text-[#555555]">Oversight ordinances</div>
+      </div>
+      <div class="border-t border-b border-[rgba(255,255,255,0.07)] py-4">
+        <div class="text-[#fbbf24] font-bold text-3xl tracking-[-0.025em] leading-none mb-1">S447</div>
+        <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.1em] text-[#555555]">Active bill · In committee</div>
+      </div>
+    </div>
   </div>
 </section>
 
 <style>
+  @keyframes glitch-scan {
+    0%   { top: -2px; opacity: 0; }
+    5%   { opacity: 1; }
+    95%  { opacity: 0.3; }
+    100% { top: 100%; opacity: 0; }
+  }
+  @keyframes glitch-scan2 {
+    0%   { top: -1px; }
+    100% { top: 100%; }
+  }
+  .glitch-bar  { animation: glitch-scan  8s linear infinite; }
+  .glitch-bar2 { animation: glitch-scan2 5s linear infinite 2s; }
+  @media (prefers-reduced-motion: reduce) {
+    .glitch-bar, .glitch-bar2 { animation: none; }
+  }
+
   @keyframes cone-sweep {
     0%   { transform: rotate(-20deg); animation-timing-function: ease-in-out; }
     38%  { transform: rotate(18deg);  animation-timing-function: cubic-bezier(0.7, 0, 0.3, 1); }
