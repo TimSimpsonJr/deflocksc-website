@@ -256,7 +256,13 @@ const emailUrl = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${enc
 </style>
 
 <script>
+  // AbortController prevents global keydown listener accumulation across Astro page transitions
+  let outreachController: AbortController | null = null;
+
   function initOutreachTab() {
+    outreachController?.abort();
+    outreachController = new AbortController();
+
     // Copy one-pager text
     const copyBtn = document.querySelector<HTMLButtonElement>('.copy-onepager-btn');
     const textEl = document.querySelector<HTMLElement>('.onepager-text');
@@ -337,7 +343,7 @@ const emailUrl = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${enc
       if (e.key === 'Escape' && expandedCard) {
         collapseCard();
       }
-    });
+    }, { signal: outreachController!.signal });
 
     // Spotlight mouse tracking on cards
     document.querySelectorAll<HTMLElement>('.outreach-card[data-spotlight]').forEach((card) => {
