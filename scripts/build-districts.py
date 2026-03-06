@@ -120,10 +120,16 @@ def simplify_and_export(gdf, output_path, district_field, district_transform=Non
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(geojson, f, separators=(",", ":"))
 
+    if len(features) == 0:
+        print(f"  WARNING: No valid features after simplification for {output_path}")
+
     size_kb = os.path.getsize(output_path) / 1024
     print(f"  Wrote {output_path} ({len(features)} features, {size_kb:.1f} KB)")
     if size_kb > 100:
         print(f"  WARNING: File exceeds 100KB target. Consider increasing SIMPLIFY_TOLERANCE.")
+
+    # Validate the output file
+    validate_output_geojson(output_path, os.path.basename(output_path))
 
 
 def download_shapefile_zip(url, description):
@@ -311,9 +317,18 @@ def build_tiger(entry, output_path, dry_run=False):
 
     gdf = download_shapefile_zip(url, f"TIGER/Line {name}")
 
+    # Validate district field exists
+    if district_field not in gdf.columns:
+        raise RuntimeError(
+            f"District field '{district_field}' not found in shapefile. "
+            f"Available columns: {list(gdf.columns)}"
+        )
+
     # Filter to SC (should already be SC-only, but verify)
     if "STATEFP" in gdf.columns:
         gdf = gdf[gdf["STATEFP"] == "45"]
+
+    validate_geodataframe(gdf, name)
 
     # Reproject to WGS84 if needed
     if gdf.crs and gdf.crs.to_epsg() != 4326:
@@ -341,6 +356,15 @@ def build_arcgis(entry, output_path, dry_run=False):
         return
 
     gdf = query_arcgis_geojson(url, f"{name} districts")
+
+    # Validate district field exists
+    if district_field not in gdf.columns:
+        raise RuntimeError(
+            f"District field '{district_field}' not found in ArcGIS response. "
+            f"Available columns: {list(gdf.columns)}"
+        )
+
+    validate_geodataframe(gdf, name)
 
     # Build district transform from config if a name map is provided
     # (e.g., Anderson County: "One" -> "1", "Two" -> "2", etc.)
@@ -386,6 +410,102 @@ BUILDERS = {
     "arcgis": build_arcgis,
     "scrfa": build_scrfa,
 }
+
+
+def validate_registry_entry(entry):
+    """Validate a registry boundary entry has required fields.
+
+    Returns a list of error messages (empty if valid).
+    """
+    errors = []
+    entry_id = entry.get("id", "<unknown>")
+
+    if not entry.get("name"):
+        errors.append(f"{entry_id}: missing 'name'")
+
+    source = entry.get("boundarySource", "")
+    if source and source not in BUILDERS:
+        errors.append(f"{entry_id}: unknown boundarySource '{source}'")
+
+    if not entry.get("boundaryFile"):
+        errors.append(f"{entry_id}: missing 'boundaryFile'")
+
+    # Source-specific field checks
+    if source == "tiger":
+        if not entry.get("boundaryUrl"):
+            errors.append(f"{entry_id}: tiger source requires 'boundaryUrl'")
+        if not entry.get("boundaryDistrictField"):
+            errors.append(f"{entry_id}: tiger source requires 'boundaryDistrictField'")
+    elif source == "arcgis":
+        if not entry.get("boundaryUrl"):
+            errors.append(f"{entry_id}: arcgis source requires 'boundaryUrl'")
+        if not entry.get("boundaryDistrictField"):
+            errors.append(f"{entry_id}: arcgis source requires 'boundaryDistrictField'")
+    elif source == "scrfa":
+        config = entry.get("boundaryConfig", {})
+        if not config.get("countyFips"):
+            errors.append(f"{entry_id}: scrfa source requires 'boundaryConfig.countyFips'")
+
+    return errors
+
+
+def validate_geodataframe(gdf, entry_id):
+    """Validate a GeoDataFrame contains usable polygon geometries.
+
+    Prints warnings for issues but does not raise.
+    """
+    if len(gdf) == 0:
+        print(f"  WARNING ({entry_id}): GeoDataFrame has 0 features")
+        return
+
+    # Check that geometries are polygons
+    non_polygon = 0
+    null_geom = 0
+    for _, row in gdf.iterrows():
+        geom = row.geometry
+        if geom is None or geom.is_empty:
+            null_geom += 1
+        elif geom.geom_type not in ("Polygon", "MultiPolygon"):
+            non_polygon += 1
+
+    if null_geom > 0:
+        print(f"  WARNING ({entry_id}): {null_geom} features have null/empty geometry")
+    if non_polygon > 0:
+        print(f"  WARNING ({entry_id}): {non_polygon} features are not Polygon/MultiPolygon")
+
+
+def validate_output_geojson(output_path, entry_id):
+    """Validate the generated GeoJSON file after writing.
+
+    Checks that coordinates fall within SC bounds.
+    """
+    try:
+        with open(output_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"  WARNING ({entry_id}): Could not validate output: {e}")
+        return
+
+    features = data.get("features", [])
+    if len(features) == 0:
+        print(f"  WARNING ({entry_id}): Output has 0 features")
+        return
+
+    # Spot-check first coordinate of each feature is within SC bounds
+    out_of_bounds = 0
+    for feature in features:
+        coords = feature.get("geometry", {}).get("coordinates", [])
+        # Navigate to first [lng, lat]
+        first = coords
+        while isinstance(first, list) and len(first) > 0 and isinstance(first[0], list):
+            first = first[0]
+        if isinstance(first, list) and len(first) >= 2:
+            lng, lat = first[0], first[1]
+            if not (-84.0 <= lng <= -78.0 and 31.5 <= lat <= 35.5):
+                out_of_bounds += 1
+
+    if out_of_bounds > 0:
+        print(f"  WARNING ({entry_id}): {out_of_bounds}/{len(features)} features have coordinates outside SC bounds")
 
 
 def load_registry():
@@ -449,6 +569,13 @@ def main():
         entry_name = entry.get("name", entry_id)
         source = entry.get("boundarySource")
         output_file = entry.get("boundaryFile")
+
+        # Validate registry entry before processing
+        entry_errors = validate_registry_entry(entry)
+        if entry_errors:
+            for err in entry_errors:
+                print(f"  VALIDATION: {err}")
+            errors.extend((output_file or entry_id, err) for err in entry_errors)
 
         if not source or not output_file:
             print(f"\n--- Skipping {entry_name}: missing boundarySource or boundaryFile ---")

@@ -45,6 +45,9 @@ function pointInRing(lat, lng, ring) {
  * @returns {boolean}
  */
 export function pointInPolygon(lat, lng, geometry) {
+  // Validate inputs: geometry must have type and coordinates
+  if (!geometry || !geometry.type || !geometry.coordinates) return false;
+
   if (geometry.type === 'Polygon') {
     const rings = geometry.coordinates;
     // Must be inside the outer ring
@@ -79,6 +82,11 @@ export function pointInPolygon(lat, lng, geometry) {
  * Returns { minLat, maxLat, minLng, maxLng }.
  */
 export function computeBBox(fc) {
+  // Validate FeatureCollection structure
+  if (!fc || !fc.features || fc.features.length === 0) {
+    return { minLat: 0, maxLat: 0, minLng: 0, maxLng: 0 };
+  }
+
   let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
 
   function scanRing(ring) {
@@ -93,6 +101,7 @@ export function computeBBox(fc) {
 
   for (let f = 0; f < fc.features.length; f++) {
     const geom = fc.features[f].geometry;
+    if (!geom || !geom.type || !geom.coordinates) continue;
     if (geom.type === 'Polygon') {
       for (let r = 0; r < geom.coordinates.length; r++) scanRing(geom.coordinates[r]);
     } else if (geom.type === 'MultiPolygon') {

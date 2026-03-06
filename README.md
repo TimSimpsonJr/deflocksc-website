@@ -15,7 +15,7 @@ The homepage has six sections:
 - **FAQ** -- sourced answers to common questions about ALPRs and privacy
 - **Take Action** -- call to action driving visitors to contact their representatives
 
-The **action modal** is the core engagement tool. A visitor enters their location via geolocation, street address (Census geocoder), or manual dropdown. The site matches them to their state legislative and local council districts using client-side boundary files, looks up their representatives, and presents pre-written template letters they can send.
+The **action modal** is the core engagement tool. A visitor enters their location via geolocation, street address (Census geocoder), or manual dropdown. The site matches them to their state legislative and local council districts using client-side boundary files, looks up their representatives, and presents pre-written template letters they can send. Letters are locally tailored -- 80+ templates cover all 46 SC counties with jurisdiction-specific facts, camera counts, and incident references.
 
 ## Tech Stack
 
@@ -40,7 +40,7 @@ npm run dev
 
 Open [localhost:4321](http://localhost:4321).
 
-Scraper data (`bills.json`, `state-legislators.json`, `local-councils.json`) ships with the repo. No scraper run is needed to start development.
+Scraper data (`bills.json`, `state-legislators.json`, `local-councils.json`) and action letters (`action-letters.json`) ship with the repo. No scraper run is needed to start development.
 
 ## Adapting for Your State
 

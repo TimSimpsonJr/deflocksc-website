@@ -369,10 +369,16 @@ const registry = {
       clearTimeout(timeout);
       if (!res.ok) throw new Error('Census geocoder HTTP ' + res.status);
       var data = await res.json();
-      var matches = data.result && data.result.addressMatches;
+      if (!data || !data.result) return result;
+      var matches = data.result.addressMatches;
       if (!matches || matches.length === 0) return result;
       var match = matches[0];
-      if (match.coordinates) { result.lng = match.coordinates.x; result.lat = match.coordinates.y; }
+      if (match.coordinates) {
+        var cx = match.coordinates.x, cy = match.coordinates.y;
+        if (typeof cx === 'number' && typeof cy === 'number' && isFinite(cx) && isFinite(cy)) {
+          result.lng = cx; result.lat = cy;
+        }
+      }
       var geo = match.geographies;
       if (geo) {
         var upper = geo['2024 State Legislative Districts - Upper'] || geo['State Legislative Districts - Upper'];
@@ -1028,12 +1034,29 @@ const registry = {
     e.preventDefault();
     var address = document.getElementById('action-address')?.value?.trim();
     if (!address) return;
+
+    // Validate address has minimum length and contains alphabetic characters
+    if (address.length < 5) {
+      showError('Please enter a full street address (e.g. "123 Main St, Greenville, SC 29601").');
+      return;
+    }
+    if (!/[a-zA-Z]/.test(address)) {
+      showError('Please enter a valid street address with a street name.');
+      return;
+    }
+
     showState('loading');
     try {
       var geo = await geocodeAddress(address);
       if (!geo.lat || !geo.lng) {
         throw new Error("That address didn't return a match. Double-check the street, city, and state, then try again.");
       }
+
+      // Validate coordinates are within South Carolina bounds
+      if (geo.lat < 31.5 || geo.lat > 35.5 || geo.lng < -84.0 || geo.lng > -78.0) {
+        throw new Error("That address doesn't appear to be in South Carolina. Please enter a SC address.");
+      }
+
       var match = await matchDistricts(geo.lat, geo.lng);
       if (geo.senate) match.senate = geo.senate;
       if (geo.house) match.house = geo.house;
@@ -1060,6 +1083,17 @@ const registry = {
       showError('Pick at least a Senate or House district so we can find your representatives.');
       return;
     }
+
+    // Validate county district is selected if county is selected (and vice versa)
+    if (match.county && !match.countyDistrict) {
+      showError('Please also select your county council district, or clear the county selection.');
+      return;
+    }
+    if (match.city && !match.cityDistrict) {
+      showError('Please also select your city council district, or clear the city selection.');
+      return;
+    }
+
     var groups = buildGroups(match);
     showState('results');
     renderResults(groups);

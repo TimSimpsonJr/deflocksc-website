@@ -8,7 +8,8 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "validate": "python scripts/validate-data.py"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.15",

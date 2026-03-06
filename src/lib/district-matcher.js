@@ -18,8 +18,8 @@ const COUNTY_FILES = {};
 const CITY_FILES = {};
 const COUNTY_CITIES = {};
 
-for (const j of registry.jurisdictions) {
-  if (!j.hasBoundary || !j.boundaryFile) continue;
+for (const j of (registry.jurisdictions || [])) {
+  if (!j.hasBoundary || !j.boundaryFile || !j.county || !j.id) continue;
   const countyLower = j.county.toLowerCase();
   if (j.type === 'county') {
     COUNTY_FILES[countyLower] = j.boundaryFile;
@@ -55,6 +55,14 @@ export async function loadBoundary(filename) {
     const res = await fetch('/districts/' + filename);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
+
+    // Validate GeoJSON structure
+    if (data.type !== 'FeatureCollection' || !Array.isArray(data.features)) {
+      console.warn('Invalid GeoJSON in boundary file: ' + filename);
+      boundaryCache.set(filename, null);
+      return null;
+    }
+
     // Pre-compute and attach bounding box for fast rejection
     data._bbox = computeBBox(data);
     boundaryCache.set(filename, data);
@@ -114,6 +122,11 @@ export async function matchDistricts(lat, lng) {
     city: null,
     cityDistrict: null,
   };
+
+  // Validate inputs are finite numbers
+  if (typeof lat !== 'number' || typeof lng !== 'number' || !isFinite(lat) || !isFinite(lng)) {
+    return result;
+  }
 
   // Early rejection: not even in SC
   if (
@@ -229,10 +242,14 @@ export async function geocodeAddress(address) {
 
     const match = matches[0];
 
-    // Extract coordinates
+    // Extract and validate coordinates
     if (match.coordinates) {
-      result.lng = match.coordinates.x;
-      result.lat = match.coordinates.y;
+      var x = match.coordinates.x;
+      var y = match.coordinates.y;
+      if (typeof x === 'number' && typeof y === 'number' && isFinite(x) && isFinite(y)) {
+        result.lng = x;
+        result.lat = y;
+      }
     }
 
     // Extract state legislative districts from geographies
