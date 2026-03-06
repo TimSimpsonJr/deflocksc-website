@@ -1,0 +1,59 @@
+{
+  "intro": "Most SC city and county councils set aside time for public comment at every regular meeting. You typically get three minutes. Some require you to sign up before the meeting starts, others let you sign up on the spot. Check your council's website or call the clerk's office to confirm the process. You don't need to be an expert. You just need to show up, be specific, and stay under time.",
+  "tips": [
+    "Sign up early. Some councils cap public comment at a set number of speakers. Arrive 15 to 30 minutes before the meeting starts.",
+    "Bring printed copies of your comment for each council member. Hand them to the clerk before you speak. Council members read handouts after the meeting even if they don't engage during your remarks.",
+    "Stay under three minutes. Practice with a timer. Going over time undermines your credibility and annoys the people you're trying to persuade.",
+    "Speak to the council, not the audience. Make eye contact with council members. Address them by name if you can.",
+    "State your name and address at the start. This confirms you're a constituent and puts your comment on the record.",
+    "End with a specific ask. Don't just describe a problem. Tell them exactly what you want them to do.",
+    "Don't argue with council members during your comment. If they push back, stay calm and offer to provide follow-up information in writing."
+  ],
+  "talkTrack": {
+    "title": "3-Minute Public Comment",
+    "sections": [
+      {
+        "label": "Open",
+        "text": "Good evening, council members. My name is [YOUR NAME] and I live at [YOUR ADDRESS] here in [CITY/COUNTY]. I'm here tonight to talk about Flock Safety cameras - the automated license plate readers installed on our roads. This is not a partisan issue. Republican state Rep. Garry Smith of Simpsonville said we need reasonable limitations on this technology. Democratic Rep. Todd Rutherford has introduced regulation bills every session since 2017. They agree on this. I'm asking you to agree too.",
+        "timing": "30 sec"
+      },
+      {
+        "label": "The Problem",
+        "text": "These cameras scan every license plate that passes them, and 99% of the plates they scan belong to people who aren't suspected of anything. The data goes to SLED, which keeps it for three years - not the 30 days Flock advertises. SLED's database has logged 422 million plate reads. That's a detailed record of where South Carolinians drive, when they drive, and how often. Flock's CEO was asked on camera in July 2025 whether his company had any federal contracts. He said no. Three weeks later, investigators forced him to admit Flock had secretly given Border Patrol an account to access local police cameras across the country - without telling any of those agencies. In Illinois, CBP accessed data from 12 local agencies in violation of state law. SC has no law that would even make that illegal here.",
+        "timing": "60 sec"
+      },
+      {
+        "label": "Local Impact",
+        "text": "This isn't hypothetical. Two Greenville women were driving a rental car that a Flock camera wrongly flagged as stolen. Police drew their guns, handcuffed both sisters, and put them in the back of a squad car before figuring out the car had just been improperly reported. They're now suing. Meanwhile, SCDOT discovered over 200 Flock cameras installed on SC roads without permits. Flock's defense was that their teams move quickly because of 'life or death situations.' They put cameras on public roads without permission and called it a virtue. And security researchers found Flock cameras can be physically hacked in under 30 seconds. They run an operating system Google stopped updating in 2021. There are 22 confirmed vulnerabilities in the National Vulnerability Database. These cameras are not secure.",
+        "timing": "60 sec"
+      },
+      {
+        "label": "The Ask",
+        "text": "I'm asking this council to pause any expansion of Flock cameras until you adopt a written oversight ordinance. That means a retention limit shorter than three years, a requirement for council approval before any data-sharing agreements, and a public audit of how this system is being used. More than 30 cities across the country have already terminated Flock contracts. You don't have to be the first to act, but you do have to act. Thank you for your time.",
+        "timing": "30 sec"
+      }
+    ]
+  },
+  "rebuttals": [
+    {
+      "claim": "It only captures plates, not people",
+      "response": "Flock's own patent, granted in August 2022, describes using neural networks to classify people by gender, estimated height and weight, clothing, and facial recognition data points. The patent describes matching individuals across multiple cameras using statistical similarity. They market these as plate readers. They patented a system that tracks and classifies people by race, gender, and physical appearance. And even setting the patent aside, SLED's database has logged 422 million plate reads with three-year retention. That's a detailed movement profile of every car in the state. You don't need to photograph someone's face to track where they go."
+    },
+    {
+      "claim": "We only keep data 30 days",
+      "response": "That's Flock's default setting, but it's not where the data stops. Every plate read from Greenville goes to SLED, which retains it for three years. And once data enters Flock's national sharing network, your local police department can't stop an outside agency from querying it. In 2025, Flock secretly gave Border Patrol an account to send data-access invitations to local agencies nationwide. The University of Washington documented a 'back door' where federal agencies accessed data from departments that never authorized sharing. Flock admitted it cannot monitor how federal agencies use its system. The 30-day number is a marketing claim, not a data protection guarantee."
+    },
+    {
+      "claim": "It reduces crime",
+      "response": "Homicides dropped 21% nationally in 2025 - the largest single-year decline on record - across hundreds of cities, most of which don't have Flock cameras. Experts credit pandemic normalization and federal spending, not cameras. Austin conducted an independent city audit and couldn't establish a causal link between Flock cameras and crime reduction. Denver, Flock's own showcase city, credited nine other initiatives alongside cameras and then terminated the contract two days before Flock used their stats in a blog post. If cameras caused Denver's crime drop, what caused the identical drop everywhere else?"
+    },
+    {
+      "claim": "It's just like a security camera",
+      "response": "A security camera at a gas station records who walks in and out. It doesn't automatically scan every person, check them against a national database, and share the results with hundreds of agencies. Flock cameras are a mass dragnet. They scan every plate that passes, cross-reference it against hotlists, and feed the data into a statewide system with three-year retention. No one opted in. No warrant is required. And Flock's network lets outside agencies query that data without your police department's knowledge or consent. That's not a security camera. That's an automated surveillance network operating on public roads with no legal framework in South Carolina."
+    },
+    {
+      "claim": "We need it for public safety",
+      "response": "Two Greenville sisters were handcuffed at gunpoint because a Flock camera flagged their rental car as stolen. It wasn't. They're suing. A SLED officer used the plate database to search for his own car, then altered the record. When a newspaper asked for more recent misconduct cases, SLED refused to produce any documents. More than 30 cities nationwide have terminated Flock contracts - not because they oppose public safety, but because the system failed basic tests of accountability. Hays County, Texas voted to end their contract while explicitly saying they support law enforcement. A Staunton, Virginia police chief with 41 years on the job called residents' concerns 'democracy in action.' Wanting oversight is not anti-police. It's pro-accountability."
+    }
+  ]
+}
