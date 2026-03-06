@@ -3,12 +3,15 @@
 
 <nav aria-label="Main navigation" class="fixed top-0 left-0 right-0 z-50 border-b border-transparent transition-[background-color,border-color] duration-500">
   <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-    <a href="/" class="text-white font-black text-xl tracking-[-0.02em]">DeflockSC</a>
+    <a href="/" class="flex items-center gap-2 text-white font-bold text-sm uppercase tracking-[0.12em]">
+      <span class="status-dot w-[6px] h-[6px] rounded-full bg-[#dc2626] flex-shrink-0" aria-hidden="true"></span>
+      DEFLOCK<span class="text-[#dc2626]">/</span>SC
+    </a>
 
     <div class="flex items-center gap-4">
       <a href="/" class="text-[#a3a3a3] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors">Home</a>
       <a href="/toolkit" class="text-[#a3a3a3] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors">Toolkit</a>
-      <button type="button" data-open-action class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors cursor-pointer">Take Action</button>
+      <button type="button" data-open-action class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.1em] px-5 py-2.5 transition-colors cursor-pointer">Take Action</button>
     </div>
   </div>
 </nav>
@@ -31,6 +34,14 @@
 </script>
 
 <style>
+  .status-dot {
+    box-shadow: 0 0 5px #dc2626;
+    animation: nav-blink 2.5s ease-in-out infinite;
+  }
+  @keyframes nav-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
   nav::after {
     content: '';
     position: absolute;
