@@ -35,33 +35,7 @@ const { fourthAmendment, otherStates, billGaps } = legalData;
   </p>
 </div>
 
-<!-- Section 2: SC Bill Tracker (compact) -->
-<div class="mb-16">
-  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-6">
-    SC Bill Tracker
-  </h3>
-  <div class="space-y-3">
-    {bills.map((bill: any) => (
-      <a
-        href={bill.url}
-        target="_blank"
-        rel="noopener"
-        class="flex flex-wrap items-center gap-x-4 gap-y-2 bg-[rgba(163,163,163,0.12)] rounded-lg px-5 py-4 transition-colors hover:bg-[rgba(163,163,163,0.18)] group"
-      >
-        <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase tracking-[0.05em] bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded shrink-0">
-          {bill.status}
-        </span>
-        <span class="text-white font-bold text-sm shrink-0">{bill.bill}</span>
-        <span class="text-[#a3a3a3] text-sm flex-1 min-w-0">{bill.title}</span>
-        <span class="text-[#737373] group-hover:text-[#fbbf24] text-xs shrink-0 transition-colors">
-          scstatehouse.gov &rarr;&#xFE0E;
-        </span>
-      </a>
-    ))}
-  </div>
-</div>
-
-<!-- Section 3: Legal Landscape - Other States vs SC -->
+<!-- Section 2: Legal Landscape - Other States vs SC -->
 <div class="mb-16">
   <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-6">
     How Other States Compare
@@ -104,6 +78,76 @@ const { fourthAmendment, otherStates, billGaps } = legalData;
         </div>
       );
     })}
+  </div>
+</div>
+
+<!-- Section 3: SC Bill Tracker (homepage-style interactive cards) -->
+<div class="mb-16">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-6">
+    SC Bill Tracker
+  </h3>
+
+  <div class="bg-[rgba(163,163,163,0.12)] rounded-xl p-5 md:p-6">
+    <div class="space-y-4 mb-6">
+      {bills.map((bill: any, i: number) => (
+        <button
+          type="button"
+          class="tk-bill-card bg-[#171717] border-l-[3px] border-[#ef4444] rounded-r-md p-5 cursor-pointer transition-all duration-200 hover:bg-[#2e2e2e] hover:translate-x-1 focus-visible:bg-[#2e2e2e] focus-visible:translate-x-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717] w-full text-left"
+          data-tk-bill={i}
+          aria-label={`${bill.bill}: ${bill.title}`}
+        >
+          <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 mb-2">
+            <span class="text-[#ef4444] font-extrabold text-lg">{bill.bill}</span>
+            <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase tracking-[0.05em] bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded">
+              {bill.status}
+            </span>
+          </div>
+          <p class="text-[#d4d4d4] text-sm mb-2">{bill.title}</p>
+          <p class="text-[#a3a3a3] text-xs font-medium">See what this bill would change &rarr;&#xFE0E;</p>
+        </button>
+      ))}
+    </div>
+
+    <p class="text-[#a3a3a3] text-sm mb-4">Last updated: February 2026</p>
+    <p class="text-[#a3a3a3] text-sm leading-relaxed">
+      <em>Bill status is checked automatically each week during the legislative session.</em>
+    </p>
+  </div>
+</div>
+
+<!-- Toolkit bill modal -->
+<div id="tk-bill-backdrop" class="fixed inset-0 z-[100] bg-[rgba(10,10,10,0.85)] hidden opacity-0 transition-opacity duration-200 flex items-center justify-center p-5">
+  <div id="tk-bill-modal" role="dialog" aria-modal="true" aria-labelledby="tk-modal-bill-id" class="w-[90vw] max-w-[560px] max-h-[85dvh] flex flex-col bg-[#262626] border-l-4 border-[#ef4444] rounded-lg opacity-0 translate-y-5 transition-all duration-250 ease-out">
+    <!-- Header -->
+    <div class="flex-shrink-0 p-6 md:p-8 pb-4 flex items-start justify-between gap-4">
+      <div>
+        <h3 id="tk-modal-bill-id" class="text-[#ef4444] font-black text-2xl tracking-[-0.02em] mb-2"></h3>
+        <p id="tk-modal-bill-title" class="text-white font-bold text-lg"></p>
+      </div>
+      <button id="tk-bill-close" class="text-[#737373] hover:text-white focus-visible:text-white transition-colors text-xl leading-none cursor-pointer flex-shrink-0 w-11 h-11 flex items-center justify-center rounded" aria-label="Close">&times;</button>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="overflow-y-auto flex-1 min-h-0 px-6 md:px-8 py-2">
+      <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-6">
+        <div>
+          <span class="text-[#737373]">Status:</span>
+          <span id="tk-modal-bill-status" class="text-[#fbbf24] font-bold ml-1"></span>
+        </div>
+        <div id="tk-modal-last-action-row">
+          <span class="text-[#737373]">Last Action:</span>
+          <span id="tk-modal-bill-last-action" class="text-[#a3a3a3] ml-1"></span>
+        </div>
+      </div>
+      <p id="tk-modal-bill-description" class="text-[#a3a3a3] text-sm leading-relaxed"></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex-shrink-0 p-6 md:p-8 pt-4 border-t border-[#404040]">
+      <a id="tk-modal-bill-link" href="#" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors">
+        Read full text on scstatehouse.gov<span class="sr-only"> (opens in new tab)</span> &rarr;&#xFE0E;
+      </a>
+    </div>
   </div>
 </div>
 
@@ -172,6 +216,8 @@ const { fourthAmendment, otherStates, billGaps } = legalData;
   function initLegalTab() {
     legalController?.abort();
     legalController = new AbortController();
+
+    // Accordion close animation
     document.querySelectorAll<HTMLDetailsElement>('.legal-details').forEach((details) => {
       const summary = details.querySelector('summary');
       summary?.addEventListener('click', (e) => {
@@ -189,4 +235,99 @@ const { fourthAmendment, otherStates, billGaps } = legalData;
 
   initLegalTab();
   document.addEventListener('astro:after-swap', initLegalTab);
+</script>
+
+<script define:vars={{ bills }}>
+  const backdrop = document.getElementById('tk-bill-backdrop');
+  const modal = document.getElementById('tk-bill-modal');
+  const closeBtn = document.getElementById('tk-bill-close');
+  var previouslyFocused = null;
+
+  function openTkModal(index) {
+    const bill = bills[index];
+    if (!bill) return;
+    previouslyFocused = document.activeElement;
+
+    document.getElementById('tk-modal-bill-id').textContent = bill.bill;
+    document.getElementById('tk-modal-bill-title').textContent = bill.title;
+    document.getElementById('tk-modal-bill-status').textContent = bill.status;
+    document.getElementById('tk-modal-bill-description').textContent = bill.description;
+    document.getElementById('tk-modal-bill-link').href = bill.url;
+
+    const lastActionRow = document.getElementById('tk-modal-last-action-row');
+    const lastAction = document.getElementById('tk-modal-bill-last-action');
+    if (bill.lastAction) {
+      lastAction.textContent = bill.lastAction;
+      lastActionRow.style.display = '';
+    } else {
+      lastActionRow.style.display = 'none';
+    }
+
+    backdrop.classList.remove('hidden');
+    backdrop.offsetHeight;
+    backdrop.classList.add('opacity-100');
+    backdrop.classList.remove('opacity-0');
+
+    modal.classList.add('opacity-100', 'translate-y-0');
+    modal.classList.remove('opacity-0', 'translate-y-5');
+
+    document.body.style.overflow = 'hidden';
+
+    setTimeout(function() {
+      document.getElementById('tk-bill-close')?.focus();
+    }, 250);
+  }
+
+  function closeTkModal() {
+    modal.classList.remove('opacity-100', 'translate-y-0');
+    modal.classList.add('opacity-0', 'translate-y-5');
+
+    backdrop.classList.remove('opacity-100');
+    backdrop.classList.add('opacity-0');
+
+    setTimeout(function() {
+      backdrop.classList.add('hidden');
+      document.body.style.overflow = '';
+      if (previouslyFocused) {
+        previouslyFocused.focus();
+      }
+      previouslyFocused = null;
+    }, 200);
+  }
+
+  // Focus trap
+  modal?.addEventListener('keydown', function(e) {
+    if (e.key !== 'Tab') return;
+    var focusable = modal.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+    if (focusable.length === 0) return;
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+
+  // Card click handlers
+  document.querySelectorAll('.tk-bill-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var index = parseInt(card.getAttribute('data-tk-bill'));
+      openTkModal(index);
+    });
+  });
+
+  // Close handlers
+  closeBtn?.addEventListener('click', closeTkModal);
+  backdrop?.addEventListener('click', function(e) {
+    if (e.target === backdrop) closeTkModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !backdrop?.classList.contains('hidden')) {
+      closeTkModal();
+    }
+  });
 </script>
