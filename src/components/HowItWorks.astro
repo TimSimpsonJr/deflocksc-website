@@ -2,117 +2,117 @@
 import HowItWorksOverlays from './HowItWorksOverlays.astro';
 ---
 
-<section id="how-it-works" aria-labelledby="how-it-works-heading" class="bg-[#262626] py-20 md:py-28 relative overflow-hidden">
-  <!-- Section glow accent -->
-  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[300px] blur-[64px] opacity-[0.15] md:opacity-[0.20] pointer-events-none" aria-hidden="true"></div>
+<section id="how-it-works" aria-labelledby="how-it-works-heading" class="bg-[#111111] py-0 relative overflow-hidden">
 
-  <div class="max-w-6xl mx-auto px-6">
-    <h2 id="how-it-works-heading" class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-10 text-center">
-      What Is Flock Safety?
+  <!-- Section header -->
+  <div class="relative overflow-hidden px-6 md:px-12 pt-14 pb-4">
+    <div class="how-bg-num absolute right-4 -top-6 font-bold leading-none text-[rgba(255,255,255,0.025)] pointer-events-none select-none" aria-hidden="true">02</div>
+    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#555555] mb-3">How it works</p>
+    <h2 id="how-it-works-heading" class="text-[#e8e8e8] font-bold text-[clamp(1.8rem,3.5vw,2.8rem)] tracking-[-0.025em] leading-[1.05] max-w-[600px] mb-10">
+      What happens every time you drive past a camera
     </h2>
+  </div>
 
-    <!-- Split layout: intro text + divider + carousel -->
-    <div class="grid md:grid-cols-[1fr_1px_1fr] gap-10 md:gap-12 mb-14">
-      <!-- Left: intro paragraphs -->
-      <div class="space-y-6 text-[#d4d4d4] text-base leading-relaxed min-w-0">
-        <p>
-          Flock Safety puts cameras on poles at intersections and along roadsides. Small. Solar-powered. Easy to miss. Every car that drives by gets photographed. Your plate number, vehicle make, color, and location get uploaded to Flock's servers. Every time.
-        </p>
-        <p>
-          Here's what your police department didn't mention: that data doesn't stay in Greenville. Flock runs a national network. Police from other states can search it. Federal agencies can too. No warrant needed.
-        </p>
-        <p>
-          Researchers found three separate ways federal agents get into local camera data, including a back door that let outside agencies search it without anyone knowing. Flock's CEO denied having federal contracts on camera in July 2025. He admitted it three weeks later. Every drive you've taken is in there.
-        </p>
-        <p>
-          None of it requires a warrant. Your local police can't turn off the federal access.<br /><span class="text-[#ef4444] font-semibold">And neither can you.</span>
-        </p>
-      </div>
+  <!-- Asymmetric grid: primary (2-row) + 2 secondary -->
+  <div class="pipeline-grid grid md:grid-cols-2 bg-[rgba(255,255,255,0.07)] mx-6 md:mx-12 mb-12" style="gap:1px">
+    <!-- Primary cell: spans 2 rows on desktop -->
+    <div class="pipeline-cell-primary bg-[#141414] p-8 md:p-12 relative md:row-span-2">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#555555] mb-10">Primary node · 01 / Capture</p>
+      <h3 class="text-[#e8e8e8] font-bold text-[1.6rem] tracking-[-0.015em] leading-[1.2] mb-4 relative">
+        Camera reads your plate — flagged or not
+      </h3>
+      <p class="text-[#a0a0a0] text-[14px] leading-[1.65] max-w-[340px] relative">
+        Flock Safety puts cameras on poles at intersections and along roadsides. Small. Solar-powered. Easy to miss. Every car that drives by gets photographed. Your plate number, vehicle make, color, and location get uploaded to Flock's servers. Every time. The camera doesn't wait for suspicion. It reads everything and checks later.
+      </p>
+      <div class="p-num-bg absolute bottom-6 right-6 font-bold leading-none text-[rgba(255,255,255,0.04)] pointer-events-none select-none" aria-hidden="true">01</div>
+    </div>
 
-      <!-- Vertical divider -->
-      <div class="hidden md:block bg-[#404040]"></div>
+    <!-- Secondary cell 1 -->
+    <div class="bg-[#111111] p-8 relative">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#555555] mb-8">02 / Ingest</p>
+      <h3 class="text-[#e8e8e8] font-semibold text-[1.3rem] tracking-[-0.015em] leading-[1.2] mb-3 relative">Enters a national network</h3>
+      <p class="text-[#a0a0a0] text-[14px] leading-[1.65] relative">
+        That data doesn't stay in your county. Flock runs a national network. Police from other states can search it. Federal agencies can too. Researchers found three separate ways federal agents get into local camera data — including a back door that let outside agencies search without anyone knowing.
+      </p>
+      <div class="p-num-bg absolute bottom-4 right-4 font-bold leading-none text-[rgba(255,255,255,0.04)] pointer-events-none select-none" aria-hidden="true">02</div>
+    </div>
 
-      <!-- Right: carousel -->
-      <div class="factoid-carousel min-w-0" id="factoidCarousel" role="region" aria-label="Case studies carousel">
-        <div class="carousel-container">
-          <!-- Prev arrow -->
-          <button class="carousel-arrow carousel-arrow-prev" id="prevBtn" aria-label="Previous factoid">&lsaquo;</button>
+    <!-- Secondary cell 2 -->
+    <div class="bg-[#111111] p-8 relative">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#555555] mb-8">03 / Access</p>
+      <h3 class="text-[#e8e8e8] font-semibold text-[1.3rem] tracking-[-0.015em] leading-[1.2] mb-3 relative">No one watching the watchers</h3>
+      <p class="text-[#a0a0a0] text-[14px] leading-[1.65] relative">
+        None of it requires a warrant. Your local police can't turn off the federal access. <span class="text-[#dc2626] font-semibold">And neither can you.</span> No SC city or county has passed an oversight ordinance. The cameras went up, the data started flowing, and no rules govern how long it's kept.
+      </p>
+      <div class="p-num-bg absolute bottom-4 right-4 font-bold leading-none text-[rgba(255,255,255,0.04)] pointer-events-none select-none" aria-hidden="true">03</div>
+    </div>
+  </div>
 
-          <!-- Viewport -->
-          <div class="carousel-viewport" aria-live="polite">
-            <div class="carousel-track" id="carouselTrack">
-              <div class="carousel-card" data-idx="0" data-overlay="0" tabindex="0" role="group" aria-label="Case study 1 of 5">
-                <div class="carousel-card-content">
-                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Greenville, SC &mdash; False Arrest</span>
-                  <p class="text-[#d4d4d4] text-[0.9rem] leading-relaxed mb-4">
-                    Two sisters driving a rental car were flagged as stolen by a Flock camera. Police drew weapons and handcuffed both women. The car wasn't stolen &mdash; it had been improperly reported. They are now suing Greenville PD.
-                  </p>
-                  <span class="read-more-text">See the full lawsuit story &rarr;&#xFE0E;</span>
-                </div>
+  <!-- Case studies carousel (preserved below the grid) -->
+  <div class="px-6 md:px-12 pb-14">
+    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#555555] mb-4">Case studies</p>
+    <div class="factoid-carousel" id="factoidCarousel" role="region" aria-label="Case studies carousel">
+      <div class="carousel-container">
+        <button class="carousel-arrow carousel-arrow-prev" id="prevBtn" aria-label="Previous factoid">&lsaquo;</button>
+        <div class="carousel-viewport" aria-live="polite">
+          <div class="carousel-track" id="carouselTrack">
+            <div class="carousel-card" data-idx="0" data-overlay="0" tabindex="0" role="group" aria-label="Case study 1 of 5">
+              <div class="carousel-card-content">
+                <span class="block text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.08em] mb-3">Greenville, SC &mdash; False Arrest</span>
+                <p class="text-[#a0a0a0] text-[0.9rem] leading-relaxed mb-4">Two sisters driving a rental car were flagged as stolen by a Flock camera. Police drew weapons and handcuffed both women. The car wasn't stolen &mdash; it had been improperly reported. They are now suing Greenville PD.</p>
+                <span class="read-more-text">See the full lawsuit story &rarr;&#xFE0E;</span>
               </div>
-
-              <div class="carousel-card" data-idx="1" data-overlay="1" tabindex="-1" role="group" aria-label="Case study 2 of 5">
-                <div class="carousel-card-content">
-                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Ventura County, CA &mdash; Data Shared Without Permission</span>
-                  <p class="text-[#d4d4d4] text-[0.9rem] leading-relaxed mb-4">
-                    Ventura County disabled Flock's cross-jurisdiction sharing to comply with state law. The feature was reactivated without anyone knowing. Out-of-state agencies searched their data 364,000 times in two months before deputies found out.
-                  </p>
-                  <span class="read-more-text">See how your data leaves the state &rarr;&#xFE0E;</span>
-                </div>
+            </div>
+            <div class="carousel-card" data-idx="1" data-overlay="1" tabindex="-1" role="group" aria-label="Case study 2 of 5">
+              <div class="carousel-card-content">
+                <span class="block text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.08em] mb-3">Ventura County, CA &mdash; Data Shared Without Permission</span>
+                <p class="text-[#a0a0a0] text-[0.9rem] leading-relaxed mb-4">Ventura County disabled Flock's cross-jurisdiction sharing to comply with state law. The feature was reactivated without anyone knowing. Out-of-state agencies searched their data 364,000 times in two months before deputies found out.</p>
+                <span class="read-more-text">See how your data leaves the state &rarr;&#xFE0E;</span>
               </div>
-
-              <div class="carousel-card" data-idx="2" data-overlay="2" tabindex="-1" role="group" aria-label="Case study 3 of 5">
-                <div class="carousel-card-content">
-                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Santa Cruz, CA &mdash; 4,000 Federal Searches</span>
-                  <p class="text-[#d4d4d4] text-[0.9rem] leading-relaxed mb-4">
-                    State agencies accessed local camera data 4,000 times on behalf of federal authorities, including ICE, before the city found out and cancelled the contract 6&ndash;1.
-                  </p>
-                  <span class="read-more-text">See why the city voted 6&ndash;1 to cancel &rarr;&#xFE0E;</span>
-                </div>
+            </div>
+            <div class="carousel-card" data-idx="2" data-overlay="2" tabindex="-1" role="group" aria-label="Case study 3 of 5">
+              <div class="carousel-card-content">
+                <span class="block text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.08em] mb-3">Santa Cruz, CA &mdash; 4,000 Federal Searches</span>
+                <p class="text-[#a0a0a0] text-[0.9rem] leading-relaxed mb-4">State agencies accessed local camera data 4,000 times on behalf of federal authorities, including ICE, before the city found out and cancelled the contract 6&ndash;1.</p>
+                <span class="read-more-text">See why the city voted 6&ndash;1 to cancel &rarr;&#xFE0E;</span>
               </div>
-
-              <div class="carousel-card" data-idx="3" data-overlay="3" tabindex="-1" role="group" aria-label="Case study 4 of 5">
-                <div class="carousel-card-content">
-                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Spartanburg, SC &mdash; Sheriff Convicted</span>
-                  <p class="text-[#d4d4d4] text-[0.9rem] leading-relaxed mb-4">
-                    Spartanburg County Sheriff Chuck Wright oversaw Flock deployments and pled guilty to federal charges: conspiracy to commit theft and wire fraud. The man with access to your location history was a convicted federal criminal.
-                  </p>
-                  <span class="read-more-text">See who had access to your data &rarr;&#xFE0E;</span>
-                </div>
+            </div>
+            <div class="carousel-card" data-idx="3" data-overlay="3" tabindex="-1" role="group" aria-label="Case study 4 of 5">
+              <div class="carousel-card-content">
+                <span class="block text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.08em] mb-3">Spartanburg, SC &mdash; Sheriff Convicted</span>
+                <p class="text-[#a0a0a0] text-[0.9rem] leading-relaxed mb-4">Spartanburg County Sheriff Chuck Wright oversaw Flock deployments and pled guilty to federal charges: conspiracy to commit theft and wire fraud. The man with access to your location history was a convicted federal criminal.</p>
+                <span class="read-more-text">See who had access to your data &rarr;&#xFE0E;</span>
               </div>
-
-              <div class="carousel-card" data-idx="4" data-overlay="4" tabindex="-1" role="group" aria-label="Case study 5 of 5">
-                <div class="carousel-card-content">
-                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Austin, TX &mdash; No Crime Reduction</span>
-                  <p class="text-[#d4d4d4] text-[0.9rem] leading-relaxed mb-4">
-                    Austin's own city audit couldn't find evidence the cameras reduce crime. Over 20% of searches lacked proper documentation. The city cancelled the contract.
-                  </p>
-                  <span class="read-more-text">See the audit that killed the contract &rarr;&#xFE0E;</span>
-                </div>
+            </div>
+            <div class="carousel-card" data-idx="4" data-overlay="4" tabindex="-1" role="group" aria-label="Case study 5 of 5">
+              <div class="carousel-card-content">
+                <span class="block text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.08em] mb-3">Austin, TX &mdash; No Crime Reduction</span>
+                <p class="text-[#a0a0a0] text-[0.9rem] leading-relaxed mb-4">Austin's own city audit couldn't find evidence the cameras reduce crime. Over 20% of searches lacked proper documentation. The city cancelled the contract.</p>
+                <span class="read-more-text">See the audit that killed the contract &rarr;&#xFE0E;</span>
               </div>
             </div>
           </div>
-
-          <!-- Next arrow -->
-          <button class="carousel-arrow carousel-arrow-next" id="nextBtn" aria-label="Next factoid">&rsaquo;</button>
-
-          <!-- Dots inside the card area -->
-          <div class="carousel-dots-bar" id="carouselDots"></div>
         </div>
+        <button class="carousel-arrow carousel-arrow-next" id="nextBtn" aria-label="Next factoid">&rsaquo;</button>
+        <div class="carousel-dots-bar" id="carouselDots"></div>
       </div>
     </div>
-
   </div>
+
 </section>
 
 <HowItWorksOverlays />
 
 <style>
-  /* Carousel container -- holds arrows, viewport, and dots as one unit */
+  .how-bg-num { font-size: clamp(10rem, 20vw, 18rem); }
+  .p-num-bg   { font-size: clamp(5rem, 9vw, 8rem); }
+
+  /* Carousel container */
   .carousel-container {
     position: relative;
-    background: #171717;
-    border-radius: 10px;
+    background: #141414;
+    border-radius: 0;
+    border-top: 1px solid rgba(255,255,255,0.07);
     padding: 24px 20px 48px;
     overflow: hidden;
   }
@@ -161,7 +161,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     transition: color 0.2s;
   }
 
-  /* Carousel arrows -- integrated into the card */
+  /* Carousel arrows */
   .carousel-arrow {
     position: absolute;
     top: 50%;
@@ -198,7 +198,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     }
   }
 
-  /* Dots -- bottom of the card */
+  /* Dots */
   .carousel-dots-bar {
     position: absolute;
     bottom: 16px;
@@ -218,7 +218,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     padding: 0;
   }
   :global(.carousel-dot.active) {
-    background: #ef4444;
+    background: #dc2626;
   }
 </style>
 
