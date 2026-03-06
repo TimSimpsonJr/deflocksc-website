@@ -1,0 +1,81 @@
+{
+  "fourthAmendment": {
+    "title": "Your 4th Amendment Rights",
+    "intro": "The Fourth Amendment protects you from unreasonable government searches. Courts and legal scholars are actively debating whether mass license plate scanning qualifies as one. South Carolina's own constitution may offer even stronger protections than federal law.",
+    "keyPoints": [
+      {
+        "point": "Carpenter v. United States (2018)",
+        "detail": "The U.S. Supreme Court ruled that police need a warrant to access long-term cell phone location data. The Court recognized that tracking someone's movements over time reveals deeply personal details - where they worship, who they visit, what doctors they see. Legal scholars argue that ALPR networks raise the same concern: they record where every car goes, every day, without a warrant."
+      },
+      {
+        "point": "The mosaic theory",
+        "detail": "A single license plate scan might seem harmless. But when cameras log every trip you take - to church, to a doctor's office, to a political rally, to a friend's house - the full picture reveals your private life in detail. Courts are increasingly recognizing that this kind of aggregate tracking is qualitatively different from a single observation. What matters is the full picture, not any one tile."
+      },
+      {
+        "point": "Institute for Justice v. City of Norfolk",
+        "detail": "The Institute for Justice, a public interest law firm with strong conservative and libertarian support, is currently challenging ALPR surveillance in federal court. Their Plate Privacy Project argues that mass plate scanning without suspicion violates the Fourth Amendment. This is not a left-right issue - IJ frames it as a property rights and constitutional question."
+      },
+      {
+        "point": "SC Constitution, Article I, Section 10",
+        "detail": "South Carolina's constitution goes further than the federal Fourth Amendment. It protects against both 'unreasonable searches and seizures' and 'unreasonable invasions of privacy.' The SC Supreme Court has applied this privacy clause to require law enforcement to have reasonable suspicion before even approaching a private residence - a higher bar than federal courts set. If state courts require suspicion before a police officer knocks on your door, it is worth asking what legal basis exists for cameras that log every passing car without any suspicion at all."
+      }
+    ],
+    "disclaimer": "This section is for informational purposes only and is not legal advice. It summarizes what courts and legal scholars are currently debating. If you have questions about your legal rights, consult a licensed attorney."
+  },
+  "otherStates": [
+    {
+      "state": "Virginia",
+      "law": "Law enforcement-only access. Data must be deleted within 7 days unless part of an active criminal investigation."
+    },
+    {
+      "state": "Montana",
+      "law": "Banned sharing of ALPR data with out-of-state agencies. Among the strongest state-level ALPR restrictions in the country."
+    },
+    {
+      "state": "Utah",
+      "law": "Strict retention limits on ALPR data. Requires policies governing access and use."
+    },
+    {
+      "state": "Maine",
+      "law": "21-day retention limit. Requires civilian oversight and public reporting on ALPR use."
+    },
+    {
+      "state": "Illinois",
+      "law": "Explicitly prohibits immigration enforcement use of ALPR data. When local agencies violated this by sharing with CBP, it triggered contract cancellations."
+    },
+    {
+      "state": "New Hampshire",
+      "law": "Among the earliest states to pass ALPR restrictions. Limits retention and requires policies for use."
+    },
+    {
+      "state": "South Carolina",
+      "law": "No ALPR-specific law. No retention limits. No access restrictions. No penalties for misuse. Three bills are pending but none have passed committee."
+    }
+  ],
+  "billGaps": [
+    {
+      "gap": "No restrictions on federal agency access",
+      "detail": "All three pending SC bills regulate state and local law enforcement, but none address federal agencies. In 2025, Flock Safety quietly gave U.S. Border Patrol an account to access local police cameras in Colorado without telling any of those agencies. SC has no law that would prevent or even require disclosure of the same arrangement here."
+    },
+    {
+      "gap": "No prohibition on immigration enforcement use",
+      "detail": "Illinois law explicitly bans using ALPR data for immigration enforcement. When local agencies violated that ban by sharing data with CBP, it led to contract cancellations. None of the three SC bills include a similar prohibition. Under current SC law and all three pending bills, federal immigration agents could access your travel data with no legal barrier."
+    },
+    {
+      "gap": "No limits on Flock's national data-sharing network",
+      "detail": "Your local city council approved cameras for local crime-solving. But Flock operates a national network that lets hundreds of outside agencies - including ones your council never heard of - query location data collected on your streets. None of the three SC bills address this network or require local approval before data is shared beyond your jurisdiction."
+    },
+    {
+      "gap": "No disclosure requirements for vendor data agreements",
+      "detail": "Flock Safety rewrote its Terms of Service twice in three months (December 2025 and February 2026), making 147 documented changes. Key changes included deleting data ownership language and granting itself a perpetual license to use customer data. If a city's contract auto-incorporates updated terms from Flock's website, the city may already be bound by provisions it never agreed to - and no SC law requires the vendor to notify anyone."
+    },
+    {
+      "gap": "No penalties with teeth for data misuse",
+      "detail": "Two of the three bills include misdemeanor penalties for violations, but enforcement depends on catching violations in the first place. When the Post and Courier asked SLED for records of recent ALPR database misconduct, SLED refused to produce any documents. A 2013 case showed a SLED officer searched for his own vehicle and altered the record. Without proactive auditing requirements, penalties on paper do not translate to accountability in practice."
+    },
+    {
+      "gap": "No regulation of feature expansion after deployment",
+      "detail": "Flock has added person-tracking technology, convoy analysis, visit frequency tracking, and voice detection to its product suite since its initial license plate reader product. Its Raven microphone system, marketed for gunshot detection, now listens for human voices. None of the three SC bills address post-deployment feature additions, meaning your police department could activate new surveillance capabilities without council approval or public notice."
+    }
+  ]
+}
