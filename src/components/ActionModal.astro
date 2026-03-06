@@ -365,7 +365,7 @@ const registry = {
       var params = new URLSearchParams({ address: address, benchmark: 'Public_AR_Current', vintage: 'Current_Current', format: 'json' });
       var controller = new AbortController();
       var timeout = setTimeout(function() { controller.abort(); }, 10000);
-      var res = await fetch('https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?' + params.toString(), { signal: controller.signal });
+      var res = await fetch('/api/geocode?' + params.toString(), { signal: controller.signal });
       clearTimeout(timeout);
       if (!res.ok) throw new Error('Census geocoder HTTP ' + res.status);
       var data = await res.json();
