@@ -61,11 +61,56 @@ git add docs/research/toolkit-gap-analysis.md
 git commit -m "docs: cross-reference DeflockYourCity toolkit with SC research"
 ```
 
+### Task 2: Fill research gaps and update Talking Points
+
+**Files:**
+- Read: `docs/research/toolkit-gap-analysis.md` (from Task 1)
+- Read: Vault research notes as needed (paths in Task 1)
+- Modify: `C:\Users\tim\OneDrive\Documents\Tim's Vault\Projects\Activism\DeflockSC Website\Talking Points\Talking Points.md`
+
+**Step 1: Review the gap analysis from Task 1**
+
+Read the gap analysis and identify topics where the linked toolkit has information we're missing. Common gaps are likely:
+- Security vulnerabilities (CVEs) — the linked toolkit documents 22+ CVEs; check if our vault covers these
+- Camera hackability (30-second physical access exploit) — may not be in our research
+- Patent-documented capabilities (racial/gender classification features) — check if covered
+- Contract term changes and data ownership shifts — may be partially covered in campaign notes
+
+**Step 2: Research the gaps**
+
+For each identified gap, search the web for SC-relevant information and primary sources. Focus on:
+- Facts that are verifiable and citeable
+- SC-specific angles where possible (if a vulnerability was exploited in SC, or if SC contracts have specific terms)
+- Sources that work across the political spectrum (avoid left-leaning-only outlets)
+
+Do NOT fabricate or speculate. If a gap can't be filled with verified SC-specific data, note it in the gap analysis as "national-only" and decide whether it still belongs in the toolkit.
+
+**Step 3: Update the Talking Points note**
+
+Add new sections or data points to the Talking Points note at `C:\Users\tim\OneDrive\Documents\Tim's Vault\Projects\Activism\DeflockSC Website\Talking Points\Talking Points.md`. Follow the existing format:
+- Each new point goes under the most relevant existing section (Values-Based Arguments, SC-Specific Angles, FAQ/Counterarguments)
+- Include inline source links
+- Use the same voice: direct, factual, bipartisan framing
+- If adding a new top-level section, keep it consistent with existing heading structure
+
+**Step 4: Update the gap analysis**
+
+Mark filled gaps as resolved in `docs/research/toolkit-gap-analysis.md`. Note any gaps that couldn't be filled and why.
+
+**Step 5: Commit**
+
+```bash
+git add docs/research/toolkit-gap-analysis.md
+git commit -m "docs: fill research gaps from toolkit cross-reference"
+```
+
+Note: The Talking Points note is in the Obsidian vault (outside the git repo), so it won't be in the commit. That's expected — it's a living research document, not a deployable asset.
+
 ---
 
 ## Phase 2: Data Files
 
-### Task 2: Create FOIA template data
+### Task 3: Create FOIA template data
 
 **Files:**
 - Create: `src/data/toolkit-foia.json`
@@ -127,7 +172,7 @@ git add src/data/toolkit-foia.json
 git commit -m "feat: add FOIA request template data"
 ```
 
-### Task 3: Create speaking/council meeting data
+### Task 4: Create speaking/council meeting data
 
 **Files:**
 - Create: `src/data/toolkit-speaking.json`
@@ -171,7 +216,7 @@ git add src/data/toolkit-speaking.json
 git commit -m "feat: add council meeting talk track and rebuttals data"
 ```
 
-### Task 4: Create outreach data
+### Task 5: Create outreach data
 
 **Files:**
 - Create: `src/data/toolkit-outreach.json`
@@ -252,7 +297,7 @@ git add src/data/toolkit-outreach.json
 git commit -m "feat: add outreach and business card data"
 ```
 
-### Task 5: Create legal landscape data
+### Task 6: Create legal landscape data
 
 **Files:**
 - Create: `src/data/toolkit-legal.json`
@@ -314,7 +359,7 @@ git commit -m "feat: add legal landscape and bill gaps data"
 
 ## Phase 3: Page and Components
 
-### Task 6: Create the toolkit page shell
+### Task 7: Create the toolkit page shell
 
 **Files:**
 - Create: `src/pages/toolkit.astro`
@@ -351,7 +396,7 @@ git add src/pages/toolkit.astro
 git commit -m "feat: add toolkit page shell"
 ```
 
-### Task 7: Create the ToolkitTabs component
+### Task 8: Create the ToolkitTabs component
 
 **Files:**
 - Create: `src/components/ToolkitTabs.astro`
@@ -388,7 +433,7 @@ git add src/components/ToolkitTabs.astro
 git commit -m "feat: add tabbed interface component"
 ```
 
-### Task 8: Build the FOIA tab (Request Records)
+### Task 9: Build the FOIA tab (Request Records)
 
 **Files:**
 - Create: `src/components/ToolkitFoia.astro`
@@ -450,7 +495,7 @@ git add src/components/ToolkitFoia.astro
 git commit -m "feat: build FOIA templates tab with copy-to-clipboard"
 ```
 
-### Task 9: Build the Speaking tab (Speak Up)
+### Task 10: Build the Speaking tab (Speak Up)
 
 **Files:**
 - Create: `src/components/ToolkitSpeaking.astro`
@@ -470,7 +515,7 @@ git add src/components/ToolkitSpeaking.astro
 git commit -m "feat: build council meeting prep tab"
 ```
 
-### Task 10: Build the Outreach tab (Spread the Word)
+### Task 11: Build the Outreach tab (Spread the Word)
 
 **Files:**
 - Create: `src/components/ToolkitOutreach.astro`
@@ -493,7 +538,7 @@ git add src/components/ToolkitOutreach.astro
 git commit -m "feat: build outreach and business cards tab"
 ```
 
-### Task 11: Build the Legal tab (Know Your Rights)
+### Task 12: Build the Legal tab (Know Your Rights)
 
 **Files:**
 - Create: `src/components/ToolkitLegal.astro`
@@ -518,7 +563,7 @@ git commit -m "feat: build legal landscape tab"
 
 ## Phase 4: Navigation and Homepage Integration
 
-### Task 12: Add Toolkit link to Nav
+### Task 13: Add Toolkit link to Nav
 
 **Files:**
 - Modify: `src/components/Nav.astro`
@@ -544,7 +589,7 @@ git add src/components/Nav.astro
 git commit -m "feat: add Toolkit link to nav"
 ```
 
-### Task 13: Add homepage teaser
+### Task 14: Add homepage teaser
 
 **Files:**
 - Modify: `src/pages/index.astro`
@@ -577,7 +622,7 @@ git commit -m "feat: add toolkit teaser CTA to homepage"
 
 ## Phase 5: Static Assets (PDFs and Business Cards)
 
-### Task 14: Generate FOIA template PDFs
+### Task 15: Generate FOIA template PDFs
 
 **Files:**
 - Create: `public/toolkit/foia/flock-contract.pdf`
@@ -611,7 +656,7 @@ git add scripts/generate-toolkit-pdfs.js public/toolkit/foia/
 git commit -m "feat: generate FOIA template PDFs"
 ```
 
-### Task 15: Generate council handout PDF
+### Task 16: Generate council handout PDF
 
 **Files:**
 - Create: `public/toolkit/speaking/council-handout.pdf`
@@ -634,7 +679,7 @@ git add public/toolkit/speaking/
 git commit -m "feat: generate council meeting handout PDF"
 ```
 
-### Task 16: Generate business card images and print sheets
+### Task 17: Generate business card images and print sheets
 
 **Files:**
 - Create: `public/toolkit/outreach/card-1984.png`
@@ -682,7 +727,7 @@ git add scripts/generate-business-cards.js public/toolkit/outreach/
 git commit -m "feat: generate business card images and print sheets"
 ```
 
-### Task 17: Generate one-pager PDF
+### Task 18: Generate one-pager PDF
 
 **Files:**
 - Create: `public/toolkit/outreach/one-pager.pdf`
@@ -705,7 +750,7 @@ git commit -m "feat: generate community one-pager PDF"
 
 ## Phase 6: Visual Verification and Polish
 
-### Task 18: Start dev server and verify all tabs
+### Task 19: Start dev server and verify all tabs
 
 **Step 1: Start the dev server**
 
@@ -759,7 +804,7 @@ Use `preview_resize` to test mobile (375px) and tablet (768px). Verify:
 - [ ] Template text is readable on small screens
 - [ ] No horizontal overflow
 
-### Task 19: Verify nav and homepage integration
+### Task 20: Verify nav and homepage integration
 
 **Step 1: Check homepage**
 
@@ -772,7 +817,7 @@ Use `preview_resize` to test mobile (375px) and tablet (768px). Verify:
 - [ ] Link works from both homepage and toolkit page
 - [ ] Nav solid background works on toolkit page (scroll behavior)
 
-### Task 20: Content review pass
+### Task 21: Content review pass
 
 **Step 1: Review all written content**
 
@@ -797,7 +842,7 @@ git commit -m "fix: content review polish pass"
 
 ## Phase 7: Build Verification and Final Commit
 
-### Task 21: Run production build
+### Task 22: Run production build
 
 **Step 1: Build**
 
@@ -821,7 +866,7 @@ python scripts/validate-data.py
 
 Check that new JSON files pass validation (may need to update the validator to include new files).
 
-### Task 22: Final commit and push
+### Task 23: Final commit and push
 
 **Step 1: Commit any remaining changes**
 
