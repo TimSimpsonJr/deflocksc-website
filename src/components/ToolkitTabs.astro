@@ -2,6 +2,7 @@
 import ToolkitFoia from './ToolkitFoia.astro';
 import ToolkitSpeaking from './ToolkitSpeaking.astro';
 import ToolkitOutreach from './ToolkitOutreach.astro';
+import ToolkitLegal from './ToolkitLegal.astro';
 
 const tabs = [
   { id: 'request-records', label: 'Request Records' },
@@ -67,10 +68,7 @@ const tabs = [
           <ToolkitOutreach />
         )}
         {tab.id === 'know-your-rights' && (
-          <div class="text-center text-[#a3a3a3] py-12 border border-dashed border-[#404040] rounded-lg">
-            <p class="text-lg font-medium text-[#d4d4d4] mb-2">Know Your Rights</p>
-            <p>Legal resources will appear here.</p>
-          </div>
+          <ToolkitLegal />
         )}
       </div>
     </div>

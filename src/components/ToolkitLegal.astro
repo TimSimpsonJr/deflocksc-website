@@ -1,0 +1,188 @@
+---
+import legalData from '../data/toolkit-legal.json';
+import bills from '../data/bills.json';
+
+const { fourthAmendment, otherStates, billGaps } = legalData;
+---
+
+<!-- Section 1: 4th Amendment Primer -->
+<div class="mb-16">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-4">
+    {fourthAmendment.title}
+  </h3>
+  <p class="text-[#d4d4d4] text-base leading-[1.7] mb-8">
+    {fourthAmendment.intro}
+  </p>
+
+  <div class="space-y-3">
+    {fourthAmendment.keyPoints.map((kp, i) => (
+      <details class="legal-details group border-l-[3px] border-[#262626]" data-legal={i} open={i === 0 || undefined}>
+        <summary class="flex items-center justify-between cursor-pointer py-4 px-5 list-none [&::-webkit-details-marker]:hidden">
+          <span class="text-white font-bold text-base pr-4">{kp.point}</span>
+          <span class="legal-icon text-[#fbbf24] font-bold text-xl flex-shrink-0 transition-transform duration-300">+</span>
+        </summary>
+        <div class="legal-content">
+          <div class="legal-inner px-5 pb-5">
+            <p class="text-[#a3a3a3] text-base leading-[1.7]">{kp.detail}</p>
+          </div>
+        </div>
+      </details>
+    ))}
+  </div>
+
+  <p class="text-[#737373] text-xs mt-6 italic">
+    {fourthAmendment.disclaimer}
+  </p>
+</div>
+
+<!-- Section 2: SC Bill Tracker (compact) -->
+<div class="mb-16">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-6">
+    SC Bill Tracker
+  </h3>
+  <div class="space-y-3">
+    {bills.map((bill: any) => (
+      <a
+        href={bill.url}
+        target="_blank"
+        rel="noopener"
+        class="flex flex-wrap items-center gap-x-4 gap-y-2 bg-[rgba(163,163,163,0.12)] rounded-lg px-5 py-4 transition-colors hover:bg-[rgba(163,163,163,0.18)] group"
+      >
+        <span class="text-[#fbbf24] font-bold text-[0.7rem] uppercase tracking-[0.05em] bg-[rgba(251,191,36,0.1)] px-3 py-1 rounded shrink-0">
+          {bill.status}
+        </span>
+        <span class="text-white font-bold text-sm shrink-0">{bill.bill}</span>
+        <span class="text-[#a3a3a3] text-sm flex-1 min-w-0">{bill.title}</span>
+        <span class="text-[#737373] group-hover:text-[#fbbf24] text-xs shrink-0 transition-colors">
+          scstatehouse.gov &rarr;&#xFE0E;
+        </span>
+      </a>
+    ))}
+  </div>
+</div>
+
+<!-- Section 3: Legal Landscape — Other States vs SC -->
+<div class="mb-16">
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-6">
+    How Other States Compare
+  </h3>
+  <p class="text-[#d4d4d4] text-base leading-[1.7] mb-8">
+    At least six states have passed laws restricting how license plate data is collected,
+    stored, and shared. South Carolina has none.
+  </p>
+
+  <div class="space-y-3">
+    {otherStates.map((entry) => {
+      const isSC = entry.state === 'South Carolina';
+      return (
+        <div
+          class:list={[
+            'rounded-lg px-5 py-4',
+            isSC
+              ? 'bg-[rgba(239,68,68,0.12)] border-l-[3px] border-[#ef4444]'
+              : 'bg-[rgba(163,163,163,0.12)]',
+          ]}
+        >
+          <div class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
+            <span
+              class:list={[
+                'font-bold text-sm shrink-0 sm:w-36',
+                isSC ? 'text-[#ef4444]' : 'text-white',
+              ]}
+            >
+              {entry.state}
+            </span>
+            <span
+              class:list={[
+                'text-sm leading-[1.6]',
+                isSC ? 'text-[#d4d4d4] font-medium' : 'text-[#a3a3a3]',
+              ]}
+            >
+              {entry.law}
+            </span>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+<!-- Section 4: Bill Gaps — What's Missing -->
+<div>
+  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-3">
+    What's Missing from the Pending Bills
+  </h3>
+  <p class="text-[#d4d4d4] text-base leading-[1.7] mb-8">
+    All three SC bills are a start. But none of them close these gaps.
+  </p>
+
+  <div class="grid md:grid-cols-2 gap-5">
+    {billGaps.map((g) => (
+      <div class="bg-[rgba(163,163,163,0.12)] rounded-xl border-l-[3px] border-[#ef4444] p-5 flex flex-col">
+        <h4 class="text-white font-bold text-base mb-2">{g.gap}</h4>
+        <p class="text-[#a3a3a3] text-sm leading-[1.6]">{g.detail}</p>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  /* Accordion animation (matches FAQ pattern) */
+  .legal-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms ease-out;
+  }
+
+  .legal-inner {
+    overflow: hidden;
+  }
+
+  details[open] .legal-content {
+    grid-template-rows: 1fr;
+  }
+
+  /* Amber border when open */
+  details[open].legal-details {
+    border-color: #fbbf24;
+  }
+
+  /* Rotate + to x */
+  details[open] .legal-icon {
+    transform: rotate(45deg);
+  }
+
+  /* Smooth close animation */
+  details.closing .legal-content {
+    grid-template-rows: 0fr;
+  }
+
+  details.closing.legal-details {
+    border-color: #262626;
+  }
+
+  details.closing .legal-icon {
+    transform: rotate(0deg);
+  }
+</style>
+
+<script>
+  function initLegalTab() {
+    document.querySelectorAll<HTMLDetailsElement>('.legal-details').forEach((details) => {
+      const summary = details.querySelector('summary');
+      summary?.addEventListener('click', (e) => {
+        if (details.hasAttribute('open')) {
+          e.preventDefault();
+          details.classList.add('closing');
+          setTimeout(() => {
+            details.classList.remove('closing');
+            details.removeAttribute('open');
+          }, 300);
+        }
+      });
+    });
+  }
+
+  initLegalTab();
+  document.addEventListener('astro:after-swap', initLegalTab);
+</script>
