@@ -362,30 +362,13 @@ const registry = {
   async function geocodeAddress(address) {
     var result = { lat: null, lng: null, senate: null, house: null };
     try {
-      var params = new URLSearchParams({ address: address, benchmark: 'Public_AR_Current', vintage: 'Current_Current', format: 'jsonp' });
-      var data = await new Promise(function(resolve, reject) {
-        var callbackName = '_censusCallback_' + Date.now();
-        var timeout = setTimeout(function() {
-          delete window[callbackName];
-          if (script.parentNode) script.parentNode.removeChild(script);
-          reject(new Error('Census geocoder timed out'));
-        }, 10000);
-        window[callbackName] = function(response) {
-          clearTimeout(timeout);
-          delete window[callbackName];
-          if (script.parentNode) script.parentNode.removeChild(script);
-          resolve(response);
-        };
-        var script = document.createElement('script');
-        script.src = 'https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?' + params.toString() + '&callback=' + callbackName;
-        script.onerror = function() {
-          clearTimeout(timeout);
-          delete window[callbackName];
-          if (script.parentNode) script.parentNode.removeChild(script);
-          reject(new Error('Census geocoder network error'));
-        };
-        document.head.appendChild(script);
-      });
+      var params = new URLSearchParams({ address: address, benchmark: 'Public_AR_Current', vintage: 'Current_Current', format: 'json' });
+      var controller = new AbortController();
+      var timeout = setTimeout(function() { controller.abort(); }, 10000);
+      var res = await fetch('https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?' + params.toString(), { signal: controller.signal });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error('Census geocoder HTTP ' + res.status);
+      var data = await res.json();
       var matches = data.result && data.result.addressMatches;
       if (!matches || matches.length === 0) return result;
       var match = matches[0];
