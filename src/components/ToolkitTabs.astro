@@ -1,5 +1,6 @@
 ---
 import ToolkitFoia from './ToolkitFoia.astro';
+import ToolkitSpeaking from './ToolkitSpeaking.astro';
 
 const tabs = [
   { id: 'request-records', label: 'Request Records' },
@@ -59,10 +60,7 @@ const tabs = [
           <ToolkitFoia />
         )}
         {tab.id === 'speak-up' && (
-          <div class="text-center text-[#a3a3a3] py-12 border border-dashed border-[#404040] rounded-lg">
-            <p class="text-lg font-medium text-[#d4d4d4] mb-2">Speak Up</p>
-            <p>Council meeting prep materials will appear here.</p>
-          </div>
+          <ToolkitSpeaking />
         )}
         {tab.id === 'spread-the-word' && (
           <div class="text-center text-[#a3a3a3] py-12 border border-dashed border-[#404040] rounded-lg">
