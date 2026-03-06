@@ -32,90 +32,79 @@ const faqs = [
 ];
 ---
 
-<section id="faq" aria-labelledby="faq-heading" class="bg-[#171717] py-20 md:py-28">
-  <div class="max-w-4xl mx-auto px-6">
-    <h2 id="faq-heading" class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-10">
+<section id="faq" aria-labelledby="faq-heading" class="bg-[#161616]">
+
+  <!-- Section header -->
+  <div class="px-6 md:px-12 pt-14 pb-6 border-b border-[rgba(255,255,255,0.07)]">
+    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#555555] mb-3">Common objections</p>
+    <h2 id="faq-heading" class="text-[#e8e8e8] font-bold text-[clamp(1.8rem,3.5vw,2.8rem)] tracking-[-0.025em] leading-[1.05]">
       But what about&hellip;
     </h2>
+  </div>
 
-    <div class="space-y-3">
+  <!-- Sidebar + answer panel -->
+  <div class="faq-layout md:grid md:grid-cols-[280px_1fr]">
+
+    <!-- Question list -->
+    <div class="faq-sidebar border-b md:border-b-0 md:border-r border-[rgba(255,255,255,0.07)]">
+      <div class="font-['DM_Mono',monospace] text-[9px] uppercase tracking-[0.18em] text-[#555555] px-8 py-4 border-b border-[rgba(255,255,255,0.07)]">
+        Questions
+      </div>
       {faqs.map((faq, i) => (
-        <details class="faq-item group border-l-[3px] border-[#262626]" data-faq={i} open={i === 0 || undefined}>
-          <summary class="flex items-center justify-between cursor-pointer py-4 px-5 list-none [&::-webkit-details-marker]:hidden">
-            <span class="text-white font-bold text-base pr-4">{faq.question}</span>
-            <span class="faq-icon text-[#ef4444] font-bold text-xl flex-shrink-0 transition-transform duration-300">+</span>
-          </summary>
-          <div class="faq-content">
-            <div class="faq-inner px-5 pb-5">
-              <p class="text-[#a3a3a3] text-base leading-[1.7]"><strong class="text-[#d4d4d4]">{faq.lead}</strong> {faq.rest}</p>
-              {faq.source && (
-                <p class="text-[#a3a3a3] text-xs mt-2" set:html={faq.source} />
-              )}
-            </div>
-          </div>
-        </details>
+        <button
+          type="button"
+          class:list={['faq-q-btn w-full text-left px-8 py-4 text-[14px] font-medium leading-[1.35] border-b border-[rgba(255,255,255,0.04)] transition-colors cursor-pointer', i === 0 ? 'faq-active' : '']}
+          data-faq={i}
+          aria-selected={i === 0 ? 'true' : 'false'}
+        >
+          {faq.question}
+        </button>
+      ))}
+    </div>
+
+    <!-- Answer panel -->
+    <div class="faq-answer-panel p-8 md:p-12 flex flex-col justify-center min-h-[320px]">
+      {faqs.map((faq, i) => (
+        <div class:list={['faq-answer', i !== 0 ? 'hidden' : '']} data-answer={i}>
+          <div class="text-[#e8e8e8] font-semibold text-[1.4rem] tracking-[-0.015em] leading-[1.2] mb-5">{faq.question}</div>
+          <p class="text-[#a0a0a0] text-[15px] leading-[1.75] max-w-[560px]">
+            <strong class="text-[#e8e8e8]">{faq.lead}</strong> {faq.rest}
+          </p>
+          {faq.source && (
+            <p class="text-[#555555] text-xs mt-3" set:html={faq.source} />
+          )}
+        </div>
       ))}
     </div>
   </div>
 </section>
 
 <style>
-  /* Smooth open/close animation using grid trick */
-  .faq-content {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 300ms ease-out;
-  }
-
-  .faq-inner {
-    overflow: hidden;
-  }
-
-  details[open] .faq-content {
-    grid-template-rows: 1fr;
-  }
-
-  /* Red border when open */
-  details[open] {
-    border-color: #ef4444;
-  }
-
-  /* Rotate + to x (toggle indicator) */
-  details[open] .faq-icon {
-    transform: rotate(45deg);
-  }
-
-  /* Prevent instant close — handled by JS */
-  details.closing .faq-content {
-    grid-template-rows: 0fr;
-  }
-
-  details.closing {
-    border-color: #262626;
-  }
-
-  details.closing .faq-icon {
-    transform: rotate(0deg);
+  .faq-q-btn { color: #888; background: transparent; }
+  .faq-q-btn:hover { color: #e8e8e8; background: #1a1a1a; }
+  .faq-active {
+    color: #e8e8e8 !important;
+    background: #1a1a1a !important;
+    border-left: 2px solid #dc2626;
+    padding-left: calc(2rem - 2px);
   }
 </style>
 
 <script>
-  // Handle smooth close animation for <details> elements
-  document.querySelectorAll('.faq-item').forEach(details => {
-    const summary = details.querySelector('summary');
+  const buttons = document.querySelectorAll('.faq-q-btn');
+  const answers = document.querySelectorAll('.faq-answer');
 
-    summary?.addEventListener('click', (e) => {
-      // If currently open, animate close
-      if (details.hasAttribute('open')) {
-        e.preventDefault();
-        details.classList.add('closing');
-
-        // Wait for animation to finish, then actually close
-        setTimeout(() => {
-          details.classList.remove('closing');
-          details.removeAttribute('open');
-        }, 300);
-      }
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = btn.getAttribute('data-faq');
+      buttons.forEach(b => {
+        b.classList.remove('faq-active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      answers.forEach(a => a.classList.add('hidden'));
+      btn.classList.add('faq-active');
+      btn.setAttribute('aria-selected', 'true');
+      document.querySelector(`.faq-answer[data-answer="${idx}"]`)?.classList.remove('hidden');
     });
   });
 </script>
