@@ -120,6 +120,12 @@ function createConeImage(): { width: number; height: number; data: Uint8ClampedA
 
 // --- Camera popup ---
 
+function escapeHtml(str: string): string {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 function showCameraPopup(e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) {
   if (!e.features?.length || !map) return;
   const feat = e.features[0];
@@ -141,29 +147,25 @@ function showCameraPopup(e: maplibregl.MapMouseEvent & { features?: maplibregl.M
   let html = '<div class="camera-popup">';
 
   if (imageUrl) {
-    const label = manufacturer ? `${manufacturer} LPR` : 'ALPR Camera';
-    html += `<div class="camera-popup-img"><img src="${imageUrl}" alt="${label}" loading="lazy" /><span class="camera-popup-img-label">${label}</span></div>`;
+    const label = manufacturer ? escapeHtml(manufacturer) + ' LPR' : 'ALPR Camera';
+    html += `<div class="camera-popup-img"><img src="${escapeHtml(imageUrl)}" alt="${label}" loading="lazy" /><span class="camera-popup-img-label">${label}</span></div>`;
   } else {
     html += '<div class="camera-popup-img camera-popup-img-empty"><span>ALPR Camera</span></div>';
   }
 
-  // Manufacturer
   if (manufacturer) {
-    html += `<div class="camera-popup-mfr">Made by<br><strong>${manufacturer}</strong></div>`;
+    html += `<div class="camera-popup-mfr">Made by<br><strong>${escapeHtml(manufacturer)}</strong></div>`;
   }
 
-  // Operator
   if (operator && operator !== manufacturer) {
-    html += `<div class="camera-popup-op">Operated by ${operator}</div>`;
+    html += `<div class="camera-popup-op">Operated by ${escapeHtml(operator)}</div>`;
   }
 
-  // Direction
   if (direction !== null) {
     html += `<div class="camera-popup-dir">Facing ${Math.round(direction)}&deg;</div>`;
   }
 
-  // OSM link
-  html += `<a class="camera-popup-link" href="https://www.openstreetmap.org/node/${id}" target="_blank" rel="noopener">&#x2197; VIEW ON OSM</a>`;
+  html += `<a class="camera-popup-link" href="https://www.openstreetmap.org/node/${encodeURIComponent(String(id))}" target="_blank" rel="noopener">&#x2197; VIEW ON OSM</a>`;
 
   html += '</div>';
 
