@@ -1,48 +1,79 @@
 ---
 ---
 
-<section id="map-section" aria-labelledby="map-section-heading" class="bg-[#171717] py-20 md:py-28 relative overflow-hidden">
-  <!-- Section glow accent -->
-  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[200px] blur-[64px] opacity-[0.08] md:opacity-[0.10] pointer-events-none" aria-hidden="true"></div>
+<section id="map-section" aria-labelledby="map-section-heading" class="bg-[#0d0d0d] relative overflow-hidden">
 
-  <div class="max-w-4xl mx-auto px-6">
-    <h2 id="map-section-heading" class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-10">
-      242 Cameras. Upstate South Carolina. No Public Vote.
-    </h2>
+  <!-- Ghost "242" background number -->
+  <div class="absolute top-[-20px] right-[-40px] font-black leading-none pointer-events-none select-none z-0"
+       style="font-size:clamp(12rem,22vw,22rem);color:rgba(220,38,38,0.05);letter-spacing:-0.06em;"
+       aria-hidden="true">242</div>
 
-    <div class="space-y-6 text-[#d4d4d4] text-base leading-relaxed mb-12">
-      <p>
-        <strong class="text-white">Cameras are already watching.</strong> Flock Safety cameras are up across Upstate SC: Greenville, Spartanburg, Anderson, and surrounding areas.
-      </p>
+  <!-- Two-column header: copy left, stats right -->
+  <div class="md:grid md:grid-cols-[1fr_240px] relative z-10 border-b border-[rgba(255,255,255,0.07)]">
 
-      <p>
-        <strong class="text-white">Greenville:</strong> Greenville PD runs 57 Flock cameras. The first batch went up in January 2021, paid for with federal civil asset forfeiture funds. No city ordinance. No council vote on oversight. There are still no rules about who sees the data, how long it's kept, or who checks how it's used.
-      </p>
+    <!-- Left: heading + copy -->
+    <div class="px-6 md:px-16 py-16 md:py-20 md:border-r md:border-[rgba(255,255,255,0.07)]">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#555] mb-6">Upstate SC / Camera Network</p>
+      <h2 id="map-section-heading" class="font-black leading-none tracking-[-0.035em] mb-8"
+          style="font-size:clamp(2rem,3.5vw,3rem);">
+        Cameras are<br>already watching.
+        <span class="block" style="color:rgba(232,232,232,0.2);">No rules attached.</span>
+      </h2>
 
-      <p>
-        <strong class="text-white">Spartanburg:</strong> City PD runs 15 cameras. The county's were deployed under Sheriff Chuck Wright&hellip; who pled guilty to federal criminal charges in May 2025. A convicted criminal had unrestricted access to a system tracking where you drive. Neither the city nor the county has an oversight policy.
-      </p>
-
-      <p>
-        <strong class="text-white">From Greenville to Spartanburg to Anderson and beyond:</strong> Cameras first, questions never. No Upstate city or county has passed an oversight ordinance. Even when other cities tried, it didn't matter. Local governments can't control where the data goes once it's in Flock's network.
-      </p>
-
-      <p>
-        <strong class="text-white">The official count undersells it.</strong> When Greenville went looking for more cameras, its own RFP required the new ones to connect with HOA and neighborhood cameras too. The city's SafeWatch program asks residents to register their Ring and Nest cameras for police use on demand. At least one Greenville HOA already runs its own license plate reader. The 57-camera figure is a floor, not a ceiling.
-      </p>
+      <div class="space-y-5 text-[13px] text-[#888] leading-[1.75] max-w-[520px]">
+        <p>
+          <strong class="text-[#e8e8e8]">Flock Safety cameras are up across Upstate SC:</strong> Greenville, Spartanburg, Anderson, and surrounding areas.
+        </p>
+        <p>
+          <strong class="text-[#e8e8e8]">Greenville:</strong> Greenville PD runs 57 Flock cameras. The first batch went up in January 2021, paid for with federal civil asset forfeiture funds. No city ordinance. No council vote on oversight. There are still no rules about who sees the data, how long it's kept, or who checks how it's used.
+        </p>
+        <p>
+          <strong class="text-[#e8e8e8]">Spartanburg:</strong> City PD runs 15 cameras. The county's were deployed under Sheriff Chuck Wright&hellip; who pled guilty to federal criminal charges in May 2025. A convicted criminal had unrestricted access to a system tracking where you drive. Neither the city nor the county has an oversight policy.
+        </p>
+        <p>
+          <strong class="text-[#e8e8e8]">From Greenville to Spartanburg to Anderson and beyond:</strong> Cameras first, questions never. No Upstate city or county has passed an oversight ordinance. Even when other cities tried, it didn't matter. Local governments can't control where the data goes once it's in Flock's network.
+        </p>
+        <p>
+          <strong class="text-[#e8e8e8]">The official count undersells it.</strong> When Greenville went looking for more cameras, its own RFP required the new ones to connect with HOA and neighborhood cameras too. The city's SafeWatch program asks residents to register their Ring and Nest cameras for police use on demand. At least one Greenville HOA already runs its own license plate reader. The 57-camera figure is a floor, not a ceiling.
+        </p>
+      </div>
     </div>
 
-    <!-- Map embed area -->
-    <div class="mb-12">
+    <!-- Right: stat column -->
+    <div class="hidden md:flex flex-col px-7 py-20">
+      <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
+        <div class="text-[32px] font-black text-[#dc2626] leading-none tracking-[-0.03em] mb-1">242</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#555]">Total cameras<br>documented</div>
+      </div>
+      <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
+        <div class="text-[32px] font-black text-[#dc2626] leading-none tracking-[-0.03em] mb-1">57</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#555]">Greenville PD</div>
+      </div>
+      <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
+        <div class="text-[24px] font-black leading-none tracking-[-0.03em] mb-1" style="color:#555;">0</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#555]">Oversight<br>ordinances</div>
+      </div>
+      <div class="py-4">
+        <div class="text-[24px] font-black leading-none tracking-[-0.03em] mb-1" style="color:#555;">0</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#555]">Public<br>votes</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Map embed area (unchanged) -->
+  <div class="relative z-10">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+
       <!-- Mobile toggle button -->
-      <div id="map-button-container" class="md:hidden bg-[#262626] border border-[#404040] rounded-lg p-8 text-center">
+      <div id="map-button-container" class="md:hidden bg-[#1a1a1a] border border-[rgba(255,255,255,0.1)] p-8 text-center">
         <p class="text-white font-bold text-lg mb-4">
           Find the cameras in your neighborhood.
         </p>
         <button
           id="map-toggle"
           type="button"
-          class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer"
+          class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer"
         >
           Explore the camera map &rarr;&#xFE0E;
         </button>
@@ -65,8 +96,10 @@
           </p>
         </div>
       </div>
+
     </div>
   </div>
+
 </section>
 
 <style>
