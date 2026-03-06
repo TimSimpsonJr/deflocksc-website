@@ -1,0 +1,186 @@
+---
+const tabs = [
+  { id: 'request-records', label: 'Request Records' },
+  { id: 'speak-up', label: 'Speak Up' },
+  { id: 'spread-the-word', label: 'Spread the Word' },
+  { id: 'know-your-rights', label: 'Know Your Rights' },
+];
+---
+
+<!-- Sticky tab bar -->
+<div class="sticky top-16 z-40 bg-[#1a1a1a] border-b border-[#333]">
+  <div class="max-w-4xl mx-auto px-6">
+    <div
+      role="tablist"
+      aria-label="Toolkit sections"
+      class="flex overflow-x-auto scrollbar-hide -webkit-overflow-scrolling-touch"
+    >
+      {tabs.map((tab, i) => (
+        <button
+          role="tab"
+          id={`tab-${tab.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-controls={`panel-${tab.id}`}
+          tabindex={i === 0 ? 0 : -1}
+          class:list={[
+            'toolkit-tab shrink-0 px-4 py-4 text-sm font-bold uppercase tracking-[0.05em] border-b-2 transition-colors whitespace-nowrap cursor-pointer',
+            i === 0
+              ? 'text-[#fbbf24] border-[#fbbf24]'
+              : 'text-[#a3a3a3] border-transparent hover:text-white',
+          ]}
+          data-tab-id={tab.id}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  </div>
+</div>
+
+<!-- Tab panels -->
+<div id="toolkit-panels">
+  {tabs.map((tab, i) => (
+    <div
+      role="tabpanel"
+      id={`panel-${tab.id}`}
+      aria-labelledby={`tab-${tab.id}`}
+      tabindex="0"
+      class:list={[
+        'toolkit-panel',
+        i % 2 === 0 ? 'bg-[#171717]' : 'bg-[#262626]',
+        i !== 0 && 'hidden',
+      ]}
+      data-panel-id={tab.id}
+    >
+      <div class="max-w-4xl mx-auto px-6 py-20 md:py-28">
+        {tab.id === 'request-records' && (
+          <div class="text-center text-[#a3a3a3] py-12 border border-dashed border-[#404040] rounded-lg">
+            <p class="text-lg font-medium text-[#d4d4d4] mb-2">Request Records</p>
+            <p>FOIA templates will appear here.</p>
+          </div>
+        )}
+        {tab.id === 'speak-up' && (
+          <div class="text-center text-[#a3a3a3] py-12 border border-dashed border-[#404040] rounded-lg">
+            <p class="text-lg font-medium text-[#d4d4d4] mb-2">Speak Up</p>
+            <p>Council meeting prep materials will appear here.</p>
+          </div>
+        )}
+        {tab.id === 'spread-the-word' && (
+          <div class="text-center text-[#a3a3a3] py-12 border border-dashed border-[#404040] rounded-lg">
+            <p class="text-lg font-medium text-[#d4d4d4] mb-2">Spread the Word</p>
+            <p>Outreach materials will appear here.</p>
+          </div>
+        )}
+        {tab.id === 'know-your-rights' && (
+          <div class="text-center text-[#a3a3a3] py-12 border border-dashed border-[#404040] rounded-lg">
+            <p class="text-lg font-medium text-[#d4d4d4] mb-2">Know Your Rights</p>
+            <p>Legal resources will appear here.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+  /* Hide scrollbar on tab bar for mobile horizontal scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+
+<script>
+  function initToolkitTabs() {
+    const tabButtons = document.querySelectorAll<HTMLButtonElement>('.toolkit-tab');
+    const panels = document.querySelectorAll<HTMLElement>('.toolkit-panel');
+
+    if (!tabButtons.length || !panels.length) return;
+
+    function activateTab(tabId: string, updateHash = true) {
+      tabButtons.forEach((btn) => {
+        const isActive = btn.dataset.tabId === tabId;
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        btn.tabIndex = isActive ? 0 : -1;
+
+        if (isActive) {
+          btn.classList.remove('text-[#a3a3a3]', 'border-transparent', 'hover:text-white');
+          btn.classList.add('text-[#fbbf24]', 'border-[#fbbf24]');
+        } else {
+          btn.classList.remove('text-[#fbbf24]', 'border-[#fbbf24]');
+          btn.classList.add('text-[#a3a3a3]', 'border-transparent', 'hover:text-white');
+        }
+      });
+
+      panels.forEach((panel) => {
+        if (panel.dataset.panelId === tabId) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      });
+
+      if (updateHash) {
+        history.replaceState(null, '', `#${tabId}`);
+      }
+    }
+
+    // Click handler
+    tabButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tabId;
+        if (tabId) activateTab(tabId);
+      });
+    });
+
+    // Arrow key navigation (left/right + home/end)
+    tabButtons.forEach((btn) => {
+      btn.addEventListener('keydown', (e: KeyboardEvent) => {
+        const tabList = Array.from(tabButtons);
+        const currentIndex = tabList.indexOf(btn);
+        let targetIndex = -1;
+
+        if (e.key === 'ArrowRight') {
+          targetIndex = (currentIndex + 1) % tabList.length;
+        } else if (e.key === 'ArrowLeft') {
+          targetIndex = (currentIndex - 1 + tabList.length) % tabList.length;
+        } else if (e.key === 'Home') {
+          targetIndex = 0;
+        } else if (e.key === 'End') {
+          targetIndex = tabList.length - 1;
+        }
+
+        if (targetIndex >= 0) {
+          e.preventDefault();
+          const target = tabList[targetIndex];
+          const tabId = target.dataset.tabId;
+          if (tabId) {
+            activateTab(tabId);
+            target.focus();
+          }
+        }
+      });
+    });
+
+    // Read hash on load
+    const hash = window.location.hash.slice(1);
+    const validIds = Array.from(tabButtons).map((btn) => btn.dataset.tabId);
+    if (hash && validIds.includes(hash)) {
+      activateTab(hash, false);
+    }
+
+    // Listen for hash changes (back/forward navigation)
+    window.addEventListener('hashchange', () => {
+      const newHash = window.location.hash.slice(1);
+      if (newHash && validIds.includes(newHash)) {
+        activateTab(newHash, false);
+      }
+    });
+  }
+
+  initToolkitTabs();
+  document.addEventListener('astro:after-swap', initToolkitTabs);
+</script>
