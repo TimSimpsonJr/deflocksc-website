@@ -81,39 +81,74 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
         <div class="cs-scene" id="scene-2">
           <svg class="s2-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid meet">
             <g class="s2-map">
-              <!-- Lower-48 outline (very dim, fades in) -->
-              <path class="s2-states" d="M844,164 L852,172 858,170 862,178 870,175 874,182 880,180 885,188 890,185 900,195 905,200 910,210 908,220 912,230 910,240 915,248 912,258 918,268 920,278 915,288 920,298 918,310 910,318 905,328 895,335 885,340 878,348 870,355 858,360 848,365 840,372 830,378 822,385 810,388 798,392 785,395 772,400 758,405 745,410 732,418 720,425 708,430 695,435 680,440 665,442 650,445 635,448 618,450 600,452 582,455 565,458 548,460 530,462 512,463 495,464 478,465 460,466 442,465 425,464 408,462 390,460 372,458 355,455 338,452 322,450 308,448 295,445 282,442 270,440 258,435 248,430 238,425 228,418 220,410 212,402 205,394 198,385 192,375 188,365 182,355 178,345 174,335 170,325 168,315 165,305 162,295 160,285 158,275 155,265 153,255 152,245 150,235 149,225 148,215 147,205 148,195 150,185 155,175 160,168 168,162 178,158 188,155 200,152 212,150 225,148 238,147 252,146 268,145 285,145 302,146 320,147 338,148 355,150 372,152 390,155 408,158 425,160 442,162 460,164 478,164 495,163 512,163 530,162 548,162 565,163 582,163 600,164 618,165 635,165 650,166 665,166 680,166 695,165 708,165 720,164 732,163 745,163 758,163 772,163 785,163 798,163 810,163 822,163 832,163 Z" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
-              <!-- CA outline (always visible) -->
-              <path class="s2-ca" d="M120,180 L115,200 110,220 108,240 107,260 108,280 112,300 118,320 125,340 130,355 132,365 128,375 120,380 115,390 112,400 115,410 120,415 128,412 135,405 142,395 148,388 152,380 155,370 158,358 160,345 162,330 160,315 158,300 155,285 150,270 148,258 145,245 142,230 140,215 138,200 135,188 130,180 Z" fill="rgba(220,38,38,0.08)" stroke="rgba(220,38,38,0.6)" stroke-width="1.5"/>
-              <!-- Arc lines from CA center (120,350) to other states -->
-              <path class="s2-arc s2-arc-1" d="M120,350 Q230,230 250,420" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
-              <path class="s2-arc s2-arc-2" d="M120,350 Q195,220 170,280" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
-              <path class="s2-arc s2-arc-3" d="M120,350 Q160,170 140,100" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
-              <path class="s2-arc s2-arc-4" d="M120,350 Q155,210 110,170" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
-              <path class="s2-arc s2-arc-5" d="M120,350 Q285,235 350,300" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="400" stroke-dashoffset="400"/>
-              <path class="s2-arc s2-arc-6" d="M120,350 Q370,180 520,140" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="500" stroke-dashoffset="500"/>
-              <path class="s2-arc s2-arc-7" d="M120,350 Q350,200 480,480" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="500" stroke-dashoffset="500"/>
-              <path class="s2-arc s2-arc-8" d="M120,350 Q390,170 560,320" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="600" stroke-dashoffset="600"/>
-              <path class="s2-arc s2-arc-9" d="M120,350 Q410,160 600,240" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="600" stroke-dashoffset="600"/>
-              <path class="s2-arc s2-arc-10" d="M120,350 Q430,150 640,180" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
-              <path class="s2-arc s2-arc-11" d="M120,350 Q420,160 640,250" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
-              <path class="s2-arc s2-arc-12" d="M120,350 Q440,140 680,220" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
-              <path class="s2-arc s2-arc-13" d="M120,350 Q430,170 670,350" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
-              <path class="s2-arc s2-arc-14" d="M120,350 Q450,150 680,420" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
-              <path class="s2-arc s2-arc-15" d="M120,350 Q460,130 720,400" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
-              <path class="s2-arc s2-arc-16" d="M120,350 Q460,120 740,280" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
-              <path class="s2-arc s2-arc-17" d="M120,350 Q470,110 740,370" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
-              <path class="s2-arc s2-arc-18" d="M120,350 Q470,100 760,200" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
-              <path class="s2-arc s2-arc-19" d="M120,350 Q480,90 790,210" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
-              <path class="s2-arc s2-arc-20" d="M120,350 Q480,100 820,180" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
-              <path class="s2-arc s2-arc-21" d="M120,350 Q490,90 840,165" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
-              <path class="s2-arc s2-arc-22" d="M120,350 Q470,80 760,260" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
-              <path class="s2-arc s2-arc-23" d="M120,350 Q490,120 780,480" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
-              <path class="s2-arc s2-arc-24" d="M120,350 Q460,110 740,340" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <!-- Lower-48 outline (simplified recognizable shape) -->
+              <path class="s2-states" d="
+                M130,162 L170,155 210,150 250,148 290,148 330,150 360,148 390,145 420,142
+                440,138 460,140 470,135 490,132 520,130 550,132 575,128 600,130
+                620,125 640,128 660,125 680,128 700,130 720,128 740,130 760,132
+                780,135 800,140 815,148 822,158 830,165 835,175
+                838,185 840,195 838,208 832,218 835,230
+                840,240 845,248 848,260 845,272
+                855,278 862,285 870,295 875,310
+                862,318 850,320 842,330 830,338
+                820,335 808,342 800,350 785,358
+                778,365 770,360 758,365 748,375
+                738,380 728,388 715,395 705,402
+                695,408 680,415 668,420
+                650,425 638,435 625,438
+                610,442 595,445 578,448
+                560,448 542,452 525,450 505,448
+                490,450 475,452 458,455 440,458 420,460
+                400,462 380,460 365,455 350,452
+                335,448 318,442 305,438 290,432
+                278,425 268,418 255,408
+                248,398 242,388 238,378 235,368
+                232,355 225,345 218,335 210,328
+                202,320 195,310 190,298 185,288
+                180,275 175,262 172,248 170,235
+                168,220 168,205 170,192 172,180 175,170
+                Z
+              " fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.2"/>
+              <!-- California (west coast, connects to lower-48 at OR border ~130,162 and AZ border ~175,370) -->
+              <path class="s2-ca" d="
+                M130,162 L125,175 120,190 116,208 112,228 110,248
+                108,268 109,288 112,305 118,322 125,338 130,348
+                132,358 128,368 122,375 116,385 112,398
+                115,408 122,415 130,418 140,412 148,402
+                155,390 160,378 164,365 168,350
+                170,335 172,318 174,300 175,285
+                175,270 174,255 172,240 170,225
+                170,210 170,195 172,180 175,170 Z
+              " fill="rgba(220,38,38,0.08)" stroke="rgba(220,38,38,0.6)" stroke-width="1.5"/>
+              <!-- Arc lines from CA center to other states -->
+              <path class="s2-arc s2-arc-1" d="M140,290 Q210,220 235,380" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
+              <path class="s2-arc s2-arc-2" d="M140,290 Q180,210 175,180" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
+              <path class="s2-arc s2-arc-3" d="M140,290 Q200,160 250,148" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
+              <path class="s2-arc s2-arc-4" d="M140,290 Q220,180 310,155" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="250" stroke-dashoffset="250"/>
+              <path class="s2-arc s2-arc-5" d="M140,290 Q280,210 350,300" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="400" stroke-dashoffset="400"/>
+              <path class="s2-arc s2-arc-6" d="M140,290 Q360,160 520,140" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="500" stroke-dashoffset="500"/>
+              <path class="s2-arc s2-arc-7" d="M140,290 Q340,190 480,450" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="500" stroke-dashoffset="500"/>
+              <path class="s2-arc s2-arc-8" d="M140,290 Q380,150 560,320" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="600" stroke-dashoffset="600"/>
+              <path class="s2-arc s2-arc-9" d="M140,290 Q400,140 600,240" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="600" stroke-dashoffset="600"/>
+              <path class="s2-arc s2-arc-10" d="M140,290 Q420,130 640,180" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
+              <path class="s2-arc s2-arc-11" d="M140,290 Q410,140 640,250" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
+              <path class="s2-arc s2-arc-12" d="M140,290 Q430,120 680,220" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
+              <path class="s2-arc s2-arc-13" d="M140,290 Q420,150 670,350" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
+              <path class="s2-arc s2-arc-14" d="M140,290 Q440,130 680,420" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <path class="s2-arc s2-arc-15" d="M140,290 Q450,110 720,400" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <path class="s2-arc s2-arc-16" d="M140,290 Q450,100 740,280" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <path class="s2-arc s2-arc-17" d="M140,290 Q460,95 740,370" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <path class="s2-arc s2-arc-18" d="M140,290 Q460,85 760,200" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-19" d="M140,290 Q470,75 790,210" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-20" d="M140,290 Q470,80 820,180" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-21" d="M140,290 Q480,72 840,168" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-22" d="M140,290 Q460,65 760,260" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-23" d="M140,290 Q480,100 780,450" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-24" d="M140,290 Q450,90 740,340" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
               <!-- Source dot -->
-              <circle cx="120" cy="350" r="6" fill="#dc2626" opacity="0.8"/>
+              <circle cx="140" cy="290" r="6" fill="#dc2626" opacity="0.8"/>
               <!-- Counter label -->
-              <text class="s2-label" x="120" y="380" text-anchor="middle" font-family="DM Mono,monospace" font-size="12" fill="rgba(255,255,255,0.2)">364,000 QUERIES</text>
+              <text class="s2-label" x="140" y="320" text-anchor="middle" font-family="DM Mono,monospace" font-size="22" font-weight="500" fill="rgba(255,255,255,0.7)" letter-spacing="1">364,000 QUERIES</text>
             </g>
           </svg>
         </div>
@@ -143,13 +178,13 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
               <div class="s3-line w55"></div><div class="s3-line w80"></div>
             </div>
             <div class="s3-shield">
-              <svg width="38" height="44" viewBox="0 0 38 44">
-                <path d="M19,2 L35,8 L35,22 C35,33 19,42 19,42 C19,42 3,33 3,22 L3,8 Z"
-                  fill="rgba(220,38,38,0.1)" stroke="rgba(220,38,38,0.5)" stroke-width="1.2"/>
-                <text x="19" y="20" text-anchor="middle" font-family="DM Mono,monospace"
-                  font-size="7" fill="rgba(220,38,38,0.8)">FED.</text>
-                <text x="19" y="30" text-anchor="middle" font-family="DM Mono,monospace"
-                  font-size="5.5" fill="rgba(220,38,38,0.6)">AUTHORITY</text>
+              <svg width="56" height="64" viewBox="0 0 56 64">
+                <path d="M28,3 L52,11 L52,32 C52,48 28,61 28,61 C28,61 4,48 4,32 L4,11 Z"
+                  fill="rgba(220,38,38,0.1)" stroke="rgba(220,38,38,0.5)" stroke-width="1.4"/>
+                <text x="28" y="30" text-anchor="middle" font-family="DM Mono,monospace"
+                  font-size="11" fill="rgba(220,38,38,0.8)">FED.</text>
+                <text x="28" y="44" text-anchor="middle" font-family="DM Mono,monospace"
+                  font-size="7.5" fill="rgba(220,38,38,0.6)">AUTHORITY</text>
               </svg>
             </div>
           </div>
@@ -348,12 +383,12 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
   .s2-map {
     transition: transform 0.65s ease-out;
     transform: scale(2.5);
-    transform-origin: 120px 350px;
+    transform-origin: 140px 290px;
   }
   .cs-card:hover .s2-map { transform: scale(1); }
 
   .s2-states { opacity: 0; transition: opacity 0.4s 0.2s; }
-  .cs-card:hover .s2-states { opacity: 0.15; }
+  .cs-card:hover .s2-states { opacity: 0.55; }
 
   .s2-ca { opacity: 0.6; transition: opacity 0.3s; }
   .cs-card:hover .s2-ca { opacity: 1; }
