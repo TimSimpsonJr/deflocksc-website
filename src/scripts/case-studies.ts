@@ -74,3 +74,25 @@ backdrop?.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeOverlay();
 });
+
+// --- Card 2: asymmetric hover-off ---
+const card2 = document.querySelector('.cs-card[data-overlay="1"]');
+const arcs = card2?.querySelectorAll('.s2-arc') ?? [];
+
+card2?.addEventListener('mouseenter', () => {
+  arcs.forEach(arc => arc.classList.remove('s2-fading'));
+});
+
+card2?.addEventListener('mouseleave', () => {
+  arcs.forEach(arc => arc.classList.add('s2-fading'));
+  setTimeout(() => {
+    arcs.forEach(arc => {
+      arc.classList.remove('s2-fading');
+      (arc as SVGElement).style.transition = 'none';
+      arc.setAttribute('stroke-dashoffset', arc.getAttribute('stroke-dasharray') || '200');
+      requestAnimationFrame(() => {
+        (arc as SVGElement).style.transition = '';
+      });
+    });
+  }, 350);
+});

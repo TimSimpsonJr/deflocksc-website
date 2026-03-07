@@ -78,7 +78,45 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
         <div class="cs-num">01</div>
       </div>
       <div class="cs-card" data-overlay="1" tabindex="0" role="group" aria-label="Case study 2 of 5">
-        <div class="cs-scene" id="scene-2"><!-- Card 2 scene goes here --></div>
+        <div class="cs-scene" id="scene-2">
+          <svg class="s2-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid meet">
+            <g class="s2-map">
+              <!-- Lower-48 outline (very dim, fades in) -->
+              <path class="s2-states" d="M844,164 L852,172 858,170 862,178 870,175 874,182 880,180 885,188 890,185 900,195 905,200 910,210 908,220 912,230 910,240 915,248 912,258 918,268 920,278 915,288 920,298 918,310 910,318 905,328 895,335 885,340 878,348 870,355 858,360 848,365 840,372 830,378 822,385 810,388 798,392 785,395 772,400 758,405 745,410 732,418 720,425 708,430 695,435 680,440 665,442 650,445 635,448 618,450 600,452 582,455 565,458 548,460 530,462 512,463 495,464 478,465 460,466 442,465 425,464 408,462 390,460 372,458 355,455 338,452 322,450 308,448 295,445 282,442 270,440 258,435 248,430 238,425 228,418 220,410 212,402 205,394 198,385 192,375 188,365 182,355 178,345 174,335 170,325 168,315 165,305 162,295 160,285 158,275 155,265 153,255 152,245 150,235 149,225 148,215 147,205 148,195 150,185 155,175 160,168 168,162 178,158 188,155 200,152 212,150 225,148 238,147 252,146 268,145 285,145 302,146 320,147 338,148 355,150 372,152 390,155 408,158 425,160 442,162 460,164 478,164 495,163 512,163 530,162 548,162 565,163 582,163 600,164 618,165 635,165 650,166 665,166 680,166 695,165 708,165 720,164 732,163 745,163 758,163 772,163 785,163 798,163 810,163 822,163 832,163 Z" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <!-- CA outline (always visible) -->
+              <path class="s2-ca" d="M120,180 L115,200 110,220 108,240 107,260 108,280 112,300 118,320 125,340 130,355 132,365 128,375 120,380 115,390 112,400 115,410 120,415 128,412 135,405 142,395 148,388 152,380 155,370 158,358 160,345 162,330 160,315 158,300 155,285 150,270 148,258 145,245 142,230 140,215 138,200 135,188 130,180 Z" fill="rgba(220,38,38,0.08)" stroke="rgba(220,38,38,0.6)" stroke-width="1.5"/>
+              <!-- Arc lines from CA center (120,350) to other states -->
+              <path class="s2-arc s2-arc-1" d="M120,350 Q230,230 250,420" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
+              <path class="s2-arc s2-arc-2" d="M120,350 Q195,220 170,280" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
+              <path class="s2-arc s2-arc-3" d="M120,350 Q160,170 140,100" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
+              <path class="s2-arc s2-arc-4" d="M120,350 Q155,210 110,170" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
+              <path class="s2-arc s2-arc-5" d="M120,350 Q285,235 350,300" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="400" stroke-dashoffset="400"/>
+              <path class="s2-arc s2-arc-6" d="M120,350 Q370,180 520,140" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="500" stroke-dashoffset="500"/>
+              <path class="s2-arc s2-arc-7" d="M120,350 Q350,200 480,480" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="500" stroke-dashoffset="500"/>
+              <path class="s2-arc s2-arc-8" d="M120,350 Q390,170 560,320" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="600" stroke-dashoffset="600"/>
+              <path class="s2-arc s2-arc-9" d="M120,350 Q410,160 600,240" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="600" stroke-dashoffset="600"/>
+              <path class="s2-arc s2-arc-10" d="M120,350 Q430,150 640,180" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
+              <path class="s2-arc s2-arc-11" d="M120,350 Q420,160 640,250" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
+              <path class="s2-arc s2-arc-12" d="M120,350 Q440,140 680,220" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
+              <path class="s2-arc s2-arc-13" d="M120,350 Q430,170 670,350" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="700" stroke-dashoffset="700"/>
+              <path class="s2-arc s2-arc-14" d="M120,350 Q450,150 680,420" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <path class="s2-arc s2-arc-15" d="M120,350 Q460,130 720,400" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <path class="s2-arc s2-arc-16" d="M120,350 Q460,120 740,280" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <path class="s2-arc s2-arc-17" d="M120,350 Q470,110 740,370" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <path class="s2-arc s2-arc-18" d="M120,350 Q470,100 760,200" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-19" d="M120,350 Q480,90 790,210" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-20" d="M120,350 Q480,100 820,180" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-21" d="M120,350 Q490,90 840,165" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-22" d="M120,350 Q470,80 760,260" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-23" d="M120,350 Q490,120 780,480" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-24" d="M120,350 Q460,110 740,340" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <!-- Source dot -->
+              <circle cx="120" cy="350" r="6" fill="#dc2626" opacity="0.8"/>
+              <!-- Counter label -->
+              <text class="s2-label" x="120" y="380" text-anchor="middle" font-family="DM Mono,monospace" font-size="12" fill="rgba(255,255,255,0.2)">364,000 QUERIES</text>
+            </g>
+          </svg>
+        </div>
         <div class="cs-body">
           <div class="cs-loc">Ventura County, CA</div>
           <div class="cs-title">364,000 Out-of-State Queries</div>
@@ -233,6 +271,62 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
   }
   .s1-dot { width: 7px; height: 7px; border-radius: 50%; background: #dc2626; flex-shrink: 0; }
   .cs-card:hover .s1-badge { opacity: 1; transform: scale(1) translateY(0); }
+
+  /* Card 2 — Data Web */
+  .s2-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+
+  .s2-map {
+    transition: transform 0.65s ease-out;
+    transform: scale(2.5);
+    transform-origin: 120px 350px;
+  }
+  .cs-card:hover .s2-map { transform: scale(1); }
+
+  .s2-states { opacity: 0; transition: opacity 0.4s 0.2s; }
+  .cs-card:hover .s2-states { opacity: 0.15; }
+
+  .s2-ca { opacity: 0.6; transition: opacity 0.3s; }
+  .cs-card:hover .s2-ca { opacity: 1; }
+
+  .s2-arc {
+    transition: stroke-dashoffset 0.5s ease-out;
+  }
+  .s2-arc-1  { transition-delay: 0.30s; }
+  .s2-arc-2  { transition-delay: 0.35s; }
+  .s2-arc-3  { transition-delay: 0.40s; }
+  .s2-arc-4  { transition-delay: 0.45s; }
+  .s2-arc-5  { transition-delay: 0.50s; }
+  .s2-arc-6  { transition-delay: 0.55s; }
+  .s2-arc-7  { transition-delay: 0.58s; }
+  .s2-arc-8  { transition-delay: 0.62s; }
+  .s2-arc-9  { transition-delay: 0.65s; }
+  .s2-arc-10 { transition-delay: 0.68s; }
+  .s2-arc-11 { transition-delay: 0.72s; }
+  .s2-arc-12 { transition-delay: 0.76s; }
+  .s2-arc-13 { transition-delay: 0.78s; }
+  .s2-arc-14 { transition-delay: 0.80s; }
+  .s2-arc-15 { transition-delay: 0.82s; }
+  .s2-arc-16 { transition-delay: 0.85s; }
+  .s2-arc-17 { transition-delay: 0.88s; }
+  .s2-arc-18 { transition-delay: 0.90s; }
+  .s2-arc-19 { transition-delay: 0.92s; }
+  .s2-arc-20 { transition-delay: 0.95s; }
+  .s2-arc-21 { transition-delay: 0.97s; }
+  .s2-arc-22 { transition-delay: 1.00s; }
+  .s2-arc-23 { transition-delay: 1.02s; }
+  .s2-arc-24 { transition-delay: 1.05s; }
+
+  .cs-card:hover .s2-arc { stroke-dashoffset: 0; }
+
+  /* Asymmetric hover-off: lines fade instead of retracing */
+  .s2-arc.s2-fading {
+    transition: opacity 0.3s ease-out !important;
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+
+  .s2-label { opacity: 0; transition: opacity 0.3s 1.0s; }
+  .cs-card:hover .s2-label { opacity: 1; }
 
   /* Mobile: single column */
   @media (max-width: 767px) {
