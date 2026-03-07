@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeflockSC — Component Direction Mockups v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #dc2626;
+      --amber: #fbbf24;
+      --bg: #111111;
+      --bg2: #161616;
+      --bg3: #0d0d0d;
+      --border: rgba(255,255,255,0.07);
+      --text: #e8e8e8;
+      --muted: #a0a0a0;
+      --dim: #555555;
+    }
+
+    body { background: #0a0a0a; color: var(--text); font-family: 'Instrument Sans', sans-serif; }
+
+    .selector {
+      position: sticky; top: 0; z-index: 200;
+      background: #0a0a0a; border-bottom: 1px solid #1e1e1e;
+      display: flex; align-items: center; padding: 0 2rem; gap: 0;
+    }
+    .selector-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: #444; margin-right: 1.5rem; white-space: nowrap;
+    }
+    .tab {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 1rem 1.5rem; border: none; background: none;
+      color: #444; cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .tab:hover { color: #888; }
+    .tab.active { color: var(--text); border-bottom-color: var(--red); }
+    .mockup { display: none; }
+    .mockup.active { display: block; }
+
+    .section-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+      background: #181818; color: #555;
+      padding: 0.6rem 2rem; border-bottom: 1px solid #1e1e1e;
+    }
+    .section-tag strong { color: #ccc; }
+    .section-tag em { color: var(--red); font-style: normal; }
+
+
+    /* ══════ OPTION A — EDITORIAL LEFT-RAIL ══════ */
+
+    #oa { background: var(--bg); }
+    #oa .nav { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 3rem; }
+    #oa .nav-logo { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); }
+    #oa .nav-logo span { color: var(--red); }
+    #oa .nav-cta {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      color: #111; background: var(--red); border: none; padding: 0.65rem 1.5rem; cursor: pointer;
+    }
+    #oa .hero {
+      position: relative; min-height: 88vh;
+      display: flex; align-items: flex-end; padding: 0 3rem 4rem; overflow: hidden;
+    }
+    #oa .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, #1e1212 0%, #0d0d0d 70%);
+    }
+    #oa .hero-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 40%, transparent 100%);
+    }
+    #oa .hero-crosshair { position: absolute; width: 20px; height: 20px; border-color: rgba(220,38,38,0.3); border-style: solid; }
+    #oa .hero-crosshair.tl { top: 2rem; left: 3rem; border-width: 1px 0 0 1px; }
+    #oa .hero-crosshair.tr { top: 2rem; right: 3rem; border-width: 1px 1px 0 0; }
+    #oa .hero-crosshair.bl { bottom: 4rem; left: 3rem; border-width: 0 0 1px 1px; }
+    #oa .hero-crosshair.br { bottom: 4rem; right: 3rem; border-width: 0 1px 1px 0; }
+    #oa .hero-content { position: relative; z-index: 2; max-width: 700px; }
+    #oa .hero-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(220,38,38,0.8); display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.75rem;
+    }
+    #oa .hero-label::before { content: ''; display: block; width: 20px; height: 1px; background: rgba(220,38,38,0.6); }
+    #oa .hero-headline { font-size: clamp(3rem, 6.5vw, 5.5rem); font-weight: 700; line-height: 1.0; letter-spacing: -0.025em; color: #f2f2f2; margin-bottom: 1.5rem; }
+    #oa .hero-headline .line2 { color: rgba(242,242,242,0.55); }
+    #oa .hero-body { font-size: 16px; font-weight: 400; line-height: 1.65; color: #909090; max-width: 480px; margin-bottom: 2.25rem; }
+    #oa .hero-actions { display: flex; gap: 1.25rem; align-items: center; }
+    #oa .btn-red { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #111; background: var(--red); border: none; padding: 0.85rem 2rem; cursor: pointer; }
+    #oa .btn-ghost { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); }
+    #oa .sec-header { display: grid; grid-template-columns: 3rem 1fr; gap: 0; align-items: end; padding: 3.5rem 3rem 2rem; }
+    #oa .sec-num { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); padding-bottom: 0.4rem; writing-mode: vertical-rl; transform: rotate(180deg); }
+    #oa .sec-heading-wrap { border-top: 1px solid var(--border); padding-top: 1.25rem; }
+    #oa .sec-cat { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.5rem; }
+    #oa .sec-title { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; color: var(--text); }
+    #oa .pipeline { padding: 0 3rem; border-top: 1px solid var(--border); }
+    #oa .pipeline-row { display: grid; grid-template-columns: 4rem 1fr; gap: 0; padding: 2rem 0; border-bottom: 1px solid var(--border); }
+    #oa .pipeline-num { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--dim); padding-top: 0.2rem; }
+    #oa .pipeline-title { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text); margin-bottom: 0.5rem; }
+    #oa .pipeline-body { font-size: 14px; line-height: 1.65; color: var(--muted); max-width: 560px; }
+    #oa .bills { padding: 0 3rem 3rem; }
+    #oa .bills-lede { font-size: 15px; line-height: 1.7; color: var(--muted); max-width: 640px; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+    #oa .bill-row { display: grid; grid-template-columns: 6rem 1fr auto; gap: 1.5rem; align-items: baseline; padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
+    #oa .bill-id { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--text); letter-spacing: 0.04em; }
+    #oa .bill-desc { font-size: 14px; color: var(--muted); line-height: 1.4; }
+    #oa .bill-desc strong { color: var(--text); font-weight: 600; display: block; margin-bottom: 0.2rem; }
+    #oa .bill-status { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); white-space: nowrap; display: flex; align-items: center; gap: 0.4rem; }
+    #oa .bill-status::before { content: ''; width: 5px; height: 5px; background: var(--amber); border-radius: 50%; flex-shrink: 0; }
+    #oa .faq { background: var(--bg2); padding: 0 3rem 3rem; }
+    #oa .faq-item { padding: 2rem 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+    #oa .faq-q { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; color: var(--text); }
+    #oa .faq-a { font-size: 14px; line-height: 1.7; color: var(--muted); }
+    #oa .cta { padding: 5rem 3rem; background: var(--bg3); display: grid; grid-template-columns: 1fr auto; gap: 4rem; align-items: end; }
+    #oa .cta-headline { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; color: var(--text); max-width: 700px; }
+    #oa .cta-headline span { color: rgba(232,232,232,0.3); }
+    #oa .cta-side { display: flex; flex-direction: column; align-items: flex-end; gap: 1rem; flex-shrink: 0; }
+    #oa .cta-stat { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); text-align: right; }
+    #oa .cta-stat strong { display: block; font-family: 'Instrument Sans', sans-serif; font-size: 2rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1; }
+
+
+    /* ══════ OPTION B — ASYMMETRIC DATA ══════ */
+
+    #ob { background: var(--bg); }
+    #ob .nav { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 3rem; border-bottom: 1px solid var(--border); }
+    #ob .nav-left { display: flex; align-items: center; gap: 0.6rem; }
+    #ob .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); box-shadow: 0 0 5px var(--red); animation: blink 2.5s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    #ob .nav-logo { font-size: 15px; font-weight: 700; letter-spacing: 0.01em; color: var(--text); }
+    #ob .nav-logo .slash { color: var(--red); }
+    #ob .nav-cta { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #111; background: var(--red); border: none; padding: 0.65rem 1.5rem; cursor: pointer; }
+    #ob .hero { position: relative; min-height: 88vh; display: flex; align-items: center; padding: 0 3rem; overflow: hidden; }
+    #ob .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 40%, #1a1010 0%, #0c0c0c 65%); }
+    #ob .hero-glitch-wrap { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    #ob .glitch-bar { position: absolute; left: 0; right: 0; height: 2px; background: rgba(220,38,38,0.15); animation: glitch-scan 8s linear infinite; }
+    @keyframes glitch-scan { 0%{top:-2px;opacity:0} 5%{opacity:1} 95%{opacity:0.3} 100%{top:100%;opacity:0} }
+    #ob .glitch-bar2 { position: absolute; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.04); animation: glitch-scan2 5s linear infinite 2s; }
+    @keyframes glitch-scan2 { 0%{top:-1px} 100%{top:100%} }
+    #ob .hero-content { position: relative; z-index: 2; width: 100%; display: grid; grid-template-columns: 1fr 320px; gap: 4rem; align-items: center; }
+    #ob .hero-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(220,38,38,0.7); margin-bottom: 1.5rem; }
+    #ob .hero-headline { font-size: clamp(3.2rem, 7vw, 6rem); font-weight: 700; line-height: 0.95; letter-spacing: -0.03em; color: #f2f2f2; margin-bottom: 1.5rem; }
+    #ob .hero-headline .tracked { color: var(--red); font-style: italic; }
+    #ob .hero-body { font-size: 15px; line-height: 1.65; color: #909090; max-width: 440px; margin-bottom: 2rem; }
+    #ob .hero-actions { display: flex; gap: 1rem; align-items: center; }
+    #ob .btn-red { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #111; background: var(--red); border: none; padding: 0.85rem 2rem; cursor: pointer; }
+    #ob .btn-outline { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); background: none; border: 1px solid #2a2a2a; padding: 0.8rem 1.25rem; cursor: pointer; }
+    #ob .hero-data { display: flex; flex-direction: column; gap: 0; }
+    #ob .data-item { padding: 1.1rem 0; border-bottom: 1px solid #1e1e1e; }
+    #ob .data-item:first-child { border-top: 1px solid #1e1e1e; }
+    #ob .data-val { font-size: 2rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1; color: var(--text); margin-bottom: 0.2rem; }
+    #ob .data-val.hi { color: var(--red); }
+    #ob .data-val.warn { color: var(--amber); }
+    #ob .data-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+    #ob .sec-wrap { position: relative; padding: 4rem 3rem 0; overflow: hidden; }
+    #ob .sec-bg-num { position: absolute; right: 2rem; top: -1.5rem; font-size: 18rem; font-weight: 800; letter-spacing: -0.05em; line-height: 1; color: rgba(255,255,255,0.025); pointer-events: none; user-select: none; }
+    #ob .sec-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.75rem; }
+    #ob .sec-title { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; color: var(--text); max-width: 600px; margin-bottom: 2.5rem; position: relative; z-index: 1; }
+    #ob .pipeline-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 1px; background: var(--border); margin: 0 3rem 3rem; }
+    #ob .pipeline-cell { background: var(--bg); padding: 2.5rem; position: relative; }
+    #ob .pipeline-cell.primary { grid-row: 1 / 3; padding: 3rem; background: #141414; }
+    #ob .p-step { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dim); margin-bottom: 3rem; }
+    #ob .p-num-bg { font-size: 8rem; font-weight: 800; line-height: 1; letter-spacing: -0.04em; color: rgba(255,255,255,0.04); position: absolute; bottom: 1.5rem; right: 1.5rem; pointer-events: none; }
+    #ob .p-title { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.015em; color: var(--text); margin-bottom: 0.75rem; line-height: 1.2; position: relative; }
+    #ob .p-body { font-size: 14px; line-height: 1.65; color: var(--muted); position: relative; }
+    #ob .pipeline-cell.primary .p-title { font-size: 1.6rem; margin-bottom: 1rem; }
+    #ob .pipeline-cell.primary .p-body { max-width: 320px; }
+    #ob .bills-wrap { padding: 0 3rem 3rem; }
+    #ob .bills-lede { font-size: 15px; line-height: 1.7; color: var(--muted); max-width: 680px; margin-bottom: 2.5rem; }
+    #ob .bills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
+    #ob .bill-col { background: var(--bg); padding: 2rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    #ob .bcol-id { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; color: var(--text); line-height: 1; }
+    #ob .bcol-title { font-size: 13px; line-height: 1.5; color: var(--muted); }
+    #ob .bcol-status { margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem; }
+    #ob .bcol-status .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
+    #ob .bcol-status .label { color: var(--amber); }
+    #ob .bcol-status .where { color: var(--dim); margin-left: auto; }
+    #ob .bcol-link { font-size: 12px; color: var(--dim); }
+    #ob .faq-wrap { background: var(--bg2); display: grid; grid-template-columns: 280px 1fr; gap: 0; }
+    #ob .faq-list { border-right: 1px solid var(--border); padding: 3rem 0; }
+    #ob .faq-list-header { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); padding: 0 2rem 1rem; border-bottom: 1px solid var(--border); }
+    #ob .faq-q-item { padding: 1rem 2rem; font-size: 14px; font-weight: 500; line-height: 1.35; color: #888; cursor: pointer; border-bottom: 1px solid #161616; }
+    #ob .faq-q-item.active { color: var(--text); background: #161616; border-left: 2px solid var(--red); padding-left: calc(2rem - 2px); }
+    #ob .faq-answer { padding: 3rem; display: flex; flex-direction: column; justify-content: center; }
+    #ob .faq-answer-q { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.2; color: var(--text); margin-bottom: 1.5rem; }
+    #ob .faq-answer-a { font-size: 15px; line-height: 1.75; color: var(--muted); max-width: 560px; }
+    #ob .cta { padding: 6rem 3rem; background: var(--bg3); position: relative; overflow: hidden; }
+    #ob .cta-bg-text { position: absolute; bottom: -2rem; right: -1rem; font-size: 16rem; font-weight: 800; line-height: 1; letter-spacing: -0.05em; color: rgba(220,38,38,0.07); pointer-events: none; user-select: none; }
+    #ob .cta-inner { position: relative; z-index: 1; }
+    #ob .cta-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); margin-bottom: 1.5rem; }
+    #ob .cta-headline { font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 0.95; color: var(--text); margin-bottom: 2.5rem; max-width: 800px; }
+    #ob .cta-headline .dim { color: rgba(232,232,232,0.25); }
+    #ob .cta-foot { display: flex; align-items: center; gap: 3rem; }
+    #ob .cta-context { font-size: 14px; line-height: 1.6; color: var(--muted); max-width: 400px; }
+
+
+    /* ══════ OPTION C — DOCUMENT RECORD ══════
+       Government record / legal brief aesthetic.
+       Roman numeral section bands. Dense table bills.
+       Deposition-style FAQ. No floating panels.
+    ══════════════════════════════════════════ */
+
+    #oc { background: #0f0f0f; }
+    #oc .nav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0.75rem 3rem; border-bottom: 2px solid #1e1e1e; }
+    #oc .nav-meta { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dim); line-height: 2; }
+    #oc .nav-logo { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text); }
+    #oc .nav-cta-wrap { display: flex; justify-content: flex-end; }
+    #oc .nav-cta { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); background: none; border: 1px solid rgba(220,38,38,0.35); padding: 0.5rem 1.25rem; cursor: pointer; }
+
+    #oc .hero { min-height: 85vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 4rem 3rem; position: relative; border-bottom: 1px solid var(--border); }
+    #oc .hero-doc-header { position: absolute; top: 0; left: 0; right: 0; padding: 1.5rem 3rem; display: flex; justify-content: space-between; align-items: flex-start; }
+    #oc .doc-field { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dim); line-height: 2.2; }
+    #oc .doc-field span { display: block; color: var(--muted); }
+    #oc .hero-rule { width: 3rem; height: 3px; background: var(--red); margin-bottom: 2rem; }
+    #oc .hero-headline { font-size: clamp(3rem, 6vw, 5.5rem); font-weight: 700; line-height: 1.02; letter-spacing: -0.03em; color: #f0f0f0; margin-bottom: 2rem; max-width: 800px; }
+    #oc .hero-sub { display: grid; grid-template-columns: 1fr auto; gap: 4rem; align-items: end; max-width: 900px; }
+    #oc .hero-body { font-size: 15px; line-height: 1.7; color: var(--muted); max-width: 520px; }
+    #oc .hero-verdict { text-align: right; flex-shrink: 0; }
+    #oc .verdict-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.4rem; }
+    #oc .verdict-val { font-size: 1rem; font-weight: 700; color: var(--red); letter-spacing: 0.02em; }
+    #oc .hero-actions { display: flex; gap: 1rem; align-items: center; margin-top: 2.5rem; }
+    #oc .btn-primary { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #111; background: var(--red); border: none; padding: 0.85rem 2.5rem; cursor: pointer; }
+    #oc .btn-sec { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); background: none; border: none; cursor: pointer; }
+
+    #oc .sec-band { display: flex; align-items: baseline; gap: 1.5rem; padding: 0.9rem 3rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: #131313; }
+    #oc .sec-roman { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--red); min-width: 2.5rem; }
+    #oc .sec-title { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
+    #oc .sec-desc { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--dim); margin-left: auto; }
+
+    #oc .outline { padding: 1.5rem 3rem; }
+    #oc .outline-item { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0; padding: 1.75rem 0; border-bottom: 1px solid var(--border); }
+    #oc .outline-marker { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text); letter-spacing: 0.04em; padding-top: 0.15rem; }
+    #oc .outline-heading { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text); margin-bottom: 0.4rem; }
+    #oc .outline-text { font-size: 14px; line-height: 1.7; color: var(--muted); max-width: 600px; }
+    #oc .outline-note { margin-top: 0.75rem; padding-left: 1rem; border-left: 2px solid #222; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--dim); line-height: 1.6; }
+
+    #oc .bill-table { padding: 1.5rem 3rem 3rem; }
+    #oc .bill-table-lede { font-size: 14px; line-height: 1.7; color: var(--muted); max-width: 640px; margin-bottom: 1.5rem; }
+    #oc table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    #oc thead th { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dim); font-weight: 400; text-align: left; padding: 0.6rem 1rem 0.6rem 0; border-bottom: 1px solid #252525; }
+    #oc thead th:last-child { text-align: right; }
+    #oc tbody td { padding: 1.1rem 1rem 1.1rem 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+    #oc .t-id { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--text); letter-spacing: 0.04em; white-space: nowrap; }
+    #oc .t-title { color: var(--text); font-weight: 500; line-height: 1.4; }
+    #oc .t-committee { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--dim); display: block; margin-top: 0.2rem; }
+    #oc .t-status { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); text-align: right; white-space: nowrap; }
+
+    #oc .depo { padding: 1.5rem 3rem 3rem; background: #131313; }
+    #oc .depo-item { padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
+    #oc .depo-q { display: flex; gap: 1.25rem; margin-bottom: 0.75rem; }
+    #oc .depo-a { display: flex; gap: 1.25rem; }
+    #oc .depo-speaker { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); white-space: nowrap; padding-top: 0.15rem; min-width: 2.5rem; }
+    #oc .depo-q .depo-speaker { color: var(--muted); }
+    #oc .depo-text { font-size: 15px; font-weight: 500; line-height: 1.45; color: var(--text); }
+    #oc .depo-a .depo-text { font-size: 14px; font-weight: 400; line-height: 1.7; color: var(--muted); }
+
+    #oc .cta { padding: 4rem 3rem; border-top: 2px solid var(--border); display: grid; grid-template-columns: 160px 1fr; gap: 3rem; align-items: start; }
+    #oc .cta-aside { display: flex; flex-direction: column; gap: 1.5rem; }
+    #oc .cta-aside-stat { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); border-left: 2px solid #252525; padding-left: 0.75rem; line-height: 2; }
+    #oc .cta-aside-stat strong { display: block; font-size: 1.6rem; font-family: 'Instrument Sans', sans-serif; color: var(--text); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+    #oc .cta-notice { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--red); margin-bottom: 1rem; }
+    #oc .cta-headline { font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; color: var(--text); margin-bottom: 1rem; max-width: 600px; }
+    #oc .cta-sub { font-size: 14px; line-height: 1.65; color: var(--muted); max-width: 500px; margin-bottom: 2rem; }
+    #oc .btn-primary-lg { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #111; background: var(--red); border: none; padding: 1rem 3rem; cursor: pointer; }
+
+
+    /* ══════ OPTION D — MANIFESTO PRINT ══════
+       Political poster / pamphlet energy.
+       Extreme scale: 9rem headlines, tiny labels.
+       Pipeline as one-word statements + body.
+       Bills as marginalia. FAQ as challenge-response.
+    ══════════════════════════════════════════ */
+
+    #od { background: #0c0c0c; }
+    #od .nav { display: flex; align-items: center; justify-content: space-between; padding: 1rem 3rem; }
+    #od .nav-wordmark { font-size: 13px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text); }
+    #od .nav-wordmark em { color: var(--red); font-style: normal; }
+    #od .nav-cta { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #111; background: var(--red); border: none; padding: 0.6rem 1.5rem; cursor: pointer; }
+
+    #od .hero { min-height: 90vh; padding: 4rem 3rem 5rem; display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
+    #od .hero-noise { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 70% at 30% 50%, #1a0a0a 0%, #0c0c0c 60%); }
+    #od .hero-bar { position: absolute; left: 58%; top: 0; bottom: 0; width: 1px; background: rgba(220,38,38,0.15); }
+    #od .hero-content { position: relative; z-index: 2; }
+    #od .hero-kicker { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(220,38,38,0.7); margin-bottom: 1.5rem; }
+    #od .hero-headline { font-size: clamp(4.5rem, 10vw, 9rem); font-weight: 700; line-height: 0.92; letter-spacing: -0.04em; color: #f0f0f0; margin-bottom: 2.5rem; max-width: 14ch; }
+    #od .hero-headline .ghost { color: rgba(240,240,240,0.12); }
+    #od .hero-foot { display: flex; gap: 4rem; align-items: flex-end; border-top: 1px solid #1e1e1e; padding-top: 1.75rem; max-width: 800px; }
+    #od .hero-body { font-size: 14px; line-height: 1.7; color: var(--muted); max-width: 360px; }
+    #od .hero-data-col { display: flex; flex-direction: column; gap: 0.3rem; flex-shrink: 0; }
+    #od .hero-stat { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.03em; color: var(--red); line-height: 1; }
+    #od .hero-stat-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dim); }
+    #od .btn-action { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #111; background: var(--red); border: none; padding: 0.85rem 2rem; cursor: pointer; margin-top: 0.5rem; }
+
+    #od .sec-statement { padding: 4rem 3rem 1.5rem; border-top: 1px solid var(--border); }
+    #od .sec-tag-line { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); margin-bottom: 1rem; }
+    #od .sec-headline { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.0; color: var(--text); max-width: 18ch; }
+    #od .sec-headline .aside { font-weight: 400; font-style: italic; color: rgba(232,232,232,0.3); }
+
+    #od .pipeline { padding: 1rem 3rem 3rem; }
+    #od .pipeline-step { padding: 2rem 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 10rem 1fr; gap: 3rem; align-items: baseline; }
+    #od .step-label { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; color: var(--text); }
+    #od .step-body { font-size: 14px; line-height: 1.75; color: var(--muted); }
+    #od .step-body strong { color: var(--text); font-weight: 600; }
+
+    #od .bills { padding: 1.5rem 3rem 3rem; }
+    #od .bills-lede { font-size: 15px; line-height: 1.7; color: var(--muted); max-width: 640px; margin-bottom: 2rem; }
+    #od .bill-item { display: grid; grid-template-columns: 7rem 1fr; gap: 0; padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
+    #od .bill-margin { padding-right: 2rem; }
+    #od .bill-id { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; color: var(--text); letter-spacing: 0.02em; line-height: 1; display: block; margin-bottom: 0.5rem; }
+    #od .bill-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); display: inline-block; }
+    #od .bill-title { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text); margin-bottom: 0.4rem; }
+    #od .bill-desc { font-size: 13px; line-height: 1.65; color: var(--muted); }
+    #od .bill-meta { margin-top: 0.5rem; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--amber); letter-spacing: 0.08em; text-transform: uppercase; }
+
+    #od .faq { padding: 2rem 3rem 3rem; background: #131313; }
+    #od .faq-header { font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; color: var(--text); margin-bottom: 2.5rem; max-width: 22ch; }
+    #od .faq-header span { color: rgba(232,232,232,0.25); }
+    #od .faq-item { padding: 1.75rem 0; border-bottom: 1px solid var(--border); }
+    #od .faq-q { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; color: var(--text); margin-bottom: 0.85rem; max-width: 540px; }
+    #od .faq-q::before { content: '\201C'; font-size: 1.3em; line-height: 0; vertical-align: -0.2em; margin-right: 0.05em; color: rgba(220,38,38,0.45); }
+    #od .faq-q::after { content: '\201D'; }
+    #od .faq-a { font-size: 14px; line-height: 1.75; color: var(--muted); max-width: 560px; padding-left: 1.5rem; border-left: 2px solid #222; }
+
+    #od .cta { padding: 5rem 3rem; position: relative; overflow: hidden; background: #0c0c0c; border-top: 1px solid var(--border); }
+    #od .cta-bg { position: absolute; bottom: -3rem; left: -1rem; font-size: 22rem; font-weight: 800; line-height: 1; letter-spacing: -0.06em; color: rgba(220,38,38,0.035); pointer-events: none; user-select: none; }
+    #od .cta-inner { position: relative; z-index: 1; max-width: 900px; }
+    #od .cta-eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 1.5rem; }
+    #od .cta-headline { font-size: clamp(2.5rem, 5.5vw, 5.5rem); font-weight: 700; letter-spacing: -0.04em; line-height: 0.93; color: var(--text); margin-bottom: 2.5rem; }
+    #od .cta-headline em { font-style: italic; color: rgba(232,232,232,0.25); }
+    #od .cta-foot { display: flex; gap: 2.5rem; align-items: center; }
+    #od .cta-sub { font-size: 14px; line-height: 1.65; color: var(--muted); max-width: 380px; }
+    #od .btn-big { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #111; background: var(--red); border: none; padding: 1.1rem 2.5rem; cursor: pointer; white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+<div class="selector">
+  <span class="selector-label">Component Direction</span>
+  <button class="tab active" onclick="show('oa',this)">A — Editorial</button>
+  <button class="tab" onclick="show('ob',this)">B — Asymmetric</button>
+  <button class="tab" onclick="show('oc',this)">C — Document Record</button>
+  <button class="tab" onclick="show('od',this)">D — Manifesto Print</button>
+</div>
+
+
+<!-- ══════ OPTION A — EDITORIAL LEFT-RAIL ══════ -->
+<div id="oa" class="mockup active">
+  <div class="section-tag"><strong>Option A</strong> — <em>Editorial Left-Rail</em> &nbsp;·&nbsp; Left-aligned headers · Full-width pipeline rows · 2-col FAQ · Left-anchored CTA</div>
+
+  <nav class="nav">
+    <div class="nav-logo">Deflock<span>SC</span></div>
+    <button class="nav-cta">Take Action</button>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-crosshair tl"></div>
+    <div class="hero-crosshair tr"></div>
+    <div class="hero-crosshair bl"></div>
+    <div class="hero-crosshair br"></div>
+    <div class="hero-content">
+      <div class="hero-label">South Carolina · ALPR Surveillance</div>
+      <h1 class="hero-headline">Your plates are<br>being tracked.<br><span class="line2">You never agreed.</span></h1>
+      <p class="hero-body">242 cameras are watching Upstate South Carolina right now. Every car that passes gets photographed. That data goes into a national network. And nobody voted on any of it.</p>
+      <div class="hero-actions">
+        <button class="btn-red">Contact Your Reps</button>
+        <span class="btn-ghost">See the data ↓</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-header">
+    <div class="sec-num">02</div>
+    <div class="sec-heading-wrap">
+      <div class="sec-cat">How it works</div>
+      <div class="sec-title">The surveillance pipeline</div>
+    </div>
+  </div>
+  <div class="pipeline">
+    <div class="pipeline-row">
+      <div class="pipeline-num">01 /</div>
+      <div>
+        <div class="pipeline-title">Camera reads your plate</div>
+        <div class="pipeline-body">Every vehicle passing a Flock camera is photographed and matched against a national hotlist — whether you've done anything wrong or not. The data includes your plate number, vehicle make, color, and GPS location.</div>
+      </div>
+    </div>
+    <div class="pipeline-row">
+      <div class="pipeline-num">02 /</div>
+      <div>
+        <div class="pipeline-title">Data enters a national network</div>
+        <div class="pipeline-body">That read doesn't stay local. Flock routes it through their servers, making it searchable by police departments across state lines. Federal agencies can query it too — no warrant needed.</div>
+      </div>
+    </div>
+    <div class="pipeline-row">
+      <div class="pipeline-num">03 /</div>
+      <div>
+        <div class="pipeline-title">No one is watching the watchers</div>
+        <div class="pipeline-body">No SC city or county has passed an oversight ordinance. No council voted on it. The cameras went up, the data started flowing, and no rules govern how long it's kept or who sees it.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-header">
+    <div class="sec-num">04</div>
+    <div class="sec-heading-wrap">
+      <div class="sec-cat">Active legislation</div>
+      <div class="sec-title">Three bills. All stalled.</div>
+    </div>
+  </div>
+  <div class="bills">
+    <p class="bills-lede">Three bills to rein in license plate cameras are sitting in SC committee right now. None have had a hearing. That changes when legislators hear from you.</p>
+    <div class="bill-row">
+      <div class="bill-id">S447</div>
+      <div class="bill-desc"><strong>Would regulate LPR systems statewide</strong>30-day retention limit · Judicial oversight for queries · Senate Judiciary</div>
+      <div class="bill-status">In committee</div>
+    </div>
+    <div class="bill-row">
+      <div class="bill-id">H3155</div>
+      <div class="bill-desc"><strong>Would regulate automatic license plate readers</strong>House Judiciary · No committee action yet</div>
+      <div class="bill-status">In committee</div>
+    </div>
+    <div class="bill-row">
+      <div class="bill-id">H4013</div>
+      <div class="bill-desc"><strong>Would regulate automated license plate readers</strong>House Education &amp; Public Works · No committee action yet</div>
+      <div class="bill-status">In committee</div>
+    </div>
+  </div>
+
+  <div class="sec-header" style="background:var(--bg2)">
+    <div class="sec-num">05</div>
+    <div class="sec-heading-wrap">
+      <div class="sec-cat">Common objections</div>
+      <div class="sec-title">But what about…</div>
+    </div>
+  </div>
+  <div class="faq">
+    <div class="faq-item">
+      <div class="faq-q">"Don't these cameras only catch criminals?"</div>
+      <div class="faq-a">99% of the plates scanned belong to people suspected of nothing. The cameras photograph every car, store the data, and check it against hotlists — in that order. You're in the database whether you've done anything wrong or not.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">"If you have nothing to hide, why worry?"</div>
+      <div class="faq-a">The question assumes the government gets to decide what counts as suspicious. Location data builds a picture of your life — where you worship, who you see, what you do. That picture shouldn't be stored for three years without your knowledge or a warrant.</div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div class="cta-headline">Tell your legislators:<br><span>South Carolina won't be</span><br>watched without a vote.</div>
+    <div class="cta-side">
+      <div class="cta-stat"><strong>242</strong>cameras in Upstate SC</div>
+      <div class="cta-stat" style="margin-top:0.5rem"><strong>0</strong>oversight ordinances passed</div>
+      <button class="btn-red" style="margin-top:1.5rem">Contact Your Reps</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════ OPTION B — ASYMMETRIC DATA ══════ -->
+<div id="ob" class="mockup">
+  <div class="section-tag"><strong>Option B</strong> — <em>Asymmetric Data</em> &nbsp;·&nbsp; Giant bg numbers · Asymmetric grid · Horizontal bill cols · Sidebar FAQ · Typographic CTA</div>
+
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="status-dot"></div>
+      <div class="nav-logo">DEFLOCK<span class="slash">/</span>SC</div>
+    </div>
+    <button class="nav-cta">Take Action</button>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-glitch-wrap">
+      <div class="glitch-bar"></div>
+      <div class="glitch-bar2"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-label">SC · ALPR · Active · Unregulated</div>
+        <h1 class="hero-headline">Your plates<br>are <span class="tracked">tracked.</span><br>No vote taken.</h1>
+        <p class="hero-body">242 cameras are watching Upstate South Carolina right now. Every car that passes gets photographed. That data goes into a national network. And nobody voted on any of it.</p>
+        <div class="hero-actions">
+          <button class="btn-red">Contact Your Reps</button>
+          <button class="btn-outline">View Camera Map</button>
+        </div>
+      </div>
+      <div class="hero-data">
+        <div class="data-item"><div class="data-val hi">242</div><div class="data-label">Cameras · Upstate SC</div></div>
+        <div class="data-item"><div class="data-val">422M</div><div class="data-label">Reads in SLED database</div></div>
+        <div class="data-item"><div class="data-val hi">0</div><div class="data-label">Oversight ordinances</div></div>
+        <div class="data-item"><div class="data-val warn">S447</div><div class="data-label">Active bill · In committee</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-wrap">
+    <div class="sec-bg-num">02</div>
+    <div class="sec-label">How it works</div>
+    <div class="sec-title">What happens every time you drive past a camera</div>
+  </div>
+  <div class="pipeline-grid">
+    <div class="pipeline-cell primary">
+      <div class="p-step">Primary node · 01 / Capture</div>
+      <div class="p-title">Camera reads your plate — flagged or not</div>
+      <div class="p-body">Every vehicle passing a Flock camera is photographed and matched against a national hotlist. The camera doesn't wait for suspicion. It reads everything, stores the read, and checks later. Your plate number, vehicle make, color, and GPS coordinates are logged regardless of whether you've ever been suspected of anything.</div>
+      <div class="p-num-bg">01</div>
+    </div>
+    <div class="pipeline-cell">
+      <div class="p-step">02 / Ingest</div>
+      <div class="p-title">Enters a national network</div>
+      <div class="p-body">Flock routes that read through their own servers — making it searchable by departments across state lines. Federal agencies can query it too.</div>
+      <div class="p-num-bg">02</div>
+    </div>
+    <div class="pipeline-cell">
+      <div class="p-step">03 / Access</div>
+      <div class="p-title">No one watching the watchers</div>
+      <div class="p-body">No SC city or county has an oversight ordinance. The cameras went up, the data started flowing, and no rules govern retention or access.</div>
+      <div class="p-num-bg">03</div>
+    </div>
+  </div>
+
+  <div class="sec-wrap">
+    <div class="sec-bg-num">04</div>
+    <div class="sec-label">Active legislation</div>
+    <div class="sec-title">Three bills. All stalled.</div>
+  </div>
+  <div class="bills-wrap">
+    <p class="bills-lede">Three bills to rein in license plate cameras are sitting in SC committee right now. None have had a hearing. That changes when legislators hear from you.</p>
+    <div class="bills-grid">
+      <div class="bill-col">
+        <div class="bcol-id">S447</div>
+        <div class="bcol-title">Would regulate LPR systems statewide — 30-day retention limit, judicial oversight for queries</div>
+        <div class="bcol-link">See what this bill would change →</div>
+        <div class="bcol-status"><span class="dot"></span><span class="label">In committee</span><span class="where">Senate Judiciary</span></div>
+      </div>
+      <div class="bill-col">
+        <div class="bcol-id">H3155</div>
+        <div class="bcol-title">Would regulate automatic license plate readers — House companion bill</div>
+        <div class="bcol-link">See what this bill would change →</div>
+        <div class="bcol-status"><span class="dot"></span><span class="label">In committee</span><span class="where">House Judiciary</span></div>
+      </div>
+      <div class="bill-col">
+        <div class="bcol-id">H4013</div>
+        <div class="bcol-title">Would regulate automated license plate readers — Education &amp; Public Works</div>
+        <div class="bcol-link">See what this bill would change →</div>
+        <div class="bcol-status"><span class="dot"></span><span class="label">In committee</span><span class="where">House Ed &amp; PW</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="faq-wrap">
+    <div class="faq-list">
+      <div class="faq-list-header">Common objections</div>
+      <div class="faq-q-item active">"Don't these cameras only catch criminals?"</div>
+      <div class="faq-q-item">"If you have nothing to hide, why worry?"</div>
+      <div class="faq-q-item">"Doesn't this reduce crime?"</div>
+      <div class="faq-q-item">"Isn't the data protected?"</div>
+      <div class="faq-q-item">"Isn't this anti-police?"</div>
+    </div>
+    <div class="faq-answer">
+      <div class="faq-answer-q">"Don't these cameras only catch criminals?"</div>
+      <div class="faq-answer-a">99% of the plates scanned belong to people suspected of nothing. The cameras photograph every car, store the data, and check it against hotlists — in that order. You're in the database whether you've done anything wrong or not.</div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div class="cta-bg-text">ACT</div>
+    <div class="cta-inner">
+      <div class="cta-label">Your legislators need to hear from you</div>
+      <div class="cta-headline">Three bills sitting in committee.<br><span class="dim">Zero hearings. Zero votes.</span><br>That changes when you call.</div>
+      <div class="cta-foot">
+        <button class="btn-red">Contact Your Reps</button>
+        <div class="cta-context">We'll match you to your SC House and Senate districts and help you draft a message in under two minutes.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════ OPTION C — DOCUMENT RECORD ══════ -->
+<div id="oc" class="mockup">
+  <div class="section-tag"><strong>Option C</strong> — <em>Document Record</em> &nbsp;·&nbsp; Centered wordmark nav · Roman numeral bands · Table bills · Deposition FAQ · Stat sidebar CTA</div>
+
+  <nav class="nav">
+    <div class="nav-meta">Case No. SC-2025<br>Filed: Active Session</div>
+    <div class="nav-logo">DeflockSC</div>
+    <div class="nav-cta-wrap"><button class="nav-cta">Take Action →</button></div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-doc-header">
+      <div class="doc-field">Subject<span>Automated License Plate Readers</span>Jurisdiction<span>State of South Carolina</span></div>
+      <div class="doc-field" style="text-align:right">Status<span>Unregulated · Active Deployment</span>Record Count<span>422,000,000+ reads</span></div>
+    </div>
+    <div>
+      <div class="hero-rule"></div>
+      <h1 class="hero-headline">Your movement is on record.<br>You didn't consent.</h1>
+      <div class="hero-sub">
+        <p class="hero-body">242 cameras are watching Upstate South Carolina right now. Every car that passes gets photographed. That data goes into a national network — searchable by agencies across state lines. No oversight. No vote. No warrant required.</p>
+        <div class="hero-verdict">
+          <div class="verdict-label">Finding</div>
+          <div class="verdict-val">UNREGULATED</div>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-primary">Contact Your Reps</button>
+        <button class="btn-sec">View Camera Map →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-band">
+    <div class="sec-roman">II.</div>
+    <div class="sec-title">How Surveillance Works</div>
+    <div class="sec-desc">The collection and sharing pipeline</div>
+  </div>
+  <div class="outline">
+    <div class="outline-item">
+      <div class="outline-marker">§ 2.1</div>
+      <div>
+        <div class="outline-heading">Camera reads your plate — flagged or not</div>
+        <div class="outline-text">Every vehicle passing a Flock camera is photographed and matched against a national hotlist. The camera doesn't wait for suspicion. It reads everything, stores the read, and checks later.</div>
+        <div class="outline-note">Logged: plate number · vehicle make &amp; color · GPS coordinates · timestamp · direction of travel</div>
+      </div>
+    </div>
+    <div class="outline-item">
+      <div class="outline-marker">§ 2.2</div>
+      <div>
+        <div class="outline-heading">Data enters a national network</div>
+        <div class="outline-text">That read doesn't stay local. Flock routes it through their servers, making it searchable by police departments across state lines. Federal agencies can query it too — no warrant needed.</div>
+      </div>
+    </div>
+    <div class="outline-item">
+      <div class="outline-marker">§ 2.3</div>
+      <div>
+        <div class="outline-heading">No oversight exists</div>
+        <div class="outline-text">No SC city or county has passed an oversight ordinance. No council voted on it. The cameras went up, the data started flowing, and no rules govern how long it's kept or who can see it.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-band">
+    <div class="sec-roman">IV.</div>
+    <div class="sec-title">Pending Legislation</div>
+    <div class="sec-desc">Three bills · 86th General Assembly</div>
+  </div>
+  <div class="bill-table">
+    <p class="bill-table-lede">Three bills to regulate license plate readers are currently before the General Assembly. None have received a committee hearing.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Bill No.</th>
+          <th>Short Title</th>
+          <th>Committee</th>
+          <th style="text-align:right">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="t-id">S447</div></td>
+          <td><div class="t-title">Regulation of LPR systems statewide<span class="t-committee">30-day retention limit · Judicial oversight requirement</span></div></td>
+          <td><div class="t-committee" style="font-size:13px;color:var(--muted)">Senate Judiciary</div></td>
+          <td><div class="t-status">In committee</div></td>
+        </tr>
+        <tr>
+          <td><div class="t-id">H3155</div></td>
+          <td><div class="t-title">Regulation of automatic license plate readers<span class="t-committee">House companion to S447</span></div></td>
+          <td><div class="t-committee" style="font-size:13px;color:var(--muted)">House Judiciary</div></td>
+          <td><div class="t-status">In committee</div></td>
+        </tr>
+        <tr>
+          <td><div class="t-id">H4013</div></td>
+          <td><div class="t-title">Regulation of automated license plate readers<span class="t-committee">Education &amp; Public Works referral</span></div></td>
+          <td><div class="t-committee" style="font-size:13px;color:var(--muted)">House Ed &amp; PW</div></td>
+          <td><div class="t-status">In committee</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec-band">
+    <div class="sec-roman">V.</div>
+    <div class="sec-title">Common Objections</div>
+    <div class="sec-desc">Q &amp; A record</div>
+  </div>
+  <div class="depo">
+    <div class="depo-item">
+      <div class="depo-q">
+        <div class="depo-speaker">Q.</div>
+        <div class="depo-text">Don't these cameras only catch criminals?</div>
+      </div>
+      <div class="depo-a">
+        <div class="depo-speaker">A.</div>
+        <div class="depo-text">99% of the plates scanned belong to people suspected of nothing. The cameras photograph every car, store the data, and check it against hotlists — in that order. You're in the database whether you've done anything wrong or not.</div>
+      </div>
+    </div>
+    <div class="depo-item">
+      <div class="depo-q">
+        <div class="depo-speaker">Q.</div>
+        <div class="depo-text">If you have nothing to hide, why worry?</div>
+      </div>
+      <div class="depo-a">
+        <div class="depo-speaker">A.</div>
+        <div class="depo-text">The question assumes the government gets to decide what counts as suspicious. Location data builds a picture of your life — where you worship, who you see, what you do. That picture shouldn't be stored for three years without your knowledge or a warrant.</div>
+      </div>
+    </div>
+    <div class="depo-item">
+      <div class="depo-q">
+        <div class="depo-speaker">Q.</div>
+        <div class="depo-text">Doesn't this reduce crime?</div>
+      </div>
+      <div class="depo-a">
+        <div class="depo-speaker">A.</div>
+        <div class="depo-text">The evidence is thin. Studies of Flock camera deployments show mixed results — some localized reductions in vehicle theft, little effect on violent crime. What's clear is that the privacy cost is borne by everyone while the claimed benefits are marginal and unevenly distributed.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div class="cta-aside">
+      <div class="cta-aside-stat"><strong>242</strong>cameras active<br>Upstate SC</div>
+      <div class="cta-aside-stat"><strong>422M</strong>reads stored<br>in SLED database</div>
+      <div class="cta-aside-stat"><strong>0</strong>oversight<br>ordinances</div>
+    </div>
+    <div>
+      <div class="cta-notice">Action Required — 86th General Assembly</div>
+      <div class="cta-headline">Tell your legislators South Carolina is watching.</div>
+      <div class="cta-sub">Three bills are stalled in committee. They move when legislators hear from constituents. We'll match you to your House and Senate districts and help you write a message that lands.</div>
+      <button class="btn-primary-lg">Contact Your Reps</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════ OPTION D — MANIFESTO PRINT ══════ -->
+<div id="od" class="mockup">
+  <div class="section-tag"><strong>Option D</strong> — <em>Manifesto Print</em> &nbsp;·&nbsp; 9rem hero headline · One-word pipeline labels · Marginalia bills · Pamphlet FAQ · Ghost-text CTA</div>
+
+  <nav class="nav">
+    <div class="nav-wordmark">Deflock<em>SC</em></div>
+    <button class="nav-cta">Take Action</button>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-noise"></div>
+    <div class="hero-bar"></div>
+    <div class="hero-content">
+      <div class="hero-kicker">South Carolina · ALPR Surveillance · 2025</div>
+      <h1 class="hero-headline">Your plates<br>are being<br><span class="ghost">watched.</span></h1>
+      <div class="hero-foot">
+        <p class="hero-body">242 cameras are watching Upstate South Carolina right now. Every car that passes gets photographed. That data goes into a national network. And nobody voted on any of it.</p>
+        <div class="hero-data-col">
+          <div class="hero-stat">242</div>
+          <div class="hero-stat-label">Cameras · Upstate SC</div>
+          <button class="btn-action">Contact Your Reps</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-statement">
+    <div class="sec-tag-line">02 · How it works</div>
+    <div class="sec-headline">Three steps. <span class="aside">No warrant needed.</span></div>
+  </div>
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-label">Captured.</div>
+      <div class="step-body">Every vehicle passing a Flock camera is photographed and matched against a national hotlist — <strong>whether you've done anything wrong or not.</strong> The data includes your plate number, vehicle make, color, and GPS location.</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-label">Shared.</div>
+      <div class="step-body">That read doesn't stay local. Flock routes it through their servers, making it searchable by police departments <strong>across state lines.</strong> Federal agencies can query it too — no warrant needed.</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-label">Unseen.</div>
+      <div class="step-body">No SC city or county has passed an oversight ordinance. No council voted on it. The cameras went up, the data started flowing, and <strong>no rules govern how long it's kept or who sees it.</strong></div>
+    </div>
+  </div>
+
+  <div class="sec-statement">
+    <div class="sec-tag-line">04 · Active legislation</div>
+    <div class="sec-headline">Three bills. <span class="aside">All stalled.</span></div>
+  </div>
+  <div class="bills">
+    <p class="bills-lede">Three bills to rein in license plate cameras are sitting in SC committee right now. None have had a hearing. That changes when legislators hear from you.</p>
+    <div class="bill-item">
+      <div class="bill-margin">
+        <span class="bill-id">S447</span>
+        <span class="bill-status-dot"></span>
+      </div>
+      <div class="bill-body">
+        <div class="bill-title">Would regulate LPR systems statewide</div>
+        <div class="bill-desc">30-day data retention limit · Judicial oversight required for queries</div>
+        <div class="bill-meta">In committee · Senate Judiciary</div>
+      </div>
+    </div>
+    <div class="bill-item">
+      <div class="bill-margin">
+        <span class="bill-id">H3155</span>
+        <span class="bill-status-dot"></span>
+      </div>
+      <div class="bill-body">
+        <div class="bill-title">Would regulate automatic license plate readers</div>
+        <div class="bill-desc">House companion to S447 · No committee action yet</div>
+        <div class="bill-meta">In committee · House Judiciary</div>
+      </div>
+    </div>
+    <div class="bill-item">
+      <div class="bill-margin">
+        <span class="bill-id">H4013</span>
+        <span class="bill-status-dot"></span>
+      </div>
+      <div class="bill-body">
+        <div class="bill-title">Would regulate automated license plate readers</div>
+        <div class="bill-desc">Education &amp; Public Works referral · No committee action yet</div>
+        <div class="bill-meta">In committee · House Ed &amp; PW</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-header">They say it's fine. <span>Here's why it's not.</span></div>
+    <div class="faq-item">
+      <div class="faq-q">Don't these cameras only catch criminals?</div>
+      <div class="faq-a">99% of the plates scanned belong to people suspected of nothing. The cameras photograph every car, store the data, and check it against hotlists — in that order. You're in the database whether you've done anything wrong or not.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">If you have nothing to hide, why worry?</div>
+      <div class="faq-a">The question assumes the government gets to decide what counts as suspicious. Location data builds a picture of your life — where you worship, who you see, what you do. That picture shouldn't be stored for three years without your knowledge or a warrant.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Doesn't this reduce crime?</div>
+      <div class="faq-a">The evidence is thin. What's clear is that the privacy cost is borne by everyone while the claimed benefits are marginal. And even if it worked — mass surveillance without oversight isn't a tradeoff any community should make without a vote.</div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div class="cta-bg">ACT</div>
+    <div class="cta-inner">
+      <div class="cta-eyebrow">Your legislators need to hear from you</div>
+      <div class="cta-headline">Three bills.<br><em>Zero hearings.</em><br>Make some noise.</div>
+      <div class="cta-foot">
+        <button class="btn-big">Contact Your Reps</button>
+        <div class="cta-sub">We'll match you to your SC House and Senate districts and help you draft a message in under two minutes.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function show(id, btn) {
+    document.querySelectorAll('.mockup').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

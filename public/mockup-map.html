@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>State Map Mockup — Dotted vs Hybrid</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0d0d0d; color:#e8e8e8; font-family:Inter,sans-serif; padding:40px 20px; }
+  h1 { text-align:center; font-size:14px; font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:0.18em; color:#888; margin-bottom:60px; }
+
+  .mockup-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; max-width:1400px; margin:0 auto; }
+  .mockup-label {
+    font-family:'DM Mono',monospace; font-size:10px; text-transform:uppercase;
+    letter-spacing:0.18em; color:#888; margin-bottom:12px;
+  }
+  .mockup-title { font-size:22px; font-weight:800; color:#e8e8e8; margin-bottom:6px; }
+  .mockup-desc { font-size:13px; color:#a3a3a3; line-height:1.6; margin-bottom:24px; }
+
+  .map-wrap {
+    position:relative;
+    background:#111111;
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:8px;
+    overflow:hidden;
+    padding:24px;
+  }
+  .map-svg { width:100%; height:auto; display:block; }
+
+  .state-popout {
+    position:absolute;
+    background:#1a1a1a;
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:6px;
+    padding:14px 18px;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity 0.2s;
+    z-index:10;
+    max-width:280px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .state-popout.active { opacity:1; pointer-events:auto; }
+  .state-popout .pop-state {
+    font-family:'DM Mono',monospace; font-size:10px; text-transform:uppercase;
+    letter-spacing:0.15em; color:#fbbf24; margin-bottom:6px;
+  }
+  .state-popout .pop-law { font-size:12px; color:#a3a3a3; line-height:1.55; }
+  .state-popout .pop-sc { color:#dc2626; }
+
+  .legend {
+    display:flex; gap:20px; margin-top:16px; font-size:11px; color:#888;
+    font-family:'DM Mono',monospace;
+  }
+  .legend-dot {
+    width:8px; height:8px; border-radius:50%; display:inline-block;
+    margin-right:6px; vertical-align:middle;
+  }
+  .legend-dot.amber { background:#fbbf24; }
+  .legend-dot.red { background:#dc2626; }
+  .legend-dot.dim { background:rgba(255,255,255,0.15); }
+
+  .dot-state { cursor:pointer; transition: opacity 0.2s; }
+  .dot-state:hover { opacity:0.8; }
+
+  .hybrid-state { cursor:pointer; transition: fill 0.15s, stroke 0.15s; }
+  .hybrid-state:hover { fill:rgba(251,191,36,0.25) !important; }
+  .hybrid-state-sc:hover { fill:rgba(220,38,38,0.25) !important; }
+
+  .note { text-align:center; font-size:11px; color:#555; margin-top:60px; font-family:'DM Mono',monospace; }
+</style>
+</head>
+<body>
+
+<h1>State Map Mockup — Two Approaches</h1>
+
+<div class="mockup-grid">
+
+  <!-- ========== OPTION 2: DOTTED MAP ========== -->
+  <div class="mockup-col">
+    <div class="mockup-label">Option 2</div>
+    <div class="mockup-title">Dotted Map</div>
+    <div class="mockup-desc">Dots fill only the land area. Highlighted states use colored dots within their boundaries + marker pins. Full lower 48 visible.</div>
+
+    <div class="map-wrap" id="dotted-wrap">
+      <svg class="map-svg" viewBox="0 20 960 590" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <!-- Base dot pattern — diagonal grid, sparse -->
+          <pattern id="dots-base" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+            <circle cx="4" cy="4" r="1.1" fill="rgba(255,255,255,0.22)"/>
+            <circle cx="12" cy="12" r="1.1" fill="rgba(255,255,255,0.22)"/>
+          </pattern>
+          <!-- Amber dot pattern for highlighted states — diagonal -->
+          <pattern id="dots-amber" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+            <circle cx="4" cy="4" r="1.5" fill="rgba(251,191,36,0.8)"/>
+            <circle cx="12" cy="12" r="1.5" fill="rgba(251,191,36,0.8)"/>
+          </pattern>
+          <!-- Red dot pattern for SC — diagonal -->
+          <pattern id="dots-red" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+            <circle cx="4" cy="4" r="1.5" fill="rgba(220,38,38,0.8)"/>
+            <circle cx="12" cy="12" r="1.5" fill="rgba(220,38,38,0.8)"/>
+          </pattern>
+        </defs>
+
+        <!-- All state paths filled with base dots — injected by JS -->
+        <g id="dotted-states" fill="url(#dots-base)" stroke="none"></g>
+
+        <!-- Highlighted states filled with colored dots — injected by JS -->
+        <g id="dotted-highlighted"></g>
+
+        <!-- State markers — amber for legislation states -->
+        <g class="dot-state" data-state="Virginia" data-law="Law enforcement-only access. Data must be deleted within 7 days unless part of an active criminal investigation.">
+          <circle cx="767" cy="282" r="8" fill="#fbbf24" opacity="0.9"/>
+          <circle cx="767" cy="282" r="3.5" fill="#111"/>
+          <text x="767" y="269" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500">VA</text>
+        </g>
+        <g class="dot-state" data-state="Montana" data-law="Banned sharing of ALPR data with out-of-state agencies. Among the strongest state-level ALPR restrictions in the country.">
+          <circle cx="290" cy="120" r="8" fill="#fbbf24" opacity="0.9"/>
+          <circle cx="290" cy="120" r="3.5" fill="#111"/>
+          <text x="290" y="107" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500">MT</text>
+        </g>
+        <g class="dot-state" data-state="Utah" data-law="Strict retention limits on ALPR data. Requires policies governing access and use.">
+          <circle cx="216" cy="250" r="8" fill="#fbbf24" opacity="0.9"/>
+          <circle cx="216" cy="250" r="3.5" fill="#111"/>
+          <text x="216" y="237" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500">UT</text>
+        </g>
+        <g class="dot-state" data-state="Maine" data-law="21-day retention limit. Requires civilian oversight and public reporting on ALPR use.">
+          <circle cx="890" cy="115" r="8" fill="#fbbf24" opacity="0.9"/>
+          <circle cx="890" cy="115" r="3.5" fill="#111"/>
+          <text x="890" y="102" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500">ME</text>
+        </g>
+        <g class="dot-state" data-state="Illinois" data-law="Explicitly prohibits immigration enforcement use of ALPR data. When local agencies violated this by sharing with CBP, it triggered contract cancellations.">
+          <circle cx="600" cy="275" r="8" fill="#fbbf24" opacity="0.9"/>
+          <circle cx="600" cy="275" r="3.5" fill="#111"/>
+          <text x="600" y="262" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500">IL</text>
+        </g>
+        <g class="dot-state" data-state="New Hampshire" data-law="Among the earliest states to pass ALPR restrictions. Limits retention and requires policies for use.">
+          <circle cx="870" cy="145" r="8" fill="#fbbf24" opacity="0.9"/>
+          <circle cx="870" cy="145" r="3.5" fill="#111"/>
+          <text x="870" y="132" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500">NH</text>
+        </g>
+        <g class="dot-state" data-state="South Carolina" data-law="No ALPR-specific law. No retention limits. No access restrictions. No penalties for misuse. Three bills are pending but none have passed committee." data-sc="true">
+          <circle cx="745" cy="390" r="10" fill="#dc2626" opacity="0.9">
+            <animate attributeName="r" values="10;13;10" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.9;0.6;0.9" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="745" cy="390" r="4" fill="#111"/>
+          <text x="745" y="375" text-anchor="middle" font-size="12" font-family="DM Mono,monospace" fill="#dc2626" font-weight="500">SC</text>
+        </g>
+      </svg>
+
+      <div class="state-popout" id="dot-popout">
+        <div class="pop-state"></div>
+        <div class="pop-law"></div>
+      </div>
+
+      <div class="legend">
+        <span><span class="legend-dot amber"></span>Has legislation</span>
+        <span><span class="legend-dot red"></span>No protections</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== OPTION 3: HYBRID ========== -->
+  <div class="mockup-col">
+    <div class="mockup-label">Option 3</div>
+    <div class="mockup-title">Hybrid — Outlines + Dots</div>
+    <div class="mockup-desc">Faint state outlines from us-map.svg with dot texture. Highlighted states have visible fills and are directly clickable as shapes.</div>
+
+    <div class="map-wrap" id="hybrid-wrap">
+      <svg class="map-svg" viewBox="0 20 960 590" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="dots2" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+            <circle cx="3.5" cy="3.5" r="1" fill="rgba(255,255,255,0.06)"/>
+            <circle cx="10.5" cy="10.5" r="1" fill="rgba(255,255,255,0.06)"/>
+          </pattern>
+        </defs>
+
+        <!-- Base: state outlines from us-map.svg -->
+        <image href="/us-map.svg" x="0" y="0" width="959" height="593" opacity="0.4"/>
+
+        <!-- Dot texture overlay -->
+        <rect x="0" y="20" width="960" height="590" fill="url(#dots2)"/>
+
+        <!-- Virginia -->
+        <path class="hybrid-state" data-state="Virginia"
+          data-law="Law enforcement-only access. Data must be deleted within 7 days unless part of an active criminal investigation."
+          d="m 835,265 -1,3 .5,1 .4,-1 .8,-3 z m -35,-7 -.7,-1 1,-.1 1,-.9 .4,-2 -.2,-.5 .1,-.5 -.3,-.7 -.6,-.5 -.4,-.1 -.5,-.4 -.6,-.6 h -1 l -.6,-.1 -.4,-.4 .1,-.5 -2,-.6 -.8,.3 -1,-.1 -.7,-.7 -.5,-.2 -.2,-.7 .6,-.8 v -.9 l -1,-.2 -1,-.9 -.9,.1 -2,-.3 -.4,.7 -.4,2 -.5,2 -10,-5 -.2,.9 .9,2 -.8,2 .1,3 -1,.8 -.5,2 -.9,.8 -1,2 -.9,.8 -1,2 -2,-1 -2,8 -1,2 -3,-.5 -1,-2 -2,-.7 -.1,5 -1,2 .4,2 -2,2 .4,2 -4,6 -1,3 2,1 -2,2 .1,1 -2,2 -.7,-1 -4,3 -2,-1 -.6,1 .8,.5 -.5,.9 -6,2 -3,-2 -.8,2 -2,2 -2,.1 -4,-2 -.1,-2 -2,-.7 .8,-1 -.7,-.6 -5,7 -3,1 -3,3 -.4,2 -2,1 -.1,2 -1,1 -2,.5 -.5,2 -1,.4 -7,4 29,-3 .2,-1 5,-.5 -.3,.7 29,-4 39,-7 29,-6 -.6,-1 .4,-.1 .9,.9 -.1,-1 -.3,-2 2,1 .9,2 v -1 l -3,-6 v -1 l -.7,-.8 -1,.7 .5,1 h -.8 l -.4,-1 -.6,.9 -.9,-1 -2,-.1 -.2,.7 2,2 -1,-.7 -.5,-1 -.4,.8 -.8,.1 -2,2 .3,-2 v -1 l -2,-.7 -2,-.5 -.2,-2 -.6,-1 -.6,1 -2,-1 -2,.3 .2,-.9 2,-.2 .9,.5 2,-.8 .9,.4 .5,1 v .7 l 2,.4 .3,.9 .9,.4 .9,1 1,-2 h .6 l -.1,-2 -1,1 -.6,-.9 2,-.2 -1,-.9 -1,.6 -.1,-2 -2,.2 -2,-1 -2,-2 4,2 .9,.3 2,-.8 -2,-.9 .6,-.6 -1,-.5 .8,-.2 -.3,-.9 1,.9 .4,-.8 .4,1 1,.8 .6,-.5 -.5,-.6 -.1,-2 -1,-.1 -2,-.8 .9,-1 -2,-.1 -.4,-.5 -1,.6 -1,-.8 -.5,-1 -2,-1 -2,-2 -2,-2 3,1 .9,1 2,.7 2,2 .2,-2 .6,1 2,.5 v -4 l -.8,-1 1,.4 .1,-2 -3,-1 -2,-.2 -1,-.2 .3,-1 -2,-.3 -.1,-.6 h -2 l -.2,.8 -.7,-1 h -3 l -1,-.4 -.2,-1 -1,-.6 -.4,-2 -.6,-.4 -.7,1 -.9,.2 -.9,.7 h -2 l -.9,-1 .4,-3 .5,-2 .6,.5 z m 22,12 .9,-.1 0,-.6 -.8,.1 z m 8,14 -1,3 1,-1 z m -2,-15 .7,.3 -.2,2 -.5,-.5 -1,1 1,.4 -2,4 .1,8 2,3 .5,-2 .4,-3 -.3,-2 .7,-.9 -.2,-1 1,-.6 -.6,-.5 .5,-.7 .8,1 -.2,1 -.4,4 1,-2 .4,-3 .1,-3 -.3,-2 .6,-2 1,-2 .1,-2 .3,-.9 -5,2 -.7,.8 z"
+          fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="1.2"/>
+
+        <!-- Montana -->
+        <path class="hybrid-state" data-state="Montana"
+          data-law="Banned sharing of ALPR data with out-of-state agencies. Among the strongest state-level ALPR restrictions in the country."
+          d="m 247,130 57,8 51,5 2,-21 5,-67 -54,-6 -54,-8 -66,-12 -5,22 4,7 -2,5 4,5 2,.7 4,8 v 2 l 2,3 h .9 l 1,2 h 3 v 2 l -7,17 -.5,4 1,.5 2,3 3,-1 4,-2 2,2 .5,2 -.5,3 2,10 3,4 2,1 .4,3 v 4 l 2,2 2,-2 7,2 2,-1 9,2 3,-3 2,-.6 1,2 2,4 .9,.1 z"
+          fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="1.2"/>
+
+        <!-- Utah -->
+        <path class="hybrid-state" data-state="Utah"
+          data-law="Strict retention limits on ALPR data. Requires policies governing access and use."
+          d="m 233,218 3,-22 -48,-8 -21,109 46,8 40,6 12,-88 z"
+          fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="1.2"/>
+
+        <!-- Maine -->
+        <path class="hybrid-state" data-state="Maine"
+          data-law="21-day retention limit. Requires civilian oversight and public reporting on ALPR use."
+          d="m 875,129 .6,4 3,2 .8,2 2,1 1,-.3 1,-3 -.8,-3 2,-.9 .5,-3 -.6,-1 3,-2 -2,-2 .9,-2 1,-2 .5,3 2,-2 1,.9 1,-.8 v -2 l 3,-1 .3,-3 2,-.2 3,-4 v -.7 l -.9,-.5 -.1,-3 .6,-1 .2,2 1,-.5 -.2,-3 -.9,.3 -.1,1 -1,-1 .9,-1 .6,.1 1,-.4 .5,3 2,-.3 3,.7 v -1 l -1,-1 1,.1 .1,-2 .6,.8 .3,2 2,2 .2,-1 .9,-.2 -.3,-.8 .8,-.6 -.1,-2 -2,-.2 -2,.7 1,-2 .7,-.8 1,-.2 .4,1 2,2 .4,-2 2,-1 -.9,-1 .1,-2 1,.5 h .7 l 2,-1 .4,-2 2,.3 .1,-.7 .2,-2 .5,1 2,-1 2,-4 -.1,-2 -1,-2 -3,-3 h -2 l -.8,2 -3,-3 .3,-.8 v -2 l -2,-4 -.8,-.2 -.7,.4 h -5 l -.3,-4 -8,-26 -7,-4 -3,-.1 -7,7 -3,-1 -1,-4 h -3 l -7,20 .7,6 -2,2 -.4,5 1,4 .8,.2 v 2 l -2,4 -2,1 -1,2 -.4,8 -2,-1 -2,.4 z m 35,-25 -1,.8 v 1 l .7,-.8 .9,.8 .4,-.5 1,.2 -1,-.8 .4,-.8 z m -2,3 -1,1 .5,.4 -.1,1 h 1 v -2 z m -3,-2 .9,1 1,.5 .3,-1 v -2 l -1,-.7 -.4,1 z m -1,5 -2,-2 2,-2 .8,.3 .2,1 1,.8 v 1 l -1,1 z"
+          fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="1.2"/>
+
+        <!-- Illinois -->
+        <path class="hybrid-state" data-state="Illinois"
+          data-law="Explicitly prohibits immigration enforcement use of ALPR data. When local agencies violated this by sharing with CBP, it triggered contract cancellations."
+          d="m 624,266 -1,5 v 2 l 2,4 v .7 l -.3,.9 .9,2 -.3,2 -2,2 -1,4 -4,5 -.1,7 h -1 l .9,2 v .9 l -2,3 .1,1 2,2 -.1,.9 -4,.6 -.6,1 -1,-.6 -1,.5 -.4,3 2,2 -.4,2 -2,.3 -7,-3 -4,4 .3,2 h -3 l -1,-2 -2,-4 v -2 l .8,-.6 .1,-1 -2,-2 -.9,-2 -3,-4 -5,-1 -7,-7 -.4,-2 3,-8 -.4,-2 1,-1 v -1 l -3,-2 -3,-.7 -3,1 -1,-2 .6,-2 -.7,-2 -9,-8 -2,-2 -2,-6 -1,-5 1,-4 .7,-.7 .1,-2 -.7,-.9 1,-2 2,-.6 .9,-.3 1,-1 v -2 l 2,-2 .5,-.5 .1,-4 -.9,-1 -1,-.3 -1,-2 1,-4 3,-.8 h 2 l 4,-2 2,-2 .1,-2 1,-1 1,-3 -.1,-3 -3,-4 h -1 l -.9,-1 .2,-2 -2,-2 -2,-1 .5,-.6 46,-3 .1,5 3,5 1,4 2,3 z"
+          fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="1.2"/>
+
+        <!-- New Hampshire -->
+        <path class="hybrid-state" data-state="New Hampshire"
+          data-law="Among the earliest states to pass ALPR restrictions. Limits retention and requires policies for use."
+          d="m 863,94 -1,.1 -1,-1 -2,1 -.5,6 1,2 -1,4 2,3 -.4,2 .1,1 -1,2 -1,.4 -.6,1 -2,1 -.7,2 1,3 -.5,2 .5,2 -1,2 .4,2 -1,2 .2,2 -.7,1 .7,4 .7,2 -.5,3 .9,2 -.2,2 -.5,1 -.1,1 2,3 18,-4 1,-2 .3,-2 2,-.6 .5,-1 2,-1 1,.3 .8,-5 -2,-1 -.8,-2 -3,-2 -.6,-4 -12,-37 z"
+          fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="1.2"/>
+
+        <!-- South Carolina — RED -->
+        <path class="hybrid-state hybrid-state-sc" data-state="South Carolina"
+          data-law="No ALPR-specific law. No retention limits. No access restrictions. No penalties for misuse. Three bills are pending but none have passed committee."
+          data-sc="true"
+          d="m 772,350 -20,3 -.1,-3 -3,-3 -1,2 -.7,-.3 .2,-1 -.4,-.5 -23,2 -7,4 -1,.1 -4,2 -.1,2 -2,1 -1,3 .2,1 6,4 3,-.3 3,4 .4,2 4,5 3,2 1,.2 2,2 1,2 2,2 2,.5 3,3 .1,1 3,3 5,2 4,7 .3,3 4,2 2,5 .8,3 4,.4 .8,-2 h .6 l 2,-2 .5,-2 3,-2 .3,-2 -1,-.9 .8,-.7 .8,.4 1,-.4 2,-2 4,-2 2,-2 .1,-.7 5,-4 -.1,-.5 -.9,-.8 1,-2 h .8 l .4,.5 .7,-.8 h 1 l .6,-2 2,-2 -.3,-5 .8,-2 4,-6 2,-2 2,-1 z"
+          fill="rgba(220,38,38,0.15)" stroke="#dc2626" stroke-width="1.5"/>
+
+        <!-- Labels -->
+        <text x="720" y="383" text-anchor="middle" font-size="12" font-family="DM Mono,monospace" fill="#dc2626" font-weight="500" style="pointer-events:none">SC</text>
+        <text x="750" y="270" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500" style="pointer-events:none">VA</text>
+        <text x="290" y="107" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500" style="pointer-events:none">MT</text>
+        <text x="230" y="250" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500" style="pointer-events:none">UT</text>
+        <text x="895" y="97" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500" style="pointer-events:none">ME</text>
+        <text x="600" y="262" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500" style="pointer-events:none">IL</text>
+        <text x="862" y="125" text-anchor="middle" font-size="11" font-family="DM Mono,monospace" fill="#fbbf24" font-weight="500" style="pointer-events:none">NH</text>
+      </svg>
+
+      <div class="state-popout" id="hybrid-popout">
+        <div class="pop-state"></div>
+        <div class="pop-law"></div>
+      </div>
+
+      <div class="legend">
+        <span><span class="legend-dot amber"></span>Has legislation</span>
+        <span><span class="legend-dot red"></span>No protections</span>
+        <span><span class="legend-dot dim"></span>No data</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="note">Click / hover a state marker or highlighted state to see the popout. Both use the same us-map.svg from the homepage case study card.</p>
+
+<script>
+  // Highlighted state path data (from us-map.svg) keyed by name
+  const highlightedStates = {
+    'Virginia': 'm 835,265 -1,3 .5,1 .4,-1 .8,-3 z m -35,-7 -.7,-1 1,-.1 1,-.9 .4,-2 -.2,-.5 .1,-.5 -.3,-.7 -.6,-.5 -.4,-.1 -.5,-.4 -.6,-.6 h -1 l -.6,-.1 -.4,-.4 .1,-.5 -2,-.6 -.8,.3 -1,-.1 -.7,-.7 -.5,-.2 -.2,-.7 .6,-.8 v -.9 l -1,-.2 -1,-.9 -.9,.1 -2,-.3 -.4,.7 -.4,2 -.5,2 -10,-5 -.2,.9 .9,2 -.8,2 .1,3 -1,.8 -.5,2 -.9,.8 -1,2 -.9,.8 -1,2 -2,-1 -2,8 -1,2 -3,-.5 -1,-2 -2,-.7 -.1,5 -1,2 .4,2 -2,2 .4,2 -4,6 -1,3 2,1 -2,2 .1,1 -2,2 -.7,-1 -4,3 -2,-1 -.6,1 .8,.5 -.5,.9 -6,2 -3,-2 -.8,2 -2,2 -2,.1 -4,-2 -.1,-2 -2,-.7 .8,-1 -.7,-.6 -5,7 -3,1 -3,3 -.4,2 -2,1 -.1,2 -1,1 -2,.5 -.5,2 -1,.4 -7,4 29,-3 .2,-1 5,-.5 -.3,.7 29,-4 39,-7 29,-6 -.6,-1 .4,-.1 .9,.9 -.1,-1 -.3,-2 2,1 .9,2 v -1 l -3,-6 v -1 l -.7,-.8 -1,.7 .5,1 h -.8 l -.4,-1 -.6,.9 -.9,-1 -2,-.1 -.2,.7 2,2 -1,-.7 -.5,-1 -.4,.8 -.8,.1 -2,2 .3,-2 v -1 l -2,-.7 -2,-.5 -.2,-2 -.6,-1 -.6,1 -2,-1 -2,.3 .2,-.9 2,-.2 .9,.5 2,-.8 .9,.4 .5,1 v .7 l 2,.4 .3,.9 .9,.4 .9,1 1,-2 h .6 l -.1,-2 -1,1 -.6,-.9 2,-.2 -1,-.9 -1,.6 -.1,-2 -2,.2 -2,-1 -2,-2 4,2 .9,.3 2,-.8 -2,-.9 .6,-.6 -1,-.5 .8,-.2 -.3,-.9 1,.9 .4,-.8 .4,1 1,.8 .6,-.5 -.5,-.6 -.1,-2 -1,-.1 -2,-.8 .9,-1 -2,-.1 -.4,-.5 -1,.6 -1,-.8 -.5,-1 -2,-1 -2,-2 -2,-2 3,1 .9,1 2,.7 2,2 .2,-2 .6,1 2,.5 v -4 l -.8,-1 1,.4 .1,-2 -3,-1 -2,-.2 -1,-.2 .3,-1 -2,-.3 -.1,-.6 h -2 l -.2,.8 -.7,-1 h -3 l -1,-.4 -.2,-1 -1,-.6 -.4,-2 -.6,-.4 -.7,1 -.9,.2 -.9,.7 h -2 l -.9,-1 .4,-3 .5,-2 .6,.5 z m 22,12 .9,-.1 0,-.6 -.8,.1 z m 8,14 -1,3 1,-1 z m -2,-15 .7,.3 -.2,2 -.5,-.5 -1,1 1,.4 -2,4 .1,8 2,3 .5,-2 .4,-3 -.3,-2 .7,-.9 -.2,-1 1,-.6 -.6,-.5 .5,-.7 .8,1 -.2,1 -.4,4 1,-2 .4,-3 .1,-3 -.3,-2 .6,-2 1,-2 .1,-2 .3,-.9 -5,2 -.7,.8 z',
+    'Montana': 'm 247,130 57,8 51,5 2,-21 5,-67 -54,-6 -54,-8 -66,-12 -5,22 4,7 -2,5 4,5 2,.7 4,8 v 2 l 2,3 h .9 l 1,2 h 3 v 2 l -7,17 -.5,4 1,.5 2,3 3,-1 4,-2 2,2 .5,2 -.5,3 2,10 3,4 2,1 .4,3 v 4 l 2,2 2,-2 7,2 2,-1 9,2 3,-3 2,-.6 1,2 2,4 .9,.1 z',
+    'Utah': 'm 233,218 3,-22 -48,-8 -21,109 46,8 40,6 12,-88 z',
+    'Maine': 'm 875,129 .6,4 3,2 .8,2 2,1 1,-.3 1,-3 -.8,-3 2,-.9 .5,-3 -.6,-1 3,-2 -2,-2 .9,-2 1,-2 .5,3 2,-2 1,.9 1,-.8 v -2 l 3,-1 .3,-3 2,-.2 3,-4 v -.7 l -.9,-.5 -.1,-3 .6,-1 .2,2 1,-.5 -.2,-3 -.9,.3 -.1,1 -1,-1 .9,-1 .6,.1 1,-.4 .5,3 2,-.3 3,.7 v -1 l -1,-1 1,.1 .1,-2 .6,.8 .3,2 2,2 .2,-1 .9,-.2 -.3,-.8 .8,-.6 -.1,-2 -2,-.2 -2,.7 1,-2 .7,-.8 1,-.2 .4,1 2,2 .4,-2 2,-1 -.9,-1 .1,-2 1,.5 h .7 l 2,-1 .4,-2 2,.3 .1,-.7 .2,-2 .5,1 2,-1 2,-4 -.1,-2 -1,-2 -3,-3 h -2 l -.8,2 -3,-3 .3,-.8 v -2 l -2,-4 -.8,-.2 -.7,.4 h -5 l -.3,-4 -8,-26 -7,-4 -3,-.1 -7,7 -3,-1 -1,-4 h -3 l -7,20 .7,6 -2,2 -.4,5 1,4 .8,.2 v 2 l -2,4 -2,1 -1,2 -.4,8 -2,-1 -2,.4 z m 35,-25 -1,.8 v 1 l .7,-.8 .9,.8 .4,-.5 1,.2 -1,-.8 .4,-.8 z m -2,3 -1,1 .5,.4 -.1,1 h 1 v -2 z m -3,-2 .9,1 1,.5 .3,-1 v -2 l -1,-.7 -.4,1 z m -1,5 -2,-2 2,-2 .8,.3 .2,1 1,.8 v 1 l -1,1 z',
+    'Illinois': 'm 624,266 -1,5 v 2 l 2,4 v .7 l -.3,.9 .9,2 -.3,2 -2,2 -1,4 -4,5 -.1,7 h -1 l .9,2 v .9 l -2,3 .1,1 2,2 -.1,.9 -4,.6 -.6,1 -1,-.6 -1,.5 -.4,3 2,2 -.4,2 -2,.3 -7,-3 -4,4 .3,2 h -3 l -1,-2 -2,-4 v -2 l .8,-.6 .1,-1 -2,-2 -.9,-2 -3,-4 -5,-1 -7,-7 -.4,-2 3,-8 -.4,-2 1,-1 v -1 l -3,-2 -3,-.7 -3,1 -1,-2 .6,-2 -.7,-2 -9,-8 -2,-2 -2,-6 -1,-5 1,-4 .7,-.7 .1,-2 -.7,-.9 1,-2 2,-.6 .9,-.3 1,-1 v -2 l 2,-2 .5,-.5 .1,-4 -.9,-1 -1,-.3 -1,-2 1,-4 3,-.8 h 2 l 4,-2 2,-2 .1,-2 1,-1 1,-3 -.1,-3 -3,-4 h -1 l -.9,-1 .2,-2 -2,-2 -2,-1 .5,-.6 46,-3 .1,5 3,5 1,4 2,3 z',
+    'New Hampshire': 'm 863,94 -1,.1 -1,-1 -2,1 -.5,6 1,2 -1,4 2,3 -.4,2 .1,1 -1,2 -1,.4 -.6,1 -2,1 -.7,2 1,3 -.5,2 .5,2 -1,2 .4,2 -1,2 .2,2 -.7,1 .7,4 .7,2 -.5,3 .9,2 -.2,2 -.5,1 -.1,1 2,3 18,-4 1,-2 .3,-2 2,-.6 .5,-1 2,-1 1,.3 .8,-5 -2,-1 -.8,-2 -3,-2 -.6,-4 -12,-37 z',
+    'South Carolina': 'm 772,350 -20,3 -.1,-3 -3,-3 -1,2 -.7,-.3 .2,-1 -.4,-.5 -23,2 -7,4 -1,.1 -4,2 -.1,2 -2,1 -1,3 .2,1 6,4 3,-.3 3,4 .4,2 4,5 3,2 1,.2 2,2 1,2 2,2 2,.5 3,3 .1,1 3,3 5,2 4,7 .3,3 4,2 2,5 .8,3 4,.4 .8,-2 h .6 l 2,-2 .5,-2 3,-2 .3,-2 -1,-.9 .8,-.7 .8,.4 1,-.4 2,-2 4,-2 2,-2 .1,-.7 5,-4 -.1,-.5 -.9,-.8 1,-2 h .8 l .4,.5 .7,-.8 h 1 l .6,-2 2,-2 -.3,-5 .8,-2 4,-6 2,-2 2,-1 z'
+  };
+
+  // Load us-map.svg, extract all paths, inject into dotted map
+  fetch('/us-map.svg')
+    .then(r => r.text())
+    .then(svgText => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgText, 'image/svg+xml');
+      const paths = doc.querySelectorAll('path');
+      const baseContainer = document.getElementById('dotted-states');
+      const hlContainer = document.getElementById('dotted-highlighted');
+
+      // Collect highlighted state d-strings for comparison
+      const hlPaths = new Set(Object.values(highlightedStates).map(d => d.trim()));
+
+      paths.forEach(p => {
+        const d = p.getAttribute('d');
+        if (!d) return;
+
+        const newPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        newPath.setAttribute('d', d);
+        newPath.setAttribute('stroke', 'none');
+
+        // Check if this path matches a highlighted state
+        const trimD = d.trim();
+        let isHighlighted = false;
+        let stateName = null;
+        for (const [name, hd] of Object.entries(highlightedStates)) {
+          if (trimD === hd.trim()) {
+            isHighlighted = true;
+            stateName = name;
+            break;
+          }
+        }
+
+        if (isHighlighted) {
+          // Colored dots for highlighted states
+          newPath.setAttribute('fill', stateName === 'South Carolina' ? 'url(#dots-red)' : 'url(#dots-amber)');
+          hlContainer.appendChild(newPath);
+        } else {
+          // Base dim dots for everything else
+          newPath.setAttribute('fill', 'url(#dots-base)');
+          baseContainer.appendChild(newPath);
+        }
+      });
+    });
+
+  // Popout logic — shared for both maps
+  function setupPopouts(wrapId, popoutId, selector) {
+    document.querySelectorAll(`#${wrapId} ${selector}`).forEach(el => {
+      el.addEventListener('mouseenter', e => {
+        const popout = document.getElementById(popoutId);
+        const state = el.dataset.state;
+        const law = el.dataset.law;
+        const isSC = el.dataset.sc === 'true';
+
+        popout.querySelector('.pop-state').textContent = state;
+        popout.querySelector('.pop-state').className = 'pop-state' + (isSC ? ' pop-sc' : '');
+        popout.querySelector('.pop-law').textContent = law;
+
+        const wrap = document.getElementById(wrapId);
+        const wrapRect = wrap.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        let left = elRect.left - wrapRect.left + (elRect.width / 2);
+        let top = elRect.top - wrapRect.top - 10;
+
+        if (left + 280 > wrapRect.width) left = wrapRect.width - 290;
+        if (left < 10) left = 10;
+        if (top < 10) top = 10;
+
+        popout.style.left = left + 'px';
+        popout.style.top = top + 'px';
+        popout.classList.add('active');
+      });
+
+      el.addEventListener('mouseleave', () => {
+        document.getElementById(popoutId).classList.remove('active');
+      });
+    });
+  }
+
+  setupPopouts('dotted-wrap', 'dot-popout', '.dot-state');
+  setupPopouts('hybrid-wrap', 'hybrid-popout', '.hybrid-state');
+</script>
+
+</body>
+</html>

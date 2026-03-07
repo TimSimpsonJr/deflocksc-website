@@ -32,12 +32,12 @@ const faqs = [
 ];
 ---
 
-<section id="faq" aria-labelledby="faq-heading" class="bg-[#161616]">
+<section id="faq" aria-labelledby="faq-heading" class="bg-[#161616] overflow-hidden">
 
   <!-- Section header -->
   <div class="px-6 md:px-12 pt-14 pb-6 border-b border-[rgba(255,255,255,0.07)]">
-    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Common objections</p>
-    <h2 id="faq-heading" class="text-[#e8e8e8] font-bold text-[clamp(1.8rem,3.5vw,2.8rem)] tracking-[-0.025em] leading-[1.05]">
+    <p data-reveal="up" class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Common objections</p>
+    <h2 id="faq-heading" data-reveal="up" data-reveal-delay="1" class="text-[#e8e8e8] font-bold text-[clamp(1.8rem,3.5vw,2.8rem)] tracking-[-0.025em] leading-[1.05]">
       But what about&hellip;
     </h2>
   </div>
@@ -47,12 +47,13 @@ const faqs = [
 
     <!-- Question list -->
     <div class="faq-sidebar border-b md:border-b-0 md:border-r border-[rgba(255,255,255,0.07)]">
-      <div class="font-['DM_Mono',monospace] text-[9px] uppercase tracking-[0.18em] text-[#737373] px-8 py-4 border-b border-[rgba(255,255,255,0.07)]">
+      <div data-reveal="left" class="font-['DM_Mono',monospace] text-[9px] uppercase tracking-[0.18em] text-[#737373] px-8 py-4 border-b border-[rgba(255,255,255,0.07)]">
         Questions
       </div>
       {faqs.map((faq, i) => (
         <button
           type="button"
+          data-reveal="left" data-reveal-delay={String(i)}
           class:list={['sidebar-btn w-full text-left px-8 py-4 text-base font-medium leading-[1.35] border-b border-[rgba(255,255,255,0.04)] cursor-pointer', i === 0 ? 'sidebar-active' : '']}
           data-faq={i}
           aria-selected={i === 0 ? 'true' : 'false'}
@@ -63,7 +64,7 @@ const faqs = [
     </div>
 
     <!-- Answer panel -->
-    <div class="faq-answer-panel p-8 md:p-12 flex flex-col justify-center min-h-[320px]">
+    <div data-reveal="right" data-reveal-delay="1" class="faq-answer-panel p-8 md:p-12 flex flex-col justify-center min-h-[320px]">
       {faqs.map((faq, i) => (
         <div class:list={['faq-answer', i !== 0 ? 'hidden' : '']} data-answer={i}>
           <div class="text-[#e8e8e8] font-semibold text-[1.4rem] tracking-[-0.015em] leading-[1.2] mb-5">{faq.question}</div>

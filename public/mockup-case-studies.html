@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Studies — 2.5D Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #080808;
+  color: #e2e2e2;
+  font-family: 'Inter', sans-serif;
+  padding: 48px 36px 96px;
+  line-height: 1.5;
+}
+
+h1 {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.18);
+  margin-bottom: 6px;
+}
+p.sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 40px;
+}
+h2 {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.2);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.section { margin-bottom: 72px; }
+
+/* ---- Bento grid ---- */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.07);
+}
+.bento > .card:nth-child(-n+3) { grid-column: span 2; }
+.bento > .card:nth-child(n+4)  { grid-column: span 3; }
+
+/* Concept row (6 equal) */
+.concept-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.07);
+}
+
+/* ---- Card shell ---- */
+.card {
+  background: #111;
+  cursor: default;
+  transition: background 0.22s;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.card:hover { background: #1a1a1a; }
+
+/* Scene panel */
+.scene {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+  background: #0d0d0d;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: border-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.card:hover .scene { border-color: rgba(220,38,38,0.22); }
+
+/* Card body */
+.card-body {
+  padding: 14px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+.card-loc {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: #dc2626;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e2e2;
+  line-height: 1.35;
+}
+.card-blurb {
+  font-size: 11px;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.55;
+}
+.card-num {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: rgba(255,255,255,0.14);
+}
+
+/* =====================================================
+   SCENE 1 — FALSE MATCH (Greenville)
+   Two license plates separate on hover → ≠ appears →
+   "FALSE MATCH · ARREST MADE" badge fades in
+   ===================================================== */
+.s1-wrap {
+  position: relative;
+  width: 210px;
+  height: 126px;
+}
+.s1-plate {
+  position: absolute;
+  width: 174px;
+  border-radius: 3px;
+  padding: 8px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transition: transform 0.48s ease-out, opacity 0.48s ease-out, box-shadow 0.48s ease-out;
+}
+.s1-plate-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.22);
+}
+.s1-plate-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: #e2e2e2;
+  line-height: 1;
+}
+.s1-plate-state {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  color: rgba(255,255,255,0.28);
+}
+/* Back plate — DATABASE RECORD, far layer */
+.s1-back {
+  top: 0; left: 0;
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.08);
+  opacity: 0.42;
+  z-index: 1;
+}
+/* Front plate — ALPR SCAN, near layer */
+.s1-front {
+  top: 28px; left: 22px;
+  background: #151515;
+  border: 1px solid rgba(255,255,255,0.28);
+  z-index: 2;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.55);
+}
+
+.card:hover .s1-back  { transform: translate(-12px, -12px); opacity: 0.62; }
+.card:hover .s1-front { transform: translate(10px, 10px); box-shadow: 0 12px 36px rgba(0,0,0,0.8); }
+
+/* ≠ indicator */
+.s1-neq {
+  position: absolute;
+  top: 28px; left: 78px;
+  z-index: 3;
+  font-size: 16px;
+  font-family: 'DM Mono', monospace;
+  color: transparent;
+  transition: color 0.28s 0.24s;
+  pointer-events: none;
+  line-height: 1;
+}
+.card:hover .s1-neq { color: rgba(220,38,38,0.8); }
+
+/* FALSE MATCH badge */
+.s1-badge {
+  position: absolute;
+  bottom: 2px; right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background: rgba(220,38,38,0.1);
+  border: 1px solid rgba(220,38,38,0.32);
+  border-radius: 2px;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: #dc2626;
+  opacity: 0;
+  transform: scale(0.88) translateY(4px);
+  transition: opacity 0.3s 0.38s, transform 0.3s 0.38s;
+  white-space: nowrap;
+}
+.s1-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #dc2626;
+  flex-shrink: 0;
+}
+.card:hover .s1-badge { opacity: 1; transform: scale(1) translateY(0); }
+
+
+/* =====================================================
+   SCENE 2A — DATA WEB (Ventura County, Variant A)
+   California outline + lines radiating to state dots
+   Layers shift different amounts on hover (parallax)
+   ===================================================== */
+.s2a-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+.s2a-ca    { transition: transform 0.55s ease-out; }
+.s2a-lines { transition: transform 0.55s ease-out; }
+.s2a-dots  { transition: transform 0.55s ease-out; }
+
+.card:hover .s2a-ca    { transform: translate(4px, -2px); }
+.card:hover .s2a-lines { transform: translate(9px, -5px); }
+.card:hover .s2a-dots  { transform: translate(15px, -9px); }
+
+.s2a-line {
+  stroke-dasharray: 130;
+  stroke-dashoffset: 130;
+  transition: stroke-dashoffset 0.5s ease-out;
+}
+.card:hover .s2a-l1 { stroke-dashoffset: 0; transition-delay: 0.08s; }
+.card:hover .s2a-l2 { stroke-dashoffset: 0; transition-delay: 0.18s; }
+.card:hover .s2a-l3 { stroke-dashoffset: 0; transition-delay: 0.28s; }
+
+.s2a-dot-c { opacity: 0.28; transition: opacity 0.3s ease-out; }
+.card:hover .s2a-d1 { opacity: 1; transition-delay: 0.2s; }
+.card:hover .s2a-d2 { opacity: 1; transition-delay: 0.3s; }
+.card:hover .s2a-d3 { opacity: 1; transition-delay: 0.4s; }
+
+.s2a-label {
+  position: absolute;
+  bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.22);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s 0.48s;
+}
+.card:hover .s2a-label { opacity: 1; }
+
+
+/* =====================================================
+   SCENE 2B — EYE + MAP (Ventura County, Variant B)
+   Grid background + large iris that expands on hover
+   ===================================================== */
+.s2b-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.s2b-grid { transition: transform 0.55s ease-out; }
+.card:hover .s2b-grid { transform: translate(4px, -3px); }
+
+/* Eye group scales from its own center */
+.s2b-eye-g {
+  transition: transform 0.48s ease-out;
+  transform-origin: 100px 90px;
+  transform-box: fill-box;
+}
+.card:hover .s2b-eye-g { transform: scale(1.12); }
+
+.s2b-iris {
+  transition: transform 0.42s 0.06s ease-out;
+  transform-origin: 100px 90px;
+  transform-box: fill-box;
+}
+.card:hover .s2b-iris { transform: scale(1.2); }
+
+.s2b-pupil {
+  transition: transform 0.38s 0.1s ease-out;
+  transform-origin: 100px 90px;
+  transform-box: fill-box;
+}
+.card:hover .s2b-pupil { transform: scale(1.3); }
+
+.s2b-badge {
+  position: absolute;
+  bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  background: rgba(220,38,38,0.1);
+  border: 1px solid rgba(220,38,38,0.28);
+  border-radius: 2px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: #dc2626;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s 0.42s;
+}
+.card:hover .s2b-badge { opacity: 1; }
+
+
+/* =====================================================
+   SCENE 3 — FILE STACK (Santa Cruz)
+   Three offset document cards; top lifts on hover
+   revealing a federal shield badge beneath
+   ===================================================== */
+.s3-wrap {
+  position: relative;
+  width: 196px;
+  height: 138px;
+}
+.s3-doc {
+  position: absolute;
+  width: 155px;
+  height: 106px;
+  border-radius: 3px;
+  padding: 9px 12px;
+  overflow: hidden;
+}
+.s3-doc-1 {
+  bottom: 0; left: 0;
+  background: rgba(10,10,10,0.9);
+  border: 1px solid rgba(255,255,255,0.06);
+  z-index: 1;
+  transform: rotate(3.5deg);
+  transition: transform 0.46s ease-out;
+}
+.s3-doc-2 {
+  bottom: 14px; left: 14px;
+  background: rgba(13,13,13,0.95);
+  border: 1px solid rgba(255,255,255,0.09);
+  z-index: 2;
+  transform: rotate(1.5deg);
+  transition: transform 0.46s 0.04s ease-out;
+}
+.s3-doc-3 {
+  bottom: 28px; left: 28px;
+  background: #161616;
+  border: 1px solid rgba(255,255,255,0.16);
+  z-index: 3;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.6);
+  transition: transform 0.46s ease-out, box-shadow 0.46s ease-out;
+}
+.card:hover .s3-doc-1 { transform: rotate(5deg) translate(-4px, 4px); }
+.card:hover .s3-doc-2 { transform: rotate(2.5deg) translate(-2px, 2px); }
+.card:hover .s3-doc-3 { transform: translateY(-18px); box-shadow: 0 20px 44px rgba(0,0,0,0.88); }
+
+.s3-doc-hdr {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.2);
+  margin-bottom: 8px;
+}
+.s3-line {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.07);
+  margin: 4px 0;
+}
+.s3-line.w88 { width: 88%; }
+.s3-line.w72 { width: 72%; }
+.s3-line.w55 { width: 55%; }
+.s3-line.w80 { width: 80%; }
+
+/* Federal shield (was hidden beneath top doc) */
+.s3-shield {
+  position: absolute;
+  right: 6px; bottom: 10px;
+  z-index: 2;
+  opacity: 0;
+  transform: scale(0.72) translateY(6px);
+  transition: opacity 0.34s 0.3s, transform 0.34s 0.3s;
+}
+.card:hover .s3-shield { opacity: 1; transform: scale(1) translateY(0); }
+
+
+/* =====================================================
+   SCENE 4 — BADGE + STAMP (Spartanburg)
+   Sheriff badge mid-layer; CONVICTED stamp rotates in;
+   record lines in background drift back on hover
+   ===================================================== */
+.s4-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.s4-record {
+  transition: transform 0.52s ease-out;
+  opacity: 0.55;
+}
+.card:hover .s4-record { transform: translate(-4px, 3px); }
+
+.s4-badge {
+  transition: transform 0.46s ease-out;
+}
+.card:hover .s4-badge { transform: translate(3px, -3px); }
+
+.s4-stamp {
+  opacity: 0;
+  transform: rotate(-25deg) scale(0.8);
+  transform-box: fill-box;
+  transform-origin: center center;
+  transition: opacity 0.42s 0.15s, transform 0.42s 0.15s cubic-bezier(0.34,1.56,0.64,1);
+}
+.card:hover .s4-stamp { opacity: 1; transform: rotate(-12deg) scale(1); }
+
+
+/* =====================================================
+   SCENE 5 — CAMERA PARALLAX (Austin)
+   Three ALPR cameras at different depths shift
+   independently on hover; "NET REDUCTION 0.0%" appears
+   ===================================================== */
+.s5-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.s5-far  { transition: transform 0.55s ease-out; opacity: 0.2; }
+.s5-mid  { transition: transform 0.55s 0.03s ease-out; opacity: 0.52; }
+.s5-near { transition: transform 0.55s 0.07s ease-out; opacity: 0.88; }
+
+.card:hover .s5-far  { transform: translate(-14px, 6px); }
+.card:hover .s5-mid  { transform: translate(7px, -11px); }
+.card:hover .s5-near { transform: translate(-7px, 15px); }
+
+.s5-count {
+  position: absolute;
+  bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  opacity: 0;
+  color: rgba(255,255,255,0.2);
+  transition: opacity 0.3s 0.44s, color 0.3s 0.44s;
+}
+.card:hover .s5-count { opacity: 1; color: #dc2626; }
+
+
+/* =====================================================
+   V2 — FULL BLEED
+   Scene fills card; text overlays at bottom
+   ===================================================== */
+.v2 .card {
+  min-height: 280px;
+  position: relative;
+}
+.v2 .scene {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  border-bottom: none;
+}
+.v2 .card-body {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 20;
+  background: linear-gradient(to top,
+    rgba(13,13,13,0.97) 0%,
+    rgba(13,13,13,0.78) 30%,
+    rgba(13,13,13,0.18) 60%,
+    transparent 100%
+  );
+  padding: 22px 16px 18px;
+}
+</style>
+</head>
+<body>
+
+<h1>Case Studies — 2.5D Hover Concepts</h1>
+<p class="sub">Hover each card to preview the animation. V1 = split layout · V2 = full bleed overlay.</p>
+
+<!-- ============================================================
+     SECTION 1 — SCENE CONCEPTS (concept row, 6 cells)
+     ============================================================ -->
+<div class="section">
+  <h2>Scene Concepts — Hover to Preview</h2>
+  <div class="concept-row">
+
+    <!-- ── Card 1: False Match ── -->
+    <div class="card">
+      <div class="scene">
+        <div class="s1-wrap">
+          <div class="s1-plate s1-back">
+            <div class="s1-plate-tag">DATABASE ENTRY</div>
+            <div class="s1-plate-num">GHP·4892</div>
+            <div class="s1-plate-state">SOUTH CAROLINA</div>
+          </div>
+          <div class="s1-plate s1-front">
+            <div class="s1-plate-tag">ALPR SCAN</div>
+            <div class="s1-plate-num">GHP·4892</div>
+            <div class="s1-plate-state">SOUTH CAROLINA</div>
+          </div>
+          <div class="s1-neq">≠</div>
+          <div class="s1-badge">
+            <div class="s1-dot"></div>
+            FALSE MATCH · ARREST MADE
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Greenville, SC</div>
+        <div class="card-title">False Arrest from ALPR Error</div>
+        <div class="card-blurb">A misread scan flagged an innocent driver as a stolen vehicle match. Charges were later dropped.</div>
+      </div>
+      <div class="card-num">01</div>
+    </div>
+
+    <!-- ── Card 2A: Data Web (Ventura, Variant A) ── -->
+    <div class="card">
+      <div class="scene" style="overflow:hidden;">
+        <svg class="s2a-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet">
+          <!-- Far layer: California outline -->
+          <g class="s2a-ca">
+            <path d="M78,18 L84,22 L88,32 L90,45 L88,58 L92,72 L90,88 L88,104 L84,118 L78,130 L70,140 L60,148 L52,152 L44,148 L40,138 L38,126 L40,114 L44,102 L42,90 L44,78 L48,66 L50,54 L48,42 L52,32 L58,22 L66,16 Z"
+              fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.2"/>
+          </g>
+          <!-- Mid layer: connecting lines -->
+          <g class="s2a-lines">
+            <line class="s2a-line s2a-l1" x1="66" y1="84" x2="158" y2="52"
+              stroke="rgba(220,38,38,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+            <line class="s2a-line s2a-l2" x1="66" y1="84" x2="162" y2="96"
+              stroke="rgba(220,38,38,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+            <line class="s2a-line s2a-l3" x1="66" y1="84" x2="155" y2="138"
+              stroke="rgba(220,38,38,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+          </g>
+          <!-- Near layer: dots at destinations + source -->
+          <g class="s2a-dots">
+            <circle cx="66" cy="84" r="5" fill="#dc2626" opacity="0.7"/>
+            <circle class="s2a-dot-c s2a-d1" cx="158" cy="52" r="5" fill="#dc2626"/>
+            <circle class="s2a-dot-c s2a-d1" cx="158" cy="52" r="9" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+            <circle class="s2a-dot-c s2a-d2" cx="162" cy="96" r="5" fill="#dc2626"/>
+            <circle class="s2a-dot-c s2a-d2" cx="162" cy="96" r="9" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+            <circle class="s2a-dot-c s2a-d3" cx="155" cy="138" r="5" fill="#dc2626"/>
+            <circle class="s2a-dot-c s2a-d3" cx="155" cy="138" r="9" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+          </g>
+        </svg>
+        <div class="s2a-label">364,000 OUT-OF-STATE QUERIES</div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Ventura County, CA · Variant A</div>
+        <div class="card-title">364,000 Out-of-State Queries</div>
+        <div class="card-blurb">ALPR data shared with agencies across the country, without oversight or consent.</div>
+      </div>
+      <div class="card-num">02A</div>
+    </div>
+
+    <!-- ── Card 2B: Eye + Map (Ventura, Variant B) ── -->
+    <div class="card">
+      <div class="scene" style="overflow:hidden;">
+        <svg class="s2b-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet">
+          <!-- Far: grid -->
+          <g class="s2b-grid">
+            <line x1="0" y1="30" x2="200" y2="30" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="0" y1="60" x2="200" y2="60" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="0" y1="90" x2="200" y2="90" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="0" y1="120" x2="200" y2="120" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="0" y1="150" x2="200" y2="150" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="40" y1="0" x2="40" y2="180" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="80" y1="0" x2="80" y2="180" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="120" y1="0" x2="120" y2="180" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="160" y1="0" x2="160" y2="180" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          </g>
+          <!-- Near: Eye -->
+          <g class="s2b-eye-g">
+            <!-- Eye whites / surround glow -->
+            <ellipse cx="100" cy="90" rx="62" ry="30" fill="rgba(13,13,13,0.8)"/>
+            <!-- Eyelid paths -->
+            <path d="M38,90 Q100,44 162,90" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+            <path d="M38,90 Q100,136 162,90" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+            <!-- Iris -->
+            <circle class="s2b-iris" cx="100" cy="90" r="22" fill="#1a0000" stroke="rgba(220,38,38,0.5)" stroke-width="1.5"/>
+            <!-- Iris rings -->
+            <circle cx="100" cy="90" r="17" fill="none" stroke="rgba(220,38,38,0.2)" stroke-width="1"/>
+            <!-- Pupil -->
+            <circle class="s2b-pupil" cx="100" cy="90" r="10" fill="#dc2626" opacity="0.85"/>
+            <circle cx="100" cy="90" r="5" fill="#0d0d0d"/>
+            <!-- Specular -->
+            <circle cx="107" cy="84" r="3" fill="rgba(255,255,255,0.15)"/>
+          </g>
+        </svg>
+        <div class="s2b-badge">364,000 QUERIES</div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Ventura County, CA · Variant B</div>
+        <div class="card-title">364,000 Out-of-State Queries</div>
+        <div class="card-blurb">ALPR data shared with agencies across the country, without oversight or consent.</div>
+      </div>
+      <div class="card-num">02B</div>
+    </div>
+
+    <!-- ── Card 3: File Stack (Santa Cruz) ── -->
+    <div class="card">
+      <div class="scene">
+        <div class="s3-wrap">
+          <!-- Doc 1 (bottom/far) -->
+          <div class="s3-doc s3-doc-1">
+            <div class="s3-doc-hdr">CASE FILE</div>
+            <div class="s3-line w88"></div>
+            <div class="s3-line w72"></div>
+            <div class="s3-line w55"></div>
+            <div class="s3-line w80"></div>
+          </div>
+          <!-- Doc 2 (mid) -->
+          <div class="s3-doc s3-doc-2">
+            <div class="s3-doc-hdr">QUERY LOG</div>
+            <div class="s3-line w88"></div>
+            <div class="s3-line w72"></div>
+            <div class="s3-line w55"></div>
+            <div class="s3-line w80"></div>
+          </div>
+          <!-- Doc 3 (top/near) -->
+          <div class="s3-doc s3-doc-3">
+            <div class="s3-doc-hdr">AUTH. RECORD</div>
+            <div class="s3-line w88"></div>
+            <div class="s3-line w72"></div>
+            <div class="s3-line w55"></div>
+            <div class="s3-line w80"></div>
+          </div>
+          <!-- Federal shield (hidden beneath top doc, reveals on hover) -->
+          <div class="s3-shield">
+            <svg width="38" height="44" viewBox="0 0 38 44">
+              <path d="M19,2 L35,8 L35,22 C35,33 19,42 19,42 C19,42 3,33 3,22 L3,8 Z"
+                fill="rgba(220,38,38,0.1)" stroke="rgba(220,38,38,0.5)" stroke-width="1.2"/>
+              <text x="19" y="20" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="7" fill="rgba(220,38,38,0.8)" letter-spacing="0">FED.</text>
+              <text x="19" y="30" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="5.5" fill="rgba(220,38,38,0.6)" letter-spacing="0">AUTHORITY</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Santa Cruz, CA</div>
+        <div class="card-title">4,000 Federal Agency Searches</div>
+        <div class="card-blurb">Federal authorities ran thousands of unauthorized queries on local ALPR data.</div>
+      </div>
+      <div class="card-num">03</div>
+    </div>
+
+    <!-- ── Card 4: Badge + Stamp (Spartanburg) ── -->
+    <div class="card">
+      <div class="scene" style="overflow:hidden;">
+        <svg class="s4-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet">
+          <!-- Far: personnel record lines -->
+          <g class="s4-record">
+            <text x="28" y="36" font-family="DM Mono,monospace" font-size="7"
+              fill="rgba(255,255,255,0.18)" letter-spacing="2">PERSONNEL RECORD</text>
+            <rect x="28" y="44" width="80" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="28" y="54" width="62" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="28" y="64" width="74" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="28" y="74" width="50" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <text x="28" y="94" font-family="DM Mono,monospace" font-size="6"
+              fill="rgba(255,255,255,0.12)" letter-spacing="1">ROLE · SHERIFF</text>
+            <text x="28" y="106" font-family="DM Mono,monospace" font-size="6"
+              fill="rgba(255,255,255,0.12)" letter-spacing="1">ACCESS · UNRESTRICTED</text>
+          </g>
+          <!-- Mid: sheriff star badge -->
+          <g class="s4-badge">
+            <circle cx="148" cy="110" r="34" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+            <polygon
+              points="148,79 154,96 172,96 158,107 163,124 148,113 133,124 138,107 124,96 142,96"
+              fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.2"/>
+            <circle cx="148" cy="105" r="10" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+            <text x="148" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+              font-size="5" fill="rgba(255,255,255,0.25)" letter-spacing="0.5">SHERIFF</text>
+          </g>
+          <!-- Near: CONVICTED stamp (rotates in) -->
+          <g class="s4-stamp">
+            <rect x="30" y="88" width="140" height="40" rx="3"
+              fill="rgba(220,38,38,0.08)" stroke="rgba(220,38,38,0.6)" stroke-width="1.5"/>
+            <text x="100" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+              font-size="20" font-weight="500" fill="#dc2626" letter-spacing="2">CONVICTED</text>
+            <text x="100" y="122" text-anchor="middle" font-family="DM Mono,monospace"
+              font-size="8" fill="rgba(220,38,38,0.7)" letter-spacing="3">FEDERAL CHARGE</text>
+          </g>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Spartanburg, SC</div>
+        <div class="card-title">Sheriff Convicted of Stalking</div>
+        <div class="card-blurb">A sitting sheriff used unrestricted ALPR access to track and stalk private citizens.</div>
+      </div>
+      <div class="card-num">04</div>
+    </div>
+
+    <!-- ── Card 5: Camera Parallax (Austin) ── -->
+    <div class="card">
+      <div class="scene" style="overflow:hidden;">
+        <svg class="s5-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet">
+          <!-- Camera icon path (body + lens + bracket) -->
+          <!-- Far: small camera, top-left -->
+          <g class="s5-far" transform="translate(24,22) scale(0.52)">
+            <rect x="0" y="12" width="60" height="38" rx="3" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect x="18" y="5" width="20" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="11" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="6" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="30" cy="31" r="3" fill="rgba(255,255,255,0.4)"/>
+          </g>
+          <!-- Mid: medium camera, right side -->
+          <g class="s5-mid" transform="translate(108,52) scale(0.78)">
+            <rect x="0" y="12" width="60" height="38" rx="3" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect x="18" y="5" width="20" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="11" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="6" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="30" cy="31" r="3" fill="rgba(255,255,255,0.4)"/>
+          </g>
+          <!-- Near: large camera, bottom-left foreground -->
+          <g class="s5-near" transform="translate(18,92) scale(1.1)">
+            <rect x="0" y="12" width="60" height="38" rx="3" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect x="18" y="5" width="20" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="11" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="6" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="30" cy="31" r="3" fill="rgba(255,255,255,0.4)"/>
+          </g>
+        </svg>
+        <div class="s5-count">NET REDUCTION · 0.0%</div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Austin, TX</div>
+        <div class="card-title">Zero Measurable Crime Reduction</div>
+        <div class="card-blurb">An independent audit found ALPR cameras had zero statistical impact on crime rates.</div>
+      </div>
+      <div class="card-num">05</div>
+    </div>
+
+  </div><!-- /concept-row -->
+</div><!-- /section -->
+
+
+<!-- ============================================================
+     SECTION 2 — VARIANT 1: SPLIT (scene ~55%, text below)
+     ============================================================ -->
+<div class="section">
+  <h2>Variant 1 — Split Layout</h2>
+  <div class="bento">
+
+    <!-- Card 1 -->
+    <div class="card">
+      <div class="scene">
+        <div class="s1-wrap">
+          <div class="s1-plate s1-back">
+            <div class="s1-plate-tag">DATABASE ENTRY</div>
+            <div class="s1-plate-num">GHP·4892</div>
+            <div class="s1-plate-state">SOUTH CAROLINA</div>
+          </div>
+          <div class="s1-plate s1-front">
+            <div class="s1-plate-tag">ALPR SCAN</div>
+            <div class="s1-plate-num">GHP·4892</div>
+            <div class="s1-plate-state">SOUTH CAROLINA</div>
+          </div>
+          <div class="s1-neq">≠</div>
+          <div class="s1-badge"><div class="s1-dot"></div>FALSE MATCH · ARREST MADE</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Greenville, SC</div>
+        <div class="card-title">False Arrest from ALPR Error</div>
+        <div class="card-blurb">A misread scan flagged an innocent driver as a stolen vehicle match. Charges were later dropped.</div>
+      </div>
+      <div class="card-num">01</div>
+    </div>
+
+    <!-- Card 2 (using Variant A — Data Web for V1) -->
+    <div class="card">
+      <div class="scene" style="overflow:hidden;">
+        <svg class="s2a-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet">
+          <g class="s2a-ca">
+            <path d="M78,18 L84,22 L88,32 L90,45 L88,58 L92,72 L90,88 L88,104 L84,118 L78,130 L70,140 L60,148 L52,152 L44,148 L40,138 L38,126 L40,114 L44,102 L42,90 L44,78 L48,66 L50,54 L48,42 L52,32 L58,22 L66,16 Z"
+              fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.2"/>
+          </g>
+          <g class="s2a-lines">
+            <line class="s2a-line s2a-l1" x1="66" y1="84" x2="158" y2="52"
+              stroke="rgba(220,38,38,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+            <line class="s2a-line s2a-l2" x1="66" y1="84" x2="162" y2="96"
+              stroke="rgba(220,38,38,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+            <line class="s2a-line s2a-l3" x1="66" y1="84" x2="155" y2="138"
+              stroke="rgba(220,38,38,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+          </g>
+          <g class="s2a-dots">
+            <circle cx="66" cy="84" r="5" fill="#dc2626" opacity="0.7"/>
+            <circle class="s2a-dot-c s2a-d1" cx="158" cy="52" r="5" fill="#dc2626"/>
+            <circle class="s2a-dot-c s2a-d1" cx="158" cy="52" r="9" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+            <circle class="s2a-dot-c s2a-d2" cx="162" cy="96" r="5" fill="#dc2626"/>
+            <circle class="s2a-dot-c s2a-d2" cx="162" cy="96" r="9" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+            <circle class="s2a-dot-c s2a-d3" cx="155" cy="138" r="5" fill="#dc2626"/>
+            <circle class="s2a-dot-c s2a-d3" cx="155" cy="138" r="9" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+          </g>
+        </svg>
+        <div class="s2a-label">364,000 OUT-OF-STATE QUERIES</div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Ventura County, CA</div>
+        <div class="card-title">364,000 Out-of-State Queries</div>
+        <div class="card-blurb">ALPR data shared with agencies across the country, without oversight or consent.</div>
+      </div>
+      <div class="card-num">02</div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="card">
+      <div class="scene">
+        <div class="s3-wrap">
+          <div class="s3-doc s3-doc-1">
+            <div class="s3-doc-hdr">CASE FILE</div>
+            <div class="s3-line w88"></div><div class="s3-line w72"></div>
+            <div class="s3-line w55"></div><div class="s3-line w80"></div>
+          </div>
+          <div class="s3-doc s3-doc-2">
+            <div class="s3-doc-hdr">QUERY LOG</div>
+            <div class="s3-line w88"></div><div class="s3-line w72"></div>
+            <div class="s3-line w55"></div><div class="s3-line w80"></div>
+          </div>
+          <div class="s3-doc s3-doc-3">
+            <div class="s3-doc-hdr">AUTH. RECORD</div>
+            <div class="s3-line w88"></div><div class="s3-line w72"></div>
+            <div class="s3-line w55"></div><div class="s3-line w80"></div>
+          </div>
+          <div class="s3-shield">
+            <svg width="38" height="44" viewBox="0 0 38 44">
+              <path d="M19,2 L35,8 L35,22 C35,33 19,42 19,42 C19,42 3,33 3,22 L3,8 Z"
+                fill="rgba(220,38,38,0.1)" stroke="rgba(220,38,38,0.5)" stroke-width="1.2"/>
+              <text x="19" y="20" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="7" fill="rgba(220,38,38,0.8)">FED.</text>
+              <text x="19" y="30" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="5.5" fill="rgba(220,38,38,0.6)">AUTHORITY</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Santa Cruz, CA</div>
+        <div class="card-title">4,000 Federal Agency Searches</div>
+        <div class="card-blurb">Federal authorities ran thousands of unauthorized queries on local ALPR data.</div>
+      </div>
+      <div class="card-num">03</div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="card">
+      <div class="scene" style="overflow:hidden;">
+        <svg class="s4-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet">
+          <g class="s4-record">
+            <text x="28" y="36" font-family="DM Mono,monospace" font-size="7"
+              fill="rgba(255,255,255,0.18)" letter-spacing="2">PERSONNEL RECORD</text>
+            <rect x="28" y="44" width="80" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="28" y="54" width="62" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="28" y="64" width="74" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="28" y="74" width="50" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <text x="28" y="94" font-family="DM Mono,monospace" font-size="6"
+              fill="rgba(255,255,255,0.12)" letter-spacing="1">ROLE · SHERIFF</text>
+            <text x="28" y="106" font-family="DM Mono,monospace" font-size="6"
+              fill="rgba(255,255,255,0.12)" letter-spacing="1">ACCESS · UNRESTRICTED</text>
+          </g>
+          <g class="s4-badge">
+            <circle cx="148" cy="110" r="34" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+            <polygon
+              points="148,79 154,96 172,96 158,107 163,124 148,113 133,124 138,107 124,96 142,96"
+              fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.2"/>
+            <circle cx="148" cy="105" r="10" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+            <text x="148" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+              font-size="5" fill="rgba(255,255,255,0.25)" letter-spacing="0.5">SHERIFF</text>
+          </g>
+          <g class="s4-stamp">
+            <rect x="30" y="88" width="140" height="40" rx="3"
+              fill="rgba(220,38,38,0.08)" stroke="rgba(220,38,38,0.6)" stroke-width="1.5"/>
+            <text x="100" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+              font-size="20" font-weight="500" fill="#dc2626" letter-spacing="2">CONVICTED</text>
+            <text x="100" y="122" text-anchor="middle" font-family="DM Mono,monospace"
+              font-size="8" fill="rgba(220,38,38,0.7)" letter-spacing="3">FEDERAL CHARGE</text>
+          </g>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Spartanburg, SC</div>
+        <div class="card-title">Sheriff Convicted of Stalking</div>
+        <div class="card-blurb">A sitting sheriff used unrestricted ALPR access to track and stalk private citizens.</div>
+      </div>
+      <div class="card-num">04</div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="card">
+      <div class="scene" style="overflow:hidden;">
+        <svg class="s5-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet">
+          <g class="s5-far" transform="translate(24,22) scale(0.52)">
+            <rect x="0" y="12" width="60" height="38" rx="3" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect x="18" y="5" width="20" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="11" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="6" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="30" cy="31" r="3" fill="rgba(255,255,255,0.4)"/>
+          </g>
+          <g class="s5-mid" transform="translate(108,52) scale(0.78)">
+            <rect x="0" y="12" width="60" height="38" rx="3" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect x="18" y="5" width="20" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="11" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="6" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="30" cy="31" r="3" fill="rgba(255,255,255,0.4)"/>
+          </g>
+          <g class="s5-near" transform="translate(18,92) scale(1.1)">
+            <rect x="0" y="12" width="60" height="38" rx="3" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect x="18" y="5" width="20" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="11" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="6" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="30" cy="31" r="3" fill="rgba(255,255,255,0.4)"/>
+          </g>
+        </svg>
+        <div class="s5-count">NET REDUCTION · 0.0%</div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Austin, TX</div>
+        <div class="card-title">Zero Measurable Crime Reduction</div>
+        <div class="card-blurb">An independent audit found ALPR cameras had zero statistical impact on crime rates.</div>
+      </div>
+      <div class="card-num">05</div>
+    </div>
+
+  </div><!-- /bento V1 -->
+</div><!-- /section -->
+
+
+<!-- ============================================================
+     SECTION 3 — VARIANT 2: FULL BLEED (text overlaid)
+     ============================================================ -->
+<div class="section">
+  <h2>Variant 2 — Full Bleed (text overlay)</h2>
+  <div class="bento v2">
+
+    <!-- Card 1 -->
+    <div class="card v2-card">
+      <div class="scene">
+        <div class="s1-wrap">
+          <div class="s1-plate s1-back">
+            <div class="s1-plate-tag">DATABASE ENTRY</div>
+            <div class="s1-plate-num">GHP·4892</div>
+            <div class="s1-plate-state">SOUTH CAROLINA</div>
+          </div>
+          <div class="s1-plate s1-front">
+            <div class="s1-plate-tag">ALPR SCAN</div>
+            <div class="s1-plate-num">GHP·4892</div>
+            <div class="s1-plate-state">SOUTH CAROLINA</div>
+          </div>
+          <div class="s1-neq">≠</div>
+          <div class="s1-badge"><div class="s1-dot"></div>FALSE MATCH · ARREST MADE</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Greenville, SC</div>
+        <div class="card-title">False Arrest from ALPR Error</div>
+        <div class="card-blurb">A misread scan flagged an innocent driver as a stolen vehicle match.</div>
+      </div>
+      <div class="card-num">01</div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="card v2-card">
+      <div class="scene" style="overflow:hidden;">
+        <svg class="s2a-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet">
+          <g class="s2a-ca">
+            <path d="M78,18 L84,22 L88,32 L90,45 L88,58 L92,72 L90,88 L88,104 L84,118 L78,130 L70,140 L60,148 L52,152 L44,148 L40,138 L38,126 L40,114 L44,102 L42,90 L44,78 L48,66 L50,54 L48,42 L52,32 L58,22 L66,16 Z"
+              fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.2"/>
+          </g>
+          <g class="s2a-lines">
+            <line class="s2a-line s2a-l1" x1="66" y1="84" x2="158" y2="52"
+              stroke="rgba(220,38,38,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+            <line class="s2a-line s2a-l2" x1="66" y1="84" x2="162" y2="96"
+              stroke="rgba(220,38,38,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+            <line class="s2a-line s2a-l3" x1="66" y1="84" x2="155" y2="138"
+              stroke="rgba(220,38,38,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+          </g>
+          <g class="s2a-dots">
+            <circle cx="66" cy="84" r="5" fill="#dc2626" opacity="0.7"/>
+            <circle class="s2a-dot-c s2a-d1" cx="158" cy="52" r="5" fill="#dc2626"/>
+            <circle class="s2a-dot-c s2a-d1" cx="158" cy="52" r="9" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+            <circle class="s2a-dot-c s2a-d2" cx="162" cy="96" r="5" fill="#dc2626"/>
+            <circle class="s2a-dot-c s2a-d2" cx="162" cy="96" r="9" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+            <circle class="s2a-dot-c s2a-d3" cx="155" cy="138" r="5" fill="#dc2626"/>
+            <circle class="s2a-dot-c s2a-d3" cx="155" cy="138" r="9" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+          </g>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Ventura County, CA</div>
+        <div class="card-title">364,000 Out-of-State Queries</div>
+        <div class="card-blurb">ALPR data shared with agencies across the country, without oversight or consent.</div>
+      </div>
+      <div class="card-num">02</div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="card v2-card">
+      <div class="scene">
+        <div class="s3-wrap">
+          <div class="s3-doc s3-doc-1">
+            <div class="s3-doc-hdr">CASE FILE</div>
+            <div class="s3-line w88"></div><div class="s3-line w72"></div>
+            <div class="s3-line w55"></div><div class="s3-line w80"></div>
+          </div>
+          <div class="s3-doc s3-doc-2">
+            <div class="s3-doc-hdr">QUERY LOG</div>
+            <div class="s3-line w88"></div><div class="s3-line w72"></div>
+            <div class="s3-line w55"></div><div class="s3-line w80"></div>
+          </div>
+          <div class="s3-doc s3-doc-3">
+            <div class="s3-doc-hdr">AUTH. RECORD</div>
+            <div class="s3-line w88"></div><div class="s3-line w72"></div>
+            <div class="s3-line w55"></div><div class="s3-line w80"></div>
+          </div>
+          <div class="s3-shield">
+            <svg width="38" height="44" viewBox="0 0 38 44">
+              <path d="M19,2 L35,8 L35,22 C35,33 19,42 19,42 C19,42 3,33 3,22 L3,8 Z"
+                fill="rgba(220,38,38,0.1)" stroke="rgba(220,38,38,0.5)" stroke-width="1.2"/>
+              <text x="19" y="20" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="7" fill="rgba(220,38,38,0.8)">FED.</text>
+              <text x="19" y="30" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="5.5" fill="rgba(220,38,38,0.6)">AUTHORITY</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Santa Cruz, CA</div>
+        <div class="card-title">4,000 Federal Agency Searches</div>
+        <div class="card-blurb">Federal authorities ran thousands of unauthorized queries on local ALPR data.</div>
+      </div>
+      <div class="card-num">03</div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="card v2-card">
+      <div class="scene" style="overflow:hidden;">
+        <svg class="s4-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet">
+          <g class="s4-record">
+            <text x="28" y="36" font-family="DM Mono,monospace" font-size="7"
+              fill="rgba(255,255,255,0.18)" letter-spacing="2">PERSONNEL RECORD</text>
+            <rect x="28" y="44" width="80" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="28" y="54" width="62" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="28" y="64" width="74" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <rect x="28" y="74" width="50" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+            <text x="28" y="94" font-family="DM Mono,monospace" font-size="6"
+              fill="rgba(255,255,255,0.12)" letter-spacing="1">ROLE · SHERIFF</text>
+            <text x="28" y="106" font-family="DM Mono,monospace" font-size="6"
+              fill="rgba(255,255,255,0.12)" letter-spacing="1">ACCESS · UNRESTRICTED</text>
+          </g>
+          <g class="s4-badge">
+            <circle cx="148" cy="110" r="34" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+            <polygon
+              points="148,79 154,96 172,96 158,107 163,124 148,113 133,124 138,107 124,96 142,96"
+              fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.2"/>
+            <circle cx="148" cy="105" r="10" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+            <text x="148" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+              font-size="5" fill="rgba(255,255,255,0.25)" letter-spacing="0.5">SHERIFF</text>
+          </g>
+          <g class="s4-stamp">
+            <rect x="30" y="88" width="140" height="40" rx="3"
+              fill="rgba(220,38,38,0.08)" stroke="rgba(220,38,38,0.6)" stroke-width="1.5"/>
+            <text x="100" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+              font-size="20" font-weight="500" fill="#dc2626" letter-spacing="2">CONVICTED</text>
+            <text x="100" y="122" text-anchor="middle" font-family="DM Mono,monospace"
+              font-size="8" fill="rgba(220,38,38,0.7)" letter-spacing="3">FEDERAL CHARGE</text>
+          </g>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Spartanburg, SC</div>
+        <div class="card-title">Sheriff Convicted of Stalking</div>
+        <div class="card-blurb">A sitting sheriff used unrestricted ALPR access to track and stalk private citizens.</div>
+      </div>
+      <div class="card-num">04</div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="card v2-card">
+      <div class="scene" style="overflow:hidden;">
+        <svg class="s5-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet">
+          <g class="s5-far" transform="translate(24,22) scale(0.52)">
+            <rect x="0" y="12" width="60" height="38" rx="3" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect x="18" y="5" width="20" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="11" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="6" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="30" cy="31" r="3" fill="rgba(255,255,255,0.4)"/>
+          </g>
+          <g class="s5-mid" transform="translate(108,52) scale(0.78)">
+            <rect x="0" y="12" width="60" height="38" rx="3" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect x="18" y="5" width="20" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="11" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="6" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="30" cy="31" r="3" fill="rgba(255,255,255,0.4)"/>
+          </g>
+          <g class="s5-near" transform="translate(18,92) scale(1.1)">
+            <rect x="0" y="12" width="60" height="38" rx="3" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect x="18" y="5" width="20" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="11" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <circle cx="30" cy="31" r="6" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="30" cy="31" r="3" fill="rgba(255,255,255,0.4)"/>
+          </g>
+        </svg>
+        <div class="s5-count">NET REDUCTION · 0.0%</div>
+      </div>
+      <div class="card-body">
+        <div class="card-loc">Austin, TX</div>
+        <div class="card-title">Zero Measurable Crime Reduction</div>
+        <div class="card-blurb">An independent audit found ALPR cameras had zero statistical impact on crime rates.</div>
+      </div>
+      <div class="card-num">05</div>
+    </div>
+
+  </div><!-- /bento V2 -->
+</div><!-- /section -->
+
+</body>
+</html>
