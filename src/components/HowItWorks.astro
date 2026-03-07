@@ -163,7 +163,42 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
       </div>
       <!-- Bottom row: 2 cards -->
       <div class="cs-card" data-overlay="3" tabindex="0" role="group" aria-label="Case study 4 of 5">
-        <div class="cs-scene" id="scene-4"><!-- Card 4 scene goes here --></div>
+        <div class="cs-scene" id="scene-4">
+          <svg class="s4-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet"
+            style="position:absolute;inset:0;width:100%;height:100%;">
+            <!-- Far: personnel record lines -->
+            <g class="s4-record">
+              <text x="28" y="36" font-family="DM Mono,monospace" font-size="7"
+                fill="rgba(255,255,255,0.18)" letter-spacing="2">PERSONNEL RECORD</text>
+              <rect x="28" y="44" width="80" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+              <rect x="28" y="54" width="62" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+              <rect x="28" y="64" width="74" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+              <rect x="28" y="74" width="50" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+              <text x="28" y="94" font-family="DM Mono,monospace" font-size="6"
+                fill="rgba(255,255,255,0.12)" letter-spacing="1">ROLE · SHERIFF</text>
+              <text x="28" y="106" font-family="DM Mono,monospace" font-size="6"
+                fill="rgba(255,255,255,0.12)" letter-spacing="1">ACCESS · UNRESTRICTED</text>
+            </g>
+            <!-- Mid: sheriff star badge -->
+            <g class="s4-badge-icon">
+              <circle cx="148" cy="110" r="34" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+              <polygon points="148,79 154,96 172,96 158,107 163,124 148,113 133,124 138,107 124,96 142,96"
+                fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.2"/>
+              <circle cx="148" cy="105" r="10" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+              <text x="148" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="5" fill="rgba(255,255,255,0.25)" letter-spacing="0.5">SHERIFF</text>
+            </g>
+            <!-- Near: CONVICTED stamp -->
+            <g class="s4-stamp">
+              <rect x="30" y="88" width="140" height="40" rx="3"
+                fill="rgba(220,38,38,0.08)" stroke="rgba(220,38,38,0.6)" stroke-width="1.5"/>
+              <text x="100" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="20" font-weight="500" fill="#dc2626" letter-spacing="2">CONVICTED</text>
+              <text x="100" y="122" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="8" fill="rgba(220,38,38,0.7)" letter-spacing="3">FEDERAL CHARGE</text>
+            </g>
+          </svg>
+        </div>
         <div class="cs-body">
           <div class="cs-loc">Spartanburg, SC</div>
           <div class="cs-title">Sheriff Convicted of Stalking</div>
@@ -381,6 +416,20 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     transition: opacity 0.34s 0.3s, transform 0.34s 0.3s;
   }
   .cs-card:hover .s3-shield { opacity: 1; transform: scale(1) translateY(0); }
+
+  /* Card 4 — Badge + Stamp */
+  .s4-record { transition: transform 0.52s ease-out; opacity: 0.55; }
+  .cs-card:hover .s4-record { transform: translate(-4px,3px); }
+
+  .s4-badge-icon { transition: transform 0.46s ease-out; }
+  .cs-card:hover .s4-badge-icon { transform: translate(3px,-3px); }
+
+  .s4-stamp {
+    opacity: 0; transform: rotate(-25deg) scale(0.8);
+    transform-box: fill-box; transform-origin: center center;
+    transition: opacity 0.42s 0.15s, transform 0.42s 0.15s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .cs-card:hover .s4-stamp { opacity: 1; transform: rotate(-12deg) scale(1); }
 
   /* Mobile: single column */
   @media (max-width: 767px) {
