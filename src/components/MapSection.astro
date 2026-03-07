@@ -88,6 +88,13 @@
         <span class="map-live-dot"></span>
         ALPR Network
       </div>
+      <button id="scroll-toggle" type="button" class="map-scroll-btn" aria-pressed="false">
+        <svg class="scroll-btn-icon" width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+          <rect x="2" y="4.5" width="7" height="5.5" rx="0.75" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M3.5 4.5V3a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span class="scroll-btn-label">Scroll to zoom</span>
+      </button>
       <div id="map-container" style="height: 600px; clip-path: inset(0);">
         <div id="camera-map" style="width: 100%; height: 100%;" role="application" aria-label="ALPR Camera Map"></div>
       </div>
@@ -108,6 +115,46 @@
 </section>
 
 <style>
+  /* Scroll-to-zoom toggle button */
+  .map-scroll-btn {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #737373;
+    background: rgba(13, 13, 13, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 5px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .map-scroll-btn:hover {
+    color: #a3a3a3;
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  .map-scroll-btn[aria-pressed="true"] {
+    color: #dc2626;
+    border-color: rgba(220, 38, 38, 0.4);
+  }
+  .map-scroll-btn[aria-pressed="true"] .scroll-btn-icon {
+    color: #dc2626;
+  }
+  .scroll-btn-icon {
+    flex-shrink: 0;
+    color: #555;
+    transition: color 0.15s;
+  }
+
   /* ALPR Network badge overlay */
   .map-badge {
     position: absolute;
@@ -343,6 +390,15 @@
       frame.classList.add('block');
     }
     loadAndResize();
+  });
+
+  // Scroll-to-zoom toggle
+  document.getElementById('scroll-toggle')?.addEventListener('click', async () => {
+    const btn = document.getElementById('scroll-toggle') as HTMLButtonElement;
+    const { toggleScrollZoom } = await import('../scripts/camera-map');
+    const enabled = toggleScrollZoom();
+    btn.setAttribute('aria-pressed', String(enabled));
+    btn.querySelector('.scroll-btn-label')!.textContent = enabled ? 'Scroll active' : 'Scroll to zoom';
   });
 
   // Frame glow cursor tracking

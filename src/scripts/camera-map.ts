@@ -316,6 +316,27 @@ function bindMapEvents() {
   map.on('mouseleave', 'camera-cones', () => { map!.getCanvas().style.cursor = ''; });
 }
 
+// --- Scroll zoom ---
+
+let scrollUnlocked = false;
+
+function setupScrollBehavior() {
+  if (!map) return;
+  const container = map.getContainer();
+  container.addEventListener('wheel', (e: WheelEvent) => {
+    if (!e.ctrlKey && !scrollUnlocked) return;
+    e.preventDefault();
+    if (!map) return;
+    const delta = e.deltaY * (e.deltaMode === 1 ? 30 : e.deltaMode === 2 ? 300 : 1);
+    map.setZoom(map.getZoom() - delta / 150);
+  }, { passive: false });
+}
+
+export function toggleScrollZoom(): boolean {
+  scrollUnlocked = !scrollUnlocked;
+  return scrollUnlocked;
+}
+
 // --- Map initialization ---
 
 function initMap() {
@@ -325,6 +346,7 @@ function initMap() {
     center: MAP_CENTER,
     zoom: MAP_ZOOM,
     attributionControl: false,
+    scrollZoom: false,
   });
 
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
@@ -362,6 +384,7 @@ function initMap() {
 
       addCameraLayers(geojson);
       bindMapEvents();
+      setupScrollBehavior();
     } catch (err) {
       console.error('Failed to load camera data:', err);
     }
