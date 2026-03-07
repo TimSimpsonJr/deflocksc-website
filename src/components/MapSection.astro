@@ -4,7 +4,7 @@
 <section id="map-section" aria-labelledby="map-section-heading" class="bg-[#0d0d0d] relative overflow-hidden">
 
   <!-- Ghost "242" background number -->
-  <div class="absolute top-[-20px] right-[-40px] font-black leading-none pointer-events-none select-none z-0"
+  <div class="absolute top-[-10px] right-[-40px] font-black leading-none pointer-events-none select-none z-0"
        style="font-size:clamp(12rem,22vw,22rem);color:rgba(220,38,38,0.05);letter-spacing:-0.06em;"
        aria-hidden="true">242</div>
 
@@ -13,14 +13,14 @@
 
     <!-- Left: heading + copy -->
     <div class="px-6 md:px-16 pt-10 md:pt-14 pb-10 md:pb-12 md:border-r md:border-[rgba(255,255,255,0.07)]">
-      <p data-reveal="right" class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-6">Upstate SC / Camera Network</p>
-      <h2 id="map-section-heading" data-reveal="right" data-reveal-delay="1" class="font-black leading-none tracking-[-0.035em] mb-8"
+      <p data-reveal="left" class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-6">Upstate SC / Camera Network</p>
+      <h2 id="map-section-heading" data-reveal="left" data-reveal-delay="1" class="font-black leading-none tracking-[-0.035em] mb-8"
           style="font-size:clamp(2rem,3.5vw,3rem);">
         Cameras are<br>already watching.
         <span class="block" style="color:rgba(232,232,232,0.2);">No rules attached.</span>
       </h2>
 
-      <div data-reveal="right" data-reveal-delay="2" class="space-y-5 text-[15px] text-[#a3a3a3] leading-[1.75] max-w-[520px]">
+      <div data-reveal="left" data-reveal-delay="2" class="space-y-5 text-[15px] text-[#a3a3a3] leading-[1.75] max-w-[520px]">
         <p>
           <strong class="text-[#e8e8e8]">Flock Safety cameras are up across Upstate SC:</strong> Greenville, Spartanburg, Anderson, and surrounding areas.
         </p>
@@ -153,6 +153,11 @@
     flex-shrink: 0;
     color: #a3a3a3;
     transition: color 0.15s;
+  }
+  @media (max-width: 767px) {
+    .map-scroll-btn {
+      display: none;
+    }
   }
 
   /* ALPR Network badge overlay */
