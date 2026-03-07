@@ -1,4 +1,8 @@
-# Maintainability Fix Plan
+# Maintainability Implementation Plan
+
+**Revised:** 2026-03-07 (updated after PR #41 merge)
+
+---
 
 ## Phase 1: Add Unit Test Infrastructure (do first — protects all later refactoring)
 
@@ -86,26 +90,42 @@ After extraction: ~225 lines (frontmatter + HTML template + CSS + one `import` l
 
 ---
 
-## Phase 4: Add Data Validation to CI (independent — can be done alongside any phase)
+## Phase 4: Extract BillTracker and ToolkitLegal Inline Scripts (newly identified)
 
-### Step 4.1: Add `python scripts/validate-data.py` step to `scrape-bills.yml`
+### Step 4.1: Extract BillTracker inline script
+- `src/components/BillTracker.astro` has a 108-line inline script
+- Create `src/scripts/bill-tracker.ts`
+- Follow the `camera-map.ts` pattern: typed module, thin import in `.astro`
+
+### Step 4.2: Extract ToolkitLegal inline script
+- `src/components/ToolkitLegal.astro` has a 122-line inline script
+- Create `src/scripts/toolkit-legal.ts`
+- Same pattern as above
+
+**Files: 2 new, 2 modified**
+
+---
+
+## Phase 5: Add Data Validation to CI (independent — can be done alongside any phase)
+
+### Step 5.1: Add `python scripts/validate-data.py` step to `scrape-bills.yml`
 - Insert after the scraper step, before the commit step
 
-### Step 4.2: Add `python scripts/validate-data.py` step to `scrape-reps.yml`
+### Step 5.2: Add `python scripts/validate-data.py` step to `scrape-reps.yml`
 - Add in each of the three jobs after scrape/build and before commit
 
 **Files: 2 workflow YAML files modified**
 
 ---
 
-## Phase 5: Extract Remaining Large Inline Scripts (polish pass)
+## Phase 6: Audit Remaining Inline Scripts (polish pass)
 
-### Step 5.1: Audit all components for inline scripts > 50 lines
-- MapSection.astro (58 lines) — already delegates to `camera-map.ts`, remaining code is thin glue. **Leave as-is.**
+### Step 6.1: Audit all components for inline scripts > 50 lines
+- MapSection.astro (59 lines) — already delegates to `camera-map.ts`, remaining code is thin glue. **Leave as-is.**
 - HowItWorks.astro — already extracted to `case-studies.ts`. **No action.**
-- BillTracker, ToolkitTabs, Toolkit* — audit and extract if >50 lines of logic
+- Any others found during audit — extract following the `camera-map.ts` pattern
 
-### Step 5.2: Extract any that exceed threshold
+### Step 6.2: Extract any that exceed threshold
 Follow the `camera-map.ts` pattern: typed module in `src/scripts/`, thin import in `.astro`.
 
 **Files: 0-3 new depending on audit**
@@ -117,8 +137,9 @@ Follow the `camera-map.ts` pattern: typed module in `src/scripts/`, thin import 
 ```
 Phase 1 (Tests) ──────> Phase 2 (TS) ──────> Phase 3 (ActionModal split)
                                                         │
-Phase 4 (CI validation) ── independent, do anytime      │
-                                                   Phase 5 (other scripts)
+Phase 4 (BillTracker + ToolkitLegal) ── after Phase 1   │
+                                                   Phase 6 (audit remaining)
+Phase 5 (CI validation) ── independent, do anytime
 ```
 
 ## Totals
@@ -128,12 +149,14 @@ Phase 4 (CI validation) ── independent, do anytime      │
 | 1     | 3         | 1              |
 | 2     | 0         | 3 (renames)    |
 | 3     | 6         | 1              |
-| 4     | 0         | 2              |
-| 5     | 0-3       | 0-3            |
-| **Total** | **9-12** | **7-10**   |
+| 4     | 2         | 2              |
+| 5     | 0         | 2              |
+| 6     | 0-3       | 0-3            |
+| **Total** | **11-14** | **9-12**  |
 
 ## Risks
 
 1. **`define:vars` → JSON data island**: Payload size is identical (data already serialized into the page today), only the mechanism changes.
 2. **Inline geo code divergence**: The duplicated copy has AbortController timeouts and uses the `/api/geocode` proxy that the library version doesn't. Must reconcile these differences when consolidating.
 3. **Module scope change**: Current inline script runs in non-module global scope (`var`, `umami` global). Extracted TS modules use strict module scope. Need `declare global` for `umami` and ensure no implicit globals.
+4. **BillTracker/ToolkitLegal extraction**: Lower risk than ActionModal since these are simpler scripts, but still need to verify no `define:vars` dependencies.
