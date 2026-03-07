@@ -58,5 +58,25 @@ const ogImageURL = new URL(ogImage, Astro.site ?? "https://deflocksc.netlify.app
     <Footer />
     <ActionModal />
 
+    <script>
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15 }
+        );
+        document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
+      } else {
+        // Reduced motion: make everything visible immediately
+        document.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('revealed'));
+      }
+    </script>
+
   </body>
 </html>
