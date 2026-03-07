@@ -12,14 +12,15 @@ const registry = {
 };
 ---
 
-<div id="action-modal" class="fixed inset-0 z-[60] hidden"
-     role="dialog" aria-modal="true" aria-label="Contact your representatives">
+<div id="action-modal" class="fixed inset-0 z-[60] hidden overflow-y-auto"
+     role="dialog" aria-modal="true" aria-label="Contact your representatives"
+     style="-webkit-overflow-scrolling: touch;">
 
   <!-- Backdrop + centering wrapper -->
-  <div id="action-modal-backdrop" class="min-h-full bg-[#171717] overflow-y-auto md:bg-black/70 md:backdrop-blur-sm md:flex md:items-start md:justify-center md:py-12">
+  <div id="action-modal-backdrop" class="min-h-full bg-[#171717] md:bg-black/70 md:backdrop-blur-sm md:flex md:items-start md:justify-center md:py-12">
 
     <!-- Modal card (full-screen mobile, centered card desktop) -->
-    <div id="action-modal-card" class="min-h-full md:min-h-0 md:bg-[#0d0d0d] md:border md:border-[rgba(255,255,255,0.1)] md:w-full md:max-w-2xl md:max-h-[85dvh] md:overflow-y-auto md:relative" style="border-top: 2px solid #dc2626;">
+    <div id="action-modal-card" class="md:bg-[#0d0d0d] md:border md:border-[rgba(255,255,255,0.1)] md:w-full md:max-w-2xl md:max-h-[85dvh] md:overflow-y-auto md:relative" style="border-top: 2px solid #dc2626;">
       <!-- Close button -->
       <button id="action-modal-close" type="button"
         class="fixed top-4 right-4 z-10 w-10 h-10 bg-transparent hover:bg-[#262626]
