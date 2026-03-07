@@ -209,14 +209,52 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
         <div class="cs-num">04</div>
       </div>
       <div class="cs-card" data-overlay="4" tabindex="0" role="group" aria-label="Case study 5 of 5">
-        <div class="cs-scene cs-scene-placeholder" id="scene-5">
-          <svg viewBox="0 0 60 50" width="60" height="50" style="opacity: 0.08;">
-            <rect x="0" y="12" width="60" height="38" rx="3"
-              fill="none" stroke="white" stroke-width="2"/>
-            <rect x="18" y="5" width="20" height="8" rx="2"
-              fill="none" stroke="white" stroke-width="2"/>
-            <circle cx="30" cy="31" r="11"
-              fill="none" stroke="white" stroke-width="2"/>
+        <div class="cs-scene" id="scene-5">
+          <svg class="s5-svg" viewBox="0 0 300 180" preserveAspectRatio="xMidYMid meet">
+            <!-- Inner void (visible when lid lifts off) -->
+            <polygon class="s5-inner" points="105,68 165,48 225,68 165,88"/>
+
+            <!-- Box body -->
+            <polygon class="s5-box-front" points="105,68 165,88 165,135 105,115"/>
+            <polygon class="s5-box-side" points="165,88 225,68 225,115 165,135"/>
+
+            <!-- Evidence label on front face -->
+            <g transform="translate(105,68) skewY(18.43)">
+              <rect class="s5-label-bg" x="5" y="6" width="50" height="34" rx="1.5"/>
+              <text x="30" y="18" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="8" font-weight="500" fill="rgba(255,255,255,0.22)" letter-spacing="1.8">EVIDENCE</text>
+              <text x="30" y="27" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="5" fill="rgba(255,255,255,0.13)" letter-spacing="0.8">CASE #APD-2024</text>
+              <text x="30" y="35" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="4" fill="rgba(255,255,255,0.09)" letter-spacing="0.6">ALPR PROGRAM</text>
+            </g>
+
+            <!-- Handle on side -->
+            <line x1="185" y1="95" x2="205" y2="88" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-linecap="round"/>
+
+            <!-- Dust particles (float up on open) -->
+            <circle class="s5-dust s5-d1" cx="140" cy="65" r="1"/>
+            <circle class="s5-dust s5-d2" cx="160" cy="60" r="0.7"/>
+            <circle class="s5-dust s5-d3" cx="175" cy="68" r="0.8"/>
+            <circle class="s5-dust s5-d4" cx="155" cy="72" r="0.6"/>
+
+            <!-- Box top face (fades out as lid lifts) -->
+            <polygon class="s5-box-top" points="105,68 165,48 225,68 165,88"/>
+
+            <!-- Lid (lifts off and fades on hover) -->
+            <g class="s5-lid">
+              <polygon class="s5-lid-top" points="105,60 165,40 225,60 165,80"/>
+              <polygon class="s5-lid-front" points="105,60 165,80 165,88 105,68"/>
+              <polygon class="s5-lid-side" points="165,80 225,60 225,68 165,88"/>
+            </g>
+
+            <!-- "NO EVIDENCE FOUND" label -->
+            <g class="s5-verdict">
+              <rect x="85" y="144" width="130" height="24" rx="2"
+                fill="rgba(10,10,10,0.92)" stroke="rgba(220,38,38,0.5)" stroke-width="0.8"/>
+              <text x="150" y="160" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="9" font-weight="500" fill="rgba(220,38,38,0.8)" letter-spacing="2">NO EVIDENCE FOUND</text>
+            </g>
           </svg>
         </div>
         <div class="cs-body">
@@ -432,6 +470,48 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     transition: opacity 0.42s 0.15s, transform 0.42s 0.15s cubic-bezier(0.34,1.56,0.64,1);
   }
   .cs-card:hover .s4-stamp { opacity: 1; transform: rotate(-12deg) scale(1); }
+
+  /* ── Card 5: Evidence box ── */
+  .s5-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .s5-box-top {
+    fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.12); stroke-width: 0.6;
+    transition: opacity 0.3s 0.1s;
+  }
+  .cs-card:hover .s5-box-top { opacity: 0; }
+
+  .s5-box-front { fill: rgba(255,255,255,0.04); stroke: rgba(255,255,255,0.1); stroke-width: 0.6; }
+  .s5-box-side { fill: rgba(255,255,255,0.025); stroke: rgba(255,255,255,0.08); stroke-width: 0.6; }
+
+  .s5-inner {
+    fill: rgba(0,0,0,0.5); stroke: rgba(255,255,255,0.04); stroke-width: 0.4;
+    opacity: 0; transition: opacity 0.3s 0.2s;
+  }
+  .cs-card:hover .s5-inner { opacity: 1; }
+
+  .s5-label-bg { fill: rgba(255,255,255,0.04); stroke: rgba(255,255,255,0.08); stroke-width: 0.4; }
+
+  .s5-lid {
+    transition: transform 0.65s 0.1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s 0.3s;
+  }
+  .cs-card:hover .s5-lid { transform: translate(30px, -35px); opacity: 0; }
+
+  .s5-lid-top { fill: rgba(255,255,255,0.07); stroke: rgba(255,255,255,0.13); stroke-width: 0.6; }
+  .s5-lid-front { fill: rgba(255,255,255,0.05); stroke: rgba(255,255,255,0.1); stroke-width: 0.6; }
+  .s5-lid-side { fill: rgba(255,255,255,0.03); stroke: rgba(255,255,255,0.08); stroke-width: 0.6; }
+
+  .s5-dust {
+    fill: rgba(255,255,255,0.15); opacity: 0;
+    transition: opacity 0.4s 0.3s, transform 0.8s 0.3s ease-out;
+  }
+  .cs-card:hover .s5-dust { opacity: 0.6; }
+  .cs-card:hover .s5-d1 { transform: translate(-6px, -18px); }
+  .cs-card:hover .s5-d2 { transform: translate(3px, -22px); }
+  .cs-card:hover .s5-d3 { transform: translate(-2px, -15px); }
+  .cs-card:hover .s5-d4 { transform: translate(7px, -20px); }
+
+  .s5-verdict { opacity: 0; transition: opacity 0.3s 0.5s; }
+  .cs-card:hover .s5-verdict { opacity: 1; }
 
   /* Mobile: single column */
   @media (max-width: 767px) {
