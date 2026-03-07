@@ -93,7 +93,7 @@
           <rect x="2" y="4.5" width="7" height="5.5" rx="0.75" stroke="currentColor" stroke-width="1.2"/>
           <path d="M3.5 4.5V3a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
         </svg>
-        <span class="scroll-btn-label">Scroll to zoom</span>
+        <span class="scroll-btn-label">Enable scroll zoom</span>
       </button>
       <div id="map-container" style="height: 600px; clip-path: inset(0);">
         <div id="camera-map" style="width: 100%; height: 100%;" role="application" aria-label="ALPR Camera Map"></div>
@@ -398,7 +398,7 @@
     const { toggleScrollZoom } = await import('../scripts/camera-map');
     const enabled = toggleScrollZoom();
     btn.setAttribute('aria-pressed', String(enabled));
-    btn.querySelector('.scroll-btn-label')!.textContent = enabled ? 'Scroll active' : 'Scroll to zoom';
+    btn.querySelector('.scroll-btn-label')!.textContent = enabled ? 'Disable scroll zoom' : 'Enable scroll zoom';
   });
 
   // Frame glow cursor tracking
