@@ -107,5 +107,23 @@ card2?.addEventListener('mouseleave', () => {
     cancelAnimationFrame(countAnim);
     countAnim = null;
   }
-  if (countEl) countEl.textContent = '0';
+  if (countEl) {
+    const current = parseInt(countEl.textContent?.replace(/,/g, '') || '0', 10);
+    if (current === 0) return;
+    const duration = 600;
+    const start = performance.now();
+
+    function tickDown(now: number) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      countEl!.textContent = Math.round(current * (1 - eased)).toLocaleString();
+      if (progress < 1) {
+        countAnim = requestAnimationFrame(tickDown);
+      } else {
+        countAnim = null;
+      }
+    }
+    countAnim = requestAnimationFrame(tickDown);
+  }
 });
