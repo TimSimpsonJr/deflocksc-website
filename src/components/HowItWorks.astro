@@ -218,10 +218,10 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
 
   .s1-neq {
     position: absolute; top: 22px; left: 76px; z-index: 3;
-    font-size: 28px; font-weight: 700; font-family: 'DM Mono',monospace;
-    color: transparent; transition: color 0.28s 0.24s; pointer-events: none;
+    font-size: 28px; font-weight: 500; font-family: 'DM Mono',monospace;
+    color: transparent; transition: color 0.28s 0.24s, transform 0.48s ease-out; pointer-events: none;
   }
-  .cs-card:hover .s1-neq { color: rgba(220,38,38,0.9); }
+  .cs-card:hover .s1-neq { color: rgba(220,38,38,0.9); transform: translateY(-14px); }
 
   .s1-badge {
     position: absolute; bottom: 2px; right: 0; z-index: 4;
