@@ -322,18 +322,21 @@ let scrollUnlocked = false;
 
 function setupScrollBehavior() {
   if (!map) return;
-  const container = map.getContainer();
-  container.addEventListener('wheel', (e: WheelEvent) => {
-    if (!e.ctrlKey && !scrollUnlocked) return;
-    e.preventDefault();
-    if (!map) return;
-    const delta = e.deltaY * (e.deltaMode === 1 ? 30 : e.deltaMode === 2 ? 300 : 1);
-    map.setZoom(map.getZoom() - delta / 150);
-  }, { passive: false });
+  // Ctrl held: temporarily enable native scrollZoom (smooth inertia)
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Control' && !scrollUnlocked) map!.scrollZoom.enable();
+  });
+  document.addEventListener('keyup', (e: KeyboardEvent) => {
+    if (e.key === 'Control' && !scrollUnlocked) map!.scrollZoom.disable();
+  });
 }
 
 export function toggleScrollZoom(): boolean {
   scrollUnlocked = !scrollUnlocked;
+  if (map) {
+    if (scrollUnlocked) map.scrollZoom.enable();
+    else map.scrollZoom.disable();
+  }
   return scrollUnlocked;
 }
 
