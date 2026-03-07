@@ -13,7 +13,7 @@ const tabs = [
 ---
 
 <!-- Sticky tab bar -->
-<div class="sticky top-16 z-40 bg-[#1a1a1a] border-b border-[#333]">
+<div class="sticky top-16 z-40 bg-[#111111] border-b border-[rgba(255,255,255,0.07)]">
   <div class="max-w-4xl mx-auto px-6">
     <div
       role="tablist"
@@ -28,13 +28,14 @@ const tabs = [
           aria-controls={`panel-${tab.id}`}
           tabindex={i === 0 ? 0 : -1}
           class:list={[
-            'toolkit-tab shrink-0 px-4 py-4 text-sm font-bold uppercase tracking-[0.05em] border-b-2 transition-colors whitespace-nowrap cursor-pointer',
+            "toolkit-tab shrink-0 px-5 py-4 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] border-b border-[rgba(255,255,255,0.04)] transition-colors whitespace-nowrap cursor-pointer flex items-center gap-2",
             i === 0
-              ? 'text-[#fbbf24] border-[#fbbf24]'
-              : 'text-[#a3a3a3] border-transparent hover:text-white',
+              ? 'tab-active text-[#e8e8e8] bg-[#1a1a1a]'
+              : 'text-[#737373] hover:text-[#a0a0a0]',
           ]}
           data-tab-id={tab.id}
         >
+          <span class:list={['w-[5px] h-[5px] rounded-full bg-[#dc2626] flex-shrink-0', i !== 0 && 'hidden']} aria-hidden="true"></span>
           {tab.label}
         </button>
       ))}
@@ -52,7 +53,7 @@ const tabs = [
       tabindex="0"
       class:list={[
         'toolkit-panel',
-        i % 2 === 0 ? 'bg-[#171717]' : 'bg-[#262626]',
+        i % 2 === 0 ? 'bg-[#111111]' : 'bg-[#141414]',
         i !== 0 && 'hidden',
       ]}
       data-panel-id={tab.id}
@@ -99,12 +100,15 @@ const tabs = [
         btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
         btn.tabIndex = isActive ? 0 : -1;
 
+        const dot = btn.querySelector('span');
         if (isActive) {
-          btn.classList.remove('text-[#a3a3a3]', 'border-transparent', 'hover:text-white');
-          btn.classList.add('text-[#fbbf24]', 'border-[#fbbf24]');
+          btn.classList.remove('text-[#737373]', 'hover:text-[#a0a0a0]');
+          btn.classList.add('tab-active', 'text-[#e8e8e8]', 'bg-[#1a1a1a]');
+          dot?.classList.remove('hidden');
         } else {
-          btn.classList.remove('text-[#fbbf24]', 'border-[#fbbf24]');
-          btn.classList.add('text-[#a3a3a3]', 'border-transparent', 'hover:text-white');
+          btn.classList.remove('tab-active', 'text-[#e8e8e8]', 'bg-[#1a1a1a]');
+          btn.classList.add('text-[#737373]', 'hover:text-[#a0a0a0]');
+          dot?.classList.add('hidden');
         }
       });
 

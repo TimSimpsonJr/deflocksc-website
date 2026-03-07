@@ -13,14 +13,14 @@
 
     <!-- Left: heading + copy -->
     <div class="px-6 md:px-16 pt-10 md:pt-14 pb-10 md:pb-12 md:border-r md:border-[rgba(255,255,255,0.07)]">
-      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#555] mb-6">Upstate SC / Camera Network</p>
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-6">Upstate SC / Camera Network</p>
       <h2 id="map-section-heading" class="font-black leading-none tracking-[-0.035em] mb-8"
           style="font-size:clamp(2rem,3.5vw,3rem);">
         Cameras are<br>already watching.
         <span class="block" style="color:rgba(232,232,232,0.2);">No rules attached.</span>
       </h2>
 
-      <div class="space-y-5 text-[13px] text-[#888] leading-[1.75] max-w-[520px]">
+      <div class="space-y-5 text-[15px] text-[#a3a3a3] leading-[1.75] max-w-[520px]">
         <p>
           <strong class="text-[#e8e8e8]">Flock Safety cameras are up across Upstate SC:</strong> Greenville, Spartanburg, Anderson, and surrounding areas.
         </p>
@@ -43,19 +43,19 @@
     <div class="hidden md:flex flex-col px-7 pt-14 pb-12">
       <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
         <div class="text-[32px] font-black text-[#dc2626] leading-none tracking-[-0.03em] mb-1">242</div>
-        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#555]">Total cameras<br>documented</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#737373]">Total cameras<br>documented</div>
       </div>
       <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
         <div class="text-[32px] font-black text-[#dc2626] leading-none tracking-[-0.03em] mb-1">57</div>
-        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#555]">Greenville PD</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#737373]">Greenville PD</div>
       </div>
       <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
         <div class="text-[24px] font-black leading-none tracking-[-0.03em] mb-1" style="color:#555;">0</div>
-        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#555]">Oversight<br>ordinances</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#737373]">Oversight<br>ordinances</div>
       </div>
       <div class="py-4">
         <div class="text-[24px] font-black leading-none tracking-[-0.03em] mb-1" style="color:#555;">0</div>
-        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#555]">Public<br>votes</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#737373]">Public<br>votes</div>
       </div>
     </div>
 
@@ -65,7 +65,7 @@
   <div class="relative z-10 px-6 md:px-16 py-6 flex items-baseline gap-4 flex-wrap">
     <span class="font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.18em] text-[#dc2626]">Interactive Map</span>
     <span class="text-[#e8e8e8] font-extrabold tracking-[-0.02em]" style="font-size:clamp(1rem,1.5vw,1.15rem);">See the cameras watching your street.</span>
-    <span class="font-['DM_Mono',monospace] text-[11px] text-[#555] tracking-[0.08em]">Community sourced · Updated hourly</span>
+    <span class="font-['DM_Mono',monospace] text-[11px] text-[#737373] tracking-[0.08em]">Community sourced · Updated hourly</span>
   </div>
 
   <!-- Map embed area — raw feed, red top separator -->
@@ -105,7 +105,7 @@
       <p class="text-[#a3a3a3] text-xs">
         Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
       </p>
-      <p class="text-[#737373] text-sm mt-1">
+      <p class="text-[#737373] text-base mt-1">
         Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
       </p>
     </div>
@@ -401,13 +401,4 @@
     btn.querySelector('.scroll-btn-label')!.textContent = enabled ? 'Disable scroll zoom' : 'Enable scroll zoom';
   });
 
-  // Frame glow cursor tracking
-  const mapFrame = document.querySelector<HTMLElement>('#map-frame[data-glow-frame]');
-  if (mapFrame) {
-    mapFrame.addEventListener('pointermove', (e: PointerEvent) => {
-      const rect = mapFrame.getBoundingClientRect();
-      mapFrame.style.setProperty('--frame-x', `${e.clientX - rect.left}px`);
-      mapFrame.style.setProperty('--frame-y', `${e.clientY - rect.top}px`);
-    }, { passive: true });
-  }
 </script>
