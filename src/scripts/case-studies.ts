@@ -75,17 +75,52 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeOverlay();
 });
 
-// --- Card 2: asymmetric hover-off ---
+// --- Card 2: asymmetric hover-off + count-up ---
 const card2 = document.querySelector('.cs-card[data-overlay="1"]');
 const arcs = card2?.querySelectorAll('.s2-arc') ?? [];
+const countEl = card2?.querySelector('.s2-count') as SVGTSpanElement | null;
+const labelEl = card2?.querySelector('.s2-label') as SVGTextElement | null;
+let countAnim: number | null = null;
 
 card2?.addEventListener('mouseenter', () => {
   arcs.forEach(arc => arc.classList.remove('s2-fading'));
+  labelEl?.classList.remove('s2-fading');
+
+  // Count-up animation: 0 → 364,000 over 1.2s with ease-out
+  if (countEl) {
+    const target = 364000;
+    const duration = 1200;
+    const start = performance.now();
+    if (countAnim) cancelAnimationFrame(countAnim);
+
+    function tick(now: number) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = Math.round(eased * target);
+      countEl!.textContent = value.toLocaleString();
+      if (progress < 1) {
+        countAnim = requestAnimationFrame(tick);
+      } else {
+        countAnim = null;
+      }
+    }
+    countAnim = requestAnimationFrame(tick);
+  }
 });
 
 card2?.addEventListener('mouseleave', () => {
+  if (countAnim) {
+    cancelAnimationFrame(countAnim);
+    countAnim = null;
+  }
+
+  // Fade out arcs + label
   arcs.forEach(arc => arc.classList.add('s2-fading'));
+  labelEl?.classList.add('s2-fading');
+
   setTimeout(() => {
+    // Reset arcs
     arcs.forEach(arc => {
       arc.classList.remove('s2-fading');
       (arc as SVGElement).style.transition = 'none';
@@ -94,5 +129,8 @@ card2?.addEventListener('mouseleave', () => {
         (arc as SVGElement).style.transition = '';
       });
     });
+    // Reset label + counter
+    labelEl?.classList.remove('s2-fading');
+    if (countEl) countEl.textContent = '0';
   }, 350);
 });
