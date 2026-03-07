@@ -48,53 +48,58 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     </div>
   </div>
 
-  <!-- Case studies carousel (preserved below the grid) -->
+  <!-- Case studies bento grid -->
   <div class="px-6 md:px-12 pb-14">
     <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#555555] mb-4">Case studies</p>
-    <div class="factoid-carousel" id="factoidCarousel" role="region" aria-label="Case studies carousel">
-      <div class="carousel-container">
-        <button class="carousel-arrow carousel-arrow-prev" id="prevBtn" aria-label="Previous factoid">&lsaquo;</button>
-        <div class="carousel-viewport" aria-live="polite">
-          <div class="carousel-track" id="carouselTrack">
-            <div class="carousel-card" data-idx="0" data-overlay="0" tabindex="0" role="group" aria-label="Case study 1 of 5">
-              <div class="carousel-card-content">
-                <span class="block text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.08em] mb-3">Greenville, SC &mdash; False Arrest</span>
-                <p class="text-[#a0a0a0] text-[0.9rem] leading-relaxed mb-4">Two sisters driving a rental car were flagged as stolen by a Flock camera. Police drew weapons and handcuffed both women. The car wasn't stolen &mdash; it had been improperly reported. They are now suing Greenville PD.</p>
-                <span class="read-more-text">See the full lawsuit story &rarr;&#xFE0E;</span>
-              </div>
-            </div>
-            <div class="carousel-card" data-idx="1" data-overlay="1" tabindex="-1" role="group" aria-label="Case study 2 of 5">
-              <div class="carousel-card-content">
-                <span class="block text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.08em] mb-3">Ventura County, CA &mdash; Data Shared Without Permission</span>
-                <p class="text-[#a0a0a0] text-[0.9rem] leading-relaxed mb-4">Ventura County disabled Flock's cross-jurisdiction sharing to comply with state law. The feature was reactivated without anyone knowing. Out-of-state agencies searched their data 364,000 times in two months before deputies found out.</p>
-                <span class="read-more-text">See how your data leaves the state &rarr;&#xFE0E;</span>
-              </div>
-            </div>
-            <div class="carousel-card" data-idx="2" data-overlay="2" tabindex="-1" role="group" aria-label="Case study 3 of 5">
-              <div class="carousel-card-content">
-                <span class="block text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.08em] mb-3">Santa Cruz, CA &mdash; 4,000 Federal Searches</span>
-                <p class="text-[#a0a0a0] text-[0.9rem] leading-relaxed mb-4">State agencies accessed local camera data 4,000 times on behalf of federal authorities, including ICE, before the city found out and cancelled the contract 6&ndash;1.</p>
-                <span class="read-more-text">See why the city voted 6&ndash;1 to cancel &rarr;&#xFE0E;</span>
-              </div>
-            </div>
-            <div class="carousel-card" data-idx="3" data-overlay="3" tabindex="-1" role="group" aria-label="Case study 4 of 5">
-              <div class="carousel-card-content">
-                <span class="block text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.08em] mb-3">Spartanburg, SC &mdash; Sheriff Convicted</span>
-                <p class="text-[#a0a0a0] text-[0.9rem] leading-relaxed mb-4">Spartanburg County Sheriff Chuck Wright oversaw Flock deployments and pled guilty to federal charges: conspiracy to commit theft and wire fraud. The man with access to your location history was a convicted federal criminal.</p>
-                <span class="read-more-text">See who had access to your data &rarr;&#xFE0E;</span>
-              </div>
-            </div>
-            <div class="carousel-card" data-idx="4" data-overlay="4" tabindex="-1" role="group" aria-label="Case study 5 of 5">
-              <div class="carousel-card-content">
-                <span class="block text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.08em] mb-3">Austin, TX &mdash; No Crime Reduction</span>
-                <p class="text-[#a0a0a0] text-[0.9rem] leading-relaxed mb-4">Austin's own city audit couldn't find evidence the cameras reduce crime. Over 20% of searches lacked proper documentation. The city cancelled the contract.</p>
-                <span class="read-more-text">See the audit that killed the contract &rarr;&#xFE0E;</span>
-              </div>
-            </div>
-          </div>
+    <div class="cs-bento">
+      <!-- Top row: 3 cards -->
+      <div class="cs-card" data-overlay="0" tabindex="0" role="group" aria-label="Case study 1 of 5">
+        <div class="cs-scene" id="scene-1"><!-- Card 1 scene goes here --></div>
+        <div class="cs-body">
+          <div class="cs-loc">Greenville, SC</div>
+          <div class="cs-title">False Arrest from ALPR Error</div>
+          <div class="cs-blurb">A misread scan flagged an innocent driver as a stolen vehicle match. Charges were later dropped.</div>
         </div>
-        <button class="carousel-arrow carousel-arrow-next" id="nextBtn" aria-label="Next factoid">&rsaquo;</button>
-        <div class="carousel-dots-bar" id="carouselDots"></div>
+        <div class="cs-num">01</div>
+      </div>
+      <div class="cs-card" data-overlay="1" tabindex="0" role="group" aria-label="Case study 2 of 5">
+        <div class="cs-scene" id="scene-2"><!-- Card 2 scene goes here --></div>
+        <div class="cs-body">
+          <div class="cs-loc">Ventura County, CA</div>
+          <div class="cs-title">364,000 Out-of-State Queries</div>
+          <div class="cs-blurb">ALPR data shared with agencies across the country, without oversight or consent.</div>
+        </div>
+        <div class="cs-num">02</div>
+      </div>
+      <div class="cs-card" data-overlay="2" tabindex="0" role="group" aria-label="Case study 3 of 5">
+        <div class="cs-scene" id="scene-3"><!-- Card 3 scene goes here --></div>
+        <div class="cs-body">
+          <div class="cs-loc">Santa Cruz, CA</div>
+          <div class="cs-title">4,000 Federal Agency Searches</div>
+          <div class="cs-blurb">Federal authorities ran thousands of unauthorized queries on local ALPR data.</div>
+        </div>
+        <div class="cs-num">03</div>
+      </div>
+      <!-- Bottom row: 2 cards -->
+      <div class="cs-card" data-overlay="3" tabindex="0" role="group" aria-label="Case study 4 of 5">
+        <div class="cs-scene" id="scene-4"><!-- Card 4 scene goes here --></div>
+        <div class="cs-body">
+          <div class="cs-loc">Spartanburg, SC</div>
+          <div class="cs-title">Sheriff Convicted of Stalking</div>
+          <div class="cs-blurb">A sitting sheriff used unrestricted ALPR access to track and stalk private citizens.</div>
+        </div>
+        <div class="cs-num">04</div>
+      </div>
+      <div class="cs-card" data-overlay="4" tabindex="0" role="group" aria-label="Case study 5 of 5">
+        <div class="cs-scene cs-scene-placeholder" id="scene-5">
+          <!-- Placeholder: faint camera outline, no animation -->
+        </div>
+        <div class="cs-body">
+          <div class="cs-loc">Austin, TX</div>
+          <div class="cs-title">Zero Measurable Crime Reduction</div>
+          <div class="cs-blurb">An independent audit found ALPR cameras had zero statistical impact on crime rates.</div>
+        </div>
+        <div class="cs-num">05</div>
       </div>
     </div>
   </div>
@@ -107,121 +112,82 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
   .how-bg-num { font-size: clamp(10rem, 20vw, 18rem); }
   .p-num-bg   { font-size: clamp(5rem, 9vw, 8rem); }
 
-  /* Carousel container */
-  .carousel-container {
+  /* Bento grid */
+  .cs-bento {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: rgba(255,255,255,0.07);
+  }
+  .cs-card:nth-child(-n+3) { grid-column: span 2; }
+  .cs-card:nth-child(n+4)  { grid-column: span 3; }
+
+  /* Card shell */
+  .cs-card {
+    background: #111;
+    cursor: pointer;
+    transition: background 0.22s;
+    overflow: hidden;
     position: relative;
-    background: #141414;
-    border-radius: 0;
-    border-top: 1px solid rgba(255,255,255,0.07);
-    padding: 24px 20px 48px;
-    overflow: hidden;
-  }
-  @media (min-width: 768px) {
-    .carousel-container {
-      padding: 24px 48px 48px;
-    }
-  }
-
-  /* Carousel viewport & track */
-  .carousel-viewport {
-    overflow: hidden;
-    width: 100%;
-  }
-  .carousel-track {
-    display: flex;
-    width: 100%;
-    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Carousel cards */
-  .carousel-card {
-    flex: 0 0 100%;
-    min-width: 100%;
-    height: 220px;
     display: flex;
     flex-direction: column;
-    cursor: pointer;
   }
-  .carousel-card-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-  }
-  .carousel-card:hover .read-more-text {
-    color: #fcd34d;
-  }
+  .cs-card:hover { background: #1a1a1a; }
 
-  /* Read More text link */
-  .read-more-text {
-    color: #fbbf24;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: color 0.2s;
-  }
-
-  /* Carousel arrows */
-  .carousel-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #a3a3a3;
-    width: 44px;
-    height: 44px;
-    cursor: pointer;
-    font-size: 24px;
+  /* Scene panel */
+  .cs-scene {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+    background: #0d0d0d;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: border-color 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.2s;
-    line-height: 1;
-    z-index: 2;
+    flex-shrink: 0;
   }
-  .carousel-arrow:hover {
-    color: #d4d4d4;
+  .cs-card:hover .cs-scene { border-color: rgba(220,38,38,0.22); }
+
+  /* Card body */
+  .cs-body {
+    padding: 14px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
   }
-  .carousel-arrow-prev {
-    left: 2px;
+  .cs-loc {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: #dc2626;
   }
-  .carousel-arrow-next {
-    right: 2px;
+  .cs-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e2e2;
+    line-height: 1.35;
   }
-  @media (min-width: 768px) {
-    .carousel-arrow-prev {
-      left: 8px;
-    }
-    .carousel-arrow-next {
-      right: 8px;
-    }
+  .cs-blurb {
+    font-size: 11px;
+    color: rgba(255,255,255,0.38);
+    line-height: 1.55;
+  }
+  .cs-num {
+    position: absolute;
+    top: 9px;
+    right: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    color: rgba(255,255,255,0.14);
   }
 
-  /* Dots */
-  .carousel-dots-bar {
-    position: absolute;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 8px;
-  }
-  :global(.carousel-dot) {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #737373;
-    cursor: pointer;
-    transition: background 0.2s;
-    border: none;
-    padding: 0;
-  }
-  :global(.carousel-dot.active) {
-    background: #dc2626;
+  /* Mobile: single column */
+  @media (max-width: 767px) {
+    .cs-bento { grid-template-columns: 1fr; }
+    .cs-card:nth-child(-n+3),
+    .cs-card:nth-child(n+4) { grid-column: span 1; }
   }
 </style>
 
-<script>
-  import '../scripts/carousel';
-</script>
