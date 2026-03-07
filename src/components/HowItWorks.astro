@@ -125,7 +125,35 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
         <div class="cs-num">02</div>
       </div>
       <div class="cs-card" data-overlay="2" tabindex="0" role="group" aria-label="Case study 3 of 5">
-        <div class="cs-scene" id="scene-3"><!-- Card 3 scene goes here --></div>
+        <div class="cs-scene" id="scene-3">
+          <div class="s3-wrap">
+            <div class="s3-doc s3-doc-1">
+              <div class="s3-hdr">CASE FILE</div>
+              <div class="s3-line w88"></div><div class="s3-line w72"></div>
+              <div class="s3-line w55"></div><div class="s3-line w80"></div>
+            </div>
+            <div class="s3-doc s3-doc-2">
+              <div class="s3-hdr">QUERY LOG</div>
+              <div class="s3-line w88"></div><div class="s3-line w72"></div>
+              <div class="s3-line w55"></div><div class="s3-line w80"></div>
+            </div>
+            <div class="s3-doc s3-doc-3">
+              <div class="s3-hdr">AUTH. RECORD</div>
+              <div class="s3-line w88"></div><div class="s3-line w72"></div>
+              <div class="s3-line w55"></div><div class="s3-line w80"></div>
+            </div>
+            <div class="s3-shield">
+              <svg width="38" height="44" viewBox="0 0 38 44">
+                <path d="M19,2 L35,8 L35,22 C35,33 19,42 19,42 C19,42 3,33 3,22 L3,8 Z"
+                  fill="rgba(220,38,38,0.1)" stroke="rgba(220,38,38,0.5)" stroke-width="1.2"/>
+                <text x="19" y="20" text-anchor="middle" font-family="DM Mono,monospace"
+                  font-size="7" fill="rgba(220,38,38,0.8)">FED.</text>
+                <text x="19" y="30" text-anchor="middle" font-family="DM Mono,monospace"
+                  font-size="5.5" fill="rgba(220,38,38,0.6)">AUTHORITY</text>
+              </svg>
+            </div>
+          </div>
+        </div>
         <div class="cs-body">
           <div class="cs-loc">Santa Cruz, CA</div>
           <div class="cs-title">4,000 Federal Agency Searches</div>
@@ -327,6 +355,32 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
 
   .s2-label { opacity: 0; transition: opacity 0.3s 1.0s; }
   .cs-card:hover .s2-label { opacity: 1; }
+
+  /* Card 3 — File Stack */
+  .s3-wrap { position: relative; width: 196px; height: 138px; }
+  .s3-doc {
+    position: absolute; width: 155px; height: 106px; border-radius: 3px;
+    padding: 9px 12px; overflow: hidden;
+  }
+  .s3-doc-1 { bottom: 0; left: 0; background: rgba(10,10,10,0.9); border: 1px solid rgba(255,255,255,0.06); z-index: 1; transform: rotate(3.5deg); transition: transform 0.46s ease-out; }
+  .s3-doc-2 { bottom: 14px; left: 14px; background: rgba(13,13,13,0.95); border: 1px solid rgba(255,255,255,0.09); z-index: 2; transform: rotate(1.5deg); transition: transform 0.46s 0.04s ease-out; }
+  .s3-doc-3 { bottom: 28px; left: 28px; background: #161616; border: 1px solid rgba(255,255,255,0.16); z-index: 3; box-shadow: 0 4px 18px rgba(0,0,0,0.6); transition: transform 0.46s ease-out, box-shadow 0.46s ease-out; }
+
+  .cs-card:hover .s3-doc-1 { transform: rotate(5deg) translate(-4px,4px); }
+  .cs-card:hover .s3-doc-2 { transform: rotate(2.5deg) translate(-2px,2px); }
+  .cs-card:hover .s3-doc-3 { transform: translateY(-18px); box-shadow: 0 20px 44px rgba(0,0,0,0.88); }
+
+  .s3-hdr { font-family: 'DM Mono',monospace; font-size: 7px; letter-spacing: 0.12em; color: rgba(255,255,255,0.2); margin-bottom: 8px; }
+  .s3-line { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.07); margin: 4px 0; }
+  .s3-line.w88 { width: 88%; } .s3-line.w72 { width: 72%; }
+  .s3-line.w55 { width: 55%; } .s3-line.w80 { width: 80%; }
+
+  .s3-shield {
+    position: absolute; right: 6px; bottom: 10px; z-index: 10;
+    opacity: 0; transform: scale(0.72) translateY(6px);
+    transition: opacity 0.34s 0.3s, transform 0.34s 0.3s;
+  }
+  .cs-card:hover .s3-shield { opacity: 1; transform: scale(1) translateY(0); }
 
   /* Mobile: single column */
   @media (max-width: 767px) {
