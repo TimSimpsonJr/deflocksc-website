@@ -217,21 +217,21 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
   .cs-card:hover .s1-front { transform: translate(10px,10px); box-shadow: 0 12px 36px rgba(0,0,0,0.8); }
 
   .s1-neq {
-    position: absolute; top: 28px; left: 78px; z-index: 3;
-    font-size: 16px; font-family: 'DM Mono',monospace;
+    position: absolute; top: 22px; left: 76px; z-index: 3;
+    font-size: 28px; font-weight: 700; font-family: 'DM Mono',monospace;
     color: transparent; transition: color 0.28s 0.24s; pointer-events: none;
   }
-  .cs-card:hover .s1-neq { color: rgba(220,38,38,0.8); }
+  .cs-card:hover .s1-neq { color: rgba(220,38,38,0.9); }
 
   .s1-badge {
     position: absolute; bottom: 2px; right: 0; z-index: 4;
-    display: flex; align-items: center; gap: 5px; padding: 4px 8px;
-    background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.32); border-radius: 2px;
-    font-family: 'DM Mono',monospace; font-size: 8px; letter-spacing: 0.1em; color: #dc2626;
+    display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+    background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.4); border-radius: 3px;
+    font-family: 'DM Mono',monospace; font-size: 11px; letter-spacing: 0.1em; color: #dc2626;
     opacity: 0; transform: scale(0.88) translateY(4px);
     transition: opacity 0.3s 0.38s, transform 0.3s 0.38s; white-space: nowrap;
   }
-  .s1-dot { width: 5px; height: 5px; border-radius: 50%; background: #dc2626; flex-shrink: 0; }
+  .s1-dot { width: 7px; height: 7px; border-radius: 50%; background: #dc2626; flex-shrink: 0; }
   .cs-card:hover .s1-badge { opacity: 1; transform: scale(1) translateY(0); }
 
   /* Mobile: single column */
