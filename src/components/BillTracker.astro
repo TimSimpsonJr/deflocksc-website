@@ -7,15 +7,15 @@ import bills from '../data/bills.json';
   <!-- Section header -->
   <div class="relative overflow-hidden px-6 md:px-12 pt-14 pb-4">
     <div class="bills-bg-num absolute right-4 -top-6 font-bold leading-none text-[rgba(255,255,255,0.025)] pointer-events-none select-none" aria-hidden="true">BILLS</div>
-    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Active legislation</p>
-    <h2 id="bill-tracker-heading" class="text-[#e8e8e8] font-bold text-[clamp(1.8rem,3.5vw,2.8rem)] tracking-[-0.025em] leading-[1.05] mb-6">
+    <p data-reveal="left" class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Active legislation</p>
+    <h2 id="bill-tracker-heading" data-reveal="left" data-reveal-delay="1" class="text-[#e8e8e8] font-bold text-[clamp(1.8rem,3.5vw,2.8rem)] tracking-[-0.025em] leading-[1.05] mb-6">
       Three bills. All stalled.
     </h2>
 
-    <p class="text-[#d4d4d4] text-[18px] leading-relaxed mb-4">
+    <p data-reveal="left" data-reveal-delay="2" class="text-[#d4d4d4] text-[18px] leading-relaxed mb-4">
       Three bills to rein in license plate cameras are sitting in SC committee right now. None have had a hearing. As of February 2026, they're just waiting. That changes when legislators hear from you.
     </p>
-    <p class="text-[#d4d4d4] text-[18px] leading-relaxed mb-10">
+    <p data-reveal="left" data-reveal-delay="3" class="text-[#d4d4d4] text-[18px] leading-relaxed mb-10">
       <strong class="text-white">But even the strongest bill has a critical gap.</strong> All three regulate what <em>government agencies</em> can do with camera data. None address what <em>Flock</em> does with it. Flock operates the network. Flock holds the data on its servers. Flock decides which agencies can query which cameras. A 90-day retention limit means nothing if Flock keeps the data indefinitely. A ban on selling data means nothing if cross-jurisdiction search is a product feature. These bills need to be amended to regulate the network itself, not just the agencies plugged into it.
     </p>
   </div>
@@ -25,6 +25,7 @@ import bills from '../data/bills.json';
     {bills.map((bill: any, i: number) => (
       <button
         type="button"
+        data-reveal="up" data-reveal-delay={String(i)}
         class="bill-col bg-[#111111] p-8 flex flex-col gap-3 text-left cursor-pointer hover:bg-[#161616] transition-colors"
         data-bill={i}
         aria-label={`${bill.bill}: ${bill.title}`}
