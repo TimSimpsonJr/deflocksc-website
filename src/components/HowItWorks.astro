@@ -352,13 +352,13 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     transform: scale(2.5);
     transform-origin: 93px 310px;
   }
-  .cs-card.s2-active .s2-map { transform: scale(1); }
+  .cs-card:hover .s2-map { transform: scale(1); }
 
   .s2-ca { opacity: 1; transition: opacity 0.25s; }
-  .cs-card.s2-active .s2-ca { opacity: 0; transition-delay: 0.15s; }
+  .cs-card:hover .s2-ca { opacity: 0; transition-delay: 0.15s; }
 
   .s2-states { opacity: 0; transition: opacity 0.4s 0.2s; }
-  .cs-card.s2-active .s2-states { opacity: 1; }
+  .cs-card:hover .s2-states { opacity: 1; }
 
   .s2-arc {
     transition: stroke-dashoffset 0.5s ease-out;
@@ -388,23 +388,10 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
   .s2-arc-23 { transition-delay: 1.02s; }
   .s2-arc-24 { transition-delay: 1.05s; }
 
-  .cs-card.s2-active .s2-arc { stroke-dashoffset: 0; }
-
-  /* Asymmetric hover-off: lines fade instead of retracing */
-  .s2-arc.s2-fading {
-    transition: opacity 0.3s ease-out !important;
-    stroke-dashoffset: 0;
-    opacity: 0;
-  }
+  .cs-card:hover .s2-arc { stroke-dashoffset: 0; }
 
   .s2-label { opacity: 0; transition: opacity 0.3s 0.35s; }
-  .cs-card.s2-active .s2-label { opacity: 1; }
-
-  /* Asymmetric hover-off: counter fades instead of reversing */
-  .s2-label.s2-fading {
-    transition: opacity 0.3s ease-out !important;
-    opacity: 0;
-  }
+  .cs-card:hover .s2-label { opacity: 1; }
 
   /* Card 3 — File Stack */
   .s3-wrap { position: relative; width: 196px; height: 138px; }

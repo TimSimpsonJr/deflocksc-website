@@ -75,24 +75,12 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeOverlay();
 });
 
-// --- Card 2: asymmetric hover-off + count-up ---
+// --- Card 2: count-up on hover ---
 const card2 = document.querySelector('.cs-card[data-overlay="1"]');
-const arcs = card2?.querySelectorAll('.s2-arc') ?? [];
 const countEl = card2?.querySelector('.s2-count') as SVGTSpanElement | null;
-const labelEl = card2?.querySelector('.s2-label') as SVGTextElement | null;
 let countAnim: number | null = null;
 
-let fadeTimer: ReturnType<typeof setTimeout> | null = null;
-
 card2?.addEventListener('mouseenter', () => {
-  // Cancel any pending reset from a previous hover-off
-  if (fadeTimer) { clearTimeout(fadeTimer); fadeTimer = null; }
-
-  card2.classList.add('s2-active');
-  arcs.forEach(arc => arc.classList.remove('s2-fading'));
-  labelEl?.classList.remove('s2-fading');
-
-  // Count-up animation: 0 → 364,000 over 1.2s with ease-out
   if (countEl) {
     const target = 364000;
     const duration = 1200;
@@ -103,8 +91,7 @@ card2?.addEventListener('mouseenter', () => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      const value = Math.round(eased * target);
-      countEl!.textContent = value.toLocaleString();
+      countEl!.textContent = Math.round(eased * target).toLocaleString();
       if (progress < 1) {
         countAnim = requestAnimationFrame(tick);
       } else {
@@ -120,26 +107,5 @@ card2?.addEventListener('mouseleave', () => {
     cancelAnimationFrame(countAnim);
     countAnim = null;
   }
-
-  // Fade out arcs + label (while .s2-active keeps dashoffset at 0)
-  arcs.forEach(arc => arc.classList.add('s2-fading'));
-  labelEl?.classList.add('s2-fading');
-
-  fadeTimer = setTimeout(() => {
-    fadeTimer = null;
-    // Remove active state — map zooms back, states fade out, CA returns
-    card2!.classList.remove('s2-active');
-    // Reset arcs
-    arcs.forEach(arc => {
-      arc.classList.remove('s2-fading');
-      (arc as SVGElement).style.transition = 'none';
-      arc.setAttribute('stroke-dashoffset', arc.getAttribute('stroke-dasharray') || '200');
-      requestAnimationFrame(() => {
-        (arc as SVGElement).style.transition = '';
-      });
-    });
-    // Reset label + counter
-    labelEl?.classList.remove('s2-fading');
-    if (countEl) countEl.textContent = '0';
-  }, 350);
+  if (countEl) countEl.textContent = '0';
 });
