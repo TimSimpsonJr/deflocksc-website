@@ -1,33 +1,32 @@
 ---
 ---
 
-<section id="take-action" aria-labelledby="take-action-heading" class="py-20 md:py-28 bg-[#262626] relative overflow-hidden">
-  <!-- Multi-glow effect -->
-  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-    <div class="absolute top-[25%] left-[55%] -translate-x-1/2 -translate-y-1/2 w-[min(900px,90vw)] h-[500px] opacity-[0.25]"
-      style="background: radial-gradient(ellipse at center, rgba(163, 163, 163, 0.4) 0%, rgba(115, 115, 115, 0.15) 40%, transparent 70%);">
-    </div>
-    <div class="absolute top-[70%] left-[40%] -translate-x-1/2 -translate-y-1/2 w-[min(700px,80vw)] h-[400px] opacity-[0.30]"
-      style="background: radial-gradient(ellipse at center, rgba(163, 163, 163, 0.35) 0%, rgba(115, 115, 115, 0.1) 50%, transparent 80%);">
-    </div>
-    <div class="absolute top-[45%] left-[60%] -translate-x-1/2 -translate-y-1/2 w-[min(500px,60vw)] h-[300px] blur-[40px] opacity-[0.35]"
-      style="background: radial-gradient(ellipse at center, rgba(212, 212, 212, 0.4) 0%, transparent 70%);">
-    </div>
-  </div>
-  <div class="max-w-3xl mx-auto px-6 relative z-10 text-center">
-    <h2 id="take-action-heading" class="text-3xl md:text-4xl font-[900] text-white leading-tight mb-8">
-      Tell Your Legislators: South Carolina Won't Be Watched Without a Vote.
+<section id="take-action" aria-labelledby="take-action-heading" class="bg-[#0d0d0d] py-20 md:py-28 relative overflow-hidden border-t border-[rgba(255,255,255,0.07)]">
+  <!-- Ghost "ACT" background text -->
+  <div class="cta-ghost-text absolute bottom-[-3rem] right-[-1rem] font-bold leading-none text-[rgba(220,38,38,0.07)] pointer-events-none select-none" aria-hidden="true">ACT</div>
+
+  <div class="max-w-5xl mx-auto px-6 md:px-12 relative z-10">
+    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-6">Your legislators need to hear from you</p>
+    <h2 id="take-action-heading" class="text-[#e8e8e8] font-bold text-[clamp(2.5rem,5vw,4.5rem)] tracking-[-0.03em] leading-[0.95] mb-10">
+      Three bills sitting in committee.<br>
+      <span class="text-[rgba(232,232,232,0.25)]">Zero hearings. Zero votes.</span><br>
+      That changes when you call.
     </h2>
-    <p class="text-[#d4d4d4] text-lg leading-relaxed mb-10">
-      Three bills are sitting in committee. The Upstate has 242 cameras and no rules governing them.
-      Your legislators need to hear from you. Find your district below and we'll help you draft the message.
-    </p>
-    <button
-      type="button"
-      data-open-action
-      class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer"
-    >
-      Contact Your Reps
-    </button>
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+      <button
+        type="button"
+        data-open-action
+        class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.08em] px-8 py-4 transition-colors cursor-pointer flex-shrink-0"
+      >
+        Contact Your Reps
+      </button>
+      <p class="text-[#a0a0a0] text-base leading-[1.6] max-w-[400px]">
+        The Upstate has 242 cameras and no rules governing them. Your legislators need to hear from you. Find your district below and we'll help you draft the message in under two minutes.
+      </p>
+    </div>
   </div>
 </section>
+
+<style>
+  .cta-ghost-text { font-size: clamp(10rem, 22vw, 20rem); letter-spacing: -0.06em; }
+</style>

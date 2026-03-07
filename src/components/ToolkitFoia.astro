@@ -3,7 +3,6 @@ import foiaTemplates from '../data/toolkit-foia.json';
 
 /**
  * Highlight [PLACEHOLDER] markers in template text with amber spans.
- * Handles newlines by splitting on them and joining with <br/> for pre-wrap rendering.
  */
 function highlightPlaceholders(text: string): string {
   return text.replace(/\[([A-Z\s]+)\]/g, '<span class="text-[#fbbf24] font-semibold">[$1]</span>');
@@ -12,9 +11,10 @@ function highlightPlaceholders(text: string): string {
 
 <!-- Intro: FOIA explainer -->
 <div class="mb-12">
-  <h3 class="text-white font-extrabold text-xl md:text-2xl tracking-[-0.02em] mb-4">
+  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">FOIA Templates</p>
+  <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-4">
     Request Public Records
-  </h3>
+  </h2>
   <p class="text-[#d4d4d4] text-base leading-[1.7] mb-3">
     South Carolina's Freedom of Information Act
     (<a href="https://www.scstatehouse.gov/code/t30c004.php" target="_blank" rel="noopener" class="text-[#fbbf24] underline">S.C. Code &sect; 30-4-10</a>)
@@ -23,69 +23,80 @@ function highlightPlaceholders(text: string): string {
   </p>
   <p class="text-[#a3a3a3] text-base leading-[1.7]">
     Agencies have 15 business days to respond. They can charge reasonable copy fees, but
-    must notify you of the cost before processing. Use the templates below to get started.
-    Fill in the bracketed fields, print or email your request, and keep a copy for your records.
+    must notify you of the cost before processing. Pick a template below, fill in the
+    bracketed fields, and send it.
   </p>
 </div>
 
-<!-- Card grid -->
-<div class="grid md:grid-cols-2 gap-6 mb-16">
-  {foiaTemplates.map((tmpl) => (
-    <div
-      class="template-card bg-[rgba(163,163,163,0.12)] rounded-xl p-6 flex flex-col"
-    >
-      <!-- Title -->
-      <h4 class="text-white font-bold text-lg mb-2 relative z-10">{tmpl.title}</h4>
+<!-- Sidebar + panel (replaces card grid) -->
+<div class="foia-layout md:grid md:grid-cols-[280px_1fr] bg-[rgba(255,255,255,0.07)] mb-16" style="gap:1px">
 
-      <!-- Description -->
-      <p class="text-[#a3a3a3] text-sm leading-[1.6] mb-4 relative z-10">{tmpl.description}</p>
-
-      <!-- Why this matters (accordion) -->
-      <details class="foia-details group mb-4 relative z-10">
-        <summary class="flex items-center cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-semibold text-[#fbbf24] hover:text-[#fde68a] transition-colors">
-          <span class="foia-icon mr-2 text-xs transition-transform duration-300">&#9654;</span>
-          Why this matters
-        </summary>
-        <div class="foia-content">
-          <div class="foia-inner">
-            <p class="text-[#a3a3a3] text-sm leading-[1.6] mt-3">{tmpl.why}</p>
-          </div>
-        </div>
-      </details>
-
-      <!-- Template text -->
-      <div
-        class="template-text bg-[#1a1a1a] border border-[#333] rounded-lg p-4 text-sm text-[#d4d4d4] leading-[1.7] whitespace-pre-wrap mb-4 flex-grow relative z-10 overflow-x-auto"
-        set:html={highlightPlaceholders(tmpl.template)}
-      />
-
-      <!-- Actions row -->
-      <div class="flex flex-wrap gap-3 relative z-10">
-        <button
-          class="copy-btn bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 rounded transition-colors cursor-pointer"
-          data-template-id={tmpl.id}
-        >
-          <span class="copy-label">Copy Template</span>
-          <span class="copy-success hidden">Copied!</span>
-        </button>
-        <a
-          href={`/toolkit/foia/${tmpl.id}.pdf`}
-          class="inline-flex items-center text-sm font-semibold text-[#a3a3a3] hover:text-white transition-colors px-4 py-2.5"
-          download
-        >
-          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Download PDF
-        </a>
-      </div>
+  <!-- Template list (sidebar) -->
+  <div class="bg-[#111111]">
+    <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
+      Templates
     </div>
-  ))}
+    {foiaTemplates.map((tmpl: any, i: number) => (
+      <button
+        type="button"
+        class:list={['foia-btn sidebar-btn w-full text-left px-6 py-4 text-sm font-medium leading-[1.35] border-b border-[rgba(255,255,255,0.04)] cursor-pointer', i === 0 ? 'sidebar-active' : '']}
+        data-foia={i}
+        aria-selected={i === 0 ? 'true' : 'false'}
+      >
+        {tmpl.title}
+      </button>
+    ))}
+  </div>
+
+  <!-- Template panel -->
+  <div class="bg-[#111111] p-8 md:p-10">
+    {foiaTemplates.map((tmpl: any, i: number) => (
+      <div class:list={['foia-panel', i !== 0 && 'hidden']} data-foia-panel={i}>
+        <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#a3a3a3] mb-2">Template {String(i + 1).padStart(2, '0')}</p>
+        <h3 class="text-[#e8e8e8] font-bold text-lg mb-3">{tmpl.title}</h3>
+        <p class="text-[#a3a3a3] text-sm leading-[1.6] mb-4">{tmpl.description}</p>
+
+        <!-- Why this matters (inline, no accordion) -->
+        <div class="border-l-2 border-[#dc2626] pl-4 mb-6">
+          <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-1">Why this matters</p>
+          <p class="text-[#a3a3a3] text-sm leading-[1.6]">{tmpl.why}</p>
+        </div>
+
+        <!-- Template text (flat, no nested box) -->
+        <div
+          class="template-text text-sm text-[#d4d4d4] leading-[1.7] whitespace-pre-wrap mb-6 border-t border-[rgba(255,255,255,0.07)] pt-6"
+          set:html={highlightPlaceholders(tmpl.template)}
+        />
+
+        <!-- Actions -->
+        <div class="flex flex-wrap gap-3">
+          <button
+            type="button"
+            class="copy-btn bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 transition-colors cursor-pointer"
+            data-template-id={tmpl.id}
+          >
+            <span class="copy-label">Copy Template</span>
+            <span class="copy-success hidden" role="status">Copied!</span>
+          </button>
+          <a
+            href={`/toolkit/foia/${tmpl.id}.pdf`}
+            class="inline-flex items-center text-sm font-semibold text-[#a3a3a3] hover:text-white transition-colors px-4 py-2.5"
+            download
+          >
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Download PDF
+          </a>
+        </div>
+      </div>
+    ))}
+  </div>
 </div>
 
 <!-- Filing instructions -->
-<div class="border-t border-[#333] pt-10">
-  <h3 class="text-white font-bold text-lg mb-4">How to File Your Request</h3>
+<div class="border-t border-[rgba(255,255,255,0.07)] pt-10">
+  <h2 class="text-[#e8e8e8] font-bold text-lg mb-4">How to File Your Request</h2>
   <ol class="text-[#d4d4d4] text-base leading-[1.8] list-decimal list-inside space-y-2">
     <li>
       <strong class="text-white">Find the records custodian.</strong> Search your agency's
@@ -111,52 +122,33 @@ function highlightPlaceholders(text: string): string {
   </ol>
 </div>
 
-<style>
-  /* Accordion animation for "Why this matters" */
-  .foia-content {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 300ms ease-out;
-  }
-
-  .foia-inner {
-    overflow: hidden;
-  }
-
-  details[open] .foia-content {
-    grid-template-rows: 1fr;
-  }
-
-  /* Rotate triangle when open */
-  details[open] .foia-icon {
-    transform: rotate(90deg);
-  }
-
-  /* Smooth close animation */
-  details.closing .foia-content {
-    grid-template-rows: 0fr;
-  }
-
-  details.closing .foia-icon {
-    transform: rotate(0deg);
-  }
-
-</style>
-
 <script>
-  let foiaController: AbortController | null = null;
-
   function initFoiaTab() {
-    foiaController?.abort();
-    foiaController = new AbortController();
+    // Sidebar selection
+    const foiaBtns = document.querySelectorAll<HTMLButtonElement>('.foia-btn');
+    const foiaPanels = document.querySelectorAll<HTMLElement>('.foia-panel');
+
+    foiaBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = btn.getAttribute('data-foia');
+        foiaBtns.forEach(b => {
+          b.classList.remove('sidebar-active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        foiaPanels.forEach(p => p.classList.add('hidden'));
+        btn.classList.add('sidebar-active');
+        btn.setAttribute('aria-selected', 'true');
+        document.querySelector(`.foia-panel[data-foia-panel="${idx}"]`)?.classList.remove('hidden');
+      });
+    });
 
     // Copy-to-clipboard
     document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
       btn.addEventListener('click', async () => {
-        const card = btn.closest('.template-card');
-        if (!card) return;
+        const panel = btn.closest('.foia-panel');
+        if (!panel) return;
 
-        const templateEl = card.querySelector('.template-text');
+        const templateEl = panel.querySelector('.template-text');
         if (!templateEl) return;
 
         const text = templateEl.textContent || '';
@@ -164,7 +156,6 @@ function highlightPlaceholders(text: string): string {
         try {
           await navigator.clipboard.writeText(text);
         } catch {
-          // Fallback for older browsers / insecure contexts
           const ta = document.createElement('textarea');
           ta.value = text;
           ta.style.position = 'fixed';
@@ -187,22 +178,6 @@ function highlightPlaceholders(text: string): string {
         }
       });
     });
-
-    // Smooth close animation for details elements
-    document.querySelectorAll<HTMLDetailsElement>('.foia-details').forEach((details) => {
-      const summary = details.querySelector('summary');
-      summary?.addEventListener('click', (e) => {
-        if (details.hasAttribute('open')) {
-          e.preventDefault();
-          details.classList.add('closing');
-          setTimeout(() => {
-            details.classList.remove('closing');
-            details.removeAttribute('open');
-          }, 300);
-        }
-      });
-    });
-
   }
 
   initFoiaTab();

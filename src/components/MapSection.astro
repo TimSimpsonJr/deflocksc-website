@@ -1,124 +1,198 @@
 ---
 ---
 
-<section id="map-section" aria-labelledby="map-section-heading" class="bg-[#171717] py-20 md:py-28 relative overflow-hidden">
-  <!-- Section glow accent -->
-  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[200px] blur-[64px] opacity-[0.08] md:opacity-[0.10] pointer-events-none" aria-hidden="true"></div>
+<section id="map-section" aria-labelledby="map-section-heading" class="bg-[#0d0d0d] relative overflow-hidden">
 
-  <div class="max-w-4xl mx-auto px-6">
-    <h2 id="map-section-heading" class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-10">
-      242 Cameras. Upstate South Carolina. No Public Vote.
-    </h2>
+  <!-- Ghost "242" background number -->
+  <div class="absolute top-[-20px] right-[-40px] font-black leading-none pointer-events-none select-none z-0"
+       style="font-size:clamp(12rem,22vw,22rem);color:rgba(220,38,38,0.05);letter-spacing:-0.06em;"
+       aria-hidden="true">242</div>
 
-    <div class="space-y-6 text-[#d4d4d4] text-base leading-relaxed mb-12">
-      <p>
-        <strong class="text-white">Cameras are already watching.</strong> Flock Safety cameras are up across Upstate SC: Greenville, Spartanburg, Anderson, and surrounding areas.
-      </p>
+  <!-- Two-column header: copy left, stats right -->
+  <div class="md:grid md:grid-cols-[1fr_240px] relative z-10 border-b border-[rgba(255,255,255,0.07)]">
 
-      <p>
-        <strong class="text-white">Greenville:</strong> Greenville PD runs 57 Flock cameras. The first batch went up in January 2021, paid for with federal civil asset forfeiture funds. No city ordinance. No council vote on oversight. There are still no rules about who sees the data, how long it's kept, or who checks how it's used.
-      </p>
+    <!-- Left: heading + copy -->
+    <div class="px-6 md:px-16 pt-10 md:pt-14 pb-10 md:pb-12 md:border-r md:border-[rgba(255,255,255,0.07)]">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-6">Upstate SC / Camera Network</p>
+      <h2 id="map-section-heading" class="font-black leading-none tracking-[-0.035em] mb-8"
+          style="font-size:clamp(2rem,3.5vw,3rem);">
+        Cameras are<br>already watching.
+        <span class="block" style="color:rgba(232,232,232,0.2);">No rules attached.</span>
+      </h2>
 
-      <p>
-        <strong class="text-white">Spartanburg:</strong> City PD runs 15 cameras. The county's were deployed under Sheriff Chuck Wright&hellip; who pled guilty to federal criminal charges in May 2025. A convicted criminal had unrestricted access to a system tracking where you drive. Neither the city nor the county has an oversight policy.
-      </p>
-
-      <p>
-        <strong class="text-white">From Greenville to Spartanburg to Anderson and beyond:</strong> Cameras first, questions never. No Upstate city or county has passed an oversight ordinance. Even when other cities tried, it didn't matter. Local governments can't control where the data goes once it's in Flock's network.
-      </p>
-
-      <p>
-        <strong class="text-white">The official count undersells it.</strong> When Greenville went looking for more cameras, its own RFP required the new ones to connect with HOA and neighborhood cameras too. The city's SafeWatch program asks residents to register their Ring and Nest cameras for police use on demand. At least one Greenville HOA already runs its own license plate reader. The 57-camera figure is a floor, not a ceiling.
-      </p>
-    </div>
-
-    <!-- Map embed area -->
-    <div class="mb-12">
-      <!-- Mobile toggle button -->
-      <div id="map-button-container" class="md:hidden bg-[#262626] border border-[#404040] rounded-lg p-8 text-center">
-        <p class="text-white font-bold text-lg mb-4">
-          Find the cameras in your neighborhood.
+      <div class="space-y-5 text-[15px] text-[#a3a3a3] leading-[1.75] max-w-[520px]">
+        <p>
+          <strong class="text-[#e8e8e8]">Flock Safety cameras are up across Upstate SC:</strong> Greenville, Spartanburg, Anderson, and surrounding areas.
         </p>
-        <button
-          id="map-toggle"
-          type="button"
-          class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer"
-        >
-          Explore the camera map &rarr;&#xFE0E;
-        </button>
-      </div>
-
-      <!-- Map container with glow frame -->
-      <div id="map-frame" class="hidden md:block glow-frame map-frame" style="position: relative; left: 50%; transform: translateX(-50%);" data-glow-frame>
-        <p class="text-white font-bold text-lg mb-4 relative z-[3] px-1">
-          Find the cameras in your neighborhood.
+        <p>
+          <strong class="text-[#e8e8e8]">Greenville:</strong> Greenville PD runs 57 Flock cameras. The first batch went up in January 2021, paid for with federal civil asset forfeiture funds. No city ordinance. No council vote on oversight. There are still no rules about who sees the data, how long it's kept, or who checks how it's used.
         </p>
-        <div id="map-container" class="rounded-lg overflow-hidden" style="height: 600px; clip-path: inset(0);">
-          <div id="camera-map" style="width: 100%; height: 100%;" role="application" aria-label="ALPR Camera Map"></div>
-        </div>
-        <div class="map-frame-credits relative z-[3] px-3 pt-2 pb-1">
-          <p class="text-[#a3a3a3] text-xs">
-            Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
-          </p>
-          <p class="text-[#737373] text-sm mt-1">
-            Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
-          </p>
-        </div>
+        <p>
+          <strong class="text-[#e8e8e8]">Spartanburg:</strong> City PD runs 15 cameras. The county's were deployed under Sheriff Chuck Wright&hellip; who pled guilty to federal criminal charges in May 2025. A convicted criminal had unrestricted access to a system tracking where you drive. Neither the city nor the county has an oversight policy.
+        </p>
+        <p>
+          <strong class="text-[#e8e8e8]">From Greenville to Spartanburg to Anderson and beyond:</strong> Cameras first, questions never. No Upstate city or county has passed an oversight ordinance. Even when other cities tried, it didn't matter. Local governments can't control where the data goes once it's in Flock's network.
+        </p>
+        <p>
+          <strong class="text-[#e8e8e8]">The official count undersells it.</strong> When Greenville went looking for more cameras, its own RFP required the new ones to connect with HOA and neighborhood cameras too. The city's SafeWatch program asks residents to register their Ring and Nest cameras for police use on demand. At least one Greenville HOA already runs its own license plate reader. The 57-camera figure is a floor, not a ceiling.
+        </p>
       </div>
     </div>
+
+    <!-- Right: stat column -->
+    <div class="hidden md:flex flex-col px-7 pt-14 pb-12">
+      <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
+        <div class="text-[32px] font-black text-[#dc2626] leading-none tracking-[-0.03em] mb-1">242</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#737373]">Total cameras<br>documented</div>
+      </div>
+      <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
+        <div class="text-[32px] font-black text-[#dc2626] leading-none tracking-[-0.03em] mb-1">57</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#737373]">Greenville PD</div>
+      </div>
+      <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
+        <div class="text-[24px] font-black leading-none tracking-[-0.03em] mb-1" style="color:#555;">0</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#737373]">Oversight<br>ordinances</div>
+      </div>
+      <div class="py-4">
+        <div class="text-[24px] font-black leading-none tracking-[-0.03em] mb-1" style="color:#555;">0</div>
+        <div class="font-['DM_Mono',monospace] text-[8px] uppercase tracking-[0.15em] text-[#737373]">Public<br>votes</div>
+      </div>
+    </div>
+
   </div>
+
+  <!-- Map intro — above the red separator -->
+  <div class="relative z-10 px-6 md:px-16 py-6 flex items-baseline gap-4 flex-wrap">
+    <span class="font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.18em] text-[#dc2626]">Interactive Map</span>
+    <span class="text-[#e8e8e8] font-extrabold tracking-[-0.02em]" style="font-size:clamp(1rem,1.5vw,1.15rem);">See the cameras watching your street.</span>
+    <span class="font-['DM_Mono',monospace] text-[11px] text-[#737373] tracking-[0.08em]">Community sourced · Updated hourly</span>
+  </div>
+
+  <!-- Map embed area — raw feed, red top separator -->
+  <div class="relative z-10" style="border-top: 2px solid #dc2626;">
+
+    <!-- Mobile toggle button -->
+    <div id="map-button-container" class="md:hidden bg-[#1a1a1a] p-8 text-center">
+      <button
+        id="map-toggle"
+        type="button"
+        class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer"
+      >
+        Explore the camera map &rarr;&#xFE0E;
+      </button>
+    </div>
+
+    <!-- Map -->
+    <div id="map-frame" class="hidden md:block" style="position: relative;">
+      <div class="map-badge" aria-hidden="true">
+        <span class="map-live-dot"></span>
+        ALPR Network
+      </div>
+      <button id="scroll-toggle" type="button" class="map-scroll-btn" aria-pressed="false">
+        <svg class="scroll-btn-icon" width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+          <rect x="2" y="4.5" width="7" height="5.5" rx="0.75" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M3.5 4.5V3a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span class="scroll-btn-label">Enable scroll zoom</span>
+      </button>
+      <div id="map-container" style="height: 600px; clip-path: inset(0);">
+        <div id="camera-map" style="width: 100%; height: 100%;" role="application" aria-label="ALPR Camera Map"></div>
+      </div>
+    </div>
+
+    <!-- Attribution -->
+    <div class="px-6 md:px-16 py-4 border-t border-[rgba(255,255,255,0.07)]">
+      <p class="text-[#a3a3a3] text-xs">
+        Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
+      </p>
+      <p class="text-[#737373] text-base mt-1">
+        Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
+      </p>
+    </div>
+
+  </div>
+
 </section>
 
 <style>
-  /* Map-specific overrides on top of .glow-frame (from global.css) */
-  .map-frame {
-    width: 100vw;
-    padding: 0;
-    padding-top: 24px;
-    padding-bottom: 12px;
-    border-radius: 0;
+  /* Scroll-to-zoom toggle button */
+  .map-scroll-btn {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #c0c0c0;
+    background: rgba(13, 13, 13, 0.9);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
   }
-
-  @media (min-width: 768px) {
-    .map-frame {
-      width: 70vw;
-      padding: 20px;
-      padding-top: 24px;
-      padding-bottom: 12px;
-      border-radius: 0.75rem;
-    }
+  .map-scroll-btn:hover {
+    color: #e8e8e8;
+    border-color: rgba(255, 255, 255, 0.35);
   }
-
-  .map-frame #map-container {
-    position: relative;
-    z-index: 1;
+  .map-scroll-btn[aria-pressed="true"] {
+    color: #dc2626;
+    border-color: rgba(220, 38, 38, 0.5);
   }
-
-  .map-frame-credits p {
-    transition: color 0.4s ease;
+  .map-scroll-btn[aria-pressed="true"] .scroll-btn-icon {
+    color: #dc2626;
   }
-
-  .map-frame-credits p:first-child a {
-    color: inherit;
-  }
-
-  .map-frame:hover .map-frame-credits p:first-child {
-    color: #737373;
-  }
-
-  .map-frame-credits p:first-child a:hover {
-    color: #d4d4d4;
-    transition: color 0.2s ease;
-  }
-
-  .map-frame:hover .map-frame-credits p:last-child {
+  .scroll-btn-icon {
+    flex-shrink: 0;
     color: #a3a3a3;
+    transition: color 0.15s;
+  }
+
+  /* ALPR Network badge overlay */
+  .map-badge {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    z-index: 10;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #e8e8e8;
+    background: rgba(13, 13, 13, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .map-live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #dc2626;
+    flex-shrink: 0;
+    animation: map-dot-blink 2s ease-in-out infinite;
+  }
+
+  @keyframes map-dot-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .map-frame-credits p {
-      transition: none;
-    }
+    .map-live-dot { animation: none; }
   }
 
   /* Dark glass zoom controls */
@@ -318,13 +392,13 @@
     loadAndResize();
   });
 
-  // Frame glow cursor tracking
-  const mapFrame = document.querySelector<HTMLElement>('#map-frame[data-glow-frame]');
-  if (mapFrame) {
-    mapFrame.addEventListener('pointermove', (e: PointerEvent) => {
-      const rect = mapFrame.getBoundingClientRect();
-      mapFrame.style.setProperty('--frame-x', `${e.clientX - rect.left}px`);
-      mapFrame.style.setProperty('--frame-y', `${e.clientY - rect.top}px`);
-    }, { passive: true });
-  }
+  // Scroll-to-zoom toggle
+  document.getElementById('scroll-toggle')?.addEventListener('click', async () => {
+    const btn = document.getElementById('scroll-toggle') as HTMLButtonElement;
+    const { toggleScrollZoom } = await import('../scripts/camera-map');
+    const enabled = toggleScrollZoom();
+    btn.setAttribute('aria-pressed', String(enabled));
+    btn.querySelector('.scroll-btn-label')!.textContent = enabled ? 'Disable scroll zoom' : 'Enable scroll zoom';
+  });
+
 </script>

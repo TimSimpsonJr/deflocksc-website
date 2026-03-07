@@ -19,10 +19,10 @@ const registry = {
   <div id="action-modal-backdrop" class="min-h-full bg-[#171717] overflow-y-auto md:bg-black/70 md:backdrop-blur-sm md:flex md:items-start md:justify-center md:py-12">
 
     <!-- Modal card (full-screen mobile, centered card desktop) -->
-    <div id="action-modal-card" class="min-h-full md:min-h-0 md:bg-[#171717] md:border md:border-[#404040] md:rounded-xl md:w-full md:max-w-2xl md:max-h-[85dvh] md:overflow-y-auto md:relative">
+    <div id="action-modal-card" class="min-h-full md:min-h-0 md:bg-[#0d0d0d] md:border md:border-[rgba(255,255,255,0.1)] md:w-full md:max-w-2xl md:max-h-[85dvh] md:overflow-y-auto md:relative" style="border-top: 2px solid #dc2626;">
       <!-- Close button -->
       <button id="action-modal-close" type="button"
-        class="fixed top-4 right-4 z-10 w-10 h-10 rounded-full bg-[#262626] hover:bg-[#404040]
+        class="fixed top-4 right-4 z-10 w-10 h-10 bg-transparent hover:bg-[#262626]
                text-[#a3a3a3] hover:text-white flex items-center justify-center transition-colors cursor-pointer
                md:absolute md:top-3 md:right-3"
         aria-label="Close">
@@ -33,25 +33,28 @@ const registry = {
 
       <!-- Content container -->
       <div class="px-6 pt-16 pb-12 md:px-8 md:pt-8 md:pb-8">
-        <h2 class="text-2xl md:text-3xl font-[900] text-white leading-tight mb-4 text-center">Find Your Representatives</h2>
-        <p class="text-[#a3a3a3] text-sm leading-relaxed mb-8 text-center max-w-md mx-auto">
-          We'll find your state legislators and local council members, with phone numbers and a draft letter written for each one. One lookup, every rep who needs to hear from you.
-        </p>
+        <div class="text-center">
+          <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Rep Lookup</p>
+          <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight mb-4">Find Your Representatives</h2>
+          <p class="text-[#a3a3a3] text-sm leading-relaxed mb-8 max-w-lg mx-auto">
+            We'll find your state legislators and local council members, with phone numbers and a draft letter written for each one. One lookup, every rep who needs to hear from you.
+          </p>
+        </div>
 
     <!-- Input State -->
     <div id="action-input">
-      <div class="flex flex-col items-center gap-6 max-w-md mx-auto">
+      <div class="flex flex-col items-center gap-6 max-w-lg mx-auto">
 
         <!-- 1. Geolocation (primary) -->
         <div class="w-full text-center">
           <button
             id="action-geo"
             type="button"
-            class="bg-[#ef4444] hover:bg-[#dc2626] text-white font-bold rounded-lg px-8 py-4 text-lg min-h-[56px] transition-colors cursor-pointer w-full max-w-xs"
+            class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold px-8 py-4 text-lg min-h-[56px] transition-colors cursor-pointer w-full max-w-xs"
           >
             Find My Reps
           </button>
-          <p class="text-[#737373] text-xs italic mt-3 max-w-sm mx-auto">
+          <p class="text-[#a3a3a3] text-xs italic mt-3 max-w-sm mx-auto">
             Your location is matched entirely in your browser. No data is sent to any server.
           </p>
         </div>
@@ -59,7 +62,7 @@ const registry = {
         <!-- Divider -->
         <div class="flex items-center gap-4 w-full">
           <div class="flex-1 h-px bg-[#404040]"></div>
-          <span class="text-[#737373] text-sm">or enter your address</span>
+          <span class="text-[#a3a3a3] text-sm">or enter your address</span>
           <div class="flex-1 h-px bg-[#404040]"></div>
         </div>
 
@@ -73,16 +76,16 @@ const registry = {
               autocomplete="street-address"
               placeholder="123 Main St, Greenville, SC"
               required
-              class="flex-1 bg-[#262626] border border-[#404040] text-white rounded px-4 py-3 text-base placeholder-[#737373] focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4] transition-colors"
+              class="flex-1 bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-4 py-3 text-base placeholder-[#888] focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4] transition-colors"
             />
             <button
               type="submit"
-              class="bg-[#404040] hover:bg-[#475569] text-white font-medium rounded px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer whitespace-nowrap"
+              class="bg-[#262626] hover:bg-[#333333] text-white font-medium px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer whitespace-nowrap"
             >
               Find My Reps
             </button>
           </div>
-          <p class="text-[#737373] text-xs italic mt-2">
+          <p class="text-[#a3a3a3] text-xs italic mt-2 text-center">
             Your address is sent to the US Census Bureau's geocoding service. No other data is shared.
           </p>
         </form>
@@ -96,13 +99,13 @@ const registry = {
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="manual-senate" class="text-[#a3a3a3] text-xs block mb-1">Senate District</label>
-                <select id="manual-senate" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-senate" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select...</option>
                 </select>
               </div>
               <div>
                 <label for="manual-house" class="text-[#a3a3a3] text-xs block mb-1">House District</label>
-                <select id="manual-house" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-house" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select...</option>
                 </select>
               </div>
@@ -110,7 +113,7 @@ const registry = {
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="manual-county" class="text-[#a3a3a3] text-xs block mb-1">County</label>
-                <select id="manual-county" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-county" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select...</option>
                   {registry.jurisdictions.filter(j => j.type === 'county').map(j => (
                     <option value={j.county.toLowerCase()}>{j.county}</option>
@@ -119,7 +122,7 @@ const registry = {
               </div>
               <div>
                 <label for="manual-county-district" class="text-[#a3a3a3] text-xs block mb-1">County District</label>
-                <select id="manual-county-district" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-county-district" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select county first</option>
                 </select>
               </div>
@@ -127,24 +130,24 @@ const registry = {
             <div id="manual-city-row" class="grid grid-cols-2 gap-3 hidden">
               <div>
                 <label for="manual-city" class="text-[#a3a3a3] text-xs block mb-1">City</label>
-                <select id="manual-city" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-city" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">None</option>
                 </select>
               </div>
               <div>
                 <label for="manual-city-district" class="text-[#a3a3a3] text-xs block mb-1">City District</label>
-                <select id="manual-city-district" class="w-full bg-[#262626] border border-[#404040] text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-city-district" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select city first</option>
                 </select>
               </div>
             </div>
-            <p class="text-[#737373] text-xs">
+            <p class="text-[#a3a3a3] text-xs">
               Don't know your district? <a href="https://www.scstatehouse.gov/legislatorssearch.php" target="_blank" rel="noopener" class="text-[#a3a3a3] hover:text-[#d4d4d4] underline">Look it up on scstatehouse.gov<span class="sr-only"> (opens in new tab)</span></a>
             </p>
             <button
               id="action-manual-submit"
               type="button"
-              class="bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer w-full"
+              class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-medium px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer w-full"
             >
               Find My Reps
             </button>
@@ -157,7 +160,7 @@ const registry = {
     <!-- Loading State -->
     <div id="action-loading" class="hidden" aria-live="polite">
       <div class="flex flex-col items-center justify-center py-12 gap-4">
-        <div class="w-10 h-10 border-4 border-[#404040] border-t-[#ef4444] rounded-full animate-spin"></div>
+        <div class="w-10 h-10 border-4 border-[#404040] border-t-[#dc2626] rounded-full animate-spin"></div>
         <p class="text-[#a3a3a3] text-sm">Finding your representatives...</p>
       </div>
     </div>
@@ -183,7 +186,7 @@ const registry = {
         <button
           id="action-retry"
           type="button"
-          class="bg-[#404040] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer"
+          class="bg-[#404040] hover:bg-[#475569] text-[#e2e8f0] font-medium px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer"
         >
           Start Over
         </button>

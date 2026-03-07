@@ -2,226 +2,525 @@
 import HowItWorksOverlays from './HowItWorksOverlays.astro';
 ---
 
-<section id="how-it-works" aria-labelledby="how-it-works-heading" class="bg-[#262626] py-20 md:py-28 relative overflow-hidden">
-  <!-- Section glow accent -->
-  <div class="section-glow absolute -top-24 left-1/2 -translate-x-1/2 w-[min(800px,90vw)] h-[300px] blur-[64px] opacity-[0.15] md:opacity-[0.20] pointer-events-none" aria-hidden="true"></div>
+<section id="how-it-works" aria-labelledby="how-it-works-heading" class="bg-[#111111] py-0 relative overflow-hidden">
 
-  <div class="max-w-6xl mx-auto px-6">
-    <h2 id="how-it-works-heading" class="text-white font-extrabold text-2xl md:text-4xl tracking-[-0.02em] mb-10 text-center">
-      What Is Flock Safety?
+  <!-- Section header -->
+  <div class="relative overflow-hidden px-6 md:px-12 pt-14 pb-4">
+    <div class="how-bg-num absolute right-4 -top-6 font-bold leading-none text-[rgba(255,255,255,0.025)] pointer-events-none select-none" aria-hidden="true">LOGGED</div>
+    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">How it works</p>
+    <h2 id="how-it-works-heading" class="text-[#e8e8e8] font-bold text-[clamp(1.8rem,3.5vw,2.8rem)] tracking-[-0.025em] leading-[1.05] max-w-[600px] mb-10">
+      The camera logged your plate 30 seconds ago.
     </h2>
+  </div>
 
-    <!-- Split layout: intro text + divider + carousel -->
-    <div class="grid md:grid-cols-[1fr_1px_1fr] gap-10 md:gap-12 mb-14">
-      <!-- Left: intro paragraphs -->
-      <div class="space-y-6 text-[#d4d4d4] text-base leading-relaxed min-w-0">
-        <p>
-          Flock Safety puts cameras on poles at intersections and along roadsides. Small. Solar-powered. Easy to miss. Every car that drives by gets photographed. Your plate number, vehicle make, color, and location get uploaded to Flock's servers. Every time.
-        </p>
-        <p>
-          Here's what your police department didn't mention: that data doesn't stay in Greenville. Flock runs a national network. Police from other states can search it. Federal agencies can too. No warrant needed.
-        </p>
-        <p>
-          Researchers found three separate ways federal agents get into local camera data, including a back door that let outside agencies search it without anyone knowing. Flock's CEO denied having federal contracts on camera in July 2025. He admitted it three weeks later. Every drive you've taken is in there.
-        </p>
-        <p>
-          None of it requires a warrant. Your local police can't turn off the federal access.<br /><span class="text-[#ef4444] font-semibold">And neither can you.</span>
-        </p>
-      </div>
-
-      <!-- Vertical divider -->
-      <div class="hidden md:block bg-[#404040]"></div>
-
-      <!-- Right: carousel -->
-      <div class="factoid-carousel min-w-0" id="factoidCarousel" role="region" aria-label="Case studies carousel">
-        <div class="carousel-container">
-          <!-- Prev arrow -->
-          <button class="carousel-arrow carousel-arrow-prev" id="prevBtn" aria-label="Previous factoid">&lsaquo;</button>
-
-          <!-- Viewport -->
-          <div class="carousel-viewport" aria-live="polite">
-            <div class="carousel-track" id="carouselTrack">
-              <div class="carousel-card" data-idx="0" data-overlay="0" tabindex="0" role="group" aria-label="Case study 1 of 5">
-                <div class="carousel-card-content">
-                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Greenville, SC &mdash; False Arrest</span>
-                  <p class="text-[#d4d4d4] text-[0.9rem] leading-relaxed mb-4">
-                    Two sisters driving a rental car were flagged as stolen by a Flock camera. Police drew weapons and handcuffed both women. The car wasn't stolen &mdash; it had been improperly reported. They are now suing Greenville PD.
-                  </p>
-                  <span class="read-more-text">See the full lawsuit story &rarr;&#xFE0E;</span>
-                </div>
-              </div>
-
-              <div class="carousel-card" data-idx="1" data-overlay="1" tabindex="-1" role="group" aria-label="Case study 2 of 5">
-                <div class="carousel-card-content">
-                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Ventura County, CA &mdash; Data Shared Without Permission</span>
-                  <p class="text-[#d4d4d4] text-[0.9rem] leading-relaxed mb-4">
-                    Ventura County disabled Flock's cross-jurisdiction sharing to comply with state law. The feature was reactivated without anyone knowing. Out-of-state agencies searched their data 364,000 times in two months before deputies found out.
-                  </p>
-                  <span class="read-more-text">See how your data leaves the state &rarr;&#xFE0E;</span>
-                </div>
-              </div>
-
-              <div class="carousel-card" data-idx="2" data-overlay="2" tabindex="-1" role="group" aria-label="Case study 3 of 5">
-                <div class="carousel-card-content">
-                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Santa Cruz, CA &mdash; 4,000 Federal Searches</span>
-                  <p class="text-[#d4d4d4] text-[0.9rem] leading-relaxed mb-4">
-                    State agencies accessed local camera data 4,000 times on behalf of federal authorities, including ICE, before the city found out and cancelled the contract 6&ndash;1.
-                  </p>
-                  <span class="read-more-text">See why the city voted 6&ndash;1 to cancel &rarr;&#xFE0E;</span>
-                </div>
-              </div>
-
-              <div class="carousel-card" data-idx="3" data-overlay="3" tabindex="-1" role="group" aria-label="Case study 4 of 5">
-                <div class="carousel-card-content">
-                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Spartanburg, SC &mdash; Sheriff Convicted</span>
-                  <p class="text-[#d4d4d4] text-[0.9rem] leading-relaxed mb-4">
-                    Spartanburg County Sheriff Chuck Wright oversaw Flock deployments and pled guilty to federal charges: conspiracy to commit theft and wire fraud. The man with access to your location history was a convicted federal criminal.
-                  </p>
-                  <span class="read-more-text">See who had access to your data &rarr;&#xFE0E;</span>
-                </div>
-              </div>
-
-              <div class="carousel-card" data-idx="4" data-overlay="4" tabindex="-1" role="group" aria-label="Case study 5 of 5">
-                <div class="carousel-card-content">
-                  <span class="block text-[#ef4444] font-bold text-xs uppercase tracking-[0.05em] mb-3">Austin, TX &mdash; No Crime Reduction</span>
-                  <p class="text-[#d4d4d4] text-[0.9rem] leading-relaxed mb-4">
-                    Austin's own city audit couldn't find evidence the cameras reduce crime. Over 20% of searches lacked proper documentation. The city cancelled the contract.
-                  </p>
-                  <span class="read-more-text">See the audit that killed the contract &rarr;&#xFE0E;</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Next arrow -->
-          <button class="carousel-arrow carousel-arrow-next" id="nextBtn" aria-label="Next factoid">&rsaquo;</button>
-
-          <!-- Dots inside the card area -->
-          <div class="carousel-dots-bar" id="carouselDots"></div>
-        </div>
-      </div>
+  <!-- Asymmetric grid: primary (2-row) + 2 secondary -->
+  <div class="pipeline-grid grid md:grid-cols-2 bg-[rgba(255,255,255,0.07)] mx-6 md:mx-12 mb-12" style="gap:1px">
+    <!-- Primary cell: spans 2 rows on desktop -->
+    <div class="pipeline-cell-primary bg-[#141414] p-8 md:p-12 relative md:row-span-2">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#737373] mb-10">Primary node · 01 / Capture</p>
+      <h3 class="text-[#e8e8e8] font-bold text-[1.6rem] tracking-[-0.015em] leading-[1.2] mb-4 relative">
+        It photographs every car. Every single time.
+      </h3>
+      <p class="text-[#a0a0a0] text-base leading-[1.65] max-w-[340px] relative">
+        Flock Safety puts cameras on poles at intersections and along roadsides. Small. Solar-powered. Easy to miss. Every car that drives by gets photographed. Your plate number, vehicle make, color, and location get uploaded to Flock's servers. Every time. The camera doesn't wait for suspicion. It reads everything and checks later.
+      </p>
+      <div class="p-num-bg absolute bottom-6 right-6 font-bold leading-none text-[rgba(255,255,255,0.04)] pointer-events-none select-none" aria-hidden="true">CAPTURE</div>
     </div>
 
+    <!-- Secondary cell 1 -->
+    <div class="bg-[#111111] p-8 relative">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#737373] mb-8">02 / Ingest</p>
+      <h3 class="text-[#e8e8e8] font-semibold text-[1.3rem] tracking-[-0.015em] leading-[1.2] mb-3 relative">Your data leaves the county immediately.</h3>
+      <p class="text-[#a0a0a0] text-base leading-[1.65] relative">
+        That data doesn't stay in your county. Flock runs a national network. Police from other states can search it. Federal agencies can too. Researchers found three separate ways federal agents get into local camera data — including a back door that let outside agencies search without anyone knowing. Flock's CEO denied having federal contracts on camera in July 2025. He admitted it three weeks later. Every drive you've taken is in there.
+      </p>
+      <div class="p-num-bg absolute bottom-4 right-4 font-bold leading-none text-[rgba(255,255,255,0.04)] pointer-events-none select-none" aria-hidden="true">INGEST</div>
+    </div>
+
+    <!-- Secondary cell 2 -->
+    <div class="bg-[#111111] p-8 relative">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#737373] mb-8">03 / Access</p>
+      <h3 class="text-[#e8e8e8] font-semibold text-[1.3rem] tracking-[-0.015em] leading-[1.2] mb-3 relative">Your local cops can't stop it.</h3>
+      <p class="text-[#a0a0a0] text-base leading-[1.65] relative">
+        No SC city or county has passed an oversight ordinance. The cameras went up, the data started flowing, and no rules govern how long it's kept. None of it requires a warrant. Your local police can't turn off the federal access. <span class="text-[#dc2626] font-semibold">And neither can you.</span>
+      </p>
+      <div class="p-num-bg absolute bottom-4 right-4 font-bold leading-none text-[rgba(255,255,255,0.04)] pointer-events-none select-none" aria-hidden="true">ACCESS</div>
+    </div>
   </div>
+
+  <!-- Case studies bento grid -->
+  <div class="px-6 md:px-12 pb-14">
+    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-4">Case studies</p>
+    <div class="cs-bento">
+      <!-- Top row: 3 cards -->
+      <div class="cs-card" data-overlay="0" tabindex="0" role="group" aria-label="Case study 1 of 5">
+        <div class="cs-scene" id="scene-1" aria-hidden="true">
+          <div class="s1-wrap">
+            <div class="s1-plate s1-back">
+              <div class="s1-tag">DATABASE ENTRY</div>
+              <div class="s1-num">GHP·4B92</div>
+              <div class="s1-state">SOUTH CAROLINA</div>
+            </div>
+            <div class="s1-plate s1-front">
+              <div class="s1-tag">ALPR SCAN</div>
+              <div class="s1-num">GHP·4892</div>
+              <div class="s1-state">SOUTH CAROLINA</div>
+            </div>
+            <div class="s1-neq">&ne;</div>
+            <div class="s1-badge"><span class="s1-dot"></span>FALSE MATCH · ARREST MADE</div>
+          </div>
+        </div>
+        <div class="cs-body">
+          <div class="cs-loc">Greenville, SC</div>
+          <div class="cs-title">False Arrest from ALPR Error</div>
+          <div class="cs-blurb">A misread scan flagged an innocent driver as a stolen vehicle match. Charges were later dropped.</div>
+        </div>
+        <div class="cs-num">01</div>
+      </div>
+      <div class="cs-card" data-overlay="1" tabindex="0" role="group" aria-label="Case study 2 of 5">
+        <div class="cs-scene" id="scene-2" aria-hidden="true">
+          <svg class="s2-svg" viewBox="0 0 959 593" preserveAspectRatio="xMidYMid meet">
+            <g class="s2-map">
+              <!-- Full US map (fades in on hover) -->
+              <image class="s2-states" href="/us-map.svg" x="0" y="0" width="959" height="593"/>
+              <!-- Inline CA path (white, visible at rest, fades out on hover) -->
+              <path class="s2-ca" d="m 69,366 3,5 -1,.1 -2,-2 z m 2,-10 2,4 3,1 .7,-.6 -1,-2 -3,-2 z m -20,-19 v 2 l 2,1 4,-.2 1,-1 -3,-.2 z m -6,.1 3,.5 1,2 h -4 z m 48,46 -1,-3 .2,-3 -.4,-8 -2,-5 -1,-1 -.6,-2 -7,-9 -4,.1 -2,-2 1,-2 -.7,-4 -2,-1 -4,-.6 -3,-1 -2,-2 -4,-7 -3,-2 -4,-.5 -3,-2 -5,-2 -3,-.3 -2,-2 .2,-3 .8,-5 2,-5 -1,-2 -4,-9 -3,-4 -.4,-3 -2,-2 .2,-2 -2,-5 -3,-3 .6,-7 2,-.8 2,-3 -.4,-3 -1,-.9 h -2 l -2,-3 -2,-4 v -8 l 1,-4 .2,-2 2,.2 -.1,2 -.8,.7 v 2 l 4,3 v -5 l -1,-3 .5,-1 -1,-2 3,-2 -2,-3 -1,.5 -2,4 .5,1 -.8,1 -.9,-.1 -5,-6 .7,-6 -1,-4 -6,-13 .8,-11 2,-4 .2,-6 -6,-11 .3,-5 7,-8 2,-2 -.1,-1 4,-9 .1,-8 .9,-2 66,19 -16,63 1,4 70,105 -.9,2 1,3 1,2 1,6 2,2 .4,2 -1,1 -5,2 -2,4 -2,7 -2,3 -2,.3 -1,7 1,2 2,.2 1,2 -.8,2 -3,2 -2,-.1 z" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <!-- Arc lines from CA center (~93,310) to real state locations -->
+              <path class="s2-arc s2-arc-1" d="M93,310 Q160,260 170,360" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
+              <path class="s2-arc s2-arc-2" d="M93,310 Q140,230 155,210" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="200" stroke-dashoffset="200"/>
+              <path class="s2-arc s2-arc-3" d="M93,310 Q180,170 280,155" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="250" stroke-dashoffset="250"/>
+              <path class="s2-arc s2-arc-4" d="M93,310 Q200,190 300,210" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="300" stroke-dashoffset="300"/>
+              <path class="s2-arc s2-arc-5" d="M93,310 Q270,220 340,280" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="400" stroke-dashoffset="400"/>
+              <path class="s2-arc s2-arc-6" d="M93,310 Q340,160 440,290" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="500" stroke-dashoffset="500"/>
+              <path class="s2-arc s2-arc-7" d="M93,310 Q320,220 450,430" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="550" stroke-dashoffset="550"/>
+              <path class="s2-arc s2-arc-8" d="M93,310 Q370,170 530,200" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="600" stroke-dashoffset="600"/>
+              <path class="s2-arc s2-arc-9" d="M93,310 Q380,160 560,300" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="620" stroke-dashoffset="620"/>
+              <path class="s2-arc s2-arc-10" d="M93,310 Q400,150 590,280" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="650" stroke-dashoffset="650"/>
+              <path class="s2-arc s2-arc-11" d="M93,310 Q410,170 560,420" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="650" stroke-dashoffset="650"/>
+              <path class="s2-arc s2-arc-12" d="M93,310 Q420,140 650,210" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="720" stroke-dashoffset="720"/>
+              <path class="s2-arc s2-arc-13" d="M93,310 Q400,160 640,330" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="720" stroke-dashoffset="720"/>
+              <path class="s2-arc s2-arc-14" d="M93,310 Q430,140 670,400" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="780" stroke-dashoffset="780"/>
+              <path class="s2-arc s2-arc-15" d="M93,310 Q440,130 700,260" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="780" stroke-dashoffset="780"/>
+              <path class="s2-arc s2-arc-16" d="M93,310 Q450,120 740,370" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="820" stroke-dashoffset="820"/>
+              <path class="s2-arc s2-arc-17" d="M93,310 Q460,110 760,460" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="850" stroke-dashoffset="850"/>
+              <path class="s2-arc s2-arc-18" d="M93,310 Q460,100 740,290" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="850" stroke-dashoffset="850"/>
+              <path class="s2-arc s2-arc-19" d="M93,310 Q470,90 780,230" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="880" stroke-dashoffset="880"/>
+              <path class="s2-arc s2-arc-20" d="M93,310 Q470,80 810,200" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-21" d="M93,310 Q480,70 840,180" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-22" d="M93,310 Q470,100 770,300" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="880" stroke-dashoffset="880"/>
+              <path class="s2-arc s2-arc-23" d="M93,310 Q460,80 820,250" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="900" stroke-dashoffset="900"/>
+              <path class="s2-arc s2-arc-24" d="M93,310 Q440,120 690,350" fill="none" stroke="rgba(220,38,38,0.5)" stroke-width="1" stroke-dasharray="800" stroke-dashoffset="800"/>
+              <!-- Source dot -->
+              <circle cx="93" cy="310" r="6" fill="#dc2626" opacity="0.8"/>
+            </g>
+            <!-- Counter label (centered in viewBox, outside s2-map so it doesn't zoom) -->
+            <text class="s2-label" x="480" y="310" text-anchor="middle" font-family="DM Mono,monospace" font-size="42" font-weight="500" fill="rgba(255,255,255,0.85)" letter-spacing="1">
+              <tspan class="s2-count">0</tspan> QUERIES
+            </text>
+          </svg>
+        </div>
+        <div class="cs-body">
+          <div class="cs-loc">Ventura County, CA</div>
+          <div class="cs-title">364,000 Out-of-State Queries</div>
+          <div class="cs-blurb">ALPR data shared with agencies across the country, without oversight or consent.</div>
+        </div>
+        <div class="cs-num">02</div>
+      </div>
+      <div class="cs-card" data-overlay="2" tabindex="0" role="group" aria-label="Case study 3 of 5">
+        <div class="cs-scene" id="scene-3" aria-hidden="true">
+          <div class="s3-wrap">
+            <div class="s3-doc s3-doc-1">
+              <div class="s3-hdr">CASE FILE</div>
+              <div class="s3-line w88"></div><div class="s3-line w72"></div>
+              <div class="s3-line w55"></div><div class="s3-line w80"></div>
+            </div>
+            <div class="s3-doc s3-doc-2">
+              <div class="s3-hdr">QUERY LOG</div>
+              <div class="s3-line w88"></div><div class="s3-line w72"></div>
+              <div class="s3-line w55"></div><div class="s3-line w80"></div>
+            </div>
+            <div class="s3-doc s3-doc-3">
+              <div class="s3-hdr">AUTH. RECORD</div>
+              <div class="s3-line w88"></div><div class="s3-line w72"></div>
+              <div class="s3-line w55"></div><div class="s3-line w80"></div>
+            </div>
+            <div class="s3-shield">
+              <svg width="56" height="64" viewBox="0 0 56 64">
+                <path d="M28,3 L52,11 L52,32 C52,48 28,61 28,61 C28,61 4,48 4,32 L4,11 Z"
+                  fill="rgba(220,38,38,0.1)" stroke="rgba(220,38,38,0.5)" stroke-width="1.4"/>
+                <text x="28" y="30" text-anchor="middle" font-family="DM Mono,monospace"
+                  font-size="11" fill="rgba(220,38,38,0.8)">FED.</text>
+                <text x="28" y="44" text-anchor="middle" font-family="DM Mono,monospace"
+                  font-size="7.5" fill="rgba(220,38,38,0.6)">AUTHORITY</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="cs-body">
+          <div class="cs-loc">Santa Cruz, CA</div>
+          <div class="cs-title">4,000 Federal Agency Searches</div>
+          <div class="cs-blurb">Federal authorities ran thousands of unauthorized queries on local ALPR data.</div>
+        </div>
+        <div class="cs-num">03</div>
+      </div>
+      <!-- Bottom row: 2 cards -->
+      <div class="cs-card" data-overlay="3" tabindex="0" role="group" aria-label="Case study 4 of 5">
+        <div class="cs-scene" id="scene-4" aria-hidden="true">
+          <svg class="s4-svg" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid meet"
+            style="position:absolute;inset:0;width:100%;height:100%;">
+            <!-- Far: personnel record lines -->
+            <g class="s4-record">
+              <text x="28" y="36" font-family="DM Mono,monospace" font-size="7"
+                fill="rgba(255,255,255,0.18)" letter-spacing="2">PERSONNEL RECORD</text>
+              <rect x="28" y="44" width="80" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+              <rect x="28" y="54" width="62" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+              <rect x="28" y="64" width="74" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+              <rect x="28" y="74" width="50" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+              <text x="28" y="94" font-family="DM Mono,monospace" font-size="6"
+                fill="rgba(255,255,255,0.12)" letter-spacing="1">ROLE · SHERIFF</text>
+              <text x="28" y="106" font-family="DM Mono,monospace" font-size="6"
+                fill="rgba(255,255,255,0.12)" letter-spacing="1">ACCESS · UNRESTRICTED</text>
+            </g>
+            <!-- Mid: sheriff star badge -->
+            <g class="s4-badge-icon">
+              <circle cx="148" cy="110" r="34" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+              <polygon points="148,79 154,96 172,96 158,107 163,124 148,113 133,124 138,107 124,96 142,96"
+                fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.2"/>
+              <circle cx="148" cy="105" r="10" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+              <text x="148" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="5" fill="rgba(255,255,255,0.25)" letter-spacing="0.5">SHERIFF</text>
+            </g>
+            <!-- Near: CONVICTED stamp -->
+            <g class="s4-stamp">
+              <rect x="30" y="88" width="140" height="40" rx="3"
+                fill="rgba(220,38,38,0.08)" stroke="rgba(220,38,38,0.6)" stroke-width="1.5"/>
+              <text x="100" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="20" font-weight="500" fill="#dc2626" letter-spacing="2">CONVICTED</text>
+              <text x="100" y="122" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="8" fill="rgba(220,38,38,0.7)" letter-spacing="3">FEDERAL CHARGE</text>
+            </g>
+          </svg>
+        </div>
+        <div class="cs-body">
+          <div class="cs-loc">Spartanburg, SC</div>
+          <div class="cs-title">Sheriff Convicted of Stalking</div>
+          <div class="cs-blurb">A sitting sheriff used unrestricted ALPR access to track and stalk private citizens.</div>
+        </div>
+        <div class="cs-num">04</div>
+      </div>
+      <div class="cs-card" data-overlay="4" tabindex="0" role="group" aria-label="Case study 5 of 5">
+        <div class="cs-scene" id="scene-5" aria-hidden="true">
+          <svg class="s5-svg" viewBox="0 0 300 180" preserveAspectRatio="xMidYMid meet">
+            <!-- Inner void (visible when lid lifts off) -->
+            <polygon class="s5-inner" points="105,68 165,48 225,68 165,88"/>
+
+            <!-- Box body -->
+            <polygon class="s5-box-front" points="105,68 165,88 165,135 105,115"/>
+            <polygon class="s5-box-side" points="165,88 225,68 225,115 165,135"/>
+
+            <!-- Evidence label on front face -->
+            <g transform="translate(105,68) skewY(18.43)">
+              <rect class="s5-label-bg" x="5" y="6" width="50" height="34" rx="1.5"/>
+              <text x="30" y="18" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="8" font-weight="500" fill="rgba(255,255,255,0.22)" letter-spacing="1.8">EVIDENCE</text>
+              <text x="30" y="27" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="5" fill="rgba(255,255,255,0.13)" letter-spacing="0.8">CASE #APD-2024</text>
+              <text x="30" y="35" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="4" fill="rgba(255,255,255,0.09)" letter-spacing="0.6">ALPR PROGRAM</text>
+            </g>
+
+            <!-- Handle on side -->
+            <line x1="185" y1="95" x2="205" y2="88" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-linecap="round"/>
+
+            <!-- Dust particles (float up on open) -->
+            <circle class="s5-dust s5-d1" cx="140" cy="65" r="1"/>
+            <circle class="s5-dust s5-d2" cx="160" cy="60" r="0.7"/>
+            <circle class="s5-dust s5-d3" cx="175" cy="68" r="0.8"/>
+            <circle class="s5-dust s5-d4" cx="155" cy="72" r="0.6"/>
+
+            <!-- Box top face (fades out as lid lifts) -->
+            <polygon class="s5-box-top" points="105,68 165,48 225,68 165,88"/>
+
+            <!-- Lid (lifts off and fades on hover) -->
+            <g class="s5-lid">
+              <polygon class="s5-lid-top" points="105,60 165,40 225,60 165,80"/>
+              <polygon class="s5-lid-front" points="105,60 165,80 165,88 105,68"/>
+              <polygon class="s5-lid-side" points="165,80 225,60 225,68 165,88"/>
+            </g>
+
+            <!-- "NO EVIDENCE FOUND" label -->
+            <g class="s5-verdict">
+              <rect x="85" y="144" width="130" height="24" rx="2"
+                fill="rgba(10,10,10,0.92)" stroke="rgba(220,38,38,0.5)" stroke-width="0.8"/>
+              <text x="150" y="160" text-anchor="middle" font-family="DM Mono,monospace"
+                font-size="9" font-weight="500" fill="rgba(220,38,38,0.8)" letter-spacing="2">NO EVIDENCE FOUND</text>
+            </g>
+          </svg>
+        </div>
+        <div class="cs-body">
+          <div class="cs-loc">Austin, TX</div>
+          <div class="cs-title">Zero Measurable Crime Reduction</div>
+          <div class="cs-blurb">An independent audit found ALPR cameras had zero statistical impact on crime rates.</div>
+        </div>
+        <div class="cs-num">05</div>
+      </div>
+    </div>
+  </div>
+
 </section>
 
 <HowItWorksOverlays />
 
 <style>
-  /* Carousel container -- holds arrows, viewport, and dots as one unit */
-  .carousel-container {
+  .how-bg-num { font-size: clamp(5rem, 10vw, 9rem); }
+  .p-num-bg   { font-size: clamp(2.5rem, 5vw, 4rem); }
+
+  /* Bento grid */
+  .cs-bento {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: rgba(255,255,255,0.07);
+  }
+  .cs-card:nth-child(-n+3) { grid-column: span 2; }
+  .cs-card:nth-child(n+4)  { grid-column: span 3; }
+
+  /* Card shell */
+  .cs-card {
+    background: #111;
+    cursor: pointer;
+    transition: background 0.22s;
+    overflow: hidden;
     position: relative;
-    background: #171717;
-    border-radius: 10px;
-    padding: 24px 20px 48px;
-    overflow: hidden;
-  }
-  @media (min-width: 768px) {
-    .carousel-container {
-      padding: 24px 48px 48px;
-    }
-  }
-
-  /* Carousel viewport & track */
-  .carousel-viewport {
-    overflow: hidden;
-    width: 100%;
-  }
-  .carousel-track {
-    display: flex;
-    width: 100%;
-    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Carousel cards */
-  .carousel-card {
-    flex: 0 0 100%;
-    min-width: 100%;
-    height: 220px;
     display: flex;
     flex-direction: column;
-    cursor: pointer;
   }
-  .carousel-card-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-  }
-  .carousel-card:hover .read-more-text {
-    color: #fcd34d;
-  }
+  .cs-card:hover { background: #1a1a1a; }
 
-  /* Read More text link */
-  .read-more-text {
-    color: #fbbf24;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: color 0.2s;
-  }
-
-  /* Carousel arrows -- integrated into the card */
-  .carousel-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #a3a3a3;
-    width: 44px;
-    height: 44px;
-    cursor: pointer;
-    font-size: 24px;
+  /* Scene panel */
+  .cs-scene {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+    background: #0d0d0d;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: border-color 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.2s;
-    line-height: 1;
-    z-index: 2;
+    flex-shrink: 0;
   }
-  .carousel-arrow:hover {
-    color: #d4d4d4;
+  .cs-card:hover .cs-scene { border-color: rgba(220,38,38,0.22); }
+
+  /* Card body */
+  .cs-body {
+    padding: 14px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
   }
-  .carousel-arrow-prev {
-    left: 2px;
+  .cs-loc {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: #dc2626;
   }
-  .carousel-arrow-next {
-    right: 2px;
+  .cs-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e2e2e2;
+    line-height: 1.35;
   }
-  @media (min-width: 768px) {
-    .carousel-arrow-prev {
-      left: 8px;
-    }
-    .carousel-arrow-next {
-      right: 8px;
-    }
+  .cs-blurb {
+    font-size: 13px;
+    color: rgba(255,255,255,0.38);
+    line-height: 1.55;
+  }
+  .cs-num {
+    position: absolute;
+    top: 9px;
+    right: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    color: rgba(255,255,255,0.14);
   }
 
-  /* Dots -- bottom of the card */
-  .carousel-dots-bar {
-    position: absolute;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 8px;
+  /* Card 1 — False Match */
+  .s1-wrap { position: relative; width: 210px; height: 126px; }
+  .s1-plate {
+    position: absolute; width: 174px; border-radius: 3px;
+    padding: 8px 14px 10px; display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    transition: transform 0.48s ease-out, opacity 0.48s ease-out, box-shadow 0.48s ease-out;
   }
-  :global(.carousel-dot) {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #737373;
-    cursor: pointer;
-    transition: background 0.2s;
-    border: none;
-    padding: 0;
+  .s1-tag { font-family: 'DM Mono',monospace; font-size: 7px; letter-spacing: 0.14em; color: rgba(255,255,255,0.22); }
+  .s1-num { font-family: 'DM Mono',monospace; font-size: 22px; font-weight: 500; letter-spacing: 0.06em; color: #e2e2e2; line-height: 1; }
+  .s1-state { font-family: 'DM Mono',monospace; font-size: 8px; letter-spacing: 0.16em; color: rgba(255,255,255,0.28); }
+
+  .s1-back { top: 0; left: 0; background: #0a0a0a; border: 1px solid rgba(255,255,255,0.08); opacity: 0.42; z-index: 1; }
+  .s1-front { top: 28px; left: 22px; background: #151515; border: 1px solid rgba(255,255,255,0.28); z-index: 2; box-shadow: 0 4px 18px rgba(0,0,0,0.55); }
+
+  .cs-card:hover .s1-back  { transform: translate(-12px,-12px); opacity: 0.62; }
+  .cs-card:hover .s1-front { transform: translate(10px,10px); box-shadow: 0 12px 36px rgba(0,0,0,0.8); }
+
+  .s1-neq {
+    position: absolute; top: 22px; left: 68px; z-index: 3;
+    font-size: 28px; font-weight: 500; font-family: 'DM Mono',monospace;
+    color: transparent; transition: color 0.28s 0.24s, transform 0.48s ease-out; pointer-events: none;
   }
-  :global(.carousel-dot.active) {
-    background: #ef4444;
+  .cs-card:hover .s1-neq { color: rgba(220,38,38,0.9); transform: translateY(-14px); }
+
+  .s1-badge {
+    position: absolute; bottom: 2px; right: 0; z-index: 4;
+    display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+    background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.4); border-radius: 3px;
+    font-family: 'DM Mono',monospace; font-size: 11px; letter-spacing: 0.1em; color: #dc2626;
+    opacity: 0; transform: scale(0.88) translateY(4px);
+    transition: opacity 0.3s 0.38s, transform 0.3s 0.38s; white-space: nowrap;
+  }
+  .s1-dot { width: 7px; height: 7px; border-radius: 50%; background: #dc2626; flex-shrink: 0; }
+  .cs-card:hover .s1-badge { opacity: 1; transform: scale(1) translateY(0); }
+
+  /* Card 2 — Data Web */
+  .s2-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+
+  .s2-map {
+    transition: transform 0.65s ease-out;
+    transform: scale(2.5);
+    transform-origin: 93px 310px;
+  }
+  .cs-card:hover .s2-map { transform: scale(1); }
+
+  .s2-ca { opacity: 1; transition: opacity 0.25s; }
+  .cs-card:hover .s2-ca { opacity: 0; transition-delay: 0.15s; }
+
+  .s2-states { opacity: 0; transition: opacity 0.4s 0.2s; }
+  .cs-card:hover .s2-states { opacity: 1; }
+
+  .s2-arc {
+    transition: stroke-dashoffset 0.5s ease-out;
+  }
+  .s2-arc-1  { transition-delay: 0.30s; }
+  .s2-arc-2  { transition-delay: 0.35s; }
+  .s2-arc-3  { transition-delay: 0.40s; }
+  .s2-arc-4  { transition-delay: 0.45s; }
+  .s2-arc-5  { transition-delay: 0.50s; }
+  .s2-arc-6  { transition-delay: 0.55s; }
+  .s2-arc-7  { transition-delay: 0.58s; }
+  .s2-arc-8  { transition-delay: 0.62s; }
+  .s2-arc-9  { transition-delay: 0.65s; }
+  .s2-arc-10 { transition-delay: 0.68s; }
+  .s2-arc-11 { transition-delay: 0.72s; }
+  .s2-arc-12 { transition-delay: 0.76s; }
+  .s2-arc-13 { transition-delay: 0.78s; }
+  .s2-arc-14 { transition-delay: 0.80s; }
+  .s2-arc-15 { transition-delay: 0.82s; }
+  .s2-arc-16 { transition-delay: 0.85s; }
+  .s2-arc-17 { transition-delay: 0.88s; }
+  .s2-arc-18 { transition-delay: 0.90s; }
+  .s2-arc-19 { transition-delay: 0.92s; }
+  .s2-arc-20 { transition-delay: 0.95s; }
+  .s2-arc-21 { transition-delay: 0.97s; }
+  .s2-arc-22 { transition-delay: 1.00s; }
+  .s2-arc-23 { transition-delay: 1.02s; }
+  .s2-arc-24 { transition-delay: 1.05s; }
+
+  .cs-card:hover .s2-arc { stroke-dashoffset: 0; }
+
+  .s2-label { opacity: 0; transition: opacity 0.3s 0.35s; }
+  .cs-card:hover .s2-label { opacity: 1; }
+
+  /* Card 3 — File Stack */
+  .s3-wrap { position: relative; width: 196px; height: 138px; }
+  .s3-doc {
+    position: absolute; width: 155px; height: 106px; border-radius: 3px;
+    padding: 9px 12px; overflow: hidden;
+  }
+  .s3-doc-1 { bottom: 0; left: 0; background: rgba(10,10,10,0.9); border: 1px solid rgba(255,255,255,0.06); z-index: 1; transform: rotate(3.5deg); transition: transform 0.46s ease-out; }
+  .s3-doc-2 { bottom: 14px; left: 14px; background: rgba(13,13,13,0.95); border: 1px solid rgba(255,255,255,0.09); z-index: 2; transform: rotate(1.5deg); transition: transform 0.46s 0.04s ease-out; }
+  .s3-doc-3 { bottom: 28px; left: 28px; background: #161616; border: 1px solid rgba(255,255,255,0.16); z-index: 3; box-shadow: 0 4px 18px rgba(0,0,0,0.6); transition: transform 0.46s ease-out, box-shadow 0.46s ease-out; }
+
+  .cs-card:hover .s3-doc-1 { transform: rotate(5deg) translate(-4px,4px); }
+  .cs-card:hover .s3-doc-2 { transform: rotate(2.5deg) translate(-2px,2px); }
+  .cs-card:hover .s3-doc-3 { transform: translateY(-18px); box-shadow: 0 20px 44px rgba(0,0,0,0.88); }
+
+  .s3-hdr { font-family: 'DM Mono',monospace; font-size: 7px; letter-spacing: 0.12em; color: rgba(255,255,255,0.2); margin-bottom: 8px; }
+  .s3-line { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.07); margin: 4px 0; }
+  .s3-line.w88 { width: 88%; } .s3-line.w72 { width: 72%; }
+  .s3-line.w55 { width: 55%; } .s3-line.w80 { width: 80%; }
+
+  .s3-shield {
+    position: absolute; right: 6px; bottom: 10px; z-index: 10;
+    opacity: 0; transform: scale(0.72) translateY(6px);
+    transition: opacity 0.34s 0.3s, transform 0.34s 0.3s;
+  }
+  .cs-card:hover .s3-shield { opacity: 1; transform: scale(1) translateY(0); }
+
+  /* Card 4 — Badge + Stamp */
+  .s4-record { transition: transform 0.52s ease-out; opacity: 0.55; }
+  .cs-card:hover .s4-record { transform: translate(-4px,3px); }
+
+  .s4-badge-icon { transition: transform 0.46s ease-out; }
+  .cs-card:hover .s4-badge-icon { transform: translate(3px,-3px); }
+
+  .s4-stamp {
+    opacity: 0; transform: rotate(-25deg) scale(0.8);
+    transform-box: fill-box; transform-origin: center center;
+    transition: opacity 0.42s 0.15s, transform 0.42s 0.15s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .cs-card:hover .s4-stamp { opacity: 1; transform: rotate(-12deg) scale(1); }
+
+  /* ── Card 5: Evidence box ── */
+  .s5-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .s5-box-top {
+    fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.12); stroke-width: 0.6;
+    transition: opacity 0.3s 0.1s;
+  }
+  .cs-card:hover .s5-box-top { opacity: 0; }
+
+  .s5-box-front { fill: rgba(255,255,255,0.04); stroke: rgba(255,255,255,0.1); stroke-width: 0.6; }
+  .s5-box-side { fill: rgba(255,255,255,0.025); stroke: rgba(255,255,255,0.08); stroke-width: 0.6; }
+
+  .s5-inner {
+    fill: rgba(0,0,0,0.5); stroke: rgba(255,255,255,0.04); stroke-width: 0.4;
+    opacity: 0; transition: opacity 0.3s 0.2s;
+  }
+  .cs-card:hover .s5-inner { opacity: 1; }
+
+  .s5-label-bg { fill: rgba(255,255,255,0.04); stroke: rgba(255,255,255,0.08); stroke-width: 0.4; }
+
+  .s5-lid {
+    transition: transform 0.65s 0.1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s 0.3s;
+  }
+  .cs-card:hover .s5-lid { transform: translate(30px, -35px); opacity: 0; }
+
+  .s5-lid-top { fill: rgba(255,255,255,0.07); stroke: rgba(255,255,255,0.13); stroke-width: 0.6; }
+  .s5-lid-front { fill: rgba(255,255,255,0.05); stroke: rgba(255,255,255,0.1); stroke-width: 0.6; }
+  .s5-lid-side { fill: rgba(255,255,255,0.03); stroke: rgba(255,255,255,0.08); stroke-width: 0.6; }
+
+  .s5-dust {
+    fill: rgba(255,255,255,0.15); opacity: 0;
+    transition: opacity 0.4s 0.3s, transform 0.8s 0.3s ease-out;
+  }
+  .cs-card:hover .s5-dust { opacity: 0.6; }
+  .cs-card:hover .s5-d1 { transform: translate(-6px, -18px); }
+  .cs-card:hover .s5-d2 { transform: translate(3px, -22px); }
+  .cs-card:hover .s5-d3 { transform: translate(-2px, -15px); }
+  .cs-card:hover .s5-d4 { transform: translate(7px, -20px); }
+
+  .s5-verdict { opacity: 0; transition: opacity 0.3s 0.5s; }
+  .cs-card:hover .s5-verdict { opacity: 1; }
+
+  /* Mobile: single column */
+  @media (max-width: 767px) {
+    .cs-bento { grid-template-columns: 1fr; }
+    .cs-card:nth-child(-n+3),
+    .cs-card:nth-child(n+4) { grid-column: span 1; }
   }
 </style>
 
 <script>
-  import '../scripts/carousel';
+  import '../scripts/case-studies';
 </script>
