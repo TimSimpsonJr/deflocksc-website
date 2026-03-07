@@ -82,7 +82,13 @@ const countEl = card2?.querySelector('.s2-count') as SVGTSpanElement | null;
 const labelEl = card2?.querySelector('.s2-label') as SVGTextElement | null;
 let countAnim: number | null = null;
 
+let fadeTimer: ReturnType<typeof setTimeout> | null = null;
+
 card2?.addEventListener('mouseenter', () => {
+  // Cancel any pending reset from a previous hover-off
+  if (fadeTimer) { clearTimeout(fadeTimer); fadeTimer = null; }
+
+  card2.classList.add('s2-active');
   arcs.forEach(arc => arc.classList.remove('s2-fading'));
   labelEl?.classList.remove('s2-fading');
 
@@ -115,11 +121,14 @@ card2?.addEventListener('mouseleave', () => {
     countAnim = null;
   }
 
-  // Fade out arcs + label
+  // Fade out arcs + label (while .s2-active keeps dashoffset at 0)
   arcs.forEach(arc => arc.classList.add('s2-fading'));
   labelEl?.classList.add('s2-fading');
 
-  setTimeout(() => {
+  fadeTimer = setTimeout(() => {
+    fadeTimer = null;
+    // Remove active state — map zooms back, states fade out, CA returns
+    card2!.classList.remove('s2-active');
     // Reset arcs
     arcs.forEach(arc => {
       arc.classList.remove('s2-fading');

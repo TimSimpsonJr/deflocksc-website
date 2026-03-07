@@ -114,7 +114,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
               <circle cx="93" cy="310" r="6" fill="#dc2626" opacity="0.8"/>
             </g>
             <!-- Counter label (centered in viewBox, outside s2-map so it doesn't zoom) -->
-            <text class="s2-label" x="480" y="310" text-anchor="middle" font-family="DM Mono,monospace" font-size="28" font-weight="500" fill="rgba(255,255,255,0.85)" letter-spacing="1">
+            <text class="s2-label" x="480" y="310" text-anchor="middle" font-family="DM Mono,monospace" font-size="42" font-weight="500" fill="rgba(255,255,255,0.85)" letter-spacing="1">
               <tspan class="s2-count">0</tspan> QUERIES
             </text>
           </svg>
@@ -352,13 +352,13 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     transform: scale(2.5);
     transform-origin: 93px 310px;
   }
-  .cs-card:hover .s2-map { transform: scale(1); }
+  .cs-card.s2-active .s2-map { transform: scale(1); }
 
   .s2-ca { opacity: 1; transition: opacity 0.25s; }
-  .cs-card:hover .s2-ca { opacity: 0; transition-delay: 0.15s; }
+  .cs-card.s2-active .s2-ca { opacity: 0; transition-delay: 0.15s; }
 
   .s2-states { opacity: 0; transition: opacity 0.4s 0.2s; }
-  .cs-card:hover .s2-states { opacity: 1; }
+  .cs-card.s2-active .s2-states { opacity: 1; }
 
   .s2-arc {
     transition: stroke-dashoffset 0.5s ease-out;
@@ -388,7 +388,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
   .s2-arc-23 { transition-delay: 1.02s; }
   .s2-arc-24 { transition-delay: 1.05s; }
 
-  .cs-card:hover .s2-arc { stroke-dashoffset: 0; }
+  .cs-card.s2-active .s2-arc { stroke-dashoffset: 0; }
 
   /* Asymmetric hover-off: lines fade instead of retracing */
   .s2-arc.s2-fading {
@@ -398,7 +398,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
   }
 
   .s2-label { opacity: 0; transition: opacity 0.3s 0.35s; }
-  .cs-card:hover .s2-label { opacity: 1; }
+  .cs-card.s2-active .s2-label { opacity: 1; }
 
   /* Asymmetric hover-off: counter fades instead of reversing */
   .s2-label.s2-fading {
