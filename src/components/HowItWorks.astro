@@ -54,7 +54,22 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     <div class="cs-bento">
       <!-- Top row: 3 cards -->
       <div class="cs-card" data-overlay="0" tabindex="0" role="group" aria-label="Case study 1 of 5">
-        <div class="cs-scene" id="scene-1"><!-- Card 1 scene goes here --></div>
+        <div class="cs-scene" id="scene-1">
+          <div class="s1-wrap">
+            <div class="s1-plate s1-back">
+              <div class="s1-tag">DATABASE ENTRY</div>
+              <div class="s1-num">GHP·4B92</div>
+              <div class="s1-state">SOUTH CAROLINA</div>
+            </div>
+            <div class="s1-plate s1-front">
+              <div class="s1-tag">ALPR SCAN</div>
+              <div class="s1-num">GHP·4892</div>
+              <div class="s1-state">SOUTH CAROLINA</div>
+            </div>
+            <div class="s1-neq">&ne;</div>
+            <div class="s1-badge"><span class="s1-dot"></span>FALSE MATCH · ARREST MADE</div>
+          </div>
+        </div>
         <div class="cs-body">
           <div class="cs-loc">Greenville, SC</div>
           <div class="cs-title">False Arrest from ALPR Error</div>
@@ -182,6 +197,42 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     font-size: 8px;
     color: rgba(255,255,255,0.14);
   }
+
+  /* Card 1 — False Match */
+  .s1-wrap { position: relative; width: 210px; height: 126px; }
+  .s1-plate {
+    position: absolute; width: 174px; border-radius: 3px;
+    padding: 8px 14px 10px; display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    transition: transform 0.48s ease-out, opacity 0.48s ease-out, box-shadow 0.48s ease-out;
+  }
+  .s1-tag { font-family: 'DM Mono',monospace; font-size: 7px; letter-spacing: 0.14em; color: rgba(255,255,255,0.22); }
+  .s1-num { font-family: 'DM Mono',monospace; font-size: 22px; font-weight: 500; letter-spacing: 0.06em; color: #e2e2e2; line-height: 1; }
+  .s1-state { font-family: 'DM Mono',monospace; font-size: 8px; letter-spacing: 0.16em; color: rgba(255,255,255,0.28); }
+
+  .s1-back { top: 0; left: 0; background: #0a0a0a; border: 1px solid rgba(255,255,255,0.08); opacity: 0.42; z-index: 1; }
+  .s1-front { top: 28px; left: 22px; background: #151515; border: 1px solid rgba(255,255,255,0.28); z-index: 2; box-shadow: 0 4px 18px rgba(0,0,0,0.55); }
+
+  .cs-card:hover .s1-back  { transform: translate(-12px,-12px); opacity: 0.62; }
+  .cs-card:hover .s1-front { transform: translate(10px,10px); box-shadow: 0 12px 36px rgba(0,0,0,0.8); }
+
+  .s1-neq {
+    position: absolute; top: 28px; left: 78px; z-index: 3;
+    font-size: 16px; font-family: 'DM Mono',monospace;
+    color: transparent; transition: color 0.28s 0.24s; pointer-events: none;
+  }
+  .cs-card:hover .s1-neq { color: rgba(220,38,38,0.8); }
+
+  .s1-badge {
+    position: absolute; bottom: 2px; right: 0; z-index: 4;
+    display: flex; align-items: center; gap: 5px; padding: 4px 8px;
+    background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.32); border-radius: 2px;
+    font-family: 'DM Mono',monospace; font-size: 8px; letter-spacing: 0.1em; color: #dc2626;
+    opacity: 0; transform: scale(0.88) translateY(4px);
+    transition: opacity 0.3s 0.38s, transform 0.3s 0.38s; white-space: nowrap;
+  }
+  .s1-dot { width: 5px; height: 5px; border-radius: 50%; background: #dc2626; flex-shrink: 0; }
+  .cs-card:hover .s1-badge { opacity: 1; transform: scale(1) translateY(0); }
 
   /* Mobile: single column */
   @media (max-width: 767px) {
