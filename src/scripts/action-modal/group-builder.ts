@@ -88,20 +88,20 @@ export function buildGroups(
   const cityCouncil = cityKey ? localCouncils[cityKey] : undefined;
 
   const matchedCountyMember = findMatchedMember(countyCouncil, match.countyDistrict);
-  if (matchedCountyMember && matchedCountyMember.name && matchedCountyMember.name !== 'Vacant') {
+  if (matchedCountyMember && matchedCountyMember.name && matchedCountyMember.name !== 'Vacant' && countyCouncil) {
     localMatchedReps.push({
       name: matchedCountyMember.name,
-      office: matchedCountyMember.title + ' — ' + countyCouncil!.label,
+      office: matchedCountyMember.title + ' — ' + countyCouncil.label,
       email: matchedCountyMember.email || '',
       phone: matchedCountyMember.phone || ''
     });
   }
 
   const matchedCityMember = findMatchedMember(cityCouncil, match.cityDistrict);
-  if (matchedCityMember && matchedCityMember.name && matchedCityMember.name !== 'Vacant') {
+  if (matchedCityMember && matchedCityMember.name && matchedCityMember.name !== 'Vacant' && cityCouncil) {
     localMatchedReps.push({
       name: matchedCityMember.name,
-      office: matchedCityMember.title + ' — ' + cityCouncil!.label,
+      office: matchedCityMember.title + ' — ' + cityCouncil.label,
       email: matchedCityMember.email || '',
       phone: matchedCityMember.phone || ''
     });

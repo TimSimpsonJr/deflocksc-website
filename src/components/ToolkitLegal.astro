@@ -236,7 +236,7 @@ const stateCoords: Record<string, [number, number]> = {
   </div>
 </div>
 
-<script type="application/json" id="toolkit-bill-data" set:html={JSON.stringify(bills)}></script>
+<script type="application/json" id="toolkit-bill-data" set:html={JSON.stringify(bills).replace(/</g, '\\u003c')}></script>
 <script>
   import '../scripts/toolkit-legal.js';
 </script>

@@ -108,7 +108,7 @@ import bills from '../data/bills.json';
   .bills-bg-num { font-size: clamp(5rem, 10vw, 9rem); }
 </style>
 
-<script type="application/json" id="bill-tracker-data" set:html={JSON.stringify(bills)}></script>
+<script type="application/json" id="bill-tracker-data" set:html={JSON.stringify(bills).replace(/</g, '\\u003c')}></script>
 <script>
   import '../scripts/bill-tracker.js';
 </script>

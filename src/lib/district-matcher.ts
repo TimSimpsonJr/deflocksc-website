@@ -10,9 +10,6 @@ import { pointInPolygon, computeBBox, pointInBBox } from './geo-utils.js';
 import type { BBox, FeatureCollection } from './geo-utils.js';
 import registry from '../data/registry.json';
 
-// Re-export pointInPolygon for consumers that imported it from here
-export { pointInPolygon };
-
 export interface DistrictMatch {
   senate: string | null;
   house: string | null;
@@ -66,7 +63,10 @@ export async function loadBoundary(filename: string): Promise<FeatureCollection 
   }
 
   try {
-    const res = await fetch('/districts/' + filename);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch('/districts/' + filename, { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
@@ -81,11 +81,17 @@ export async function loadBoundary(filename: string): Promise<FeatureCollection 
     data._bbox = computeBBox(data);
     boundaryCache.set(filename, data);
     return data;
-  } catch (e) {
-    console.warn('Failed to load boundary file: ' + filename, e);
+  } catch (e: any) {
+    if (e.name === 'AbortError') console.warn('Boundary load timed out: ' + filename);
+    else console.warn('Failed to load boundary file: ' + filename, e);
     boundaryCache.set(filename, null); // cache the failure so we don't retry
     return null;
   }
+}
+
+/** Clear cached boundary data. Exported for testing only. */
+export function _clearBoundaryCacheForTesting(): void {
+  boundaryCache.clear();
 }
 
 // --- Internal matching helpers ---
@@ -224,9 +230,13 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
       format: 'json',
     });
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     const res = await fetch(
-      'https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?' + params.toString()
+      '/api/geocode?' + params.toString(),
+      { signal: controller.signal }
     );
+    clearTimeout(timeoutId);
 
     if (!res.ok) throw new Error('Census geocoder HTTP ' + res.status);
 
@@ -261,8 +271,9 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
         result.house = lower[0].BASENAME;
       }
     }
-  } catch (e) {
-    console.warn('Census geocoder failed:', e);
+  } catch (e: any) {
+    if (e.name === 'AbortError') console.warn('Census geocoder timed out');
+    else console.warn('Census geocoder failed:', e);
   }
 
   return result;

@@ -71,14 +71,7 @@ export interface RepGroup {
   matchedDistrict?: string | null;
 }
 
-export interface DistrictMatch {
-  senate: string | null;
-  house: string | null;
-  county: string | null;
-  countyDistrict: string | null;
-  city: string | null;
-  cityDistrict: string | null;
-}
+export type { DistrictMatch } from '../../lib/district-matcher.js';
 
 export interface ModalData {
   actionLetters: ActionLetter[];

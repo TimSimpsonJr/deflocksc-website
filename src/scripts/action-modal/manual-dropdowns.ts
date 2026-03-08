@@ -67,10 +67,11 @@ export function initManualDropdowns(stateLegislators: StateLegislators, registry
   // County change handler
   document.getElementById('manual-county')?.addEventListener('change', function(this: HTMLSelectElement) {
     const county = this.value;
-    const distSel = document.getElementById('manual-county-district') as HTMLSelectElement;
-    const cityRow = document.getElementById('manual-city-row')!;
-    const citySel = document.getElementById('manual-city') as HTMLSelectElement;
-    const cityDistSel = document.getElementById('manual-city-district') as HTMLSelectElement;
+    const distSel = document.getElementById('manual-county-district') as HTMLSelectElement | null;
+    const cityRow = document.getElementById('manual-city-row');
+    const citySel = document.getElementById('manual-city') as HTMLSelectElement | null;
+    const cityDistSel = document.getElementById('manual-city-district') as HTMLSelectElement | null;
+    if (!distSel || !cityRow || !citySel || !cityDistSel) return;
 
     distSel.innerHTML = '<option value="">Select...</option>';
     if (county && countyDistrictRanges[county]) {
@@ -104,7 +105,8 @@ export function initManualDropdowns(stateLegislators: StateLegislators, registry
   document.getElementById('manual-city')?.addEventListener('change', function(this: HTMLSelectElement) {
     const city = this.value;
     const county = (document.getElementById('manual-county') as HTMLSelectElement | null)?.value;
-    const cityDistSel = document.getElementById('manual-city-district') as HTMLSelectElement;
+    const cityDistSel = document.getElementById('manual-city-district') as HTMLSelectElement | null;
+    if (!cityDistSel) return;
 
     cityDistSel.innerHTML = '<option value="">Select...</option>';
     if (city && county && countyCitiesMap[county]) {

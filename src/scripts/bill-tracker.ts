@@ -1,16 +1,8 @@
-interface Bill {
-  bill: string;
-  title: string;
-  status: string;
-  description: string;
-  url: string;
-  lastAction?: string;
-  committee?: string;
-}
+import type { Bill } from './types.js';
 
 const dataEl = document.getElementById('bill-tracker-data');
-if (dataEl) {
-  const bills: Bill[] = JSON.parse(dataEl.textContent!);
+if (dataEl && dataEl.textContent) {
+  const bills: Bill[] = JSON.parse(dataEl.textContent);
   initBillTracker(bills);
 }
 
@@ -18,6 +10,7 @@ function initBillTracker(bills: Bill[]): void {
   const backdrop = document.getElementById('bill-modal-backdrop');
   const modal = document.getElementById('bill-modal');
   const closeBtn = document.getElementById('bill-modal-close');
+  if (!backdrop || !modal) return;
   let previouslyFocused: Element | null = null;
 
   function openModal(index: number): void {
@@ -25,28 +18,35 @@ function initBillTracker(bills: Bill[]): void {
     if (!bill) return;
     previouslyFocused = document.activeElement;
 
-    document.getElementById('modal-bill-id')!.textContent = bill.bill;
-    document.getElementById('modal-bill-title')!.textContent = bill.title;
-    document.getElementById('modal-bill-status')!.textContent = bill.status;
-    document.getElementById('modal-bill-description')!.textContent = bill.description;
-    (document.getElementById('modal-bill-link') as HTMLAnchorElement).href = bill.url;
+    const idEl = document.getElementById('modal-bill-id');
+    const titleEl = document.getElementById('modal-bill-title');
+    const statusEl = document.getElementById('modal-bill-status');
+    const descEl = document.getElementById('modal-bill-description');
+    const linkEl = document.getElementById('modal-bill-link') as HTMLAnchorElement | null;
+    if (idEl) idEl.textContent = bill.bill;
+    if (titleEl) titleEl.textContent = bill.title;
+    if (statusEl) statusEl.textContent = bill.status;
+    if (descEl) descEl.textContent = bill.description;
+    if (linkEl) linkEl.href = bill.url;
 
-    const lastActionRow = document.getElementById('modal-last-action-row')!;
-    const lastAction = document.getElementById('modal-bill-last-action')!;
-    if (bill.lastAction) {
-      lastAction.textContent = bill.lastAction;
-      lastActionRow.style.display = '';
-    } else {
-      lastActionRow.style.display = 'none';
+    const lastActionRow = document.getElementById('modal-last-action-row');
+    const lastAction = document.getElementById('modal-bill-last-action');
+    if (lastActionRow && lastAction) {
+      if (bill.lastAction) {
+        lastAction.textContent = bill.lastAction;
+        lastActionRow.style.display = '';
+      } else {
+        lastActionRow.style.display = 'none';
+      }
     }
 
-    backdrop!.classList.remove('hidden');
-    backdrop!.offsetHeight; // trigger reflow for animation
-    backdrop!.classList.add('opacity-100');
-    backdrop!.classList.remove('opacity-0');
+    backdrop.classList.remove('hidden');
+    backdrop.offsetHeight; // trigger reflow for animation
+    backdrop.classList.add('opacity-100');
+    backdrop.classList.remove('opacity-0');
 
-    modal!.classList.add('opacity-100', 'translate-y-0');
-    modal!.classList.remove('opacity-0', 'translate-y-5');
+    modal.classList.add('opacity-100', 'translate-y-0');
+    modal.classList.remove('opacity-0', 'translate-y-5');
 
     document.body.style.overflow = 'hidden';
 
@@ -56,14 +56,14 @@ function initBillTracker(bills: Bill[]): void {
   }
 
   function closeModal(): void {
-    modal!.classList.remove('opacity-100', 'translate-y-0');
-    modal!.classList.add('opacity-0', 'translate-y-5');
+    modal.classList.remove('opacity-100', 'translate-y-0');
+    modal.classList.add('opacity-0', 'translate-y-5');
 
-    backdrop!.classList.remove('opacity-100');
-    backdrop!.classList.add('opacity-0');
+    backdrop.classList.remove('opacity-100');
+    backdrop.classList.add('opacity-0');
 
     setTimeout(function() {
-      backdrop!.classList.add('hidden');
+      backdrop.classList.add('hidden');
       const actionOpen = !document.getElementById('action-modal')?.classList.contains('hidden');
       if (!actionOpen) {
         document.body.style.overflow = '';
@@ -76,7 +76,7 @@ function initBillTracker(bills: Bill[]): void {
   }
 
   // Focus trap
-  modal?.addEventListener('keydown', function(e) {
+  modal.addEventListener('keydown', function(e) {
     if (e.key !== 'Tab') return;
     const focusable = modal.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
     if (focusable.length === 0) return;
@@ -95,18 +95,18 @@ function initBillTracker(bills: Bill[]): void {
   // Card click handlers
   document.querySelectorAll('.bill-col').forEach(card => {
     card.addEventListener('click', () => {
-      const index = parseInt(card.getAttribute('data-bill')!);
-      openModal(index);
+      const attr = card.getAttribute('data-bill');
+      if (attr) openModal(parseInt(attr));
     });
   });
 
   // Close handlers
   closeBtn?.addEventListener('click', closeModal);
-  backdrop?.addEventListener('click', (e) => {
+  backdrop.addEventListener('click', (e) => {
     if (e.target === backdrop) closeModal();
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !backdrop?.classList.contains('hidden')) {
+    if (e.key === 'Escape' && !backdrop.classList.contains('hidden')) {
       closeModal();
     }
   });

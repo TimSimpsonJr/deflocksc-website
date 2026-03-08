@@ -7,8 +7,8 @@ import { initManualDropdowns } from './manual-dropdowns.js';
 
 // Read server-injected data from the JSON data island
 const dataEl = document.getElementById('action-modal-data');
-if (dataEl) {
-  const data: ModalData = JSON.parse(dataEl.textContent!);
+if (dataEl && dataEl.textContent) {
+  const data: ModalData = JSON.parse(dataEl.textContent);
   init(data);
 }
 

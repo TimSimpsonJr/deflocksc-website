@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { matchDistricts, loadBoundary, geocodeAddress } from './district-matcher.js';
+import { matchDistricts, loadBoundary, geocodeAddress, _clearBoundaryCacheForTesting } from './district-matcher.js';
 
 // Helper: create a simple GeoJSON FeatureCollection with one polygon feature
 function makeFC(district: string, coords: number[][][]) {
@@ -19,10 +19,8 @@ vi.stubGlobal('fetch', fetchMock);
 
 beforeEach(() => {
   fetchMock.mockReset();
+  _clearBoundaryCacheForTesting();
 });
-
-// Expose cache clearing by accessing the module's internal state
-// Since there's no _clearCacheForTesting export, we test loadBoundary caching behavior
 
 describe('loadBoundary', () => {
   it('fetches and returns a valid FeatureCollection', async () => {
@@ -36,7 +34,7 @@ describe('loadBoundary', () => {
     expect(result).not.toBeNull();
     expect(result!.type).toBe('FeatureCollection');
     expect(result!._bbox).toBeDefined();
-    expect(fetchMock).toHaveBeenCalledWith('/districts/test-boundary.json');
+    expect(fetchMock).toHaveBeenCalledWith('/districts/test-boundary.json', expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it('returns null and caches failure on HTTP error', async () => {
@@ -104,6 +102,19 @@ describe('geocodeAddress', () => {
     expect(result.lng).toBe(-82.394);
     expect(result.senate).toBe('3');
     expect(result.house).toBe('17');
+  });
+
+  it('uses the /api/geocode proxy endpoint', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({
+        result: { addressMatches: [] },
+      }),
+    });
+
+    await geocodeAddress('123 Main St');
+    const url = fetchMock.mock.calls[0][0] as string;
+    expect(url).toMatch(/^\/api\/geocode\?/);
   });
 
   it('returns nulls when no address matches found', async () => {
