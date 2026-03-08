@@ -10,7 +10,6 @@ __pycache__/
 !.env.example
 .claude/*
 !.claude/settings.json
-!.claude/hooks/
 public/dev-preview.html
 tina/__generated__/
 public/admin/

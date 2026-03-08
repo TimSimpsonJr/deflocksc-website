@@ -10,15 +10,6 @@
             "command": "claude plugin marketplace add obra/superpowers-marketplace 2>/dev/null; claude plugin install superpowers@superpowers-marketplace 2>/dev/null; true"
           }
         ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
-          }
-        ]
       }
     ]
   }
