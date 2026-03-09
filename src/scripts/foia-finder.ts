@@ -83,7 +83,7 @@ function renderAgencyCard(contact: FoiaContact): string {
         </div>
         <button
           type="button"
-          class="foia-use-btn shrink-0 bg-[#262626] hover:bg-[#dc2626] text-[#a3a3a3] hover:text-white text-xs font-bold uppercase tracking-[0.05em] px-3 py-2 transition-colors cursor-pointer"
+          class="foia-use-btn shrink-0 bg-[#262626] hover:bg-[#dc2626] text-[#a3a3a3] hover:text-white text-xs font-bold uppercase tracking-[0.05em] px-3 py-2 min-h-[44px] transition-colors cursor-pointer"
           data-agency-id="${contact.id}"
         >
           Use This Agency

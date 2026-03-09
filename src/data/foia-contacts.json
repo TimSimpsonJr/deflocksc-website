@@ -159,7 +159,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 4 Flock cameras confirmed via EFF Atlas of Surveillance."
+    "notes": "4 Flock cameras confirmed via EFF Atlas of Surveillance."
   },
   {
     "id": "mauldin-pd",
@@ -177,7 +177,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 6 Flock cameras confirmed via EFF Atlas of Surveillance."
+    "notes": "6 Flock cameras confirmed via EFF Atlas of Surveillance."
   },
   {
     "id": "simpsonville-pd",
@@ -195,7 +195,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 10 Flock cameras deployed since 2020 at $4,000 total initial cost."
+    "notes": "10 Flock cameras deployed since 2020 at $4,000 total initial cost."
   },
   {
     "id": "travelers-rest-pd",
@@ -213,7 +213,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Listed on Flock transparency portal. Camera count not publicly documented."
+    "notes": "Listed on Flock transparency portal. Camera count not publicly documented."
   },
   {
     "id": "irmo-pd",
@@ -231,7 +231,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 6 Flock cameras confirmed via EFF Atlas of Surveillance as of Sept 2025."
+    "notes": "6 Flock cameras confirmed via EFF Atlas of Surveillance as of Sept 2025."
   },
   {
     "id": "richland-county-clerk",
@@ -285,7 +285,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 12 Flock cameras as of Feb 2024. Shares camera access with Charleston County SO."
+    "notes": "12 Flock cameras as of Feb 2024. Shares camera access with Charleston County SO."
   },
   {
     "id": "charleston-county-sheriff",
@@ -303,7 +303,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 25+ Flock cameras including James Island expansion. Also operates DataWorks Plus face recognition since 2013."
+    "notes": "25+ Flock cameras including James Island expansion. Also operates DataWorks Plus face recognition since 2013."
   },
   {
     "id": "north-charleston-pd",
@@ -321,7 +321,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 34 Rekor ALPR units plus 800+ Verkada surveillance cameras. $2.5M surveillance buildout approved 2022. Lt. Terrell used cameras to stalk his wife — demoted, not fired."
+    "notes": "34 Rekor ALPR units plus 800+ Verkada surveillance cameras. $2.5M surveillance buildout approved 2022. Lt. Terrell used cameras to stalk his wife — demoted, not fired."
   },
   {
     "id": "mount-pleasant-pd",
@@ -339,7 +339,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Flock cameras via SLED program. Also operates Motorola CityProtect camera registry."
+    "notes": "Flock cameras via SLED program. Also operates Motorola CityProtect camera registry."
   },
   {
     "id": "charleston-county-clerk",
@@ -411,7 +411,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 11 fixed + 4 mobile Flock cameras. Department actively promotes its Flock program."
+    "notes": "11 fixed + 4 mobile Flock cameras. Department actively promotes its Flock program."
   },
   {
     "id": "spartanburg-county-sheriff",
@@ -429,7 +429,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Former Sheriff Chuck Wright pled guilty to federal charges (wire fraud, drug misrepresentation, corruption). He had unsupervised access to these cameras."
+    "notes": "Former Sheriff Chuck Wright pled guilty to federal charges (wire fraud, drug misrepresentation, corruption). He had unsupervised access to these cameras."
   },
   {
     "id": "spartanburg-county-clerk",
@@ -483,7 +483,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: One of the few small-town departments with a published Flock transparency portal."
+    "notes": "One of the few small-town departments with a published Flock transparency portal."
   },
   {
     "id": "lexington-county-sheriff",
@@ -501,7 +501,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Has body-worn cameras (state grant funded) but not confirmed as Flock ALPR operator. May participate in SLED database through other equipment."
+    "notes": "Has body-worn cameras (state grant funded) but not confirmed as Flock ALPR operator. May participate in SLED database through other equipment."
   },
   {
     "id": "cayce-pd",
@@ -519,7 +519,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Flock data-sharing partner. Located across the Congaree River from Columbia — the two cities' surveillance footprints effectively merge."
+    "notes": "Flock data-sharing partner. Located across the Congaree River from Columbia — the two cities' surveillance footprints effectively merge."
   },
   {
     "id": "lexington-county-clerk",
@@ -555,7 +555,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 22 Flock cameras confirmed via EFF Atlas of Surveillance."
+    "notes": "22 Flock cameras confirmed via EFF Atlas of Surveillance."
   },
   {
     "id": "anderson-county-sheriff",
@@ -573,7 +573,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 10 cameras confirmed via EFF Atlas of Surveillance. No local oversight ordinance."
+    "notes": "10 cameras confirmed via EFF Atlas of Surveillance. No local oversight ordinance."
   },
   {
     "id": "anderson-county-clerk",
@@ -609,7 +609,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 30 Flock cameras funded by $397,500 state grant. Cameras placed at city gateways. Provided Flock audit logs for free within 1 day (contrast with Richland County's $9K quote)."
+    "notes": "30 Flock cameras funded by $397,500 state grant. Cameras placed at city gateways. Provided Flock audit logs for free within 1 day (contrast with Richland County's $9K quote)."
   },
   {
     "id": "florence-county-sheriff",
@@ -627,7 +627,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 14 stationary + 76 mobile (patrol car) Flock cameras. Sheriff Joye installed cameras on private property to bypass SCDOT permit pause. 1-year data retention."
+    "notes": "14 stationary + 76 mobile (patrol car) Flock cameras. Sheriff Joye installed cameras on private property to bypass SCDOT permit pause. 1-year data retention."
   },
   {
     "id": "florence-county-clerk",
@@ -663,7 +663,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 23 Flock cameras operational since 2022. Horry County uses a police department rather than a sheriff's office for county policing."
+    "notes": "23 Flock cameras operational since 2022. Horry County uses a police department rather than a sheriff's office for county policing."
   },
   {
     "id": "myrtle-beach-pd",
@@ -681,7 +681,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Real Time Crime Center since 2015 with 1,900+ camera views and ALPRs at all entry/exit points. 38.7M plate reads in 2019 alone. Also runs ShotSpotter ($90K/year)."
+    "notes": "Real Time Crime Center since 2015 with 1,900+ camera views and ALPRs at all entry/exit points. 38.7M plate reads in 2019 alone. Also runs ShotSpotter ($90K/year)."
   },
   {
     "id": "conway-pd",
@@ -699,7 +699,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 54 Flock cameras for a city of ~25,000 — roughly 1 camera per 460 residents. Also installed ShotSpotter in early 2025."
+    "notes": "54 Flock cameras for a city of ~25,000 — roughly 1 camera per 460 residents. Also installed ShotSpotter in early 2025."
   },
   {
     "id": "north-myrtle-beach-pd",
@@ -717,7 +717,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 18 Flock cameras at city entrances/exits. Building a $2M Real Time Crime Center."
+    "notes": "18 Flock cameras at city entrances/exits. Building a $2M Real Time Crime Center."
   },
   {
     "id": "horry-county-clerk",
@@ -771,7 +771,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 56 Flock cameras — the highest county sheriff's office count in SC. No transparency portal, no published use policy, no public audit procedures despite the scale."
+    "notes": "56 Flock cameras — the highest county sheriff's office count in SC. No transparency portal, no published use policy, no public audit procedures despite the scale."
   },
   {
     "id": "goose-creek-pd",
@@ -789,7 +789,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Confirmed Flock data-sharing partner. Can query Berkeley County SO's 56-camera network. New public safety hub may house surveillance coordination."
+    "notes": "Confirmed Flock data-sharing partner. Can query Berkeley County SO's 56-camera network. New public safety hub may house surveillance coordination."
   },
   {
     "id": "berkeley-county-clerk",
@@ -825,7 +825,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Confirmed participant in SLED ALPR program and Flock data-sharing network, but specific camera counts are not publicly documented."
+    "notes": "Confirmed participant in SLED ALPR program and Flock data-sharing network, but specific camera counts are not publicly documented."
   },
   {
     "id": "summerville-pd",
@@ -843,7 +843,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 12 general surveillance cameras in downtown area with live feed to dispatch. ALPR-specific capability unconfirmed."
+    "notes": "12 general surveillance cameras in downtown area with live feed to dispatch. ALPR-specific capability unconfirmed."
   },
   {
     "id": "dorchester-county-clerk",
@@ -879,7 +879,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 16 Flock cameras. Also operates 2 DJI drones. Part of a dense 58+ camera county-wide network."
+    "notes": "16 Flock cameras. Also operates 2 DJI drones. Part of a dense 58+ camera county-wide network."
   },
   {
     "id": "rock-hill-pd",
@@ -897,7 +897,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 6 Flock cameras with 30-day data retention confirmed via Atlas of Surveillance."
+    "notes": "6 Flock cameras with 30-day data retention confirmed via Atlas of Surveillance."
   },
   {
     "id": "fort-mill-pd",
@@ -915,7 +915,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 24 Flock cameras — among the largest municipal deployments in York County. Data-sharing partnership with Tega Cay PD."
+    "notes": "24 Flock cameras — among the largest municipal deployments in York County. Data-sharing partnership with Tega Cay PD."
   },
   {
     "id": "tega-cay-pd",
@@ -933,7 +933,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 4 Flock cameras creating a \"virtual gate\" at the peninsula's limited entry points. $2,500/camera/year. Also runs a voluntary private camera registry."
+    "notes": "4 Flock cameras creating a \"virtual gate\" at the peninsula's limited entry points. $2,500/camera/year. Also runs a voluntary private camera registry."
   },
   {
     "id": "york-county-clerk",
@@ -969,7 +969,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: ~60 Rekor + Verkada cameras (not Flock). 83 million plate reads in first year. Also connected 50 existing traffic cams to Verkada Command. $262K in ARPA funds requested."
+    "notes": "~60 Rekor + Verkada cameras (not Flock). 83 million plate reads in first year. Also connected 50 existing traffic cams to Verkada Command. $262K in ARPA funds requested."
   },
   {
     "id": "beaufort-pd",
@@ -987,7 +987,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Uses Flock Safety (different vendor than the county sheriff's Rekor system). Camera count not publicly documented."
+    "notes": "Uses Flock Safety (different vendor than the county sheriff's Rekor system). Camera count not publicly documented."
   },
   {
     "id": "bluffton-pd",
@@ -1005,7 +1005,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Uses Flock Safety. Mailed a USB drive of Flock audit logs for $20 within days (good FOIA responsiveness)."
+    "notes": "Uses Flock Safety. Mailed a USB drive of Flock audit logs for $20 within days (good FOIA responsiveness)."
   },
   {
     "id": "hilton-head-island-pd",
@@ -1023,7 +1023,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Uses Flock Safety. Major tourism destination means millions of visitors' plates captured annually."
+    "notes": "Uses Flock Safety. Major tourism destination means millions of visitors' plates captured annually."
   },
   {
     "id": "beaufort-county-clerk",
@@ -1059,7 +1059,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Participates in statewide SLED ALPR program. ALPR data feeds into SLED's centralized database."
+    "notes": "Participates in statewide SLED ALPR program. ALPR data feeds into SLED's centralized database."
   },
   {
     "id": "aiken-county-sheriff",
@@ -1077,7 +1077,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: No confirmed ALPR cameras. County borders GA (Augusta); cross-state data sharing is an open question."
+    "notes": "No confirmed ALPR cameras. County borders GA (Augusta); cross-state data sharing is an open question."
   },
   {
     "id": "aiken-county-clerk",
@@ -1113,7 +1113,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: 30 Flock cameras. Data-sharing partner on national Flock network. Shaw Air Force Base proximity raises federal access questions."
+    "notes": "30 Flock cameras. Data-sharing partner on national Flock network. Shaw Air Force Base proximity raises federal access questions."
   },
   {
     "id": "sumter-pd",
@@ -1131,7 +1131,7 @@
       "phone": null,
       "address": null
     },
-    "notes": "Note: Listed on Flock data-sharing network. Camera count not publicly documented."
+    "notes": "Listed on Flock data-sharing network. Camera count not publicly documented."
   },
   {
     "id": "sumter-county-clerk",

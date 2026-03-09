@@ -95,11 +95,11 @@ function highlightPlaceholders(text: string): string {
           class="flex-1 min-w-[200px] bg-[#0a0a0a] border border-[rgba(255,255,255,0.12)] text-white placeholder-[#525252] px-4 py-2.5 text-sm focus:border-[#dc2626] focus:outline-none"
         />
         <div class="flex gap-1" role="group" aria-label="Filter by agency type">
-          <button type="button" class="foia-type-chip bg-[#dc2626] text-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="all">All</button>
-          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="police">Police</button>
-          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="sheriff">Sheriff</button>
-          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="clerk">Clerk</button>
-          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="state">State</button>
+          <button type="button" class="foia-type-chip bg-[#dc2626] text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="all">All</button>
+          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="police">Police</button>
+          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="sheriff">Sheriff</button>
+          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="clerk">Clerk</button>
+          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="state">State</button>
         </div>
       </div>
       <div id="foia-browse-list" class="space-y-3 max-h-[60vh] overflow-y-auto"></div>
