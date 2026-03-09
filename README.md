@@ -15,7 +15,14 @@ The homepage has six sections:
 - **FAQ** -- sourced answers to common questions about ALPRs and privacy
 - **Take Action** -- call to action driving visitors to contact their representatives
 
-The **action modal** is the core engagement tool. A visitor enters their location via geolocation, street address (Census geocoder), or manual dropdown. The site matches them to their state legislative and local council districts using client-side boundary files, looks up their representatives, and presents pre-written template letters they can send. Letters are locally tailored -- 80+ templates cover all 46 SC counties with jurisdiction-specific facts, camera counts, and incident references.
+The **action modal** is the core engagement tool. A visitor enters their location via geolocation, street address (Census geocoder), or manual dropdown. The site matches them to their state legislative and local council districts using client-side boundary files, looks up their representatives, and presents pre-written template letters they can send. Letters are locally tailored -- 85 templates cover all 46 SC counties with jurisdiction-specific facts, camera counts, and incident references.
+
+The **/toolkit** page provides four tabs of hands-on advocacy resources:
+
+- **Request Records** -- four ready-to-file SC FOIA letter templates (contracts, retention policies, camera locations, federal data-sharing agreements) with placeholder highlighting, copy-to-clipboard, and PDF download
+- **Speak Up** -- public comment preparation for council meetings: a timed 3-minute talk track, seven practical tips, and five pre-written rebuttals to common pushback from elected officials
+- **Spread the Word** -- peer-to-peer outreach materials: a one-pager overview, audience-specific conversation starters, print-ready business card designs (PNG + Avery 8371 PDF), and pre-filled social media share links
+- **Know Your Rights** -- legal context including a 4th Amendment primer (*Carpenter v. United States*, SC Constitution Article I §10), an interactive state comparison map showing ALPR laws in seven states, and a gap analysis of SC's three pending bills
 
 ## Tech Stack
 

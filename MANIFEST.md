@@ -23,8 +23,14 @@ src/
     TakeAction.astro            # CTA section, opens ActionModal
     ActionModal.astro           # Rep lookup: geolocation, address, or manual dropdown
     Footer.astro                # 2-column: About + Resources
+    ToolkitTabs.astro           # Four-tab container with sticky nav + hash routing
+    ToolkitFoia.astro           # FOIA letter templates with placeholder highlighting
+    ToolkitSpeaking.astro       # Public comment guide: talk track, tips, rebuttals
+    ToolkitOutreach.astro       # One-pager, conversation starters, business cards, share links
+    ToolkitLegal.astro          # 4th Amendment primer, state map, bill gap analysis
   pages/
     index.astro                 # Homepage — assembles all section components
+    toolkit.astro               # Citizen toolkit page (FOIA, speaking, outreach, legal)
     blog/index.astro            # Blog listing page
     blog/[...slug].astro        # Individual blog post
     blog/[...slug]/og.png.ts    # Dynamic OG image generation per post
@@ -40,8 +46,12 @@ src/
     bills.json                  # SC legislature bills (populated by scraper)
     state-legislators.json      # State reps and senators
     local-councils.json         # County/city council members
-    action-letters.json         # 80+ locally tailored letter templates (all 46 counties)
+    action-letters.json         # 85 locally tailored letter templates (all 46 counties)
     registry.json               # Rep data registry (adapter metadata)
+    toolkit-foia.json           # 4 FOIA request templates
+    toolkit-speaking.json       # Public comment tips, talk track, rebuttals
+    toolkit-outreach.json       # One-pager, conversation starters, business card designs
+    toolkit-legal.json          # 4th Amendment cases, state comparison, bill gap analysis
   styles/
     global.css                  # Tailwind base, glow-frame, custom utilities
   content/
