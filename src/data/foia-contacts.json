@@ -142,5 +142,1013 @@
       "address": "1 Justice Square, Columbia, SC 29201"
     },
     "notes": null
+  },
+  {
+    "id": "greer-pd",
+    "name": "Greer Police Department",
+    "shortName": "Greer PD",
+    "type": "police",
+    "county": "greenville",
+    "city": "greer",
+    "hasAlprCameras": true,
+    "cameraCount": 4,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 4 Flock cameras confirmed via EFF Atlas of Surveillance."
+  },
+  {
+    "id": "mauldin-pd",
+    "name": "Mauldin Police Department",
+    "shortName": "Mauldin PD",
+    "type": "police",
+    "county": "greenville",
+    "city": "mauldin",
+    "hasAlprCameras": true,
+    "cameraCount": 6,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 6 Flock cameras confirmed via EFF Atlas of Surveillance."
+  },
+  {
+    "id": "simpsonville-pd",
+    "name": "Simpsonville Police Department",
+    "shortName": "Simpsonville PD",
+    "type": "police",
+    "county": "greenville",
+    "city": "simpsonville",
+    "hasAlprCameras": true,
+    "cameraCount": 10,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 10 Flock cameras deployed since 2020 at $4,000 total initial cost."
+  },
+  {
+    "id": "travelers-rest-pd",
+    "name": "Travelers Rest Police Department",
+    "shortName": "Travelers Rest PD",
+    "type": "police",
+    "county": "greenville",
+    "city": "travelers-rest",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Listed on Flock transparency portal. Camera count not publicly documented."
+  },
+  {
+    "id": "irmo-pd",
+    "name": "Irmo Police Department",
+    "shortName": "Irmo PD",
+    "type": "police",
+    "county": "richland",
+    "city": "irmo",
+    "hasAlprCameras": true,
+    "cameraCount": 6,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 6 Flock cameras confirmed via EFF Atlas of Surveillance as of Sept 2025."
+  },
+  {
+    "id": "richland-county-clerk",
+    "name": "Richland County - Clerk to Council",
+    "shortName": "Richland County Clerk",
+    "type": "clerk",
+    "county": "richland",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes and budget records. SLED HQ is in Richland County."
+  },
+  {
+    "id": "columbia-city-clerk",
+    "name": "City of Columbia - City Clerk",
+    "shortName": "Columbia City Clerk",
+    "type": "clerk",
+    "county": "richland",
+    "city": "columbia",
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "City Clerk",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request budget approvals for Columbia PD's $8M surveillance upgrade and ShotSpotter contract."
+  },
+  {
+    "id": "charleston-pd",
+    "name": "Charleston Police Department",
+    "shortName": "Charleston PD",
+    "type": "police",
+    "county": "charleston",
+    "city": "charleston",
+    "hasAlprCameras": true,
+    "cameraCount": 12,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 12 Flock cameras as of Feb 2024. Shares camera access with Charleston County SO."
+  },
+  {
+    "id": "charleston-county-sheriff",
+    "name": "Charleston County Sheriff's Office",
+    "shortName": "Charleston County Sheriff",
+    "type": "sheriff",
+    "county": "charleston",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": 25,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 25+ Flock cameras including James Island expansion. Also operates DataWorks Plus face recognition since 2013."
+  },
+  {
+    "id": "north-charleston-pd",
+    "name": "North Charleston Police Department",
+    "shortName": "North Charleston PD",
+    "type": "police",
+    "county": "charleston",
+    "city": "north-charleston",
+    "hasAlprCameras": true,
+    "cameraCount": 34,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 34 Rekor ALPR units plus 800+ Verkada surveillance cameras. $2.5M surveillance buildout approved 2022. Lt. Terrell used cameras to stalk his wife — demoted, not fired."
+  },
+  {
+    "id": "mount-pleasant-pd",
+    "name": "Mount Pleasant Police Department",
+    "shortName": "Mount Pleasant PD",
+    "type": "police",
+    "county": "charleston",
+    "city": "mount-pleasant",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Flock cameras via SLED program. Also operates Motorola CityProtect camera registry."
+  },
+  {
+    "id": "charleston-county-clerk",
+    "name": "Charleston County - Clerk to Council",
+    "shortName": "Charleston County Clerk",
+    "type": "clerk",
+    "county": "charleston",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes and budget records for surveillance spending."
+  },
+  {
+    "id": "charleston-city-clerk",
+    "name": "City of Charleston - City Clerk",
+    "shortName": "Charleston City Clerk",
+    "type": "clerk",
+    "county": "charleston",
+    "city": "charleston",
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "City Clerk",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request budget approvals and council meeting minutes related to Charleston PD's Flock contract."
+  },
+  {
+    "id": "north-charleston-city-clerk",
+    "name": "City of North Charleston - City Clerk",
+    "shortName": "North Charleston City Clerk",
+    "type": "clerk",
+    "county": "charleston",
+    "city": "north-charleston",
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "City Clerk",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request records on $2.5M surveillance buildout, Verkada contract, Fusus dashboard, and Joint Operations Center."
+  },
+  {
+    "id": "spartanburg-pd",
+    "name": "Spartanburg Police Department",
+    "shortName": "Spartanburg PD",
+    "type": "police",
+    "county": "spartanburg",
+    "city": "spartanburg",
+    "hasAlprCameras": true,
+    "cameraCount": 15,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 11 fixed + 4 mobile Flock cameras. Department actively promotes its Flock program."
+  },
+  {
+    "id": "spartanburg-county-sheriff",
+    "name": "Spartanburg County Sheriff's Office",
+    "shortName": "Spartanburg County Sheriff",
+    "type": "sheriff",
+    "county": "spartanburg",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": 2,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Former Sheriff Chuck Wright pled guilty to federal charges (wire fraud, drug misrepresentation, corruption). He had unsupervised access to these cameras."
+  },
+  {
+    "id": "spartanburg-county-clerk",
+    "name": "Spartanburg County - Clerk to Council",
+    "shortName": "Spartanburg County Clerk",
+    "type": "clerk",
+    "county": "spartanburg",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes and budget records for surveillance spending."
+  },
+  {
+    "id": "spartanburg-city-clerk",
+    "name": "City of Spartanburg - City Clerk",
+    "shortName": "Spartanburg City Clerk",
+    "type": "clerk",
+    "county": "spartanburg",
+    "city": "spartanburg",
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "City Clerk",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request budget approvals and council meeting minutes related to Spartanburg PD's Flock contract."
+  },
+  {
+    "id": "lexington-pd",
+    "name": "Lexington Police Department",
+    "shortName": "Lexington PD",
+    "type": "police",
+    "county": "lexington",
+    "city": "lexington",
+    "hasAlprCameras": true,
+    "cameraCount": 4,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: One of the few small-town departments with a published Flock transparency portal."
+  },
+  {
+    "id": "lexington-county-sheriff",
+    "name": "Lexington County Sheriff's Department",
+    "shortName": "Lexington County Sheriff",
+    "type": "sheriff",
+    "county": "lexington",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Has body-worn cameras (state grant funded) but not confirmed as Flock ALPR operator. May participate in SLED database through other equipment."
+  },
+  {
+    "id": "cayce-pd",
+    "name": "Cayce Department of Public Safety",
+    "shortName": "Cayce DPS",
+    "type": "police",
+    "county": "lexington",
+    "city": "cayce",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Flock data-sharing partner. Located across the Congaree River from Columbia — the two cities' surveillance footprints effectively merge."
+  },
+  {
+    "id": "lexington-county-clerk",
+    "name": "Lexington County - Clerk to Council",
+    "shortName": "Lexington County Clerk",
+    "type": "clerk",
+    "county": "lexington",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes and budget records for surveillance spending."
+  },
+  {
+    "id": "anderson-pd",
+    "name": "Anderson Police Department",
+    "shortName": "Anderson PD",
+    "type": "police",
+    "county": "anderson",
+    "city": "anderson",
+    "hasAlprCameras": true,
+    "cameraCount": 22,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 22 Flock cameras confirmed via EFF Atlas of Surveillance."
+  },
+  {
+    "id": "anderson-county-sheriff",
+    "name": "Anderson County Sheriff's Office",
+    "shortName": "Anderson County Sheriff",
+    "type": "sheriff",
+    "county": "anderson",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": 10,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 10 cameras confirmed via EFF Atlas of Surveillance. No local oversight ordinance."
+  },
+  {
+    "id": "anderson-county-clerk",
+    "name": "Anderson County - Clerk to Council",
+    "shortName": "Anderson County Clerk",
+    "type": "clerk",
+    "county": "anderson",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes and budget records for surveillance spending."
+  },
+  {
+    "id": "florence-pd",
+    "name": "Florence Police Department",
+    "shortName": "Florence PD",
+    "type": "police",
+    "county": "florence",
+    "city": "florence",
+    "hasAlprCameras": true,
+    "cameraCount": 30,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 30 Flock cameras funded by $397,500 state grant. Cameras placed at city gateways. Provided Flock audit logs for free within 1 day (contrast with Richland County's $9K quote)."
+  },
+  {
+    "id": "florence-county-sheriff",
+    "name": "Florence County Sheriff's Office",
+    "shortName": "Florence County Sheriff",
+    "type": "sheriff",
+    "county": "florence",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": 90,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 14 stationary + 76 mobile (patrol car) Flock cameras. Sheriff Joye installed cameras on private property to bypass SCDOT permit pause. 1-year data retention."
+  },
+  {
+    "id": "florence-county-clerk",
+    "name": "Florence County - Clerk to Council",
+    "shortName": "Florence County Clerk",
+    "type": "clerk",
+    "county": "florence",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes. Florence delegation introduced H5146 to force SCDOT to allow ALPR cameras."
+  },
+  {
+    "id": "horry-county-pd",
+    "name": "Horry County Police Department",
+    "shortName": "Horry County PD",
+    "type": "police",
+    "county": "horry",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": 23,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 23 Flock cameras operational since 2022. Horry County uses a police department rather than a sheriff's office for county policing."
+  },
+  {
+    "id": "myrtle-beach-pd",
+    "name": "Myrtle Beach Police Department",
+    "shortName": "Myrtle Beach PD",
+    "type": "police",
+    "county": "horry",
+    "city": "myrtle-beach",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Real Time Crime Center since 2015 with 1,900+ camera views and ALPRs at all entry/exit points. 38.7M plate reads in 2019 alone. Also runs ShotSpotter ($90K/year)."
+  },
+  {
+    "id": "conway-pd",
+    "name": "Conway Police Department",
+    "shortName": "Conway PD",
+    "type": "police",
+    "county": "horry",
+    "city": "conway",
+    "hasAlprCameras": true,
+    "cameraCount": 54,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 54 Flock cameras for a city of ~25,000 — roughly 1 camera per 460 residents. Also installed ShotSpotter in early 2025."
+  },
+  {
+    "id": "north-myrtle-beach-pd",
+    "name": "North Myrtle Beach Department of Public Safety",
+    "shortName": "North Myrtle Beach DPS",
+    "type": "police",
+    "county": "horry",
+    "city": "north-myrtle-beach",
+    "hasAlprCameras": true,
+    "cameraCount": 18,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 18 Flock cameras at city entrances/exits. Building a $2M Real Time Crime Center."
+  },
+  {
+    "id": "horry-county-clerk",
+    "name": "Horry County - Clerk to Council",
+    "shortName": "Horry County Clerk",
+    "type": "clerk",
+    "county": "horry",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes and budget records for surveillance spending."
+  },
+  {
+    "id": "myrtle-beach-city-clerk",
+    "name": "City of Myrtle Beach - City Clerk",
+    "shortName": "Myrtle Beach City Clerk",
+    "type": "clerk",
+    "county": "horry",
+    "city": "myrtle-beach",
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "City Clerk",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request budget records for Real Time Crime Center, ShotSpotter contract, and camera expansion phases."
+  },
+  {
+    "id": "berkeley-county-sheriff",
+    "name": "Berkeley County Sheriff's Office",
+    "shortName": "Berkeley County Sheriff",
+    "type": "sheriff",
+    "county": "berkeley",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": 56,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 56 Flock cameras — the highest county sheriff's office count in SC. No transparency portal, no published use policy, no public audit procedures despite the scale."
+  },
+  {
+    "id": "goose-creek-pd",
+    "name": "Goose Creek Police Department",
+    "shortName": "Goose Creek PD",
+    "type": "police",
+    "county": "berkeley",
+    "city": "goose-creek",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Confirmed Flock data-sharing partner. Can query Berkeley County SO's 56-camera network. New public safety hub may house surveillance coordination."
+  },
+  {
+    "id": "berkeley-county-clerk",
+    "name": "Berkeley County - Clerk to Council",
+    "shortName": "Berkeley County Clerk",
+    "type": "clerk",
+    "county": "berkeley",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes. Sen. Brian Adams (R-Berkeley) supports cameras — spoke in favor during S.447 debate."
+  },
+  {
+    "id": "dorchester-county-sheriff",
+    "name": "Dorchester County Sheriff's Office",
+    "shortName": "Dorchester County Sheriff",
+    "type": "sheriff",
+    "county": "dorchester",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Confirmed participant in SLED ALPR program and Flock data-sharing network, but specific camera counts are not publicly documented."
+  },
+  {
+    "id": "summerville-pd",
+    "name": "Summerville Police Department",
+    "shortName": "Summerville PD",
+    "type": "police",
+    "county": "dorchester",
+    "city": "summerville",
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 12 general surveillance cameras in downtown area with live feed to dispatch. ALPR-specific capability unconfirmed."
+  },
+  {
+    "id": "dorchester-county-clerk",
+    "name": "Dorchester County - Clerk to Council",
+    "shortName": "Dorchester County Clerk",
+    "type": "clerk",
+    "county": "dorchester",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes and budget records for surveillance spending."
+  },
+  {
+    "id": "york-county-sheriff",
+    "name": "York County Sheriff's Office",
+    "shortName": "York County Sheriff",
+    "type": "sheriff",
+    "county": "york",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": 16,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 16 Flock cameras. Also operates 2 DJI drones. Part of a dense 58+ camera county-wide network."
+  },
+  {
+    "id": "rock-hill-pd",
+    "name": "Rock Hill Police Department",
+    "shortName": "Rock Hill PD",
+    "type": "police",
+    "county": "york",
+    "city": "rock-hill",
+    "hasAlprCameras": true,
+    "cameraCount": 6,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 6 Flock cameras with 30-day data retention confirmed via Atlas of Surveillance."
+  },
+  {
+    "id": "fort-mill-pd",
+    "name": "Fort Mill Police Department",
+    "shortName": "Fort Mill PD",
+    "type": "police",
+    "county": "york",
+    "city": "fort-mill",
+    "hasAlprCameras": true,
+    "cameraCount": 24,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 24 Flock cameras — among the largest municipal deployments in York County. Data-sharing partnership with Tega Cay PD."
+  },
+  {
+    "id": "tega-cay-pd",
+    "name": "Tega Cay Police Department",
+    "shortName": "Tega Cay PD",
+    "type": "police",
+    "county": "york",
+    "city": "tega-cay",
+    "hasAlprCameras": true,
+    "cameraCount": 4,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 4 Flock cameras creating a \"virtual gate\" at the peninsula's limited entry points. $2,500/camera/year. Also runs a voluntary private camera registry."
+  },
+  {
+    "id": "york-county-clerk",
+    "name": "York County - Clerk to Council",
+    "shortName": "York County Clerk",
+    "type": "clerk",
+    "county": "york",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes and budget records for surveillance spending."
+  },
+  {
+    "id": "beaufort-county-sheriff",
+    "name": "Beaufort County Sheriff's Office",
+    "shortName": "Beaufort County Sheriff",
+    "type": "sheriff",
+    "county": "beaufort",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": 60,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: ~60 Rekor + Verkada cameras (not Flock). 83 million plate reads in first year. Also connected 50 existing traffic cams to Verkada Command. $262K in ARPA funds requested."
+  },
+  {
+    "id": "beaufort-pd",
+    "name": "Beaufort Police Department",
+    "shortName": "Beaufort PD",
+    "type": "police",
+    "county": "beaufort",
+    "city": "beaufort",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Uses Flock Safety (different vendor than the county sheriff's Rekor system). Camera count not publicly documented."
+  },
+  {
+    "id": "bluffton-pd",
+    "name": "Bluffton Police Department",
+    "shortName": "Bluffton PD",
+    "type": "police",
+    "county": "beaufort",
+    "city": "bluffton",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Uses Flock Safety. Mailed a USB drive of Flock audit logs for $20 within days (good FOIA responsiveness)."
+  },
+  {
+    "id": "hilton-head-island-pd",
+    "name": "Hilton Head Island Law Enforcement",
+    "shortName": "Hilton Head PD",
+    "type": "police",
+    "county": "beaufort",
+    "city": "hilton-head-island",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Uses Flock Safety. Major tourism destination means millions of visitors' plates captured annually."
+  },
+  {
+    "id": "beaufort-county-clerk",
+    "name": "Beaufort County - Clerk to Council",
+    "shortName": "Beaufort County Clerk",
+    "type": "clerk",
+    "county": "beaufort",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request council meeting minutes. Councilman Bartholomew was sole dissenter on $262K ARPA surveillance spending."
+  },
+  {
+    "id": "aiken-dps",
+    "name": "Aiken Department of Public Safety",
+    "shortName": "Aiken DPS",
+    "type": "police",
+    "county": "aiken",
+    "city": "aiken",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Participates in statewide SLED ALPR program. ALPR data feeds into SLED's centralized database."
+  },
+  {
+    "id": "aiken-county-sheriff",
+    "name": "Aiken County Sheriff's Office",
+    "shortName": "Aiken County Sheriff",
+    "type": "sheriff",
+    "county": "aiken",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: No confirmed ALPR cameras. County borders GA (Augusta); cross-state data sharing is an open question."
+  },
+  {
+    "id": "aiken-county-clerk",
+    "name": "Aiken County - Clerk to Council",
+    "shortName": "Aiken County Clerk",
+    "type": "clerk",
+    "county": "aiken",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request county council meeting minutes and budget records for surveillance spending."
+  },
+  {
+    "id": "sumter-county-sheriff",
+    "name": "Sumter County Sheriff's Office",
+    "shortName": "Sumter County Sheriff",
+    "type": "sheriff",
+    "county": "sumter",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": 30,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: 30 Flock cameras. Data-sharing partner on national Flock network. Shaw Air Force Base proximity raises federal access questions."
+  },
+  {
+    "id": "sumter-pd",
+    "name": "Sumter Police Department",
+    "shortName": "Sumter PD",
+    "type": "police",
+    "county": "sumter",
+    "city": "sumter",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Note: Listed on Flock data-sharing network. Camera count not publicly documented."
+  },
+  {
+    "id": "sumter-county-clerk",
+    "name": "Sumter County - Clerk to Council",
+    "shortName": "Sumter County Clerk",
+    "type": "clerk",
+    "county": "sumter",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": null,
+      "address": null
+    },
+    "notes": "Request council meeting minutes. House Speaker Murrell Smith's law firm (Sumter-based) is defending SLED in the ALPR lawsuit."
   }
 ]
