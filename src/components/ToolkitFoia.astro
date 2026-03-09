@@ -1,5 +1,6 @@
 ---
 import foiaTemplates from '../data/toolkit-foia.json';
+import foiaContacts from '../data/foia-contacts.json';
 
 /**
  * Highlight [PLACEHOLDER] markers in template text with amber spans.
@@ -9,23 +10,109 @@ function highlightPlaceholders(text: string): string {
 }
 ---
 
-<!-- Intro: FOIA explainer -->
+<!-- Zone 1: Agency Finder -->
 <div class="mb-12">
   <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">FOIA Templates</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-4">
-    Request Public Records
+    Find Your Agency &amp; Request Records
   </h2>
-  <p class="text-[#d4d4d4] text-base leading-[1.7] mb-3">
+  <p class="text-[#d4d4d4] text-base leading-[1.7] mb-6">
     South Carolina's Freedom of Information Act
     (<a href="https://www.scstatehouse.gov/code/t30c004.php" target="_blank" rel="noopener" class="text-[#fbbf24] underline">S.C. Code &sect; 30-4-10</a>)
-    gives every person the right to inspect and copy public records. You don't need to be
-    a resident, a voter, or a journalist. Anyone can file.
+    gives every person the right to inspect and copy public records. Find the agency you want to request records from, then grab a template below.
   </p>
-  <p class="text-[#a3a3a3] text-base leading-[1.7]">
-    Agencies have 15 business days to respond. They can charge reasonable copy fees, but
-    must notify you of the cost before processing. Pick a template below, fill in the
-    bracketed fields, and send it.
+
+  <!-- Finder input -->
+  <div id="foia-finder-input" class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] p-6 mb-6">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-4 mb-4">
+      <button
+        id="foia-geo"
+        type="button"
+        class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold px-6 py-3 text-sm uppercase tracking-[0.08em] transition-colors cursor-pointer whitespace-nowrap min-h-[48px]"
+      >
+        Use My Location
+      </button>
+      <div class="flex-1">
+        <form id="foia-address-form" class="flex gap-2">
+          <input
+            id="foia-address"
+            type="text"
+            placeholder="Or enter your address..."
+            class="flex-1 bg-[#0a0a0a] border border-[rgba(255,255,255,0.12)] text-white placeholder-[#525252] px-4 py-3 text-sm focus:border-[#dc2626] focus:outline-none min-h-[48px]"
+            autocomplete="street-address"
+          />
+          <button
+            type="submit"
+            class="bg-[#262626] hover:bg-[#333] text-white font-semibold px-5 py-3 text-sm transition-colors cursor-pointer whitespace-nowrap min-h-[48px]"
+          >
+            Find
+          </button>
+        </form>
+      </div>
+    </div>
+    <p class="text-[#525252] text-xs">
+      Your location is matched entirely in your browser. No data is sent to any server.
+    </p>
+  </div>
+
+  <!-- Loading state (hidden by default) -->
+  <div id="foia-finder-loading" class="hidden text-center py-8">
+    <div class="inline-block w-6 h-6 border-2 border-[#525252] border-t-[#dc2626] rounded-full animate-spin" role="status">
+      <span class="sr-only">Finding agencies...</span>
+    </div>
+    <p class="text-[#a3a3a3] text-sm mt-3">Finding agencies near you...</p>
+  </div>
+
+  <!-- Error state (hidden by default) -->
+  <div id="foia-finder-error" class="hidden bg-[rgba(220,38,38,0.1)] border border-[rgba(220,38,38,0.3)] p-4 mb-6" role="alert">
+    <p id="foia-finder-error-msg" class="text-[#fca5a5] text-sm"></p>
+    <button id="foia-finder-retry" type="button" class="text-[#fbbf24] text-sm underline mt-2 cursor-pointer">Try again</button>
+  </div>
+
+  <!-- Results state (hidden by default) -->
+  <div id="foia-finder-results" class="hidden mb-6" aria-live="polite">
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="foia-results-heading" class="text-[#e8e8e8] font-semibold text-base"></h3>
+      <button id="foia-finder-reset" type="button" class="text-[#a3a3a3] hover:text-white text-xs underline cursor-pointer">New search</button>
+    </div>
+    <div id="foia-results-list" class="space-y-3"></div>
+  </div>
+
+  <!-- Browse all agencies toggle -->
+  <div class="border-t border-[rgba(255,255,255,0.07)] pt-4">
+    <button id="foia-browse-toggle" type="button" class="text-[#a3a3a3] hover:text-white text-sm font-medium cursor-pointer flex items-center gap-2">
+      <svg id="foia-browse-chevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+      Browse all agencies
+    </button>
+    <div id="foia-browse-panel" class="hidden mt-4">
+      <div class="flex flex-wrap gap-2 mb-4">
+        <input
+          id="foia-search"
+          type="text"
+          placeholder="Search agencies..."
+          class="flex-1 min-w-[200px] bg-[#0a0a0a] border border-[rgba(255,255,255,0.12)] text-white placeholder-[#525252] px-4 py-2.5 text-sm focus:border-[#dc2626] focus:outline-none"
+        />
+        <div class="flex gap-1" role="group" aria-label="Filter by agency type">
+          <button type="button" class="foia-type-chip bg-[#dc2626] text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="all">All</button>
+          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="police">Police</button>
+          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="sheriff">Sheriff</button>
+          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="clerk">Clerk</button>
+          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="state">State</button>
+        </div>
+      </div>
+      <div id="foia-browse-list" class="space-y-3 max-h-[60vh] overflow-y-auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Pre-fill banner (hidden by default, shown when agency selected) -->
+<div id="foia-prefill-banner" class="hidden bg-[rgba(251,191,36,0.1)] border border-[rgba(251,191,36,0.3)] px-4 py-3 mb-6 flex items-center justify-between">
+  <p class="text-[#fbbf24] text-sm">
+    Templates pre-filled for <strong id="foia-prefill-name"></strong>
   </p>
+  <button id="foia-prefill-clear" type="button" class="text-[#a3a3a3] hover:text-white text-xs underline cursor-pointer">Clear</button>
 </div>
 
 <!-- Sidebar + panel (replaces card grid) -->
@@ -122,6 +209,8 @@ function highlightPlaceholders(text: string): string {
   </ol>
 </div>
 
+<script type="application/json" id="foia-contacts-data" set:html={JSON.stringify(foiaContacts)}></script>
+
 <script>
   function initFoiaTab() {
     // Sidebar selection
@@ -182,4 +271,8 @@ function highlightPlaceholders(text: string): string {
 
   initFoiaTab();
   document.addEventListener('astro:after-swap', initFoiaTab);
+</script>
+
+<script>
+  import '../scripts/foia-finder';
 </script>

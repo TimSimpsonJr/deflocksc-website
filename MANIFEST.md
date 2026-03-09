@@ -24,7 +24,7 @@ src/
     ActionModal.astro           # Rep lookup: geolocation, address, or manual dropdown
     Footer.astro                # 2-column: About + Resources
     ToolkitTabs.astro           # Four-tab container with sticky nav + hash routing
-    ToolkitFoia.astro           # FOIA letter templates with placeholder highlighting
+    ToolkitFoia.astro           # FOIA agency finder + letter templates with auto-fill
     ToolkitSpeaking.astro       # Public comment guide: talk track, tips, rebuttals
     ToolkitOutreach.astro       # One-pager, conversation starters, business cards, share links
     ToolkitLegal.astro          # 4th Amendment primer, state map, bill gap analysis
@@ -51,6 +51,7 @@ src/
     camera-map.ts               # MapLibre init, camera layers, popups, clusters
     carousel.ts                 # Auto-advance, dot/arrow nav, keyboard a11y
     case-studies.ts             # Case study card animations, overlay focus traps
+    foia-finder.ts              # Agency finder: location lookup, browse/filter, auto-fill
     toolkit-legal.ts            # State comparison map, bill gap analysis interactivity
   data/
     bills.json                  # SC legislature bills (populated by scraper)
@@ -58,6 +59,7 @@ src/
     local-councils.json         # County/city council members
     action-letters.json         # 85 locally tailored letter templates (all 46 counties)
     registry.json               # Rep data registry (adapter metadata)
+    foia-contacts.json          # 64 curated FOIA contact records (agencies + custodians)
     toolkit-foia.json           # 4 FOIA request templates
     toolkit-speaking.json       # Public comment tips, talk track, rebuttals
     toolkit-outreach.json       # One-pager, conversation starters, business card designs
@@ -104,6 +106,7 @@ docs/
 
 ## Key Relationships
 
+- **foia-finder.ts imports district-matcher.ts** — reuses geocoder + district matching for agency location lookup
 - **action-modal/ imports district-matcher.ts + geo-utils.ts** — client-side rep lookup, letter rendering, district matching
 - **camera-map.ts extracted from MapSection** — MapLibre init, layers, popups, cluster handling
 - **carousel.ts extracted from HowItWorks** — auto-advance, navigation, keyboard a11y
