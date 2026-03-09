@@ -36,12 +36,22 @@ src/
     blog/[...slug]/og.png.ts    # Dynamic OG image generation per post
     rss.xml.ts                  # RSS feed
   lib/
-    district-matcher.js         # Boundary loading, district matching, Census geocoder (fetch)
-    geo-utils.js                # Point-in-polygon, bounding box geometry
+    district-matcher.ts         # Boundary loading, district matching, Census geocoder (fetch)
+    geo-utils.ts                # Point-in-polygon, bounding box geometry
     og-image.ts                 # Satori SVG-to-PNG for OG cards
   scripts/
+    action-modal/               # ActionModal client-side logic (extracted)
+      index.ts                  #   Entry point, wires up modal events
+      group-builder.ts          #   Builds rep groups from matched districts
+      results-renderer.ts       #   Renders rep cards, letters, email/copy actions
+      modal-controller.ts       #   Open/close, focus trap, scroll lock
+      manual-dropdowns.ts       #   Manual district selection fallback
+      types.ts                  #   Shared type definitions
+    bill-tracker.ts             # Bill card modals, status rendering
     camera-map.ts               # MapLibre init, camera layers, popups, clusters
     carousel.ts                 # Auto-advance, dot/arrow nav, keyboard a11y
+    case-studies.ts             # Case study card animations, overlay focus traps
+    toolkit-legal.ts            # State comparison map, bill gap analysis interactivity
   data/
     bills.json                  # SC legislature bills (populated by scraper)
     state-legislators.json      # State reps and senators
@@ -94,11 +104,12 @@ docs/
 
 ## Key Relationships
 
-- **ActionModal inlines district-matcher.js** — Astro `define:vars` scripts can't import ES modules; functions are duplicated with `dm` prefix
+- **action-modal/ imports district-matcher.ts + geo-utils.ts** — client-side rep lookup, letter rendering, district matching
 - **camera-map.ts extracted from MapSection** — MapLibre init, layers, popups, cluster handling
 - **carousel.ts extracted from HowItWorks** — auto-advance, navigation, keyboard a11y
 - **HowItWorksOverlays.astro extracted from HowItWorks** — case study overlay panels
 - **scraper.py → bills.json** — GitHub Actions runs scraper, commits updated bill data
-- **build-districts.py → public/districts/** — generates GeoJSON consumed by district-matcher.js at runtime
+- **build-districts.py → public/districts/** — generates GeoJSON consumed by district-matcher.ts at runtime
 - **publish.py ← Obsidian vault** — pulls blog posts tagged `publish: deflocksc`
 - **fetch-camera-data.mjs → camera-data.json** — caches Deflock CDN data for the map
+- **validate-data.py** — runs in scraper CI workflows to catch malformed data before commit
