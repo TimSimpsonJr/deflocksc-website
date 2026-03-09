@@ -209,7 +209,7 @@ function highlightPlaceholders(text: string): string {
   </ol>
 </div>
 
-<script type="application/json" id="foia-contacts-data">{JSON.stringify(foiaContacts)}</script>
+<script type="application/json" id="foia-contacts-data" set:html={JSON.stringify(foiaContacts)}></script>
 
 <script>
   function initFoiaTab() {

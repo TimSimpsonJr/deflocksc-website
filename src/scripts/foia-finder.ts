@@ -64,7 +64,7 @@ function renderAgencyCard(contact: FoiaContact): string {
     : '';
 
   const notesLine = contact.notes
-    ? `<p class="text-[#737373] text-xs italic mt-2">${contact.notes}</p>`
+    ? `<p class="text-[#737373] text-xs italic mt-2"><span class="not-italic font-semibold text-[#525252]">Note:</span> ${contact.notes}</p>`
     : '';
 
   const clerkHint = contact.type === 'clerk'
