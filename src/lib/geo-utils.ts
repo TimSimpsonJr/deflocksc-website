@@ -2,21 +2,49 @@
  * Geometry utilities — point-in-polygon and bounding box helpers.
  *
  * Pure geometric operations with no external dependencies.
- * Used by district-matcher.js for spatial lookups.
+ * Used by district-matcher for spatial lookups.
  */
+
+export interface BBox {
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+}
+
+type Ring = [number, number][];
+
+interface PolygonGeometry {
+  type: 'Polygon';
+  coordinates: Ring[];
+}
+
+interface MultiPolygonGeometry {
+  type: 'MultiPolygon';
+  coordinates: Ring[][];
+}
+
+type Geometry = PolygonGeometry | MultiPolygonGeometry;
+
+export interface Feature {
+  type: string;
+  properties: Record<string, any>;
+  geometry: Geometry;
+}
+
+export interface FeatureCollection {
+  type: string;
+  features: Feature[];
+  _bbox?: BBox;
+}
 
 // --- Point-in-Polygon (ray-casting) ---
 
 /**
  * Tests whether a point is inside a single polygon ring using the
  * ray-casting algorithm.
- *
- * @param {number} lat - Latitude of the test point
- * @param {number} lng - Longitude of the test point
- * @param {number[][]} ring - Array of [lng, lat] coordinate pairs (GeoJSON order)
- * @returns {boolean}
  */
-function pointInRing(lat, lng, ring) {
+function pointInRing(lat: number, lng: number, ring: Ring): boolean {
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const xi = ring[i][0], yi = ring[i][1];
@@ -38,13 +66,8 @@ function pointInRing(lat, lng, ring) {
  * any hole rings.
  *
  * For MultiPolygon: returns true if the point is inside any sub-polygon.
- *
- * @param {number} lat - Latitude
- * @param {number} lng - Longitude
- * @param {object} geometry - GeoJSON geometry object (Polygon or MultiPolygon)
- * @returns {boolean}
  */
-export function pointInPolygon(lat, lng, geometry) {
+export function pointInPolygon(lat: number, lng: number, geometry: Geometry | null | undefined): boolean {
   // Validate inputs: geometry must have type and coordinates
   if (!geometry || !geometry.type || !geometry.coordinates) return false;
 
@@ -81,7 +104,7 @@ export function pointInPolygon(lat, lng, geometry) {
  * Computes a bounding box from all coordinates in a GeoJSON FeatureCollection.
  * Returns { minLat, maxLat, minLng, maxLng }.
  */
-export function computeBBox(fc) {
+export function computeBBox(fc: { features?: Feature[] } | null | undefined): BBox {
   // Validate FeatureCollection structure
   if (!fc || !fc.features || fc.features.length === 0) {
     return { minLat: 0, maxLat: 0, minLng: 0, maxLng: 0 };
@@ -89,7 +112,7 @@ export function computeBBox(fc) {
 
   let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
 
-  function scanRing(ring) {
+  function scanRing(ring: Ring) {
     for (let i = 0; i < ring.length; i++) {
       const lng = ring[i][0], lat = ring[i][1];
       if (lat < minLat) minLat = lat;
@@ -117,7 +140,7 @@ export function computeBBox(fc) {
 /**
  * Returns true if a point falls within a bounding box (with a small margin).
  */
-export function pointInBBox(lat, lng, bbox) {
+export function pointInBBox(lat: number, lng: number, bbox: BBox): boolean {
   const margin = 0.01; // ~1km buffer
   return (
     lat >= bbox.minLat - margin &&
