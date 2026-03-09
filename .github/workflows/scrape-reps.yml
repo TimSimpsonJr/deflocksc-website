@@ -33,6 +33,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: python -m scripts.scrape_reps --state-only
+      - run: python scripts/validate-data.py
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
@@ -52,6 +53,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: python -m scripts.scrape_reps --local-only
+      - run: python scripts/validate-data.py
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
@@ -71,6 +73,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: python scripts/build-districts.py
+      - run: python scripts/validate-data.py
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"

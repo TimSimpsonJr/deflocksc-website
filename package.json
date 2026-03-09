@@ -9,7 +9,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "validate": "python scripts/validate-data.py"
+    "validate": "python scripts/validate-data.py",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.15",
@@ -28,6 +30,7 @@
   },
   "devDependencies": {
     "pdf-lib": "^1.17.1",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "vitest": "^4.0.18"
   }
 }
