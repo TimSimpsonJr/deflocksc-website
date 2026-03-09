@@ -1,0 +1,146 @@
+[
+  {
+    "id": "sled",
+    "name": "South Carolina Law Enforcement Division",
+    "shortName": "SLED",
+    "type": "sled",
+    "county": null,
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "FOIA Officer",
+      "name": null,
+      "email": "foia@sled.sc.gov",
+      "phone": null,
+      "address": "P.O. Box 21398, Columbia, SC 29221"
+    },
+    "notes": "Maintains statewide ALPR database with 422 million plate reads and 3-year retention."
+  },
+  {
+    "id": "scdot",
+    "name": "South Carolina Department of Transportation",
+    "shortName": "SCDOT",
+    "type": "scdot",
+    "county": null,
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "FOIA Officer",
+      "name": null,
+      "email": "foia@scdot.org",
+      "phone": "803-737-1270",
+      "address": "955 Park Street, Columbia, SC 29201"
+    },
+    "notes": "Discovered 200+ unpermitted Flock cameras on state roads in 2024. Relevant for permit records."
+  },
+  {
+    "id": "greenville-pd",
+    "name": "Greenville Police Department",
+    "shortName": "Greenville PD",
+    "type": "police",
+    "county": "greenville",
+    "city": "greenville",
+    "hasAlprCameras": true,
+    "cameraCount": 57,
+    "custodian": {
+      "title": "Records Custodian",
+      "name": null,
+      "email": null,
+      "phone": "864-271-5333",
+      "address": "4 McGee St, Greenville, SC 29601"
+    },
+    "notes": "Greenville PD has refused to disclose camera locations publicly."
+  },
+  {
+    "id": "greenville-county-sheriff",
+    "name": "Greenville County Sheriff's Office",
+    "shortName": "Greenville County Sheriff",
+    "type": "sheriff",
+    "county": "greenville",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": 11,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": "864-467-5200",
+      "address": "4 McGee St, Greenville, SC 29601"
+    },
+    "notes": null
+  },
+  {
+    "id": "greenville-city-clerk",
+    "name": "City of Greenville - City Clerk",
+    "shortName": "Greenville City Clerk",
+    "type": "clerk",
+    "county": "greenville",
+    "city": "greenville",
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "City Clerk",
+      "name": null,
+      "email": "cityclerk@greenvillesc.gov",
+      "phone": "864-467-4422",
+      "address": "206 S Main St, Greenville, SC 29601"
+    },
+    "notes": "Request budget approvals and council meeting minutes related to surveillance technology."
+  },
+  {
+    "id": "greenville-county-clerk",
+    "name": "Greenville County - Clerk to Council",
+    "shortName": "Greenville County Clerk",
+    "type": "clerk",
+    "county": "greenville",
+    "city": null,
+    "hasAlprCameras": false,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Clerk to Council",
+      "name": null,
+      "email": null,
+      "phone": "864-467-7105",
+      "address": "301 University Ridge, Suite 2400, Greenville, SC 29601"
+    },
+    "notes": "Request county council meeting minutes and budget records for surveillance spending."
+  },
+  {
+    "id": "richland-county-sheriff",
+    "name": "Richland County Sheriff's Department",
+    "shortName": "Richland County Sheriff",
+    "type": "sheriff",
+    "county": "richland",
+    "city": null,
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "FOIA Officer",
+      "name": null,
+      "email": "foia@rcsd.net",
+      "phone": "803-576-3000",
+      "address": "5623 Two Notch Road, Columbia, SC 29223"
+    },
+    "notes": null
+  },
+  {
+    "id": "columbia-pd",
+    "name": "Columbia Police Department",
+    "shortName": "Columbia PD",
+    "type": "police",
+    "county": "richland",
+    "city": "columbia",
+    "hasAlprCameras": true,
+    "cameraCount": null,
+    "custodian": {
+      "title": "Records Division",
+      "name": null,
+      "email": null,
+      "phone": "803-545-3500",
+      "address": "1 Justice Square, Columbia, SC 29201"
+    },
+    "notes": null
+  }
+]
