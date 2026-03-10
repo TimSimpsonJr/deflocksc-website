@@ -13,7 +13,7 @@ if (dataEl) {
 }
 
 function init(data: ModalData): void {
-  const { actionLetters, stateLegislators, localCouncils, registry } = data;
+  const { actionLetters, stateLegislators, localCouncils, registry, cameraCounts } = data;
 
   initModalController();
   initResultsEventDelegation(localCouncils);
@@ -31,7 +31,7 @@ function init(data: ModalData): void {
   function handleMatch(match: DistrictMatch): void {
     const groups = buildGroups(match, actionLetters, stateLegislators, localCouncils);
     showState('results');
-    renderResults(groups);
+    renderResults(groups, cameraCounts);
     document.getElementById('action-results')?.focus();
   }
 

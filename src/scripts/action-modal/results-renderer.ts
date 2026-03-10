@@ -40,11 +40,71 @@ function replaceGreeting(body: string, name: string): string {
   return body.replace(/^Dear .+,/m, 'Dear ' + name + ',');
 }
 
-export function renderResults(groups: RepGroup[]): void {
+function titleCase(s: string): string {
+  return s.replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function animateCount(el: HTMLElement, target: number): void {
+  const duration = 1000;
+  const start = performance.now();
+  function tick(now: number): void {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease-out: 1 - (1 - t)^3
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = String(Math.round(eased * target));
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, number>): void {
   currentGroups = groups;
   const container = document.getElementById('action-results-list');
   if (!container) return;
   container.innerHTML = '';
+
+  // Camera counter stat line
+  if (cameraCounts) {
+    let countyKey: string | undefined;
+    let cityKey: string | undefined;
+    for (const g of groups) {
+      if (g.countyKey && !countyKey) countyKey = g.countyKey;
+      if (g.cityKey && !cityKey) cityKey = g.cityKey;
+    }
+
+    const cityCount = cityKey ? (cameraCounts[cityKey] || 0) : 0;
+    const countyCount = countyKey ? (cameraCounts[countyKey] || 0) : 0;
+
+    if (cityCount > 0 || countyCount > 0) {
+      const statDiv = document.createElement('div');
+      statDiv.className = 'text-[#a3a3a3] text-sm mb-6 pb-4 border-b border-[#404040]';
+
+      const parts: string[] = [];
+
+      if (cityCount > 0) {
+        const cityName = cityKey!.split(':')[1];
+        parts.push('<span class="text-white font-semibold" data-count="' + cityCount + '">0</span> cameras in City of ' + titleCase(cityName));
+      }
+
+      if (countyCount > 0) {
+        const countyName = countyKey!.split(':')[1];
+        const label = cityCount > 0
+          ? ' in ' + titleCase(countyName) + ' County'
+          : ' cameras in ' + titleCase(countyName) + ' County';
+        parts.push('<span class="text-white font-semibold" data-count="' + countyCount + '">0</span>' + label);
+      }
+
+      statDiv.innerHTML = parts.join(' <span class="mx-1">\u00b7</span> ');
+
+      container.appendChild(statDiv);
+
+      statDiv.querySelectorAll('[data-count]').forEach(el => {
+        const target = parseInt(el.getAttribute('data-count')!, 10);
+        animateCount(el as HTMLElement, target);
+      });
+    }
+  }
 
   for (let gi = 0; gi < groups.length; gi++) {
     const group = groups[gi];
