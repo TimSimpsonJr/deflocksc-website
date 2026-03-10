@@ -85,4 +85,5 @@ export interface ModalData {
   stateLegislators: StateLegislators;
   localCouncils: LocalCouncils;
   registry: Registry;
+  cameraCounts: Record<string, number>;
 }
