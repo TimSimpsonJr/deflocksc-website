@@ -78,13 +78,13 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
 
     if (cityCount > 0 || countyCount > 0) {
       const statDiv = document.createElement('div');
-      statDiv.className = 'text-[#a3a3a3] text-sm mb-6 pb-4 border-b border-[#404040]';
+      statDiv.className = 'text-[#a3a3a3] text-base mb-6 pb-4 border-b border-[#404040]';
 
       const parts: string[] = [];
 
       if (cityCount > 0) {
         const cityName = cityKey!.split(':')[1];
-        parts.push('<span class="text-white font-semibold" data-count="' + cityCount + '">0</span> cameras in City of ' + titleCase(cityName));
+        parts.push('<span class="text-[#ef4444] font-semibold" data-count="' + cityCount + '">0</span> cameras in City of ' + titleCase(cityName));
       }
 
       if (countyCount > 0) {
@@ -92,7 +92,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
         const label = cityCount > 0
           ? ' in ' + titleCase(countyName) + ' County'
           : ' cameras in ' + titleCase(countyName) + ' County';
-        parts.push('<span class="text-white font-semibold" data-count="' + countyCount + '">0</span>' + label);
+        parts.push('<span class="text-[#ef4444] font-semibold" data-count="' + countyCount + '">0</span>' + label);
       }
 
       statDiv.innerHTML = parts.join(' <span class="mx-1">\u00b7</span> ');
@@ -158,7 +158,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
       const nameRow = document.createElement('div');
       nameRow.className = 'flex items-baseline gap-2';
       const nameSpan = document.createElement('span');
-      nameSpan.className = 'text-white font-semibold';
+      nameSpan.className = 'text-[#ef4444] font-semibold';
       nameSpan.textContent = rep.name;
       if (rep.party) {
         const partySpan = document.createElement('span');
