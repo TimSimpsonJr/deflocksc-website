@@ -5,6 +5,7 @@ summary: "Why we built this site, what we're trying to do with it, and the probl
 tags:
   - launch
   - campaign
+featuredImage: /blog/sc-county-map.png
 draft: false
 ---
 
