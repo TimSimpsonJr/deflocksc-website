@@ -30,7 +30,7 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
 <Base title={`${post.data.title} — DeflockSC`} description={post.data.summary} ogImage={ogImage}>
   {/* Progress bar */}
-  <div id="progress-bar" class="fixed top-0 left-0 h-[3px] bg-[#ef4444] z-[100] transition-[width] duration-[50ms] linear" style="width: 0%;" aria-hidden="true"></div>
+  <div id="progress-bar" class="fixed top-0 left-0 h-[3px] bg-[#ef4444] z-40 transition-[width] duration-[50ms] linear" style="width: 0%;" aria-hidden="true"></div>
 
   <div class="grid grid-cols-[1fr_minmax(0,720px)_1fr] lg:grid-cols-[1fr_minmax(0,720px)_240px_1fr] gap-x-10 pt-20 md:pt-28 px-6 lg:px-0">
     {/* Main article */}
@@ -108,7 +108,7 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
       <div class="text-xs font-bold uppercase tracking-[0.12em] text-[#737373] mb-6">Related Posts</div>
       <div class="grid md:grid-cols-3 gap-5">
         {relatedPosts.map((rp) => (
-          <a href={`/blog/${rp.id}`} class="block group">
+          <a href={`/blog/${rp.id}`} class="block group" aria-label={rp.data.title}>
             <article class="bg-[#1a1a1a] rounded-[10px] overflow-hidden border border-[#262626] group-hover:border-[#404040] group-hover:-translate-y-0.5 transition-all duration-200 h-full">
               {rp.data.featuredImage && (
                 <img src={rp.data.featuredImage} alt="" class="w-full aspect-video object-cover" />
@@ -131,37 +131,46 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 </Base>
 
 <script>
-  // Reading progress bar
+  // Reading progress bar + TOC active state tracking
   const progressBar = document.getElementById('progress-bar');
-  if (progressBar) {
-    window.addEventListener('scroll', () => {
-      const h = document.documentElement;
-      const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
-      progressBar.style.width = `${Math.min(pct, 100)}%`;
-    }, { passive: true });
-  }
-
-  // TOC active state tracking
   const tocLinks = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
-  if (tocLinks.length > 0) {
-    const headingEls = Array.from(tocLinks).map((link) =>
-      document.getElementById(link.dataset.slug ?? '')
-    ).filter(Boolean) as HTMLElement[];
 
-    window.addEventListener('scroll', () => {
-      let activeSlug = '';
-      for (const el of headingEls) {
-        if (el.getBoundingClientRect().top < 120) {
-          activeSlug = el.id;
-        }
+  const headingEls = tocLinks.length > 0
+    ? (Array.from(tocLinks).map((link) =>
+        document.getElementById(link.dataset.slug ?? '')
+      ).filter(Boolean) as HTMLElement[])
+    : [];
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      // Progress bar
+      if (progressBar) {
+        const h = document.documentElement;
+        const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+        progressBar.style.width = `${Math.min(pct, 100)}%`;
       }
-      tocLinks.forEach((link) => {
-        const isActive = link.dataset.slug === activeSlug;
-        link.classList.toggle('text-[#ef4444]', isActive);
-        link.classList.toggle('border-[#ef4444]', isActive);
-        link.classList.toggle('text-[#525252]', !isActive);
-        link.classList.toggle('border-transparent', !isActive);
-      });
-    }, { passive: true });
-  }
+
+      // TOC tracking
+      if (headingEls.length > 0) {
+        let activeSlug = '';
+        for (const el of headingEls) {
+          if (el.getBoundingClientRect().top < 120) {
+            activeSlug = el.id;
+          }
+        }
+        tocLinks.forEach((link) => {
+          const isActive = link.dataset.slug === activeSlug;
+          link.classList.toggle('text-[#ef4444]', isActive);
+          link.classList.toggle('border-[#ef4444]', isActive);
+          link.classList.toggle('text-[#525252]', !isActive);
+          link.classList.toggle('border-transparent', !isActive);
+        });
+      }
+
+      ticking = false;
+    });
+  }, { passive: true });
 </script>
