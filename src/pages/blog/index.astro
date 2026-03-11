@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
+import { estimateReadTime } from '../../lib/blog-utils';
 
 const posts = (await getCollection('blog'))
   .filter((post) => !post.data.draft)
@@ -48,13 +49,17 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
               <img
                 src={posts[0].data.featuredImage}
                 alt=""
-                class="w-full aspect-[2.5/1] object-cover"
+                class="w-full object-contain bg-[#0a0a0a]"
               />
             )}
             <div class="p-7 md:p-8">
-              <time class="text-[#737373] text-[13px] font-medium" datetime={new Date(posts[0].data.date).toISOString()}>
-                {new Date(posts[0].data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </time>
+              <div class="flex items-center gap-3 text-[#737373] text-[13px] font-medium">
+                <time datetime={new Date(posts[0].data.date).toISOString()}>
+                  {new Date(posts[0].data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </time>
+                <span class="text-[#404040]">&middot;</span>
+                <span>{estimateReadTime(posts[0].body ?? '')} min read</span>
+              </div>
               <h2 class="text-2xl md:text-[28px] font-[900] text-white mt-2 mb-3 leading-tight">{posts[0].data.title}</h2>
               <p class="text-[#a3a3a3] text-[15px] leading-relaxed max-w-[600px]">{posts[0].data.summary}</p>
               {posts[0].data.tags && (
@@ -79,13 +84,17 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
                   <img
                     src={post.data.featuredImage}
                     alt=""
-                    class="w-full aspect-video object-cover"
+                    class="w-full object-contain bg-[#0a0a0a]"
                   />
                 )}
                 <div class="p-5">
-                  <time class="text-[#737373] text-[13px] font-medium" datetime={new Date(post.data.date).toISOString()}>
-                    {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                  </time>
+                  <div class="flex items-center gap-3 text-[#737373] text-[13px] font-medium">
+                    <time datetime={new Date(post.data.date).toISOString()}>
+                      {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </time>
+                    <span class="text-[#404040]">&middot;</span>
+                    <span>{estimateReadTime(post.body ?? '')} min read</span>
+                  </div>
                   <h2 class="text-lg font-[800] text-white mt-1.5 mb-2 leading-snug">{post.data.title}</h2>
                   <p class="text-[#a3a3a3] text-sm leading-relaxed">{post.data.summary}</p>
                   {post.data.tags && (
