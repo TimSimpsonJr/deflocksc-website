@@ -32,35 +32,49 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
   {/* Progress bar */}
   <div id="progress-bar" class="fixed top-0 left-0 h-[3px] bg-[#ef4444] z-50 transition-[width] duration-[50ms] linear" style="width: 0%;" aria-hidden="true"></div>
 
-  <div class="grid grid-cols-[1fr_minmax(0,720px)_1fr] lg:grid-cols-[1fr_minmax(0,720px)_240px_1fr] gap-x-10 pt-20 md:pt-28 px-6 lg:px-0">
-    {/* Main article */}
-    <article class="col-start-2 col-end-3 min-w-0">
-      <a href="/blog" class="text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors mb-6 inline-block">&larr; Back to Blog</a>
+  {/* Full-bleed hero */}
+  <div class="relative -mt-16 md:h-[50vh] md:min-h-[320px] md:max-h-[520px] overflow-hidden">
+    {post.data.featuredImage ? (
+      <img
+        src={post.data.featuredImage}
+        alt=""
+        class="w-full pt-16 md:pt-0 md:absolute md:inset-0 md:h-full object-contain md:object-cover bg-[#0a0a0a]"
+      />
+    ) : (
+      <div class="absolute inset-0 bg-[#0a0a0a]">
+        <div class="absolute inset-0 flex items-center justify-center overflow-hidden select-none" aria-hidden="true">
+          <span class="text-[8vw] font-[900] text-[#1a1a1a] uppercase leading-none text-center px-8 line-clamp-3">{post.data.title}</span>
+        </div>
+      </div>
+    )}
 
-      <header class="mb-8">
-        <div class="flex items-center gap-3 text-[13px] text-[#737373] font-medium mb-2.5">
+    {/* Back link */}
+    <a href="/blog" class="absolute top-20 left-6 lg:left-10 text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors z-10 [text-shadow:0_1px_8px_rgba(0,0,0,0.8)]">&larr; Back to Blog</a>
+
+    {/* Title + meta overlay */}
+    <div class="absolute bottom-0 left-0 right-0 px-6 lg:px-10 pb-6 md:pb-8">
+      <div class="max-w-[720px] mx-auto lg:mx-0 lg:ml-[calc((100%-720px-240px-2.5rem)/2)]">
+        <div class="flex items-center gap-3 text-[13px] text-[#a3a3a3] font-medium mb-2.5 [text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">
           <time datetime={new Date(post.data.date).toISOString()}>
             {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </time>
-          <span class="text-[#404040]">&middot;</span>
+          <span class="text-[#525252]">&middot;</span>
           <span>{readTime} min read</span>
         </div>
-        <h1 class="text-3xl md:text-4xl font-[900] text-white leading-tight tracking-[-0.02em]">{post.data.title}</h1>
-        {post.data.tags && (
-          <div class="flex flex-wrap gap-2 mt-4">
-            {post.data.tags.map((tag) => (
-              <a href={`/blog#${tag}`} class="text-xs font-semibold px-2.5 py-1 rounded-md bg-[#262626] text-[#a3a3a3] hover:bg-[#333] hover:text-white transition-all no-underline">{tag}</a>
-            ))}
-          </div>
-        )}
-      </header>
+        <h1 class="text-3xl md:text-4xl font-[900] text-white leading-tight tracking-[-0.02em] [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_4px_40px_rgba(0,0,0,0.7)]">{post.data.title}</h1>
+      </div>
+    </div>
+  </div>
 
-      {post.data.featuredImage && (
-        <img
-          src={post.data.featuredImage}
-          alt=""
-          class="w-full rounded-xl mb-10 object-contain bg-[#0a0a0a]"
-        />
+  <div class="grid grid-cols-[1fr_minmax(0,720px)_1fr] lg:grid-cols-[1fr_minmax(0,720px)_240px_1fr] gap-x-10 pt-6 px-6 lg:px-0">
+    {/* Main article */}
+    <article class="col-start-2 col-end-3 min-w-0">
+      {post.data.tags && (
+        <div class="flex flex-wrap gap-2 mb-8">
+          {post.data.tags.map((tag) => (
+            <a href={`/blog#${tag}`} class="text-xs font-semibold px-2.5 py-1 rounded-md bg-[#262626] text-[#a3a3a3] hover:bg-[#333] hover:text-white transition-all no-underline">{tag}</a>
+          ))}
+        </div>
       )}
 
       <div class="prose prose-invert max-w-none
@@ -78,6 +92,13 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
         [&_img]:rounded-lg [&_img]:my-6
         [&>hr]:border-t [&>hr]:border-[#262626] [&>hr]:my-10">
         <Content />
+      </div>
+
+      {/* End mark */}
+      <div class="flex justify-center gap-2 mt-16 mb-4" aria-hidden="true">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#404040]"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[#404040]"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[#404040]"></span>
       </div>
     </article>
 
@@ -128,6 +149,8 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
       </div>
     </section>
   )}
+
+  <div class="pb-20"></div>
 </Base>
 
 <script>
