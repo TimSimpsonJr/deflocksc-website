@@ -102,7 +102,9 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
         </div>
       )}
 
-      <p id="no-results" class="text-[#737373] mt-8 hidden" role="status">No posts match this filter.</p>
+      {allTags.length > 0 && (
+        <p id="no-results" class="text-[#737373] mt-8 hidden" role="status">No posts match this filter.</p>
+      )}
     </div>
   </section>
 </Base>
