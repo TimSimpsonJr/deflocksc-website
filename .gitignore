@@ -12,3 +12,4 @@ __pycache__/
 public/dev-preview.html
 tina/__generated__/
 public/admin/
+lighthouse*.json
