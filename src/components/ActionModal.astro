@@ -3,6 +3,7 @@ import actionLetters from '../data/action-letters.json';
 import stateLegislators from '../data/state-legislators.json';
 import localCouncils from '../data/local-councils.json';
 import registryFull from '../data/registry.json';
+import cameraCounts from '../../public/camera-counts.json';
 
 // Project only fields needed client-side (avoid leaking adapter config, ArcGIS URLs, etc.)
 const registry = {
@@ -219,7 +220,7 @@ const registry = {
   }
 </style>
 
-<script type="application/json" id="action-modal-data" set:html={JSON.stringify({ actionLetters, stateLegislators, localCouncils, registry })}></script>
+<script type="application/json" id="action-modal-data" set:html={JSON.stringify({ actionLetters, stateLegislators, localCouncils, registry, cameraCounts })}></script>
 <script>
   import '../scripts/action-modal/index.js';
 </script>
