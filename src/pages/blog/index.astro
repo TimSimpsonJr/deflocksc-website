@@ -18,17 +18,19 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 
       {/* Tag filter bar */}
       {allTags.length > 0 && (
-        <div class="flex flex-wrap gap-2 mb-10" id="tag-bar" role="toolbar" aria-label="Filter posts by tag">
+        <div class="flex flex-wrap gap-2 mb-10" id="tag-bar" role="group" aria-label="Filter posts by tag">
           <button
             type="button"
             class="tag-pill active px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-all cursor-pointer border border-transparent"
             data-tag="all"
+            aria-pressed="true"
           >All</button>
           {allTags.map((tag) => (
             <button
               type="button"
               class="tag-pill px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-all cursor-pointer border border-transparent"
               data-tag={tag}
+              aria-pressed="false"
             >{tag}</button>
           ))}
         </div>
@@ -99,6 +101,8 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
           ))}
         </div>
       )}
+
+      <p id="no-results" class="text-[#737373] mt-8 hidden" role="status">No posts match this filter.</p>
     </div>
   </section>
 </Base>
@@ -131,7 +135,11 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
     window.location.hash = tag === 'all' ? '' : tag;
 
     // Update pill active state
-    pills.forEach((p) => p.classList.toggle('active', p.dataset.tag === tag));
+    pills.forEach((p) => {
+      const isActive = p.dataset.tag === tag;
+      p.classList.toggle('active', isActive);
+      p.setAttribute('aria-pressed', String(isActive));
+    });
 
     // Show/hide cards
     cards.forEach((card) => {
@@ -139,6 +147,10 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
       const show = tag === 'all' || cardTags.includes(tag);
       card.classList.toggle('hidden-by-filter', !show);
     });
+
+    const anyVisible = Array.from(cards).some((c) => !c.classList.contains('hidden-by-filter'));
+    const noResults = document.getElementById('no-results');
+    if (noResults) noResults.classList.toggle('hidden', anyVisible);
   }
 
   // Pill click handlers
@@ -147,6 +159,11 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
   });
 
   // Restore from URL hash on load
-  const hashTag = window.location.hash.slice(1);
+  const hashTag = decodeURIComponent(window.location.hash.slice(1));
   if (hashTag) filterByTag(hashTag);
+
+  window.addEventListener('hashchange', () => {
+    const tag = decodeURIComponent(window.location.hash.slice(1)) || 'all';
+    filterByTag(tag);
+  });
 </script>
