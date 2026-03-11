@@ -33,12 +33,13 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
   <div id="progress-bar" class="fixed top-0 left-0 h-[3px] bg-[#ef4444] z-50 transition-[width] duration-[50ms] linear" style="width: 0%;" aria-hidden="true"></div>
 
   {/* Full-bleed hero */}
-  <div class="relative -mt-16 md:h-[50vh] md:min-h-[320px] md:max-h-[520px] overflow-hidden">
+  <div class="relative -mt-16 md:h-[50vh] md:min-h-[320px] md:max-h-[520px] overflow-hidden bg-[#171717]">
     {post.data.featuredImage ? (
       <img
+        id="hero-img"
         src={post.data.featuredImage}
         alt=""
-        class="w-full pt-16 md:pt-0 md:absolute md:inset-0 md:h-full object-contain md:object-cover bg-[#0a0a0a]"
+        class="w-full pt-16 md:pt-0 md:absolute md:inset-0 md:h-full object-contain"
       />
     ) : (
       <div class="absolute inset-0 bg-[#0a0a0a]">
@@ -46,6 +47,14 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
           <span class="text-[8vw] font-[900] text-[#1a1a1a] uppercase leading-none text-center px-8 line-clamp-3">{post.data.title}</span>
         </div>
       </div>
+    )}
+
+    {/* Side fade overlays — JS-positioned at rendered image edges, desktop only */}
+    {post.data.featuredImage && (
+      <>
+        <div id="hero-fade-left" class="hidden md:block absolute inset-y-0 bg-gradient-to-r from-[#171717] to-transparent pointer-events-none" aria-hidden="true"></div>
+        <div id="hero-fade-right" class="hidden md:block absolute inset-y-0 bg-gradient-to-l from-[#171717] to-transparent pointer-events-none" aria-hidden="true"></div>
+      </>
     )}
 
     {/* Back link */}
@@ -196,4 +205,40 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
       ticking = false;
     });
   }, { passive: true });
+
+  // Position side fade overlays at rendered image edges (object-contain)
+  const heroImg = document.getElementById('hero-img') as HTMLImageElement | null;
+  const fadeL = document.getElementById('hero-fade-left');
+  const fadeR = document.getElementById('hero-fade-right');
+
+  function positionFades() {
+    if (!heroImg || !fadeL || !fadeR || !heroImg.naturalWidth) return;
+    if (window.innerWidth < 768) return;
+
+    const cw = heroImg.clientWidth;
+    const ch = heroImg.clientHeight;
+    const scale = Math.min(cw / heroImg.naturalWidth, ch / heroImg.naturalHeight);
+    const renderedW = heroImg.naturalWidth * scale;
+    const offset = (cw - renderedW) / 2;
+
+    // No fade needed if image reaches the container edges
+    if (offset < 2) {
+      fadeL.style.width = '0';
+      fadeR.style.width = '0';
+      return;
+    }
+
+    const fadeW = renderedW * 0.15;
+
+    fadeL.style.left = `${offset}px`;
+    fadeL.style.width = `${fadeW}px`;
+    fadeR.style.right = `${offset}px`;
+    fadeR.style.width = `${fadeW}px`;
+  }
+
+  if (heroImg) {
+    if (heroImg.complete) positionFades();
+    else heroImg.addEventListener('load', positionFades);
+    window.addEventListener('resize', positionFades);
+  }
 </script>
