@@ -158,7 +158,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
       const nameRow = document.createElement('div');
       nameRow.className = 'flex items-baseline gap-2';
       const nameSpan = document.createElement('span');
-      nameSpan.className = 'text-[#ef4444] font-semibold';
+      nameSpan.className = 'text-white font-semibold';
       nameSpan.textContent = rep.name;
       if (rep.party) {
         const partySpan = document.createElement('span');
