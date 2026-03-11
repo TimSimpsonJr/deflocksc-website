@@ -6,7 +6,7 @@ tags:
   - privacy
   - parental-rights
   - sc
-draft: false
+draft: true
 ---
 
 An LAPD audit found that over 99% of license plates scanned by their ALPR cameras belonged to people with no connection to any crime. Not suspects. Not persons of interest. Just people driving.

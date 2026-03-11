@@ -6,7 +6,7 @@ tags:
   - flock-safety
   - vendor-accountability
   - privacy
-draft: false
+draft: true
 ---
 
 On July 30, 2025, Flock Safety CEO Garrett Langley went on 9NEWS in Colorado and said his company had no federal contracts. Three weeks later, the same station reported that Flock had been secretly giving CBP (Customs and Border Protection) a Flock account since May 2025, using it to send data-sharing invitations to local police departments across the country. 25 Colorado departments accepted without being told what they were signing up for.

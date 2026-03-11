@@ -7,7 +7,7 @@ tags:
   - sc
   - local-harms
   - privacy
-draft: false
+draft: true
 ---
 
 Two sisters were driving in Greenville when a Flock Safety camera misread their rental car's license plate and flagged it as stolen. Police pulled them over at gunpoint. They were handcuffed. The car wasn't stolen. It had been improperly reported. They're now suing Greenville PD.

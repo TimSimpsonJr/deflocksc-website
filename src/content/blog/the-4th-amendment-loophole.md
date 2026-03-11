@@ -7,7 +7,7 @@ tags:
   - federal-access
   - privacy
   - legislation
-draft: false
+draft: true
 ---
 
 In 2018, the Supreme Court ruled in Carpenter v. United States that the government needs a warrant to access your cell phone location data. The reasoning: aggregated location tracking reveals the "privacies of life," and the 4th Amendment protects against that kind of warrantless government surveillance.

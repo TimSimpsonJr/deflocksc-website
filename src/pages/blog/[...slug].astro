@@ -37,15 +37,7 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
     <article class="col-start-2 col-end-3 min-w-0">
       <a href="/blog" class="text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors mb-6 inline-block">&larr; Back to Blog</a>
 
-      {post.data.featuredImage && (
-        <img
-          src={post.data.featuredImage}
-          alt=""
-          class="w-full rounded-xl mb-8 aspect-[2/1] object-cover"
-        />
-      )}
-
-      <header class="mb-10">
+      <header class="mb-8">
         <div class="flex items-center gap-3 text-[13px] text-[#737373] font-medium mb-2.5">
           <time datetime={new Date(post.data.date).toISOString()}>
             {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -62,6 +54,14 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
           </div>
         )}
       </header>
+
+      {post.data.featuredImage && (
+        <img
+          src={post.data.featuredImage}
+          alt=""
+          class="w-full rounded-xl mb-10 object-contain bg-[#0a0a0a]"
+        />
+      )}
 
       <div class="prose prose-invert max-w-none
         [&>p]:text-[#d4d4d4] [&>p]:text-[17px] [&>p]:leading-[1.8] [&>p]:mb-6
@@ -111,7 +111,7 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
           <a href={`/blog/${rp.id}`} class="block group" aria-label={rp.data.title}>
             <article class="bg-[#1a1a1a] rounded-[10px] overflow-hidden border border-[#262626] group-hover:border-[#404040] group-hover:-translate-y-0.5 transition-all duration-200 h-full">
               {rp.data.featuredImage && (
-                <img src={rp.data.featuredImage} alt="" class="w-full aspect-video object-cover" />
+                <img src={rp.data.featuredImage} alt="" class="w-full object-contain bg-[#0a0a0a]" />
               )}
               <div class="p-4">
                 <time class="text-xs text-[#737373] font-medium" datetime={new Date(rp.data.date).toISOString()}>

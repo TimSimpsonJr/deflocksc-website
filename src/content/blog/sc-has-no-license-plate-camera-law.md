@@ -6,7 +6,7 @@ tags:
   - legislation
   - sc
   - privacy
-draft: false
+draft: true
 ---
 
 In February 2024, South Carolina's Transportation Secretary Christy Hall told the Post and Courier something that should've made headlines: "There has not been public policy put into place by the South Carolina Legislature regarding the use of these devices, (or the) privacy concerns regarding the collection, handling and disposition of the data they collect."

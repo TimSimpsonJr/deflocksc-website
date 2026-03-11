@@ -1,5 +1,5 @@
 ---
-title: "Building DeflockSC"
+title: "Why We Built DeflockSC"
 date: 2026-03-04T00:00:00.000Z
 summary: "Why we built this site, what we're trying to do with it, and the problems we had to solve along the way."
 tags:
@@ -55,9 +55,27 @@ We started with Mapbox for the camera map, but that came with API keys and usage
 
 ### Letters that actually say something
 
-We wrote 11 template letters, each loaded with facts specific to that jurisdiction. The Greenville City letter mentions 57 cameras and the incident where 2 sisters were pulled over at gunpoint after a Flock camera misread their rental car's plate. The Spartanburg letter brings up the former sheriff's federal conviction.
+There are 85 template letters on the site now: 2 statewide, 46 county-specific, 36 city-specific, and 1 fallback for jurisdictions we haven't covered yet. Each one is loaded with facts pulled from that jurisdiction's own backyard.
 
-We used an automated research workflow to find and source those facts: pulling articles, verifying claims, and organizing everything with citations. Then we turned those notes into the letters and FAQ entries you see on the site.
+The Greenville City letter mentions 57 cameras and the incident where 2 sisters were pulled over at gunpoint after a Flock camera misread their rental car's plate. The Spartanburg letter brings up the former sheriff's federal conviction. The Lancaster letter cites 50 cameras across a county of 100,000 people.
+
+We researched all 46 SC counties, organized the findings with citations, and turned those notes into the letters and FAQ entries you see on the site. The research workflow is documented in the repo if you want to see how the sausage gets made.
+
+### The citizen toolkit
+
+The same research that fed the letters also fed the [citizen toolkit](/toolkit). We kept running into the same question: what do you actually *do* once you know about the cameras?
+
+So we built 4 toolkits and bolted them onto the site:
+
+**FOIA templates.** 4 ready-to-file records requests covering camera locations, data retention policies, federal data sharing agreements, and the actual Flock contract your city signed. All formatted for SC's Freedom of Information Act (§ 30-4-10). Copy, paste, send.
+
+**Council meeting prep.** Talking points, sample questions, and a rundown of how public comment periods work in SC. Most people have never spoken at a council meeting. We tried to make it less intimidating.
+
+**Outreach materials.** Flyers, social media graphics, and email templates for organizing in your community. If you want to get your neighbors asking questions too, the assets are there.
+
+**Legal resources.** A plain-language breakdown of your rights around ALPR surveillance, what the law currently says (not much), and what the 3 pending bills would change.
+
+The toolkit came together because we kept finding material that didn't fit in a letter but was too useful to leave on the cutting room floor. It's the same research pipeline, just pointed at a different output.
 
 ## Fork it
 
