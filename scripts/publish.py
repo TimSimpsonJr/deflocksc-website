@@ -12,6 +12,7 @@ Usage:
 import os
 import re
 import shutil
+import subprocess
 import sys
 
 import yaml
@@ -156,6 +157,9 @@ def main():
         print(f"ERROR: Vault not found at {VAULT_PATH}")
         sys.exit(1)
 
+    # Resolve the repo root (parent of scripts/)
+    repo_root = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+
     os.makedirs(BLOG_DIR, exist_ok=True)
 
     print(f"Scanning vault: {VAULT_PATH}")
@@ -163,6 +167,7 @@ def main():
     print(f"Found {len(files)} file(s) with publish: deflocksc")
 
     processed = 0
+    published_files = []
     for fpath in files:
         fname = os.path.basename(fpath)
         print(f"\nProcessing: {fname}")
@@ -182,9 +187,30 @@ def main():
             f.write(content)
 
         print(f"  -> {dest}")
+        published_files.append(dest)
         processed += 1
 
     print(f"\nDone. {processed} file(s) published to {BLOG_DIR}")
+
+    if processed == 0:
+        print("No files to commit.")
+        return
+
+    # Git add, commit, push
+    print("\nCommitting and pushing to remote...")
+    try:
+        for f in published_files:
+            subprocess.run(["git", "add", f], cwd=repo_root, check=True)
+
+        slugs = ", ".join(os.path.basename(f) for f in published_files)
+        msg = f"content(blog): publish {processed} post(s)\n\n{slugs}"
+        subprocess.run(["git", "commit", "-m", msg], cwd=repo_root, check=True)
+        subprocess.run(["git", "push"], cwd=repo_root, check=True)
+        print("Pushed to remote. Netlify will auto-rebuild.")
+    except subprocess.CalledProcessError as e:
+        print(f"Git error: {e}")
+        print("Files were written but not committed. Run git commands manually.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

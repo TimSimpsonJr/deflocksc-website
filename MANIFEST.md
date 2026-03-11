@@ -13,7 +13,7 @@ src/
   layouts/
     Base.astro                  # Shell: Nav, main slot, Footer
   components/
-    Nav.astro                   # Fixed nav — logo + "Take Action" CTA
+    Nav.astro                   # Fixed nav — logo, Home/Toolkit/Blog links + "Take Action" CTA
     Hero.astro                  # Camera PNG + animated SVG light cones
     HowItWorks.astro            # Carousel explaining ALPR surveillance
     HowItWorksOverlays.astro    # Case study overlay panels (extracted from HowItWorks)
@@ -31,11 +31,12 @@ src/
   pages/
     index.astro                 # Homepage — assembles all section components
     toolkit.astro               # Citizen toolkit page (FOIA, speaking, outreach, legal)
-    blog/index.astro            # Blog listing page
-    blog/[...slug].astro        # Individual blog post
+    blog/index.astro            # Blog listing — featured hero + grid + tag filtering
+    blog/[...slug].astro        # Individual post — TOC sidebar, progress bar, read time, related posts
     blog/[...slug]/og.png.ts    # Dynamic OG image generation per post
     rss.xml.ts                  # RSS feed
   lib/
+    blog-utils.ts               # Read time estimation + related posts matching
     district-matcher.ts         # Boundary loading, district matching, Census geocoder (fetch)
     geo-utils.ts                # Point-in-polygon, bounding box geometry
     og-image.ts                 # Satori SVG-to-PNG for OG cards
@@ -80,7 +81,7 @@ scripts/
   build-districts.py            # Census TIGER/Line → simplified GeoJSON
   build-map-style.mjs           # OpenFreeMap dark style customization
   fetch-camera-data.mjs         # Deflock CDN camera data fetch
-  publish.py                    # Obsidian vault → blog post publisher
+  publish.py                    # Obsidian vault → blog post publisher (auto git commit + push)
 
 public/
   districts/                    # GeoJSON boundaries (state leg, county, city)
@@ -113,6 +114,8 @@ docs/
 - **HowItWorksOverlays.astro extracted from HowItWorks** — case study overlay panels
 - **scraper.py → bills.json** — GitHub Actions runs scraper, commits updated bill data
 - **build-districts.py → public/districts/** — generates GeoJSON consumed by district-matcher.ts at runtime
-- **publish.py ← Obsidian vault** — pulls blog posts tagged `publish: deflocksc`
+- **publish.py ← Obsidian vault** — pulls blog posts tagged `publish: deflocksc`, auto commits + pushes
+- **blog-utils.ts ← blog/[...slug].astro** — read time and related posts used in post page template
+- **blog/index.astro** — client-side tag filtering with URL hash persistence
 - **fetch-camera-data.mjs → camera-data.json** — caches Deflock CDN data for the map
 - **validate-data.py** — runs in scraper CI workflows to catch malformed data before commit

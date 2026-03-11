@@ -5,7 +5,8 @@ summary: We're launching DeflockSC to bring transparency to license plate survei
 tags:
   - launch
   - campaign
-draft: true
+featuredImage: /blog/sc-county-map.png
+draft: false
 ---
 
 DeflockSC is live. More updates coming soon.

@@ -5,40 +5,167 @@ import { getCollection } from 'astro:content';
 const posts = (await getCollection('blog'))
   .filter((post) => !post.data.draft)
   .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+// Collect all unique tags across published posts
+const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 ---
 
 <Base title="Blog — DeflockSC" description="Campaign updates and research on license plate surveillance in South Carolina.">
   <section class="py-20 md:py-28">
-    <div class="max-w-3xl mx-auto px-6">
+    <div class="max-w-[900px] mx-auto px-6">
       <h1 class="text-3xl md:text-4xl font-[900] text-white mb-4">Blog</h1>
-      <p class="text-[#a3a3a3] text-lg mb-12">Campaign updates and research on license plate surveillance in South Carolina.</p>
+      <p class="text-[#a3a3a3] text-lg mb-8">Campaign updates and research on license plate surveillance in South Carolina.</p>
+
+      {/* Tag filter bar */}
+      {allTags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mb-10" id="tag-bar" role="group" aria-label="Filter posts by tag">
+          <button
+            type="button"
+            class="tag-pill active px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-all cursor-pointer border border-transparent"
+            data-tag="all"
+            aria-pressed="true"
+          >All</button>
+          {allTags.map((tag) => (
+            <button
+              type="button"
+              class="tag-pill px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-all cursor-pointer border border-transparent"
+              data-tag={tag}
+              aria-pressed="false"
+            >{tag}</button>
+          ))}
+        </div>
+      )}
 
       {posts.length === 0 && (
         <p class="text-[#737373]">We're preparing our first post. In the meantime, <a href="/" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">learn how Flock Safety cameras work</a> and why South Carolina needs oversight.</p>
       )}
 
-      <div class="space-y-8">
-        {posts.map((post) => (
-          <a href={`/blog/${post.id}`} class="block group">
-            <article class="bg-[#262626] rounded-lg border-l-3 border-[#262626] group-hover:border-[#ef4444] transition-all duration-200 group-hover:bg-[#2e2e2e] overflow-hidden">
-              {post.data.featuredImage && (
-                <img
-                  src={post.data.featuredImage}
-                  alt=""
-                  class="w-full aspect-[3/1] object-cover"
-                />
+      {/* Featured hero (latest post) */}
+      {posts.length > 0 && (
+        <a href={`/blog/${posts[0].id}`} class="block group mb-8 blog-card" data-tags={(posts[0].data.tags ?? []).join(',')}>
+          <article class="bg-[#171717] rounded-xl overflow-hidden border border-[#262626] group-hover:border-[#404040] transition-all duration-200">
+            {posts[0].data.featuredImage && (
+              <img
+                src={posts[0].data.featuredImage}
+                alt=""
+                class="w-full aspect-[2.5/1] object-cover"
+              />
+            )}
+            <div class="p-7 md:p-8">
+              <time class="text-[#737373] text-[13px] font-medium" datetime={new Date(posts[0].data.date).toISOString()}>
+                {new Date(posts[0].data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </time>
+              <h2 class="text-2xl md:text-[28px] font-[900] text-white mt-2 mb-3 leading-tight">{posts[0].data.title}</h2>
+              <p class="text-[#a3a3a3] text-[15px] leading-relaxed max-w-[600px]">{posts[0].data.summary}</p>
+              {posts[0].data.tags && (
+                <div class="flex flex-wrap gap-1.5 mt-4">
+                  {posts[0].data.tags.map((tag) => (
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-[#262626] text-[#a3a3a3]">{tag}</span>
+                  ))}
+                </div>
               )}
-              <div class="p-6">
-                <time class="text-[#737373] text-sm font-medium" datetime={new Date(post.data.date).toISOString()}>
-                  {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </time>
-                <h2 class="text-xl font-bold text-white mt-2 mb-2 group-hover:text-[#fafafa] transition-colors">{post.data.title}</h2>
-                <p class="text-[#a3a3a3] text-sm leading-relaxed">{post.data.summary}</p>
-              </div>
-            </article>
-          </a>
-        ))}
-      </div>
+            </div>
+          </article>
+        </a>
+      )}
+
+      {/* Grid of remaining posts */}
+      {posts.length > 1 && (
+        <div class="grid md:grid-cols-2 gap-6" id="post-grid">
+          {posts.slice(1).map((post) => (
+            <a href={`/blog/${post.id}`} class="block group blog-card" data-tags={(post.data.tags ?? []).join(',')}>
+              <article class="bg-[#171717] rounded-xl overflow-hidden border border-[#262626] group-hover:border-[#404040] transition-all duration-200 group-hover:-translate-y-0.5 h-full">
+                {post.data.featuredImage && (
+                  <img
+                    src={post.data.featuredImage}
+                    alt=""
+                    class="w-full aspect-video object-cover"
+                  />
+                )}
+                <div class="p-5">
+                  <time class="text-[#737373] text-[13px] font-medium" datetime={new Date(post.data.date).toISOString()}>
+                    {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </time>
+                  <h2 class="text-lg font-[800] text-white mt-1.5 mb-2 leading-snug">{post.data.title}</h2>
+                  <p class="text-[#a3a3a3] text-sm leading-relaxed">{post.data.summary}</p>
+                  {post.data.tags && (
+                    <div class="flex flex-wrap gap-1.5 mt-3">
+                      {post.data.tags.map((tag) => (
+                        <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-[#262626] text-[#a3a3a3]">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </article>
+            </a>
+          ))}
+        </div>
+      )}
+
+      {allTags.length > 0 && (
+        <p id="no-results" class="text-[#737373] mt-8 hidden" role="status">No posts match this filter.</p>
+      )}
     </div>
   </section>
 </Base>
+
+<style>
+  .tag-pill {
+    background: #262626;
+    color: #a3a3a3;
+  }
+  .tag-pill:hover {
+    background: #333;
+    color: #fff;
+  }
+  .tag-pill.active {
+    background: #ef4444;
+    color: #fff;
+    border-color: #ef4444;
+  }
+  .blog-card.hidden-by-filter {
+    display: none;
+  }
+</style>
+
+<script>
+  const pills = document.querySelectorAll<HTMLButtonElement>('.tag-pill');
+  const cards = document.querySelectorAll<HTMLElement>('.blog-card');
+
+  function filterByTag(tag: string) {
+    // Update URL hash
+    window.location.hash = tag === 'all' ? '' : tag;
+
+    // Update pill active state
+    pills.forEach((p) => {
+      const isActive = p.dataset.tag === tag;
+      p.classList.toggle('active', isActive);
+      p.setAttribute('aria-pressed', String(isActive));
+    });
+
+    // Show/hide cards
+    cards.forEach((card) => {
+      const cardTags = (card.dataset.tags ?? '').split(',').filter(Boolean);
+      const show = tag === 'all' || cardTags.includes(tag);
+      card.classList.toggle('hidden-by-filter', !show);
+    });
+
+    const anyVisible = Array.from(cards).some((c) => !c.classList.contains('hidden-by-filter'));
+    const noResults = document.getElementById('no-results');
+    if (noResults) noResults.classList.toggle('hidden', anyVisible);
+  }
+
+  // Pill click handlers
+  pills.forEach((pill) => {
+    pill.addEventListener('click', () => filterByTag(pill.dataset.tag ?? 'all'));
+  });
+
+  // Restore from URL hash on load
+  const hashTag = decodeURIComponent(window.location.hash.slice(1));
+  if (hashTag) filterByTag(hashTag);
+
+  window.addEventListener('hashchange', () => {
+    const tag = decodeURIComponent(window.location.hash.slice(1)) || 'all';
+    filterByTag(tag);
+  });
+</script>

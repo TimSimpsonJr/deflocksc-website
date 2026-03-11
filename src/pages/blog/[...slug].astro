@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getCollection, render } from 'astro:content';
+import { estimateReadTime, findRelatedPosts } from '../../lib/blog-utils';
 
 export async function getStaticPaths() {
   const posts = (await getCollection('blog')).filter((post) => !post.data.draft);
@@ -11,49 +12,165 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+
+// Read time from raw markdown body
+const allPosts = (await getCollection('blog')).filter((p) => !p.data.draft);
+const readTime = estimateReadTime(post.body ?? '');
+const relatedPosts = findRelatedPosts(post.id, post.data.tags ?? [], allPosts);
 
 // OG image priority: manual override > auto-generated > site default
 const ogImage = post.data.ogImage
   ? post.data.ogImage
   : `/blog/${post.id}/og.png`;
+
+// Filter headings to h2 and h3 for TOC
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
 <Base title={`${post.data.title} — DeflockSC`} description={post.data.summary} ogImage={ogImage}>
-  <article class="py-20 md:py-28">
-    <div class="max-w-3xl mx-auto px-6">
-      <a href="/blog" class="text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors mb-8 inline-block">&larr; Back to Blog</a>
+  {/* Progress bar */}
+  <div id="progress-bar" class="fixed top-0 left-0 h-[3px] bg-[#ef4444] z-50 transition-[width] duration-[50ms] linear" style="width: 0%;" aria-hidden="true"></div>
+
+  <div class="grid grid-cols-[1fr_minmax(0,720px)_1fr] lg:grid-cols-[1fr_minmax(0,720px)_240px_1fr] gap-x-10 pt-20 md:pt-28 px-6 lg:px-0">
+    {/* Main article */}
+    <article class="col-start-2 col-end-3 min-w-0">
+      <a href="/blog" class="text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors mb-6 inline-block">&larr; Back to Blog</a>
 
       {post.data.featuredImage && (
         <img
           src={post.data.featuredImage}
           alt=""
-          class="w-full rounded-lg mb-8 aspect-[2/1] object-cover"
+          class="w-full rounded-xl mb-8 aspect-[2/1] object-cover"
         />
       )}
 
       <header class="mb-10">
-        <time class="text-[#737373] text-sm font-medium" datetime={new Date(post.data.date).toISOString()}>
-          {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </time>
-        <h1 class="text-3xl md:text-4xl font-[900] text-white mt-2 leading-tight">{post.data.title}</h1>
+        <div class="flex items-center gap-3 text-[13px] text-[#737373] font-medium mb-2.5">
+          <time datetime={new Date(post.data.date).toISOString()}>
+            {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </time>
+          <span class="text-[#404040]">&middot;</span>
+          <span>{readTime} min read</span>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-[900] text-white leading-tight tracking-[-0.02em]">{post.data.title}</h1>
+        {post.data.tags && (
+          <div class="flex flex-wrap gap-2 mt-4">
+            {post.data.tags.map((tag) => (
+              <a href={`/blog#${tag}`} class="text-xs font-semibold px-2.5 py-1 rounded-md bg-[#262626] text-[#a3a3a3] hover:bg-[#333] hover:text-white transition-all no-underline">{tag}</a>
+            ))}
+          </div>
+        )}
       </header>
 
       <div class="prose prose-invert max-w-none
-        [&>p]:text-[#d4d4d4] [&>p]:leading-[1.8] [&>p]:mb-6
-        [&>h2]:text-white [&>h2]:font-bold [&>h2]:text-2xl [&>h2]:mt-10 [&>h2]:mb-4
-        [&>h3]:text-white [&>h3]:font-bold [&>h3]:text-xl [&>h3]:mt-8 [&>h3]:mb-3
-        [&>ul]:text-[#d4d4d4] [&>ul]:space-y-2 [&>ul]:mb-6 [&>ul>li]:pl-2
-        [&>ol]:text-[#d4d4d4] [&>ol]:space-y-2 [&>ol]:mb-6
-        [&>blockquote]:border-l-3 [&>blockquote]:border-[#ef4444] [&>blockquote]:pl-6 [&>blockquote]:text-[#a3a3a3] [&>blockquote]:italic [&>blockquote]:my-8
+        [&>p]:text-[#d4d4d4] [&>p]:text-[17px] [&>p]:leading-[1.8] [&>p]:mb-6
+        [&>h2]:text-white [&>h2]:font-[800] [&>h2]:text-2xl [&>h2]:mt-12 [&>h2]:mb-4 [&>h2]:leading-snug
+        [&>h3]:text-white [&>h3]:font-bold [&>h3]:text-xl [&>h3]:mt-9 [&>h3]:mb-3
+        [&>ul]:text-[#d4d4d4] [&>ul]:space-y-2 [&>ul]:mb-6 [&>ul>li]:pl-2 [&>ul>li]:text-[17px] [&>ul>li]:leading-[1.7]
+        [&>ol]:text-[#d4d4d4] [&>ol]:space-y-2 [&>ol]:mb-6 [&>ol>li]:text-[17px]
+        [&>blockquote]:border-l-3 [&>blockquote]:border-[#ef4444] [&>blockquote]:pl-6 [&>blockquote]:text-[#a3a3a3] [&>blockquote]:italic [&>blockquote]:my-8 [&>blockquote]:text-[17px] [&>blockquote]:leading-[1.7]
         [&_a]:text-[#fbbf24] [&_a]:hover:text-[#fcd34d] [&_a]:focus-visible:text-[#fcd34d] [&_a]:transition-colors
         [&_strong]:text-white
         [&_code]:bg-[#262626] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm
         [&>pre]:bg-[#262626] [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>pre]:mb-6
         [&_pre_code]:p-0 [&_pre_code]:bg-transparent
-        [&_img]:rounded-lg [&_img]:my-6">
+        [&_img]:rounded-lg [&_img]:my-6
+        [&>hr]:border-t [&>hr]:border-[#262626] [&>hr]:my-10">
         <Content />
       </div>
-    </div>
-  </article>
+    </article>
+
+    {/* TOC sidebar — desktop only */}
+    {tocHeadings.length > 0 && (
+      <aside class="hidden lg:block col-start-3 col-end-4" aria-label="Table of contents">
+        <nav class="sticky top-20 pt-4">
+          <div class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#737373] mb-4">On this page</div>
+          <ul class="space-y-2" id="toc-list">
+            {tocHeadings.map((h) => (
+              <li>
+                <a
+                  href={`#${h.slug}`}
+                  class={`toc-link block text-[13px] leading-snug text-[#525252] hover:text-[#a3a3a3] transition-colors border-l-2 border-transparent ${h.depth === 3 ? 'pl-6' : 'pl-3'}`}
+                  data-slug={h.slug}
+                >{h.text}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
+    )}
+  </div>
+
+  {/* Related posts */}
+  {relatedPosts.length > 0 && (
+    <section class="max-w-[900px] mx-auto px-6 pt-16 mt-16 border-t border-[#262626]">
+      <div class="text-xs font-bold uppercase tracking-[0.12em] text-[#737373] mb-6">Related Posts</div>
+      <div class="grid md:grid-cols-3 gap-5">
+        {relatedPosts.map((rp) => (
+          <a href={`/blog/${rp.id}`} class="block group" aria-label={rp.data.title}>
+            <article class="bg-[#1a1a1a] rounded-[10px] overflow-hidden border border-[#262626] group-hover:border-[#404040] group-hover:-translate-y-0.5 transition-all duration-200 h-full">
+              {rp.data.featuredImage && (
+                <img src={rp.data.featuredImage} alt="" class="w-full aspect-video object-cover" />
+              )}
+              <div class="p-4">
+                <time class="text-xs text-[#737373] font-medium" datetime={new Date(rp.data.date).toISOString()}>
+                  {new Date(rp.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </time>
+                <h3 class="text-[15px] font-bold text-white mt-1 leading-snug">{rp.data.title}</h3>
+                {rp.data.tags && rp.data.tags[0] && (
+                  <span class="inline-block mt-2 text-[11px] font-semibold px-2 py-0.5 rounded bg-[#262626] text-[#a3a3a3]">{rp.data.tags[0]}</span>
+                )}
+              </div>
+            </article>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
 </Base>
+
+<script>
+  // Reading progress bar + TOC active state tracking
+  const progressBar = document.getElementById('progress-bar');
+  const tocLinks = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+
+  const headingEls = tocLinks.length > 0
+    ? (Array.from(tocLinks).map((link) =>
+        document.getElementById(link.dataset.slug ?? '')
+      ).filter(Boolean) as HTMLElement[])
+    : [];
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      // Progress bar
+      if (progressBar) {
+        const h = document.documentElement;
+        const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+        progressBar.style.width = `${Math.min(pct, 100)}%`;
+      }
+
+      // TOC tracking
+      if (headingEls.length > 0) {
+        let activeSlug = '';
+        for (const el of headingEls) {
+          if (el.getBoundingClientRect().top < 120) {
+            activeSlug = el.id;
+          }
+        }
+        tocLinks.forEach((link) => {
+          const isActive = link.dataset.slug === activeSlug;
+          link.classList.toggle('text-[#ef4444]', isActive);
+          link.classList.toggle('border-[#ef4444]', isActive);
+          link.classList.toggle('text-[#525252]', !isActive);
+          link.classList.toggle('border-transparent', !isActive);
+        });
+      }
+
+      ticking = false;
+    });
+  }, { passive: true });
+</script>
