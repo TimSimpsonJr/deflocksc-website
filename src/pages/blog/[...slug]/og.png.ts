@@ -8,12 +8,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .filter((post) => !post.data.ogImage)
     .map((post) => ({
       params: { slug: post.id },
-      props: { title: post.data.title },
+      props: { title: post.data.title, featuredImage: post.data.featuredImage },
     }));
 };
 
 export const GET: APIRoute = async ({ props }) => {
-  const png = await generateOgImage(props.title);
+  const png = await generateOgImage(props.title, props.featuredImage);
   return new Response(png, {
     headers: { "Content-Type": "image/png" },
   });
