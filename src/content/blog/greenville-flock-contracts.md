@@ -10,6 +10,7 @@ tags:
   - privacy
   - research
 featuredImage: /blog/greenville-flock-foia-surveillance-money.png
+featuredImageAlt: Greenville SC Flock Safety FOIA contract documents showing surveillance camera spending funded by civil asset forfeiture
 draft: false
 ---
 
@@ -17,11 +18,11 @@ In December 2019, the Greenville Police Department used civil asset forfeiture f
 
 Civil asset forfeiture is the legal process that lets police seize property from people suspected of crimes, often without ever charging them. The money goes into a fund that the department controls. It doesn't flow through the city budget. It doesn't go before council. The department decides how to spend it.
 
-GPD used that money to purchase surveillance cameras that now record the license plates of everyone who drives past them. The cameras read your plate, timestamp it, log your location, and upload it to a database. If you've driven through Greenville in the past 6 years, your movements are in that system.
+GPD used that money to purchase surveillance cameras that now record the license plates of everyone who drives past them. The cameras read your plate, timestamp it, log your location, and upload it to a database. If you've driven through Greenville in the past 6 years, your movements are in that system. You can see where these cameras are on the [SC camera map](/#camera-map).
 
 <strong class="red">They used money taken from residents to build a system that tracks residents.</strong> And they never asked anyone's permission.
 
-We know this because we filed a FOIA request. We asked the City of Greenville for every Flock Safety contract, license, MOU, data agreement, letter of intent, and scope of work document active between January 2020 and October 2025. The city sent back 96 pages.
+We know this because we [filed a FOIA request](/toolkit#request-records). We asked the City of Greenville for every Flock Safety contract, license, MOU, data agreement, letter of intent, and scope of work document active between January 2020 and October 2025. The city sent back 96 pages.
 
 Those 96 pages tell a story about how a $2,000 pilot program turned into a $131,000-per-year surveillance operation, spread across two city departments, without a single recorded vote from any elected official.
 
@@ -143,7 +144,7 @@ That's the most visible harm. It's not the only one.
 
 Just up I-85 in Spartanburg County, former Sheriff Chuck Wright oversaw Flock camera deployments during his tenure. Wright was a prominent local figure with decades in law enforcement. He [pled guilty to federal charges](https://www.postandcourier.com/spartanburg/news/spartanburg-sheriff-chuck-wright-fbi-investigation-career-controversies/article_aa5d54be-7354-4507-be0c-dfdc456bdc57.html): conspiracy to commit theft of federal funds, conspiracy to commit wire fraud, and obtaining controlled substances through fraud. He faces up to 30 years in prison. His name was [removed from the Sheriff's Office sign](https://www.foxcarolina.com/2025/05/29/chuck-wrights-name-covered-spartanburg-county-sheriffs-office-sign/) in May 2025.
 
-A convicted criminal had unsupervised access to surveillance tools that track where residents drive. That's what no oversight looks like in practice. And both counties run on the same Flock platform, feeding data into the same SLED database, governed by the same absence of law.
+A convicted criminal had unsupervised access to surveillance tools that track where residents drive. That's what no oversight looks like in practice. And both counties run on the same Flock platform, feeding data into the same SLED database, governed by the same [absence of law](/#bill-tracker).
 
 ## Six years, no vote
 
@@ -161,11 +162,11 @@ Six years. A 62x cost increase. Two contracts. 52 cameras (at minimum). Zero pub
 
 The 96 pages we received answer a lot of questions. They also open new ones.
 
-We've drafted a follow-up FOIA request asking for search and query logs (how often are the cameras being searched, and by whom), authorized user counts, any federal data-sharing agreements, and council minutes that reference Flock or ALPR technology. If council did discuss this behind closed doors, those records should exist.
+We've drafted a follow-up FOIA request asking for search and query logs (how often are the cameras being searched, and by whom), authorized user counts, any federal data-sharing agreements, and council minutes that reference Flock or ALPR technology. If council did discuss this behind closed doors, those records should exist. If you want to file your own requests, the [FOIA toolkit](/toolkit#request-records) has templates ready to go.
 
 We also want the full RFP response documents. The FOIA gave us the city's solicitation and Flock's signed contract, but not Flock's actual proposal. And we'd like to know whether the Public Works cameras at those two recycling centers are actively capturing license plates or serving some other function. The addresses are known. On-site verification is next.
 
-At the state level, three bills are sitting in committee right now: S. 447, H. 3155, and H. 4013. They would set retention limits, require access controls, and create penalties for misuse. They have bipartisan support. They haven't moved.
+At the state level, [four bills are sitting in committee right now](/#bill-tracker): H. 4675, S. 447, H. 3155, and H. 4013. H. 4675 is the strongest: it would ban Flock's cloud storage, prohibit AI-based vehicle tracking, and block immigration enforcement access. The other three would set retention limits, require access controls, and create penalties for misuse. All four have bipartisan support. None have moved.
 
 If your state rep sits on Judiciary or Education and Public Works, they have a say in whether those bills get a hearing.
 

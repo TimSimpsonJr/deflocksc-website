@@ -53,7 +53,9 @@ The argument for these cameras assumes the system works as advertised, that only
 
 ## What would change
 
-Three bills in the SC Legislature would set basic guardrails:
+Four bills in the SC Legislature would set basic guardrails:
+
+**H. 4675** is the strongest. It would ban Flock's cloud storage entirely, prohibit AI-based vehicle tracking, set a 21-day retention limit, and block immigration enforcement access. Sponsored by 4 Freedom Caucus Republicans.
 
 **S. 447** and **H. 3155** require visual confirmation before ALPR-based traffic stops, limit retention to 90 days (down from SLED's current 3 years), prohibit selling data, and create misdemeanor penalties for violations.
 
@@ -74,6 +76,7 @@ If your rep sits on Judiciary or Education & Public Works, they decide whether t
 - [Oyez: Carpenter v. United States (2018)](https://www.oyez.org/cases/2017/16-402)
 - [The 74: ICE taps into school security cameras (Feb 2026)](https://www.the74million.org/article/ice-taps-into-school-security-cameras-to-aid-trumps-immigration-crackdown-74-investigation-shows/)
 - [The Policing Project: SCPIF v. SLED](https://www.policingproject.org/south-carolina-license-plate-reader-lawsuit)
+- [SC Legislature: H. 4675](https://www.scstatehouse.gov/billsearch.php?billnumbers=4675&session=126)
 - [SC Legislature: S. 447](https://www.scstatehouse.gov/billsearch.php?billnumbers=447&session=126)
 - [SC Legislature: H. 3155](https://www.scstatehouse.gov/billsearch.php?billnumbers=3155&session=126)
 - [SC Legislature: H. 4013](https://www.scstatehouse.gov/billsearch.php?billnumbers=4013&session=126)

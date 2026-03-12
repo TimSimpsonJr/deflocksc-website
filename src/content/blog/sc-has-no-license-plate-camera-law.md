@@ -1,7 +1,7 @@
 ---
 title: "SC Has No License Plate Camera Law"
 date: 2026-03-05T00:00:00.000Z
-summary: "South Carolina has no statute governing license plate cameras. No retention limits, no access controls, no penalties for misuse. Three bills could change that."
+summary: "South Carolina has no statute governing license plate cameras. No retention limits, no access controls, no penalties for misuse. Four bills could change that."
 tags:
   - legislation
   - sc
@@ -35,13 +35,15 @@ The city also runs SafeWatch, a program that asks residents to register their Ri
 
 ## What the Legislature hasn't done
 
-Three bills are sitting in committee right now:
+Four bills are sitting in committee right now:
 
-**S. 447** (Senate, Judiciary Committee since March 2025) and **H. 3155** (House, Judiciary Committee since January 2025) offer the strongest protections: visual confirmation required before ALPR-based traffic stops, 90-day data retention limits, prohibition on selling data, misdemeanor penalties for violations, and mandatory written oversight policies.
+**H. 4675** (House, Judiciary Committee since January 2026) is the strongest. It bans third-party cloud storage of camera data, prohibits AI-based vehicle tracking beyond license plates, sets a 21-day retention limit, requires warrants for data access, and explicitly bans immigration enforcement use. If passed, every existing Flock contract in SC would be void. It's sponsored by 4 SC Freedom Caucus Republicans.
+
+**S. 447** (Senate, Judiciary Committee since March 2025) and **H. 3155** (House, Judiciary Committee since January 2025) offer solid protections: visual confirmation required before ALPR-based traffic stops, 90-day data retention limits, prohibition on selling data, misdemeanor penalties for violations, and mandatory written oversight policies.
 
 **H. 4013** (House, Education & Public Works Committee since February 2025) includes similar protections with 5 co-sponsors, suggesting broader support across districts.
 
-All three bills share the same gap: **none of them restrict federal agency access to SC ALPR data**. No provision blocks ICE, CBP, or any other federal agency from querying the movements of SC residents. Illinois has that protection. South Carolina doesn't, and these bills wouldn't add it.
+Three of the four bills (S. 447, H. 3155, H. 4013) share the same gap: **none of them restrict federal agency access to SC ALPR data**. H. 4675 closes that gap with its cloud storage ban and immigration enforcement prohibition, but even it is sitting untouched in committee.
 
 Rep. Todd Rutherford (D-Richland) has been pushing ALPR regulation for years. He introduced similar bills in 2023, 2021, and as far back as 2020. His framing: "This is no slippery slope. This is the hill, and we're sliding down it."
 
@@ -63,11 +65,11 @@ In 2013, a SLED officer used the ALPR database to search for a vehicle he person
 
 That's the accountability mechanism for a database with 422 million records. One documented case. No way to know what's happened since. And no law that would make any of it illegal.
 
-## Three bills. Three committees. Zero movement.
+## Four bills. Three committees. Zero movement.
 
 The SC Public Interest Foundation is suing SLED over the constitutionality of the database. Greenville resident John Sloan is a named plaintiff. But lawsuits take years.
 
-The faster path is legislative. Three bills, bipartisan support, documented harms, and a state transportation secretary on record saying the Legislature hasn't acted. The pieces are there. They're just sitting in committee.
+The faster path is legislative. Four bills, bipartisan support (Freedom Caucus Republicans on H. 4675, Democrats on H. 3155), documented harms, and a state transportation secretary on record saying the Legislature hasn't acted. The pieces are there. They're just sitting in committee.
 
 If your rep sits on Judiciary or Education & Public Works, they have a direct say in whether these bills move.
 
@@ -80,6 +82,7 @@ If your rep sits on Judiciary or Education & Public Works, they have a direct sa
 - [Post and Courier: "A company installed license plate cameras without permission. SC agency wants clear rules"](https://www.postandcourier.com/news/a-company-installed-license-plate-cameras-without-permission-sc-agency-wants-clear-rules/article_e1234567.html), David Ferrara, Mar. 11, 2024
 - [Post and Courier: SC law enforcement ALPR investigation](https://www.postandcourier.com/), Eric Connor, Dec. 20, 2020
 - [The Policing Project: SCPIF v. SLED](https://www.policingproject.org/)
+- [SC Legislature: H. 4675](https://www.scstatehouse.gov/billsearch.php?billnumbers=4675&session=126)
 - [SC Legislature: S. 447](https://www.scstatehouse.gov/billsearch.php?billnumbers=447&session=126)
 - [SC Legislature: H. 3155](https://www.scstatehouse.gov/billsearch.php?billnumbers=3155&session=126)
 - [SC Legislature: H. 4013](https://www.scstatehouse.gov/billsearch.php?billnumbers=4013&session=126)

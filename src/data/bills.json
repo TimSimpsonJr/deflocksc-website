@@ -1,12 +1,21 @@
 [
   {
+    "bill": "H4675",
+    "title": "Would ban cloud storage, AI tracking, and federal data access",
+    "status": "In Committee, House Judiciary",
+    "url": "https://www.scstatehouse.gov/sess126_2025-2026/bills/4675.htm",
+    "lastAction": "Referred to Committee on Judiciary",
+    "lastActionDate": "1/13/2026",
+    "description": "H4675 is the strongest of the four bills. It bans third-party cloud storage of camera data, prohibits AI-based vehicle tracking beyond license plates, sets a 21-day retention limit, requires warrants for data access, and explicitly blocks federal data access. If passed, every existing Flock Safety contract in SC would be void."
+  },
+  {
     "bill": "S447",
     "title": "Would regulate license plate reader systems statewide",
     "status": "In Committee, Senate Judiciary",
     "url": "https://www.scstatehouse.gov/sess126_2025-2026/bills/447.htm",
     "lastAction": "Referred to Committee on Judiciary",
     "lastActionDate": "3/12/2025",
-    "description": "S447 has gotten the furthest of the three bills. It cleared a Senate Judiciary subcommittee, but the full committee hasn't acted. This bill would establish statewide rules for how law enforcement can use license plate readers, including data retention limits and access controls."
+    "description": "S447 cleared a Senate Judiciary subcommittee in April 2025, but the full committee hasn't acted. This bill would establish statewide rules for how law enforcement can use license plate readers, including 90-day data retention limits and access controls."
   },
   {
     "bill": "H3155",

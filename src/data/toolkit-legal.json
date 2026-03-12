@@ -49,21 +49,21 @@
     },
     {
       "state": "South Carolina",
-      "law": "No ALPR-specific law. No retention limits. No access restrictions. No penalties for misuse. Three bills are pending but none have passed committee."
+      "law": "No ALPR-specific law. No retention limits. No access restrictions. No penalties for misuse. Four bills are pending but none have passed committee. The newest, H4675, would ban cloud storage, AI tracking, and federal data access."
     }
   ],
   "billGaps": [
     {
       "gap": "No restrictions on federal agency access",
-      "detail": "All three pending SC bills regulate state and local law enforcement, but none address federal agencies. In 2025, Flock Safety quietly gave U.S. Border Patrol an account to access local police cameras in Colorado without telling any of those agencies. SC has no law that would prevent or even require disclosure of the same arrangement here."
+      "detail": "Three of the four pending SC bills (S447, H3155, H4013) regulate state and local law enforcement but say nothing about federal agencies. H4675 is the exception: it explicitly prohibits immigration enforcement use of ALPR data and bans third-party cloud storage, which would structurally prevent federal agencies from accessing the data through Flock's network. In 2025, Flock Safety quietly gave U.S. Border Patrol an account to access local police cameras in Colorado without telling any of those agencies. SC has no law that would prevent the same arrangement here, unless H4675 passes."
     },
     {
       "gap": "No prohibition on immigration enforcement use",
-      "detail": "Illinois law explicitly bans using ALPR data for immigration enforcement. When local agencies violated that ban by sharing data with CBP, it led to contract cancellations. None of the three SC bills include a similar prohibition. Under current SC law and all three pending bills, federal immigration agents could access your travel data with no legal barrier."
+      "detail": "Illinois law explicitly bans using ALPR data for immigration enforcement. When local agencies violated that ban by sharing data with CBP, it led to contract cancellations. H4675 is the only SC bill that includes a similar prohibition, banning immigration enforcement use outright. The other three bills (S447, H3155, H4013) don't touch it. Under current SC law, federal immigration agents can access your travel data with no legal barrier."
     },
     {
       "gap": "No limits on Flock's national data-sharing network",
-      "detail": "Your local city council approved cameras for local crime-solving. But Flock operates a national network that lets hundreds of outside agencies - including ones your council never heard of - query location data collected on your streets. None of the three SC bills address this network or require local approval before data is shared beyond your jurisdiction."
+      "detail": "Your local city council approved cameras for local crime-solving. But Flock operates a national network that lets hundreds of outside agencies, including ones your council never heard of, query location data collected on your streets. H4675 would ban third-party cloud storage entirely, which would structurally break this network in SC. The other three bills don't address it at all."
     },
     {
       "gap": "No disclosure requirements for vendor data agreements",
@@ -71,11 +71,11 @@
     },
     {
       "gap": "No penalties with teeth for data misuse",
-      "detail": "Two of the three bills include misdemeanor penalties for violations, but enforcement depends on catching violations in the first place. When the Post and Courier asked SLED for records of recent ALPR database misconduct, SLED refused to produce any documents. A 2013 case showed a law enforcement officer with SLED database access searched for his own vehicle and altered the record. Without proactive auditing requirements, penalties on paper do not translate to accountability in practice."
+      "detail": "Three of the four bills include misdemeanor penalties, but enforcement depends on catching violations in the first place. H4675 goes further: it requires quarterly independent audits by the SC Inspector General and gives residents a private right of action to sue for violations. The other three bills rely on agency self-reporting. When the Post and Courier asked SLED for records of recent ALPR database misconduct, SLED refused to produce any documents. A 2013 case showed a law enforcement officer with SLED database access searched for his own vehicle and altered the record."
     },
     {
       "gap": "No regulation of feature expansion after deployment",
-      "detail": "Flock has added person-tracking technology, convoy analysis, visit frequency tracking, and voice detection to its product suite since its initial license plate reader product. Its Raven microphone system, marketed for gunshot detection, now listens for human voices. None of the three SC bills address post-deployment feature additions, meaning your police department could activate new surveillance capabilities without council approval or public notice."
+      "detail": "Flock has bolted on person-tracking technology, convoy analysis, visit frequency tracking, and voice detection since its initial license plate reader product. Its Raven microphone system, marketed for gunshot detection, now listens for human voices. H4675 bans AI-based vehicle tracking beyond license plates, which would block some of these features. But none of the four bills address post-deployment feature additions broadly, meaning your police department could still activate new surveillance capabilities without council approval or public notice."
     }
   ]
 }

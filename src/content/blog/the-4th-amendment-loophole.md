@@ -54,15 +54,17 @@ All of this exists without a single state statute authorizing it. No retention l
 
 ## What SC could do
 
-Three bills in the SC Legislature would start to close this gap:
+Four bills in the SC Legislature would start to close this gap:
 
-**S. 447** and **H. 3155** offer the strongest protections: visual confirmation before ALPR-based traffic stops, 90-day data retention, prohibition on selling data, misdemeanor penalties for violations.
+**H. 4675** goes the furthest. It bans third-party cloud storage (which is how Flock's national network operates), prohibits AI-based vehicle tracking, sets a 21-day retention limit, requires warrants for data access, and explicitly bans immigration enforcement use. If passed, every existing Flock contract in SC would be void. Sponsored by 4 Freedom Caucus Republicans.
+
+**S. 447** and **H. 3155** offer solid protections: visual confirmation before ALPR-based traffic stops, 90-day data retention, prohibition on selling data, misdemeanor penalties for violations.
 
 **H. 4013** includes similar protections with 5 co-sponsors across districts.
 
-All 3 bills share the same hole: **none of them restrict federal agency access to SC ALPR data**. No provision blocks ICE, CBP, or any other federal agency from querying the movements of SC residents. Illinois has that protection. South Carolina doesn't, and these bills wouldn't add it.
+S. 447, H. 3155, and H. 4013 share the same hole: **none of them restrict federal agency access**. H. 4675 closes that gap by banning the cloud infrastructure that enables it. But all four are stalled in committee.
 
-That's worth pushing on. But even without the federal access provision, any of these bills would be a significant step: retention limits, access controls, penalties for abuse. The 4th Amendment fight will take years in court. The legislative fix could happen this session.
+The 4th Amendment fight will take years in court. The legislative fix could happen this session.
 
 If your rep sits on Judiciary or Education & Public Works, they have a say.
 
@@ -79,6 +81,7 @@ If your rep sits on Judiciary or Education & Public Works, they have a say.
 - [EFF: San Jose can protect immigrants by ending Flock (Feb 2026)](https://www.eff.org/deeplinks/2026/02/op-ed-san-jose-can-protect-immigrants-ending-flock-surveillance-system)
 - [9NEWS: Flock admits federal immigration agents have direct access (Aug 2025)](https://www.9news.com/article/news/local/flock-federal-immigration-agents-access-tracking-data/73-a8aee742-56d4-4a57-b5bb-0373286dfef8)
 - [Institute for Justice: IJ v. City of Norfolk](https://ij.org/case/norfolk-alpr/)
+- [SC Legislature: H. 4675](https://www.scstatehouse.gov/billsearch.php?billnumbers=4675&session=126)
 - [SC Legislature: S. 447](https://www.scstatehouse.gov/billsearch.php?billnumbers=447&session=126)
 - [SC Legislature: H. 3155](https://www.scstatehouse.gov/billsearch.php?billnumbers=3155&session=126)
 - [SC Legislature: H. 4013](https://www.scstatehouse.gov/billsearch.php?billnumbers=4013&session=126)

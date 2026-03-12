@@ -6,10 +6,11 @@ tags:
   - launch
   - campaign
 featuredImage: /blog/sc-county-map.png
+featuredImageAlt: Map of South Carolina counties with ALPR surveillance camera deployments highlighted
 draft: false
 ---
 
-Welcome to DeflockSC. If you're reading this, you've probably already poked around the homepage. You've seen the camera map, the bill tracker, the rep finder. This post is about why all of that exists, and what we ran into while building it.
+Welcome to DeflockSC. If you're reading this, you've probably already poked around the homepage. You've seen the [camera map](/#camera-map), the [bill tracker](/#bill-tracker), the rep finder. This post is about why all of that exists, and what we ran into while building it.
 
 ## What we're trying to do
 
@@ -19,7 +20,7 @@ We give people the information (where are the cameras, what bills are pending, w
 
 We're not a news outlet, but we will be posting updates here as things develop. When relevant reporting comes out, when bills move (or don't), when local councils take action, we'll cover it. This site is first and foremost a tool, though. It's pointed at specific bills, specific jurisdictions, specific elected officials. If those bills pass or fail, we'll adapt. If other states want to run the same play, the code is open source.
 
-The long-term goal is enough constituent pressure to get the 3 pending bills out of committee and get local councils asking hard questions about their own Flock contracts. Whether that works, we don't know yet. But nobody was going to stumble into emailing their county council member about camera data policies on their own. The path had to be built.
+The long-term goal is enough constituent pressure to get the [4 pending bills](/#bill-tracker) out of committee and get local councils asking hard questions about their own Flock contracts. Whether that works, we don't know yet. But nobody was going to stumble into emailing their county council member about camera data policies on their own. The path had to be built.
 
 ## Why it's built this way
 
@@ -35,7 +36,7 @@ We also built it this way because it needed to be cheap to run, hard to break, a
 
 The original plan was to use a Google API that matches addresses to legislative districts. Google killed it. So we had to build that ourselves, and it had to work entirely in your browser without sending your location to our servers (because we don't have servers).
 
-We download official boundary maps from the Census Bureau (for state districts) and county GIS portals (for local council districts), shrink them down to a manageable size, and bundle them with the site. When you enter your address or share your location, your browser checks those maps to figure out which districts you're in.
+We download official boundary maps from the Census Bureau (for state districts) and county GIS portals (for local council districts), shrink them down to a manageable size, and bundle them with the site. When you enter your address or share your location, your browser checks those maps to figure out which districts you're in. You can see the result on the [camera map](/#camera-map).
 
 3 ways to find your district: share your location, type an address, or just pick from dropdowns. We built all 3 because none of them work for everyone.
 
@@ -57,7 +58,7 @@ We started with Mapbox for the camera map, but that came with API keys and usage
 
 There are 85 template letters on the site now: 2 statewide, 46 county-specific, 36 city-specific, and 1 fallback for jurisdictions we haven't covered yet. Each one is loaded with facts pulled from that jurisdiction's own backyard.
 
-The Greenville City letter mentions 57 cameras and the incident where 2 sisters were pulled over at gunpoint after a Flock camera misread their rental car's plate. The Spartanburg letter brings up the former sheriff's federal conviction. The Lancaster letter cites 50 cameras across a county of 100,000 people.
+The Greenville City letter mentions [57 cameras and the incident where 2 sisters were pulled over at gunpoint](/blog/greenville-flock-contracts) after a Flock camera misread their rental car's plate. The Spartanburg letter brings up the former sheriff's federal conviction. The Lancaster letter cites 50 cameras across a county of 100,000 people.
 
 We researched all 46 SC counties, organized the findings with citations, and turned those notes into the letters and FAQ entries you see on the site. The research workflow is documented in the repo if you want to see how the sausage gets made.
 
@@ -67,13 +68,13 @@ The same research that fed the letters also fed the [citizen toolkit](/toolkit).
 
 So we built 4 toolkits and bolted them onto the site:
 
-**FOIA templates.** 4 ready-to-file records requests covering camera locations, data retention policies, federal data sharing agreements, and the actual Flock contract your city signed. All formatted for SC's Freedom of Information Act (§ 30-4-10). Copy, paste, send.
+**[FOIA templates.](/toolkit#request-records)** 4 ready-to-file records requests covering camera locations, data retention policies, federal data sharing agreements, and the actual Flock contract your city signed. All formatted for SC's Freedom of Information Act (§ 30-4-10). Copy, paste, send.
 
-**Council meeting prep.** Talking points, sample questions, and a rundown of how public comment periods work in SC. Most people have never spoken at a council meeting. We tried to make it less intimidating.
+**[Council meeting prep.](/toolkit#speak-up)** Talking points, sample questions, and a rundown of how public comment periods work in SC. Most people have never spoken at a council meeting. We tried to make it less intimidating.
 
-**Outreach materials.** Flyers, social media graphics, and email templates for organizing in your community. If you want to get your neighbors asking questions too, the assets are there.
+**[Outreach materials.](/toolkit#spread-the-word)** Flyers, social media graphics, and email templates for organizing in your community. If you want to get your neighbors asking questions too, the assets are there.
 
-**Legal resources.** A plain-language breakdown of your rights around ALPR surveillance, what the law currently says (not much), and what the 3 pending bills would change.
+**[Legal resources.](/toolkit#know-your-rights)** A plain-language breakdown of your rights around ALPR surveillance, what the law currently says (not much), and what the 4 pending bills would change.
 
 The toolkit came together because we kept finding material that didn't fit in a letter but was too useful to leave on the cutting room floor. It's the same research pipeline, just pointed at a different output.
 
