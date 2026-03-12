@@ -1,13 +1,13 @@
 ---
 title: "The 4th Amendment Loophole"
-date: 2026-03-05T00:00:00.000Z
+date: 2026-03-08T00:00:00.000Z
 summary: "The government can't track your movements without a warrant. The Supreme Court said so. But if a private company does the tracking and the government just buys access, the 4th Amendment doesn't apply. That's the loophole."
 tags:
   - 4th-amendment
   - federal-access
   - privacy
   - legislation
-draft: true
+draft: false
 ---
 
 In 2018, the Supreme Court ruled in Carpenter v. United States that the government needs a warrant to access your cell phone location data. The reasoning: aggregated location tracking reveals the "privacies of life," and the 4th Amendment protects against that kind of warrantless government surveillance.

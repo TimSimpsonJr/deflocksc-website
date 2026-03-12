@@ -1,7 +1,7 @@
 ---
 title: "Bought With Your Money"
 subtitle: "How Greenville Built a Surveillance System Nobody Voted For"
-date: 2026-03-12
+date: 2026-03-11
 summary: "We filed a public records request for every Flock Safety contract the City of Greenville has signed since 2019. 96 pages came back. They show a surveillance program funded with seized money, signed by a police chief under investigation, and expanded for six years without a single council vote."
 tags:
   - greenville

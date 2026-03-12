@@ -7,7 +7,9 @@ tags:
   - sc
   - privacy
   - h4675
-draft: true
+draft: false
+featuredImage: /blog/sc-alpr-bill-h4675-legislation.png
+featuredImageAlt: "SC license plate camera bill H4675 — legal documents and gavel illustration"
 ---
 
 South Carolina has [4 bills](/blog/sc-has-no-license-plate-camera-law) that would regulate license plate cameras. Three of them set rules for what police can do with camera data. H4675 sets rules for what Flock Safety can do with it.
@@ -72,7 +74,7 @@ Three of SC's 4 bills don't touch any of this. They regulate state and local age
 
 H4675 does. Its cloud ban makes the national network structurally impossible in SC (data can't leave state-owned servers). Its immigration enforcement ban closes the policy gap.
 
-You can compare all 4 bills side by side on our [toolkit page](/toolkit).
+You can compare all 4 bills side by side on our [toolkit page](/toolkit#know-your-rights).
 
 The other 3 bills set rules for how agencies use the data. H4675 goes after the plumbing that moves it.
 
@@ -100,7 +102,11 @@ If a city's contract auto-incorporates Flock's updated terms, it may already be 
 
 Cities across the country are pulling back. Denver canceled its Flock contract in February 2026 (Flock's own showcase city), and Evanston, Mountain View, Lynnwood, Santa Cruz, and Staunton have all done the same.
 
-SC can set rules now or wait until a scandal forces the issue.
+SC has its own track record. In 2024, a North Charleston police lieutenant [used the city's surveillance cameras to follow his wife](https://www.live5news.com/2024/06/24/north-charleston-police-officer-demoted-using-cameras-track-wife/) because he suspected she was having an affair. He pulled up live video feeds for days, tracked her movements, and confronted her in a Target parking lot. He was demoted. Not fired.
+
+In 2013, a SLED officer looked up his own vehicle in the ALPR database and changed the record to show someone else's plate. His access was revoked, but when the Post and Courier filed a FOIA for any misconduct cases since, SLED refused to hand over a single document.
+
+Two documented abuse cases in SC. Zero laws broken, because there aren't any to break.
 
 Both H4675 and H3155 sit in the same committee. The strongest provisions from H4675 should be folded into whatever bill advances.
 
