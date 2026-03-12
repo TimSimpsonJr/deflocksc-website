@@ -1,0 +1,125 @@
+---
+import { getCollection } from 'astro:content';
+import { estimateReadTime } from '../lib/blog-utils';
+
+const posts = (await getCollection('blog'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+  .slice(0, 5);
+---
+
+{posts.length >= 3 && (
+  <section id="blog-preview" aria-labelledby="blog-preview-heading" class="py-20 md:py-28 relative overflow-hidden">
+    <div class="max-w-[1400px] mx-auto px-6 relative z-10">
+
+      {/* Header */}
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+        <div>
+          <p data-reveal="left" class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">From the Blog</p>
+          <h2 id="blog-preview-heading" data-reveal="left" data-reveal-delay="1" class="text-[#e8e8e8] font-bold text-[clamp(1.8rem,3.5vw,2.8rem)] tracking-[-0.025em] leading-[1.05]">Latest Posts</h2>
+        </div>
+        <a href="/blog" data-reveal="left" data-reveal-delay="2" class="font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#737373] hover:text-[#e8e8e8] transition-colors whitespace-nowrap">
+          Read all posts &rarr;&#xFE0E;
+        </a>
+      </div>
+
+      {/* Post grid */}
+      <div class="blog-preview-grid grid gap-6">
+        {posts.map((post, i) => (
+          <a
+            href={`/blog/${post.id}`}
+            class:list={[
+              'block group',
+              i >= 4 && 'blog-preview-5th',
+              i >= 3 && i < 4 && 'blog-preview-4th',
+            ]}
+            data-reveal="up"
+            data-reveal-delay={String(i)}
+          >
+            <article class="bg-[#111111] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.07)] group-hover:border-[rgba(255,255,255,0.12)] transition-all duration-200 group-hover:-translate-y-0.5 h-full">
+              {post.data.featuredImage && (
+                <img
+                  src={post.data.featuredImage}
+                  alt={post.data.featuredImageAlt ?? post.data.title}
+                  width="440"
+                  height="220"
+                  loading="lazy"
+                  class="w-full object-contain bg-[#0a0a0a]"
+                />
+              )}
+              <div class="p-5">
+                <div class="flex items-center gap-3 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#737373]">
+                  <time datetime={new Date(post.data.date).toISOString()}>
+                    {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
+                  </time>
+                  <span class="text-[rgba(255,255,255,0.15)]">/</span>
+                  <span>{estimateReadTime(post.body ?? '')} min read</span>
+                </div>
+                <h3 class="text-lg font-bold text-[#e8e8e8] mt-1.5 leading-snug">{post.data.title}</h3>
+                {post.data.subtitle && (
+                  <p class="text-sm text-[#a0a0a0] font-medium mt-0.5 leading-snug">{post.data.subtitle}</p>
+                )}
+                <p class="text-[#a0a0a0] text-sm leading-relaxed mt-1.5 line-clamp-2">{post.data.summary}</p>
+                {post.data.tags && (
+                  <div class="flex items-center gap-2 mt-3 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#737373]">
+                    {post.data.tags.map((tag, ti) => (
+                      <>
+                        {ti > 0 && <span class="text-[rgba(255,255,255,0.15)]">/</span>}
+                        <span>{tag}</span>
+                      </>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </article>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  /* Base: 1 column, show first 3 */
+  .blog-preview-grid {
+    grid-template-columns: 1fr;
+  }
+  .blog-preview-4th,
+  .blog-preview-5th {
+    display: none;
+  }
+
+  /* 640px+: 2 columns, still 3 posts */
+  @media (min-width: 640px) {
+    .blog-preview-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* 900px+: 3 columns, still 3 posts */
+  @media (min-width: 900px) {
+    .blog-preview-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* 1200px+: 4 columns, reveal 4th post */
+  @media (min-width: 1200px) {
+    .blog-preview-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .blog-preview-4th {
+      display: block;
+    }
+  }
+
+  /* 1500px+: 5 columns, reveal 5th post */
+  @media (min-width: 1500px) {
+    .blog-preview-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .blog-preview-5th {
+      display: block;
+    }
+  }
+</style>
