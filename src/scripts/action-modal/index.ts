@@ -48,11 +48,12 @@ function init(data: ModalData): void {
         throw new Error("Your location didn't match any SC legislative districts. Try typing your street address instead.");
       }
       handleMatch(match);
-    } catch (err: any) {
-      if (err.code === 1) {
+    } catch (err: unknown) {
+      if (err instanceof Object && 'code' in err && (err as { code: number }).code === 1) {
         showError('Location access was blocked by your browser. You can type your address below instead.');
       } else {
-        showError(err.message || 'We could not determine your location. Try entering your street address instead.');
+        const msg = err instanceof Error ? err.message : String(err);
+        showError(msg || 'We could not determine your location. Try entering your street address instead.');
       }
     }
   });
@@ -87,8 +88,9 @@ function init(data: ModalData): void {
       if (geo.senate) match.senate = geo.senate;
       if (geo.house) match.house = geo.house;
       handleMatch(match);
-    } catch (err: any) {
-      showError(err.message || 'The address lookup did not return results. Check the address and try again, or select your district manually below.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      showError(msg || 'The address lookup did not return results. Check the address and try again, or select your district manually below.');
     }
   });
 

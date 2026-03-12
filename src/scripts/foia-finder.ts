@@ -208,11 +208,12 @@ function initFoiaFinder(contacts: FoiaContact[]): void {
       });
       const match = await matchDistricts(pos.coords.latitude, pos.coords.longitude);
       showLocationResults(contacts, statewide, match.county, match.city);
-    } catch (err: any) {
-      if (err.code === 1) {
+    } catch (err: unknown) {
+      if (err instanceof Object && 'code' in err && (err as { code: number }).code === 1) {
         showFinderError('Location access was blocked. Try entering your address instead.');
       } else {
-        showFinderError(err.message || 'Could not determine your location. Try entering your address.');
+        const msg = err instanceof Error ? err.message : String(err);
+        showFinderError(msg || 'Could not determine your location. Try entering your address.');
       }
     }
   });
@@ -236,8 +237,9 @@ function initFoiaFinder(contacts: FoiaContact[]): void {
       }
       const match = await matchDistricts(geo.lat, geo.lng);
       showLocationResults(contacts, statewide, match.county, match.city);
-    } catch (err: any) {
-      showFinderError(err.message || 'Address lookup failed. Check the address and try again.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      showFinderError(msg || 'Address lookup failed. Check the address and try again.');
     }
   });
 
