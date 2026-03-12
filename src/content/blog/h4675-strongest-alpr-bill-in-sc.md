@@ -116,6 +116,8 @@ Even if H4675 doesn't pass as written, its ideas can survive in a stronger compr
 
 If your state rep sits on the House Judiciary Committee or Education & Public Works, they have a direct say in whether these bills move. Tell them you want H4675 to get a hearing.
 
+For a step-by-step playbook (FOIA requests, council meeting prep, outreach materials), read the [action guide](/blog/how-to-fight-alpr-surveillance-sc).
+
 <div class="flex justify-center my-10">
   <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer">Find Your Rep</button>
 </div>

@@ -91,6 +91,8 @@ Every case study in this post traces back to the same root cause. South Carolina
 
 <strong class="red">None of this is illegal. That's the problem.</strong> [Bills exist](h4675-strongest-alpr-bill-in-sc) that would change this. They're sitting in committee. Meanwhile, the cameras keep scanning and the database keeps growing, governed by nothing but internal policy and good intentions.
 
+If you want to do something about it, the [action guide](/blog/how-to-fight-alpr-surveillance-sc) has 5 concrete steps: FOIA requests, council meetings, outreach, and more.
+
 <div class="flex justify-center my-10">
   <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer">Find Your Rep</button>
 </div>
