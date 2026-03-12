@@ -12,27 +12,32 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 ---
 
 <Base title="Blog — DeflockSC" description="Campaign updates and research on license plate surveillance in South Carolina.">
-  <section class="py-20 md:py-28">
-    <div class="max-w-[900px] mx-auto px-6">
-      <h1 class="text-3xl md:text-4xl font-[900] text-white mb-4">Blog</h1>
-      <p class="text-[#a3a3a3] text-lg mb-8">Campaign updates and research on license plate surveillance in South Carolina.</p>
+  <section class="py-20 md:py-28 relative overflow-hidden">
+    <div class="absolute left-4 -top-2 font-bold leading-none text-[rgba(255,255,255,0.025)] pointer-events-none select-none" style="font-size: clamp(5rem, 10vw, 9rem)" aria-hidden="true">BLOG</div>
+    <div class="max-w-[900px] mx-auto px-6 relative z-10">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Campaign Updates</p>
+      <h1 class="text-3xl md:text-5xl font-bold text-[#e8e8e8] tracking-[-0.02em] mb-4">Blog</h1>
+      <p class="text-[#a0a0a0] text-lg mb-8">Campaign updates and research on license plate surveillance in South Carolina.</p>
 
       {/* Tag filter bar */}
       {allTags.length > 0 && (
-        <div class="flex flex-wrap gap-2 mb-10" id="tag-bar" role="group" aria-label="Filter posts by tag">
+        <div class="flex flex-wrap items-center gap-x-1 gap-y-2 mb-10 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em]" id="tag-bar" role="group" aria-label="Filter posts by tag">
           <button
             type="button"
-            class="tag-pill active px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-all cursor-pointer border border-transparent"
+            class="tag-filter tag-active px-3 py-2 transition-colors cursor-pointer"
             data-tag="all"
             aria-pressed="true"
           >All</button>
           {allTags.map((tag) => (
-            <button
-              type="button"
-              class="tag-pill px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-all cursor-pointer border border-transparent"
-              data-tag={tag}
-              aria-pressed="false"
-            >{tag}</button>
+            <>
+              <span class="text-[rgba(255,255,255,0.15)] select-none" aria-hidden="true">/</span>
+              <button
+                type="button"
+                class="tag-filter px-3 py-2 transition-colors cursor-pointer"
+                data-tag={tag}
+                aria-pressed="false"
+              >{tag}</button>
+            </>
           ))}
         </div>
       )}
@@ -44,28 +49,34 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
       {/* Featured hero (latest post) */}
       {posts.length > 0 && (
         <a href={`/blog/${posts[0].id}`} class="block group mb-8 blog-card" data-tags={(posts[0].data.tags ?? []).join(',')}>
-          <article class="bg-[#171717] rounded-xl overflow-hidden border border-[#262626] group-hover:border-[#404040] transition-all duration-200">
+          <article class="bg-[#111111] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.07)] group-hover:border-[rgba(255,255,255,0.12)] transition-all duration-200">
             {posts[0].data.featuredImage && (
               <img
                 src={posts[0].data.featuredImage}
-                alt=""
+                alt={posts[0].data.title}
                 class="w-full object-contain bg-[#0a0a0a]"
               />
             )}
             <div class="p-7 md:p-8">
-              <div class="flex items-center gap-3 text-[#737373] text-[13px] font-medium">
+              <div class="flex items-center gap-3 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#737373]">
                 <time datetime={new Date(posts[0].data.date).toISOString()}>
-                  {new Date(posts[0].data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {new Date(posts[0].data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
                 </time>
-                <span class="text-[#404040]">&middot;</span>
+                <span class="text-[rgba(255,255,255,0.15)]">/</span>
                 <span>{estimateReadTime(posts[0].body ?? '')} min read</span>
               </div>
-              <h2 class="text-2xl md:text-[28px] font-[900] text-white mt-2 mb-3 leading-tight">{posts[0].data.title}</h2>
-              <p class="text-[#a3a3a3] text-[15px] leading-relaxed max-w-[600px]">{posts[0].data.summary}</p>
+              <h2 class="text-2xl md:text-[28px] font-bold text-[#e8e8e8] mt-2 leading-tight tracking-[-0.02em]">{posts[0].data.title}</h2>
+              {posts[0].data.subtitle && (
+                <p class="text-[15px] text-[#a0a0a0] font-medium mt-1 mb-1 leading-snug">{posts[0].data.subtitle}</p>
+              )}
+              <p class="text-[#a0a0a0] text-[15px] leading-relaxed max-w-[600px] mt-2">{posts[0].data.summary}</p>
               {posts[0].data.tags && (
-                <div class="flex flex-wrap gap-1.5 mt-4">
-                  {posts[0].data.tags.map((tag) => (
-                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-[#262626] text-[#a3a3a3]">{tag}</span>
+                <div class="flex items-center gap-2 mt-4 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#737373]">
+                  {posts[0].data.tags.map((tag, i) => (
+                    <>
+                      {i > 0 && <span class="text-[rgba(255,255,255,0.15)]">/</span>}
+                      <span>{tag}</span>
+                    </>
                   ))}
                 </div>
               )}
@@ -79,28 +90,35 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
         <div class="grid md:grid-cols-2 gap-6" id="post-grid">
           {posts.slice(1).map((post) => (
             <a href={`/blog/${post.id}`} class="block group blog-card" data-tags={(post.data.tags ?? []).join(',')}>
-              <article class="bg-[#171717] rounded-xl overflow-hidden border border-[#262626] group-hover:border-[#404040] transition-all duration-200 group-hover:-translate-y-0.5 h-full">
+              <article class="bg-[#111111] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.07)] group-hover:border-[rgba(255,255,255,0.12)] transition-all duration-200 group-hover:-translate-y-0.5 h-full">
                 {post.data.featuredImage && (
                   <img
                     src={post.data.featuredImage}
-                    alt=""
+                    alt={post.data.title}
+                    loading="lazy"
                     class="w-full object-contain bg-[#0a0a0a]"
                   />
                 )}
                 <div class="p-5">
-                  <div class="flex items-center gap-3 text-[#737373] text-[13px] font-medium">
+                  <div class="flex items-center gap-3 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#737373]">
                     <time datetime={new Date(post.data.date).toISOString()}>
-                      {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
                     </time>
-                    <span class="text-[#404040]">&middot;</span>
+                    <span class="text-[rgba(255,255,255,0.15)]">/</span>
                     <span>{estimateReadTime(post.body ?? '')} min read</span>
                   </div>
-                  <h2 class="text-lg font-[800] text-white mt-1.5 mb-2 leading-snug">{post.data.title}</h2>
-                  <p class="text-[#a3a3a3] text-sm leading-relaxed">{post.data.summary}</p>
+                  <h2 class="text-lg font-bold text-[#e8e8e8] mt-1.5 leading-snug">{post.data.title}</h2>
+                  {post.data.subtitle && (
+                    <p class="text-sm text-[#a0a0a0] font-medium mt-0.5 leading-snug">{post.data.subtitle}</p>
+                  )}
+                  <p class="text-[#a0a0a0] text-sm leading-relaxed mt-1.5">{post.data.summary}</p>
                   {post.data.tags && (
-                    <div class="flex flex-wrap gap-1.5 mt-3">
-                      {post.data.tags.map((tag) => (
-                        <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-[#262626] text-[#a3a3a3]">{tag}</span>
+                    <div class="flex items-center gap-2 mt-3 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#737373]">
+                      {post.data.tags.map((tag, i) => (
+                        <>
+                          {i > 0 && <span class="text-[rgba(255,255,255,0.15)]">/</span>}
+                          <span>{tag}</span>
+                        </>
                       ))}
                     </div>
                   )}
@@ -119,18 +137,19 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 </Base>
 
 <style>
-  .tag-pill {
-    background: #262626;
-    color: #a3a3a3;
+  .tag-filter {
+    color: #737373;
+    background: transparent;
   }
-  .tag-pill:hover {
-    background: #333;
-    color: #fff;
+  .tag-filter:hover {
+    color: #e8e8e8;
+    background: #161616;
   }
-  .tag-pill.active {
-    background: #ef4444;
-    color: #fff;
-    border-color: #ef4444;
+  .tag-filter.tag-active {
+    color: #e8e8e8;
+    background: #1a1a1a;
+    border-left: 2px solid #dc2626;
+    padding-left: calc(0.75rem - 2px);
   }
   .blog-card.hidden-by-filter {
     display: none;
@@ -138,7 +157,7 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 </style>
 
 <script>
-  const pills = document.querySelectorAll<HTMLButtonElement>('.tag-pill');
+  const pills = document.querySelectorAll<HTMLButtonElement>('.tag-filter');
   const cards = document.querySelectorAll<HTMLElement>('.blog-card');
 
   function filterByTag(tag: string) {
@@ -148,7 +167,7 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
     // Update pill active state
     pills.forEach((p) => {
       const isActive = p.dataset.tag === tag;
-      p.classList.toggle('active', isActive);
+      p.classList.toggle('tag-active', isActive);
       p.setAttribute('aria-pressed', String(isActive));
     });
 

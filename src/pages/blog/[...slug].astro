@@ -30,54 +30,90 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
 <Base title={`${post.data.title} — DeflockSC`} description={post.data.summary} ogImage={ogImage}>
   {/* Progress bar */}
-  <div id="progress-bar" class="fixed top-0 left-0 h-[3px] bg-[#ef4444] z-50 transition-[width] duration-[50ms] linear" style="width: 0%;" aria-hidden="true"></div>
+  <div id="progress-bar" class="fixed top-0 left-0 h-[3px] bg-[#dc2626] z-50 transition-[width] duration-[50ms] linear" style="width: 0%;" aria-hidden="true"></div>
 
-  <div class="grid grid-cols-[1fr_minmax(0,720px)_1fr] lg:grid-cols-[1fr_minmax(0,720px)_240px_1fr] gap-x-10 pt-20 md:pt-28 px-6 lg:px-0">
-    {/* Main article */}
-    <article class="col-start-2 col-end-3 min-w-0">
-      <a href="/blog" class="text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors mb-6 inline-block">&larr; Back to Blog</a>
+  {/* Full-bleed hero */}
+  <div class="relative -mt-16 md:h-[50vh] md:min-h-[320px] md:max-h-[520px] overflow-hidden bg-black">
+    {post.data.featuredImage ? (
+      <img
+        id="hero-img"
+        src={post.data.featuredImage}
+        alt={post.data.title}
+        class="w-full pt-16 md:pt-0 md:absolute md:inset-0 md:h-full object-contain"
+      />
+    ) : (
+      <div class="absolute inset-0 bg-[#0a0a0a]">
+        <div class="absolute inset-0 flex items-center justify-center overflow-hidden select-none" aria-hidden="true">
+          <span class="text-[8vw] font-bold text-[#1a1a1a] uppercase leading-none text-center px-8 line-clamp-3">{post.data.title}</span>
+        </div>
+      </div>
+    )}
 
-      <header class="mb-8">
-        <div class="flex items-center gap-3 text-[13px] text-[#737373] font-medium mb-2.5">
+    {/* Side fade overlays — JS-positioned at rendered image edges, desktop only */}
+    {post.data.featuredImage && (
+      <>
+        <div id="hero-fade-left" class="hidden md:block absolute inset-y-0 bg-gradient-to-r from-black to-transparent pointer-events-none" aria-hidden="true"></div>
+        <div id="hero-fade-right" class="hidden md:block absolute inset-y-0 bg-gradient-to-l from-black to-transparent pointer-events-none" aria-hidden="true"></div>
+      </>
+    )}
+
+    {/* Back link */}
+    <a href="/blog" class="hidden md:block absolute top-20 left-6 lg:left-10 text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors z-10 [text-shadow:0_1px_8px_rgba(0,0,0,0.8)]">&larr; Back to Blog</a>
+
+    {/* Title + meta overlay */}
+    <div class="absolute bottom-0 left-0 right-0 px-6 lg:px-10 pb-6 md:pb-8">
+      <div class="max-w-[660px] mx-auto lg:mx-0 lg:ml-[calc((100%-660px-240px-2.5rem)/2)]">
+        <div class="flex items-center gap-3 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#a0a0a0] mb-2.5 [text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">
           <time datetime={new Date(post.data.date).toISOString()}>
-            {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
           </time>
-          <span class="text-[#404040]">&middot;</span>
+          <span class="text-[rgba(255,255,255,0.25)]">/</span>
           <span>{readTime} min read</span>
         </div>
-        <h1 class="text-3xl md:text-4xl font-[900] text-white leading-tight tracking-[-0.02em]">{post.data.title}</h1>
-        {post.data.tags && (
-          <div class="flex flex-wrap gap-2 mt-4">
-            {post.data.tags.map((tag) => (
-              <a href={`/blog#${tag}`} class="text-xs font-semibold px-2.5 py-1 rounded-md bg-[#262626] text-[#a3a3a3] hover:bg-[#333] hover:text-white transition-all no-underline">{tag}</a>
-            ))}
-          </div>
+        <h1 class="text-3xl md:text-4xl font-bold text-[#e8e8e8] leading-tight tracking-[-0.02em] [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_4px_40px_rgba(0,0,0,0.7)]">{post.data.title}</h1>
+        {post.data.subtitle && (
+          <p class="text-lg md:text-xl text-[#a0a0a0] mt-2 font-medium leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">{post.data.subtitle}</p>
         )}
-      </header>
+      </div>
+    </div>
+  </div>
 
-      {post.data.featuredImage && (
-        <img
-          src={post.data.featuredImage}
-          alt=""
-          class="w-full rounded-xl mb-10 object-contain bg-[#0a0a0a]"
-        />
+  <div class="grid grid-cols-[1fr_minmax(0,660px)_1fr] lg:grid-cols-[1fr_minmax(0,660px)_240px_1fr] gap-x-10 pt-6 px-6 lg:px-0">
+    {/* Main article */}
+    <article class="blog-post col-start-2 col-end-3 min-w-0">
+      {post.data.tags && (
+        <div class="flex items-center gap-2 mb-8 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em]">
+          {post.data.tags.map((tag, i) => (
+            <>
+              {i > 0 && <span class="text-[rgba(255,255,255,0.15)]" aria-hidden="true">/</span>}
+              <a href={`/blog#${tag}`} class="text-[#737373] hover:text-[#e8e8e8] transition-colors no-underline">{tag}</a>
+            </>
+          ))}
+        </div>
       )}
 
       <div class="prose prose-invert max-w-none
-        [&>p]:text-[#d4d4d4] [&>p]:text-[17px] [&>p]:leading-[1.8] [&>p]:mb-6
-        [&>h2]:text-white [&>h2]:font-[800] [&>h2]:text-2xl [&>h2]:mt-12 [&>h2]:mb-4 [&>h2]:leading-snug
-        [&>h3]:text-white [&>h3]:font-bold [&>h3]:text-xl [&>h3]:mt-9 [&>h3]:mb-3
-        [&>ul]:text-[#d4d4d4] [&>ul]:space-y-2 [&>ul]:mb-6 [&>ul>li]:pl-2 [&>ul>li]:text-[17px] [&>ul>li]:leading-[1.7]
-        [&>ol]:text-[#d4d4d4] [&>ol]:space-y-2 [&>ol]:mb-6 [&>ol>li]:text-[17px]
-        [&>blockquote]:border-l-3 [&>blockquote]:border-[#ef4444] [&>blockquote]:pl-6 [&>blockquote]:text-[#a3a3a3] [&>blockquote]:italic [&>blockquote]:my-8 [&>blockquote]:text-[17px] [&>blockquote]:leading-[1.7]
+        [&>p]:text-[#b0b0b0] [&>p]:leading-[1.8] [&>p]:mb-6 [&>p]:md:mb-7
+        [&>h2]:text-[#e8e8e8] [&>h2]:font-bold [&>h2]:text-2xl [&>h2]:mt-14 [&>h2]:mb-4 [&>h2]:leading-snug [&>h2]:tracking-[-0.02em]
+        [&>h3]:text-[#e8e8e8] [&>h3]:font-bold [&>h3]:text-xl [&>h3]:mt-10 [&>h3]:mb-3
+        [&>ul]:text-[#b0b0b0] [&>ul]:space-y-2 [&>ul]:mb-7 [&>ul>li]:pl-2 [&>ul>li]:leading-[1.7]
+        [&>ol]:text-[#b0b0b0] [&>ol]:space-y-2 [&>ol]:mb-7
+        [&>blockquote]:border-l-3 [&>blockquote]:border-[#dc2626] [&>blockquote]:pl-6 [&>blockquote]:text-[#868686] [&>blockquote]:italic [&>blockquote]:my-8 [&>blockquote]:leading-[1.7]
         [&_a]:text-[#fbbf24] [&_a]:hover:text-[#fcd34d] [&_a]:focus-visible:text-[#fcd34d] [&_a]:transition-colors
-        [&_strong]:text-white
-        [&_code]:bg-[#262626] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm
-        [&>pre]:bg-[#262626] [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>pre]:mb-6
+        [&_strong]:text-[#e8e8e8]
+        [&_code]:bg-[rgba(255,255,255,0.07)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-sm
+        [&>pre]:bg-[#0d0d0d] [&>pre]:p-4 [&>pre]:overflow-x-auto [&>pre]:mb-6
         [&_pre_code]:p-0 [&_pre_code]:bg-transparent
-        [&_img]:rounded-lg [&_img]:my-6
-        [&>hr]:border-t [&>hr]:border-[#262626] [&>hr]:my-10">
+        [&_img]:my-6
+        [&>hr]:border-t [&>hr]:border-[rgba(255,255,255,0.07)] [&>hr]:my-10">
         <Content />
+      </div>
+
+      {/* End mark */}
+      <div class="flex justify-center gap-2 mt-16 mb-4" aria-hidden="true">
+        <span class="w-1.5 h-1.5 rounded-full bg-[rgba(255,255,255,0.12)]"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[rgba(255,255,255,0.12)]"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[rgba(255,255,255,0.12)]"></span>
       </div>
     </article>
 
@@ -85,13 +121,13 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
     {tocHeadings.length > 0 && (
       <aside class="hidden lg:block col-start-3 col-end-4" aria-label="Table of contents">
         <nav class="sticky top-20 pt-4">
-          <div class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#737373] mb-4">On this page</div>
-          <ul class="space-y-2" id="toc-list">
+          <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-4">On this page</div>
+          <ul class="space-y-2.5" id="toc-list">
             {tocHeadings.map((h) => (
               <li>
                 <a
                   href={`#${h.slug}`}
-                  class={`toc-link block text-[13px] leading-snug text-[#525252] hover:text-[#a3a3a3] transition-colors border-l-2 border-transparent ${h.depth === 3 ? 'pl-6' : 'pl-3'}`}
+                  class={`toc-link block text-[13px] leading-relaxed text-[#737373] hover:text-[#a0a0a0] transition-colors border-l-2 border-transparent ${h.depth === 3 ? 'pl-6' : 'pl-3'}`}
                   data-slug={h.slug}
                 >{h.text}</a>
               </li>
@@ -104,22 +140,22 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
   {/* Related posts */}
   {relatedPosts.length > 0 && (
-    <section class="max-w-[900px] mx-auto px-6 pt-16 mt-16 border-t border-[#262626]">
-      <div class="text-xs font-bold uppercase tracking-[0.12em] text-[#737373] mb-6">Related Posts</div>
+    <section class="max-w-[900px] mx-auto px-6 pt-16 mt-16 border-t border-[rgba(255,255,255,0.07)]">
+      <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-6">Related Posts</div>
       <div class="grid md:grid-cols-3 gap-5">
         {relatedPosts.map((rp) => (
           <a href={`/blog/${rp.id}`} class="block group" aria-label={rp.data.title}>
-            <article class="bg-[#1a1a1a] rounded-[10px] overflow-hidden border border-[#262626] group-hover:border-[#404040] group-hover:-translate-y-0.5 transition-all duration-200 h-full">
+            <article class="bg-[#1a1a1a] rounded-[10px] overflow-hidden border border-[rgba(255,255,255,0.07)] group-hover:border-[rgba(255,255,255,0.12)] group-hover:-translate-y-0.5 transition-all duration-200 h-full">
               {rp.data.featuredImage && (
-                <img src={rp.data.featuredImage} alt="" class="w-full object-contain bg-[#0a0a0a]" />
+                <img src={rp.data.featuredImage} alt={rp.data.title} class="w-full object-contain bg-[#0a0a0a]" />
               )}
               <div class="p-4">
-                <time class="text-xs text-[#737373] font-medium" datetime={new Date(rp.data.date).toISOString()}>
-                  {new Date(rp.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                <time class="font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#737373]" datetime={new Date(rp.data.date).toISOString()}>
+                  {new Date(rp.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
                 </time>
-                <h3 class="text-[15px] font-bold text-white mt-1 leading-snug">{rp.data.title}</h3>
+                <h3 class="text-[15px] font-bold text-[#e8e8e8] mt-1 leading-snug">{rp.data.title}</h3>
                 {rp.data.tags && rp.data.tags[0] && (
-                  <span class="inline-block mt-2 text-[11px] font-semibold px-2 py-0.5 rounded bg-[#262626] text-[#a3a3a3]">{rp.data.tags[0]}</span>
+                  <span class="font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#737373] mt-2 inline-block">{rp.data.tags[0]}</span>
                 )}
               </div>
             </article>
@@ -128,6 +164,8 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
       </div>
     </section>
   )}
+
+  <div class="pb-20"></div>
 </Base>
 
 <script>
@@ -153,24 +191,93 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
         progressBar.style.width = `${Math.min(pct, 100)}%`;
       }
 
-      // TOC tracking
+      // TOC tracking — activate when heading enters upper third of viewport
       if (headingEls.length > 0) {
         let activeSlug = '';
+        const threshold = window.innerHeight * 0.4;
         for (const el of headingEls) {
-          if (el.getBoundingClientRect().top < 120) {
+          if (el.getBoundingClientRect().top < threshold) {
             activeSlug = el.id;
           }
         }
         tocLinks.forEach((link) => {
           const isActive = link.dataset.slug === activeSlug;
-          link.classList.toggle('text-[#ef4444]', isActive);
-          link.classList.toggle('border-[#ef4444]', isActive);
-          link.classList.toggle('text-[#525252]', !isActive);
-          link.classList.toggle('border-transparent', !isActive);
+          link.classList.toggle('toc-active', isActive);
         });
       }
 
       ticking = false;
     });
   }, { passive: true });
+
+  // Position side fade overlays at rendered image edges (object-contain)
+  const heroImg = document.getElementById('hero-img') as HTMLImageElement | null;
+  const fadeL = document.getElementById('hero-fade-left');
+  const fadeR = document.getElementById('hero-fade-right');
+
+  function positionFades() {
+    if (!heroImg || !fadeL || !fadeR || !heroImg.naturalWidth) return;
+    if (window.innerWidth < 768) return;
+
+    const cw = heroImg.clientWidth;
+    const ch = heroImg.clientHeight;
+    const scale = Math.min(cw / heroImg.naturalWidth, ch / heroImg.naturalHeight);
+    const renderedW = heroImg.naturalWidth * scale;
+    const offset = (cw - renderedW) / 2;
+
+    // No fade needed if image reaches the container edges
+    if (offset < 2) {
+      fadeL.style.width = '0';
+      fadeR.style.width = '0';
+      return;
+    }
+
+    const fadeW = renderedW * 0.15;
+
+    fadeL.style.left = `${offset}px`;
+    fadeL.style.width = `${fadeW}px`;
+    fadeR.style.right = `${offset}px`;
+    fadeR.style.width = `${fadeW}px`;
+  }
+
+  if (heroImg) {
+    if (heroImg.complete) positionFades();
+    else heroImg.addEventListener('load', positionFades);
+    window.addEventListener('resize', positionFades);
+  }
 </script>
+
+<style is:global>
+  /* Responsive prose font size: 16px mobile → 18px desktop */
+  .blog-post .prose > p,
+  .blog-post .prose > ul li,
+  .blog-post .prose > ol li,
+  .blog-post .prose > blockquote {
+    font-size: 16px;
+  }
+  @media (min-width: 768px) {
+    .blog-post .prose > p,
+    .blog-post .prose > ul li,
+    .blog-post .prose > ol li,
+    .blog-post .prose > blockquote {
+      font-size: 18px;
+    }
+  }
+
+  /* Scroll offset so headings land below fixed nav */
+  .blog-post .prose h2[id],
+  .blog-post .prose h3[id] {
+    scroll-margin-top: 5rem;
+  }
+
+  /* Red bold for damning emphasis points */
+  .blog-post .prose strong.red {
+    color: #dc2626;
+  }
+
+  /* TOC active state — prevent hover from overriding red */
+  .toc-link.toc-active {
+    color: #dc2626 !important;
+    border-color: #dc2626 !important;
+  }
+</style>

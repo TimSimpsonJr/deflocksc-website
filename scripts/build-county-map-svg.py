@@ -35,7 +35,7 @@ RED_SHADES = [
     "#e02a2a",
     "#e53333",
     "#e83d3d",
-    "#ef4444",  # red-500
+    "#e84040",  # lighter red
     "#c92424",
     "#d12828",
     "#bf1e1e",
@@ -189,26 +189,21 @@ def build_svg(counties, bounds):
     # Background gradient
     lines.append("  <defs>")
     lines.append('    <radialGradient id="bg" cx="50%" cy="40%" r="70%">')
-    lines.append('      <stop offset="0%" stop-color="#262626"/>')
-    lines.append('      <stop offset="100%" stop-color="#171717"/>')
+    lines.append('      <stop offset="0%" stop-color="#1a1a1a"/>')
+    lines.append('      <stop offset="100%" stop-color="#111111"/>')
     lines.append("    </radialGradient>")
     # Subtle vignette
     lines.append('    <radialGradient id="vignette" cx="50%" cy="50%" r="60%">')
     lines.append('      <stop offset="0%" stop-color="transparent"/>')
     lines.append('      <stop offset="100%" stop-color="rgba(0,0,0,0.4)"/>')
     lines.append("    </radialGradient>")
-    # Red dot glow filter
-    lines.append('    <filter id="dot-glow" x="-50%" y="-50%" width="200%" height="200%">')
-    lines.append('      <feGaussianBlur stdDeviation="3" result="blur"/>')
-    lines.append('      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>')
-    lines.append("    </filter>")
     lines.append("  </defs>")
 
     # Background
     lines.append(f'  <rect width="{SVG_WIDTH}" height="{SVG_HEIGHT}" fill="url(#bg)"/>')
 
     # County paths
-    lines.append('  <g fill-rule="evenodd" stroke="#171717" stroke-width="1.2" stroke-linejoin="round">')
+    lines.append('  <g fill-rule="evenodd" stroke="#111111" stroke-width="1.2" stroke-linejoin="round">')
     for name in county_names:
         geom = counties[name]
         path_data = geometry_to_path(geom, bounds, SVG_WIDTH, SVG_HEIGHT, PADDING)
@@ -219,38 +214,6 @@ def build_svg(counties, bounds):
 
     # Vignette overlay
     lines.append(f'  <rect width="{SVG_WIDTH}" height="{SVG_HEIGHT}" fill="url(#vignette)"/>')
-
-    # DEFLOCK/SC logo — lower right corner
-    # Matches nav: bold uppercase, tracking-[0.12em], red dot + red slash
-    logo_x = SVG_WIDTH - 40
-    logo_y = SVG_HEIGHT - 40
-    font_size = 28
-    tracking = 0.12  # em
-
-    # Use text-anchor="start" so we know exactly where the text begins
-    # Estimate text width: ~12.5px per char at 28px bold + tracking
-    # "DEFLOCK/SC" = 10 chars → ~195px
-    text_w = 195
-    text_x = logo_x - text_w
-    # Cap height center: ~35% of font-size above baseline
-    cap_center_y = logo_y - font_size * 0.35
-    # Dot: 3/4 of cap height ≈ 0.75 * 0.7 * font_size ≈ 15px diameter → r=7.5 ... too big
-    # 3/4 of the letter height visually means about 3/4 of cap height
-    # Cap height ≈ 0.7 * font_size = ~20px, so 3/4 = 15px → but that's the whole dot
-    # Nav dot is w-[6px] h-[6px] = 3px radius at 14px text. Scale: 28/14 = 2x → r=6
-    dot_r = 5.5
-    dot_gap = 10  # gap between dot and D
-
-    lines.append(f'  <g>')
-    # Logo text
-    lines.append(f'    <text x="{text_x}" y="{logo_y}" font-family="Inter, system-ui, sans-serif" font-size="{font_size}" font-weight="700" letter-spacing="{tracking}em" text-anchor="start">')
-    lines.append('      <tspan fill="white">DEFLOCK</tspan>')
-    lines.append('      <tspan fill="#dc2626">/</tspan>')
-    lines.append('      <tspan fill="white">SC</tspan>')
-    lines.append("    </text>")
-    # Red dot: centered vertically with cap height, just left of text
-    lines.append(f'    <circle cx="{text_x - dot_gap - dot_r}" cy="{cap_center_y}" r="{dot_r}" fill="#dc2626" filter="url(#dot-glow)"/>')
-    lines.append("  </g>")
 
     lines.append("</svg>")
     return "\n".join(lines)

@@ -196,6 +196,20 @@ def main():
         print("No files to commit.")
         return
 
+    # Safety: ensure we're on the master branch
+    try:
+        branch = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=repo_root, check=True, capture_output=True, text=True
+        ).stdout.strip()
+        if branch != "master":
+            print(f"WARNING: On branch '{branch}', not 'master'. Skipping git push.")
+            print("Files were written. Switch to master and commit manually.")
+            return
+    except subprocess.CalledProcessError:
+        print("WARNING: Could not determine git branch. Skipping git push.")
+        return
+
     # Git add, commit, push
     print("\nCommitting and pushing to remote...")
     try:

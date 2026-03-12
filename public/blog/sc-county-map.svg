@@ -8,10 +8,6 @@
       <stop offset="0%" stop-color="transparent"/>
       <stop offset="100%" stop-color="rgba(0,0,0,0.4)"/>
     </radialGradient>
-    <filter id="dot-glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
   </defs>
   <rect width="1440" height="720" fill="url(#bg)"/>
   <g fill-rule="evenodd" stroke="#171717" stroke-width="1.2" stroke-linejoin="round">
@@ -63,12 +59,4 @@
     <path d="M629.8,93.3L630.9,89.7L632.6,86.3L631.2,83.8L631.1,82.7L631.8,81.6L630.5,76.9L630.7,75.8L633.2,74.0L633.3,73.2L643.6,73.3L644.7,55.6L650.7,50.0L705.8,53.2L703.7,53.6L702.8,56.0L705.0,57.8L706.0,61.0L705.4,62.3L702.9,63.5L701.9,65.6L701.8,70.4L704.4,73.8L722.2,61.4L726.9,67.6L726.9,69.8L728.0,70.7L727.0,73.4L728.2,74.9L728.4,76.1L727.4,79.0L726.4,79.5L727.2,80.5L728.4,80.0L727.7,81.7L729.0,83.1L729.2,84.6L730.3,84.5L729.8,85.6L730.8,88.6L730.5,89.5L731.4,90.1L732.2,89.7L732.3,91.6L733.1,92.5L732.9,95.8L733.7,98.3L733.1,100.5L731.4,102.4L731.2,108.0L731.4,110.0L733.2,111.6L733.4,113.0L732.2,114.9L728.4,117.0L728.2,118.4L632.2,118.2L634.9,116.3L636.3,113.2L634.8,111.9L633.8,109.5L633.1,104.5L632.1,103.0L633.5,99.9L632.3,97.8L632.9,95.6L630.5,94.7L629.8,93.3Z" fill="#cc2222" fill-opacity="0.85"/>
   </g>
   <rect width="1440" height="720" fill="url(#vignette)"/>
-  <g>
-    <text x="1205" y="680" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="700" letter-spacing="0.12em" text-anchor="start">
-      <tspan fill="white">DEFLOCK</tspan>
-      <tspan fill="#dc2626">/</tspan>
-      <tspan fill="white">SC</tspan>
-    </text>
-    <circle cx="1189.5" cy="670.2" r="5.5" fill="#dc2626" filter="url(#dot-glow)"/>
-  </g>
 </svg>
