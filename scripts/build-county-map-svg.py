@@ -35,7 +35,7 @@ RED_SHADES = [
     "#e02a2a",
     "#e53333",
     "#e83d3d",
-    "#ef4444",  # red-500
+    "#e84040",  # lighter red
     "#c92424",
     "#d12828",
     "#bf1e1e",
@@ -189,8 +189,8 @@ def build_svg(counties, bounds):
     # Background gradient
     lines.append("  <defs>")
     lines.append('    <radialGradient id="bg" cx="50%" cy="40%" r="70%">')
-    lines.append('      <stop offset="0%" stop-color="#262626"/>')
-    lines.append('      <stop offset="100%" stop-color="#171717"/>')
+    lines.append('      <stop offset="0%" stop-color="#1a1a1a"/>')
+    lines.append('      <stop offset="100%" stop-color="#111111"/>')
     lines.append("    </radialGradient>")
     # Subtle vignette
     lines.append('    <radialGradient id="vignette" cx="50%" cy="50%" r="60%">')
@@ -203,7 +203,7 @@ def build_svg(counties, bounds):
     lines.append(f'  <rect width="{SVG_WIDTH}" height="{SVG_HEIGHT}" fill="url(#bg)"/>')
 
     # County paths
-    lines.append('  <g fill-rule="evenodd" stroke="#171717" stroke-width="1.2" stroke-linejoin="round">')
+    lines.append('  <g fill-rule="evenodd" stroke="#111111" stroke-width="1.2" stroke-linejoin="round">')
     for name in county_names:
         geom = counties[name]
         path_data = geometry_to_path(geom, bounds, SVG_WIDTH, SVG_HEIGHT, PADDING)

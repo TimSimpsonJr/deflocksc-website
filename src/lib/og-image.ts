@@ -112,7 +112,7 @@ async function generateWithImage(featuredImage: string): Promise<Buffer> {
 
   // Resize to cover OG dimensions on a dark background
   const base = await sharp(imgBuf)
-    .resize(OG_WIDTH, OG_HEIGHT, { fit: "contain", background: "#171717" })
+    .resize(OG_WIDTH, OG_HEIGHT, { fit: "contain", background: "#111111" })
     .png()
     .toBuffer();
 
@@ -137,7 +137,7 @@ async function generateTextCard(title: string): Promise<Buffer> {
           flexDirection: "column",
           justifyContent: "flex-end",
           padding: "60px",
-          backgroundColor: "#171717",
+          backgroundColor: "#111111",
           fontFamily: "Inter",
         },
         children: [

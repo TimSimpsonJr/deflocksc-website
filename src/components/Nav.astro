@@ -22,7 +22,7 @@
   </div>
 
   <!-- Mobile menu -->
-  <div id="nav-mobile-menu" class="md:hidden hidden bg-[#171717] border-t border-[rgba(255,255,255,0.07)] px-6 py-4 flex flex-col gap-3">
+  <div id="nav-mobile-menu" class="md:hidden hidden bg-[#111111] border-t border-[rgba(255,255,255,0.07)] px-6 py-4 flex flex-col gap-3">
     <a href="/" class="text-[#a3a3a3] hover:text-white font-bold text-sm uppercase tracking-[0.1em] transition-colors py-2">Home</a>
     <a href="/toolkit" class="text-[#a3a3a3] hover:text-white font-bold text-sm uppercase tracking-[0.1em] transition-colors py-2">Toolkit</a>
     <a href="/blog" class="text-[#a3a3a3] hover:text-white font-bold text-sm uppercase tracking-[0.1em] transition-colors py-2">Blog</a>
@@ -37,10 +37,10 @@
   if (nav) {
     window.addEventListener('scroll', () => {
       if (window.scrollY > 0) {
-        nav.classList.add('nav-solid', 'bg-[#171717]', 'border-[#262626]');
+        nav.classList.add('nav-solid', 'bg-[#111111]', 'border-[rgba(255,255,255,0.07)]');
         nav.classList.remove('border-transparent');
       } else {
-        nav.classList.remove('nav-solid', 'bg-[#171717]', 'border-[#262626]');
+        nav.classList.remove('nav-solid', 'bg-[#111111]', 'border-[rgba(255,255,255,0.07)]');
         nav.classList.add('border-transparent');
       }
     }, { passive: true });
