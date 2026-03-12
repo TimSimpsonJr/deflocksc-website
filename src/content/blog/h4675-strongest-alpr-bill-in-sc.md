@@ -12,7 +12,7 @@ draft: true
 
 South Carolina has [4 bills](/blog/sc-has-no-license-plate-camera-law) that would regulate license plate cameras. Three of them set rules for what police can do with camera data. H4675 sets rules for what Flock Safety can do with it.
 
-That distinction matters. Flock Safety is the private company behind most ALPR cameras in South Carolina. They store every plate scan on their own cloud servers.
+Flock Safety is the private company behind most ALPR cameras in South Carolina. They store every plate scan on their own cloud servers.
 
 They also pipe data into a national network that lets any participating agency query any other agency's cameras. And they've been caught giving federal agencies direct access without telling the local departments that actually own the cameras.
 
@@ -46,7 +46,7 @@ Emergency access is allowed for imminent threats, but it has to be documented wi
 
 Misdemeanor penalties (1 year, $5,000 fine) for unauthorized access. Illegally obtained data is inadmissible.
 
-H4675 is sponsored by 4 Freedom Caucus Republicans: Kilmartin, Chumley, Edgerton, and Magnuson. Rep. Todd Rutherford (D) has his own ALPR bill (H3155) sitting in the same committee. Lawmakers from opposite ends of the spectrum both looked at this and concluded that mass plate surveillance needs limits.
+H4675 is sponsored by 4 Freedom Caucus Republicans: Kilmartin, Chumley, Edgerton, and Magnuson. Rep. Todd Rutherford (D) has his own ALPR bill (H3155) sitting in the same committee. A Freedom Caucus libertarian and a Democratic civil liberties advocate don't agree on much, but they both concluded that mass plate surveillance needs limits.
 
 ## The federal access problem
 
@@ -54,7 +54,7 @@ Local agencies sign Flock contracts thinking the cameras are for local crime-sol
 
 Once a city plugs in, its plate scans become searchable by thousands of departments it's never heard of. Including federal ones.
 
-The problem isn't specific to any one federal agency. It's structural. If CBP can search the network, so can every other federal entity with access.
+The problem is structural. If CBP can search the network, so can every other federal entity with access.
 
 No local authorization required. No notification sent. The system is built to make this easy, and there's nothing stopping it.
 
@@ -74,7 +74,7 @@ H4675 does. Its cloud ban makes the national network structurally impossible in 
 
 You can compare all 4 bills side by side on our [toolkit page](/toolkit).
 
-H4675 addresses the architecture of the system. The other bills address the rules around it.
+The other 3 bills set rules for how agencies use the data. H4675 goes after the plumbing that moves it.
 
 ## Where it could be stronger
 
