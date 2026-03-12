@@ -30,7 +30,22 @@ const faqs = [
     source: 'Sources: <a href="https://augustafreepress.com/news/staunton-to-cancel-flock-safety-camera-contract-doesnt-agree-with-ideology-of-ceo/" target="_blank" rel="noopener" class="text-[#fbbf24] underline">Augusta Free Press</a> <span class="mx-1">&middot;</span> <a href="https://www.postandcourier.com/greenville/news/greenville-adding-more-cameras-to-read-license-plates-raising-questions-of-oversight-privacy/article_4cf2761a-4157-11eb-98b9-9b7e9434164e.html" target="_blank" rel="noopener" class="text-[#fbbf24] underline">Post and Courier</a>',
   },
 ];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question.replace(/^"|"$/g, ''),
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": `${faq.lead} ${faq.rest}`
+    }
+  }))
+};
 ---
+
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 
 <section id="faq" aria-labelledby="faq-heading" class="bg-[#161616] overflow-hidden">
 

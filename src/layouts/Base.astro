@@ -8,30 +8,33 @@ interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  ogType?: string;
+  publishedDate?: string;
 }
 
-const { title = "DeflockSC", description = "242 cameras are tracking drivers across Upstate SC with no public vote and no oversight. Fight back.", ogImage = "/og-image.png" } = Astro.props;
-const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://deflocksc.netlify.app");
-const ogImageURL = new URL(ogImage, Astro.site ?? "https://deflocksc.netlify.app").href;
+const { title = "DeflockSC — License Plate Surveillance in South Carolina", description = "Over 240 ALPR cameras track drivers across South Carolina with no public vote and no oversight. See the map, find your reps, and fight back.", ogImage = "/og-image.png", ogType = "website", publishedDate } = Astro.props;
+const siteOrigin = Astro.site ?? new URL("https://deflocksc.org");
+const canonicalURL = new URL(Astro.url.pathname, siteOrigin);
+const ogImageURL = new URL(ogImage, siteOrigin).href;
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
 
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:image" content={ogImageURL} />
     <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="DeflockSC" />
+    {publishedDate && <meta property="article:published_time" content={publishedDate} />}
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
@@ -41,11 +44,23 @@ const ogImageURL = new URL(ogImage, Astro.site ?? "https://deflocksc.netlify.app
     <meta name="theme-color" content="#111111" />
     <link rel="alternate" type="application/rss+xml" title="DeflockSC Blog" href="/rss.xml" />
 
+    {/* Organization structured data */}
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "DeflockSC",
+      "url": "https://deflocksc.org",
+      "logo": "https://deflocksc.org/favicon.svg",
+      "description": "South Carolina advocacy group fighting automated license plate reader surveillance.",
+      "sameAs": []
+    })} />
+
+    <slot name="head" />
 
     {/* Umami Cloud Analytics – proxied through our domain to avoid ad-blocker blocklists */}
     <script defer src="/u/script.js" data-website-id="c0ff812f-a062-43e1-8ac1-e5eafd527ffc" />
   </head>
-  <body class="bg-[#111111] text-[#a0a0a0] font-['Instrument_Sans',sans-serif] leading-[1.7] min-h-screen">
+  <body class="bg-[#111111] text-[#a0a0a0] font-['Instrument_Sans_Variable',sans-serif] leading-[1.7] min-h-screen">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-[#dc2626] focus:text-white focus:font-bold focus:text-sm focus:px-4 focus:py-2 focus:rounded">
       Skip to main content
     </a>

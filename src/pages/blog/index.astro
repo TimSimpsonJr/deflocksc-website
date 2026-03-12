@@ -11,7 +11,7 @@ const posts = (await getCollection('blog'))
 const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 ---
 
-<Base title="Blog — DeflockSC" description="Campaign updates and research on license plate surveillance in South Carolina.">
+<Base title="ALPR Surveillance Blog — Research & Updates | DeflockSC" description="Investigations, campaign updates, and research on automated license plate reader surveillance in South Carolina.">
   <section class="py-20 md:py-28 relative overflow-hidden">
     <div class="absolute left-4 -top-2 font-bold leading-none text-[rgba(255,255,255,0.025)] pointer-events-none select-none" style="font-size: clamp(5rem, 10vw, 9rem)" aria-hidden="true">BLOG</div>
     <div class="max-w-[900px] mx-auto px-6 relative z-10">
@@ -53,7 +53,9 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
             {posts[0].data.featuredImage && (
               <img
                 src={posts[0].data.featuredImage}
-                alt={posts[0].data.title}
+                alt={posts[0].data.featuredImageAlt ?? posts[0].data.title}
+                width="900"
+                height="450"
                 class="w-full object-contain bg-[#0a0a0a]"
               />
             )}
@@ -94,7 +96,9 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
                 {post.data.featuredImage && (
                   <img
                     src={post.data.featuredImage}
-                    alt={post.data.title}
+                    alt={post.data.featuredImageAlt ?? post.data.title}
+                    width="440"
+                    height="220"
                     loading="lazy"
                     class="w-full object-contain bg-[#0a0a0a]"
                   />
