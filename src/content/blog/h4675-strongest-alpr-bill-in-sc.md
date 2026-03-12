@@ -18,11 +18,11 @@ Flock Safety is the private company behind most ALPR cameras in South Carolina. 
 
 They also pipe data into a national network that lets any participating agency query any other agency's cameras. And they've been caught giving federal agencies direct access without telling the local departments that actually own the cameras.
 
-South Carolina has **zero laws** governing any of it. No retention limits, no access controls, no penalties for misuse.
+South Carolina has <strong class="red">zero laws</strong> governing any of it. No retention limits, no access controls, no penalties for misuse.
 
 Flock operates in a complete regulatory vacuum. If you're new to this, read the [full breakdown of that vacuum](/blog/sc-has-no-license-plate-camera-law).
 
-Here's what makes H4675 different from the other 3 bills: if it passed, every existing Flock contract in the state would be void.
+Here's what makes H4675 different from the other 3 bills: if it passed, <strong class="red">every existing Flock contract in the state would be void</strong>.
 
 ## What H4675 actually does
 
@@ -106,7 +106,7 @@ SC has its own track record. In 2024, a North Charleston police lieutenant [used
 
 In 2013, a SLED officer looked up his own vehicle in the ALPR database and changed the record to show someone else's plate. His access was revoked, but when the Post and Courier filed a FOIA for any misconduct cases since, SLED refused to hand over a single document.
 
-Two documented abuse cases in SC. Zero laws broken, because there aren't any to break.
+<strong class="red">Two documented abuse cases in SC. Zero laws broken, because there aren't any to break.</strong>
 
 Both H4675 and H3155 sit in the same committee. The strongest provisions from H4675 should be folded into whatever bill advances.
 

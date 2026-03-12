@@ -1,72 +1,97 @@
 ---
 title: "The 4th Amendment Loophole"
 date: 2026-03-08T00:00:00.000Z
-summary: "The government can't track your movements without a warrant. The Supreme Court said so. But if a private company does the tracking and the government just buys access, the 4th Amendment doesn't apply. That's the loophole."
+summary: "The Supreme Court said the government can't track your movements without a warrant. Then a private company built a system that lets them do it anyway."
 tags:
   - 4th-amendment
   - federal-access
   - privacy
   - legislation
 draft: false
+featuredImage: /blog/4th-amendment-loophole-legislation.png
+featuredImageAlt: "The 4th Amendment loophole — legal documents and gavel illustration"
 ---
 
-In 2018, the Supreme Court ruled in Carpenter v. United States that the government needs a warrant to access your cell phone location data. The reasoning: aggregated location tracking reveals the "privacies of life," and the 4th Amendment protects against that kind of warrantless government surveillance.
+## The promise
 
-That should have settled things. It didn't.
+In 2012, the Supreme Court decided United States v. Jones. The case involved a GPS tracker that police had attached to a suspect's car without a valid warrant. The Court ruled it was an unconstitutional search. Five justices went further, arguing that even collecting public movements over a long enough period amounts to a search under the 4th Amendment.
+
+Six years later, Carpenter v. United States made that argument the law. The government had obtained 127 days of cell-site location data from Timothy Carpenter's wireless carrier, no warrant, just a court order under a lower legal standard. The Supreme Court said that wasn't good enough. Chief Justice Roberts, writing for the majority, recognized that aggregated location tracking reveals what the Court called the "privacies of life." Where you go, over time, tells a story. And the 4th Amendment protects that story from warrantless government access.
+
+Two cases, same principle: the government can't build a map of where you've been without a judge signing off.
+
+For a few years, that looked like settled law.
 
 ## The workaround
 
-The Carpenter decision applies when the government directly compels a company to hand over data. But what if the government doesn't compel anything? What if a private company voluntarily collects the data, builds a searchable database, and then sells access?
+Carpenter drew a clear line, but it drew it in a specific place. The ruling applies when the government compels a company to hand over data. The wireless carrier didn't choose to share Carpenter's location history. The government demanded it.
 
-That's exactly how Flock Safety works. Cities buy cameras. The cameras scan license plates on public roads. The data enters a shared network. Federal agencies get access to that network, and suddenly the government knows everywhere you've been, without ever getting a warrant.
+So what happens when nobody gets compelled? What if a private company voluntarily builds the surveillance infrastructure, collects the data on its own, and then sells access?
 
-The constitutional protection from Carpenter doesn't kick in because the government didn't order the surveillance. A private company did. The government just bought a subscription.
+That's exactly how Flock Safety's license plate reader network works. A city buys cameras. Those cameras scan every plate that drives by on public roads. The scan data enters Flock's cloud platform, a shared national network. Any participating agency can search any other agency's data. And anyone who buys a subscription can query the system.
 
-## Three doors
+The constitutional protection from Carpenter doesn't apply because the government never ordered the surveillance. A private company built it. <strong class="red">The government just bought a login.</strong>
 
-The University of Washington Center for Human Rights documented how this works in practice. They found 3 distinct ways federal agencies access local ALPR data, and gave them names:
+There's a legal concept called the "third-party doctrine" that courts have used for decades to justify this kind of arrangement. The idea: if you voluntarily share information with a third party (your bank, your phone company), you've given up your expectation of privacy in that information. Carpenter was supposed to be chipping away at that doctrine. The Court explicitly said it doesn't want technological advances to erode constitutional protections.
 
-**Front door:** A local agency explicitly authorizes data sharing with CBP or ICE. In Washington state, 8 agencies opened direct access. At least they knew what they were doing.
+But the private-company-as-middleman model sidesteps Carpenter entirely. The government isn't compelling anyone. It's just shopping.
 
-**Back door:** CBP accesses data from agencies that never authorized sharing. In Washington, 10+ agencies were compromised without their knowledge. Flock's own architecture made this possible.
+## The doors open
 
-**Side door:** A local officer runs a search on behalf of a federal agent. No federal account needed. No contract. No formal access request. Just one officer searching the system and handing over the results. Over 4,000 immigration-related "side door" lookups were documented nationally by 404 Media.
+In October 2025, the University of Washington Center for Human Rights published a report called "Leaving the Door Wide Open." They'd spent months investigating how federal agencies access local police ALPR data, and they found 3 distinct mechanisms. They gave them names.
 
-The side door is the one that's nearly impossible to prevent. It doesn't require any technical access. It just requires a willing local officer. And there's no audit trail that distinguishes a search done for local purposes from one done on behalf of ICE.
+**Front door.** A local agency explicitly authorizes data sharing with a federal agency. In Washington state, 8 agencies opened this kind of direct access. At least they knew what they were agreeing to.
 
-## The numbers
+**Back door.** Federal agencies access data from local departments that never authorized sharing. In Washington, 10+ agencies were compromised this way, without their knowledge. Flock's own network architecture made it possible. The system was designed so that data sharing could happen at the platform level, regardless of what any individual department thought it had agreed to.
 
-In Virginia, investigators found roughly 3,000 immigration-related searches on the Flock network over a 12-month period. The search terms included "ICE," "ERO," and "deportee." In San Jose, California, the EFF documented 261,000+ warrantless ALPR queries in just 14 months.
+**Side door.** A local officer runs a search on behalf of a federal agent. No federal account needed. No contract. No formal access request. Just one officer querying the system and handing over results. Over 4,000 of these lookups were documented nationally by 404 Media.
 
-In Colorado, 25 police departments were sharing data with CBP through a secret Flock pilot program that started in May 2025. None of those departments were told what they'd agreed to. Flock's CEO denied having any federal contracts on camera, then issued a written admission 3 weeks later.
+The side door is the one that's nearly impossible to prevent. It doesn't require any technical access or special permissions. It just requires a willing local officer. And there's no audit trail that distinguishes a search done for local purposes from one done on behalf of someone else.
 
-The Institute for Justice is pursuing federal litigation in IJ v. City of Norfolk, a case that directly challenges ALPR data collection under the 4th Amendment. The court has allowed the case to proceed, which means there's at least a plausible constitutional claim. But litigation takes years.
+Then there's Colorado. In May 2025, a pilot program quietly enrolled 25 police departments in a data-sharing arrangement with federal agencies through the Flock network. None of those departments were told what they'd actually agreed to. When reporters started asking questions, Flock's CEO denied having any federal contracts on camera. Three weeks later, the company issued a written admission.
 
-## Why "I have nothing to hide" doesn't hold up
+The point here isn't about any single federal agency or any specific enforcement priority. The point is structural. The system has no guardrails. If one agency can access local surveillance data through the back door or the side door, any agency can. The mechanism is the problem, not the use case. <strong class="red">The same architecture that lets one federal agency run warrantless searches lets every federal agency run warrantless searches.</strong> That's what needs to be stopped.
 
-Plate scans record where you go. Over time, that builds a picture: which church you attend, which doctor you visit, whether you showed up at a political rally, a gun show, a protest, a support group, a custody hearing.
+More than 20 cities have reached the same conclusion. Denver, Cambridge, Evanston, and others have terminated or suspended their Flock contracts specifically because of uncontrolled federal access to local data.
 
-The Supreme Court recognized this in Carpenter. Individual data points might be innocuous. Aggregated over weeks and months, they reveal patterns that most people consider deeply private. The Court called this the "mosaic theory": the whole is more revealing than the parts.
+And the harm isn't limited to the federal level. In Greenville, SC, two sisters were held at gunpoint during a traffic stop triggered by an ALPR misidentification. The system flagged their plate. The cops drew weapons. The plate match was wrong. That's the accountability standard for a technology that operates in a legal vacuum.
 
-SLED's database holds **422 million** license plate reads from 2019 to 2022. That's 100 million+ scans per year across South Carolina. Retained for 3 years. Accessible to 2,000+ users across 99+ agencies. Fort Jackson and Parris Island are listed as contributors.
+## The scale
 
-All of this exists without a single state statute authorizing it. No retention limits. No access controls. No warrant requirement. No penalties if someone misuses it.
+The individual cases are bad enough. The aggregate picture is worse.
 
-## What SC could do
+In San Jose, California, the EFF documented 261,000+ warrantless ALPR queries in just 14 months. In Virginia, investigators found roughly 3,000 searches on the Flock network tied to federal agency activity over a single year.
 
-Four bills in the SC Legislature would start to close this gap:
+In South Carolina, the numbers are staggering. SLED (the State Law Enforcement Division) operates a centralized ALPR database that's been collecting plate scans since at least 2019. Between 2019 and 2022: <strong class="red">422 million license plate reads</strong>. Over <strong class="red">100 million scans per year</strong>. Retained for **3 years**. Accessible to **2,000+ users** across **99+ agencies**. Fort Jackson and Parris Island are listed as contributors. Military installations, feeding data into a system with no statutory authorization.
 
-**H. 4675** goes the furthest. It bans third-party cloud storage (which is how Flock's national network operates), prohibits AI-based vehicle tracking, sets a 21-day retention limit, requires warrants for data access, and explicitly bans immigration enforcement use. If passed, every existing Flock contract in SC would be void. Sponsored by 4 Freedom Caucus Republicans.
+This is exactly the pattern the Supreme Court flagged in Carpenter. Individual plate scans might seem harmless. One camera catches you driving down Main Street. So what? But aggregated over weeks and months, those scans reveal which church you attend, which doctor you visit, whether you showed up at a political rally, a gun show, a protest, a support group, a custody hearing. The Court called this the "mosaic theory": the whole is more revealing than the parts.
 
-**S. 447** and **H. 3155** offer solid protections: visual confirmation before ALPR-based traffic stops, 90-day data retention, prohibition on selling data, misdemeanor penalties for violations.
+The Court recognized this pattern as constitutionally protected. It's happening anyway.
 
-**H. 4013** includes similar protections with 5 co-sponsors across districts.
+All of it, every scan, every query, every year of retention, exists <strong class="red">without a single South Carolina statute authorizing it</strong>. No retention limits written into law. No access controls. No warrant requirement. No penalties if someone misuses the data.
 
-S. 447, H. 3155, and H. 4013 share the same hole: **none of them restrict federal agency access**. H. 4675 closes that gap by banning the cloud infrastructure that enables it. But all four are stalled in committee.
+## Fighting back
 
-The 4th Amendment fight will take years in court. The legislative fix could happen this session.
+There are two paths to closing this gap: litigation and legislation.
 
-If your rep sits on Judiciary or Education & Public Works, they have a say.
+The Institute for Justice is pursuing [IJ v. City of Norfolk](https://ij.org/case/norfolk-alpr/), the first major federal lawsuit directly challenging ALPR data collection under the 4th Amendment. The court has allowed the case to proceed, which means there's at least a plausible constitutional claim that mass plate scanning violates the same principles the Court established in Carpenter and Jones.
+
+But litigation takes years. Discovery, motions, appeals. The data keeps accumulating while the case works its way through the system.
+
+The legislative path could move faster. In South Carolina, [H.4675](/blog/h4675-strongest-alpr-bill-in-sc) was written to close exactly the gaps this post describes. It reads like a point-by-point response to the problems with the current system:
+
+- **Bans third-party cloud storage** of ALPR data, which is the infrastructure that makes the back door possible. If the data can't live on Flock's national network, federal agencies can't query it through that network.
+- **Requires a warrant** for law enforcement to access historical plate data. This is the Carpenter principle that courts haven't enforced for ALPR yet, written directly into state law.
+- **21-day retention limit**, compared to SLED's current practice of holding data for 3 years with no legal basis.
+- **Bans AI-based vehicle tracking** beyond license plates, closing the door on Flock's "Vehicle Fingerprint" feature that identifies cars by make, model, color, and accessories.
+- **Quarterly independent audits** by the SC Inspector General, with annual transparency reports.
+- **Civil remedies** for individuals whose data is misused: injunctive relief, damages, and attorney's fees.
+- **Illegally obtained data is inadmissible** in any proceeding.
+- **Existing contracts that violate the law are void** on passage.
+
+The bill is sponsored by 4 Freedom Caucus Republicans. Rep. Todd Rutherford, a Democrat, has been pushing separate ALPR regulation since 2020. When both libertarian conservatives and civil liberties progressives identify the same constitutional problem, it's probably a real one.
+
+Carpenter established the principle 8 years ago. H.4675 would actually enforce it in South Carolina. The bill is sitting in the House Judiciary Committee.
 
 <div class="flex justify-center my-10">
   <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer">Find Your Rep</button>
@@ -74,6 +99,7 @@ If your rep sits on Judiciary or Education & Public Works, they have a say.
 
 ## Sources
 
+- [Oyez: United States v. Jones (2012)](https://www.oyez.org/cases/2011/10-1259)
 - [Oyez: Carpenter v. United States (2018)](https://www.oyez.org/cases/2017/16-402)
 - [UWCHR: Leaving the Door Wide Open (Oct 21, 2025)](https://jsis.washington.edu/humanrights/2025/10/21/leaving-the-door-wide-open/)
 - [404 Media: ICE taps into nationwide ALPR network (May 2025)](https://www.404media.co/ice-taps-into-nationwide-ai-enabled-camera-network-data-shows/)
@@ -82,6 +108,3 @@ If your rep sits on Judiciary or Education & Public Works, they have a say.
 - [9NEWS: Flock admits federal immigration agents have direct access (Aug 2025)](https://www.9news.com/article/news/local/flock-federal-immigration-agents-access-tracking-data/73-a8aee742-56d4-4a57-b5bb-0373286dfef8)
 - [Institute for Justice: IJ v. City of Norfolk](https://ij.org/case/norfolk-alpr/)
 - [SC Legislature: H. 4675](https://www.scstatehouse.gov/billsearch.php?billnumbers=4675&session=126)
-- [SC Legislature: S. 447](https://www.scstatehouse.gov/billsearch.php?billnumbers=447&session=126)
-- [SC Legislature: H. 3155](https://www.scstatehouse.gov/billsearch.php?billnumbers=3155&session=126)
-- [SC Legislature: H. 4013](https://www.scstatehouse.gov/billsearch.php?billnumbers=4013&session=126)
