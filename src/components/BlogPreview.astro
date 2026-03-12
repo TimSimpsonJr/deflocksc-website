@@ -30,22 +30,24 @@ const posts = (await getCollection('blog'))
             href={`/blog/${post.id}`}
             class:list={[
               'block group',
-              i >= 4 && 'blog-preview-5th',
-              i >= 3 && i < 4 && 'blog-preview-4th',
+              i === 4 && 'blog-preview-5th',
+              i === 3 && 'blog-preview-4th',
             ]}
             data-reveal="up"
             data-reveal-delay={String(i)}
           >
             <article class="bg-[#111111] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.07)] group-hover:border-[rgba(255,255,255,0.12)] transition-all duration-200 group-hover:-translate-y-0.5 h-full">
               {post.data.featuredImage && (
-                <img
-                  src={post.data.featuredImage}
-                  alt={post.data.featuredImageAlt ?? post.data.title}
-                  width="440"
-                  height="220"
-                  loading="lazy"
-                  class="w-full object-contain bg-[#0a0a0a]"
-                />
+                <div class="aspect-[2/1] overflow-hidden bg-[#0a0a0a]">
+                  <img
+                    src={post.data.featuredImage}
+                    alt={post.data.featuredImageAlt ?? post.data.title}
+                    width="440"
+                    height="220"
+                    loading="lazy"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
               )}
               <div class="p-5">
                 <div class="flex items-center gap-3 font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.12em] text-[#737373]">
