@@ -8,7 +8,7 @@ const posts = (await getCollection('blog'))
   .slice(0, 5);
 ---
 
-{posts.length >= 3 && (
+{posts.length >= 2 && (
   <section id="blog-preview" aria-labelledby="blog-preview-heading" class="py-20 md:py-28 relative overflow-hidden">
     <div class="max-w-[1400px] mx-auto px-6 relative z-10">
 
@@ -30,8 +30,9 @@ const posts = (await getCollection('blog'))
             href={`/blog/${post.id}`}
             class:list={[
               'block group bg-[#111111] hover:bg-[#161616] transition-colors overflow-hidden min-w-0',
-              i === 4 && 'blog-preview-5th',
+              i === 2 && 'blog-preview-3rd',
               i === 3 && 'blog-preview-4th',
+              i === 4 && 'blog-preview-5th',
             ]}
             data-reveal="up"
             data-reveal-delay={String(Math.min(i, 3))}
@@ -80,26 +81,35 @@ const posts = (await getCollection('blog'))
 )}
 
 <style>
-  /* Base: 1 column, show first 3 */
+  /*
+    Post visibility matches column count at every breakpoint:
+    1 col → 2 posts, 2 col → 2 posts, 3 col → 3, 4 col → 4, 5 col → 5
+  */
+
+  /* Base: 1 column, show first 2 */
   .blog-preview-grid {
     grid-template-columns: 1fr;
   }
+  .blog-preview-grid > .blog-preview-3rd,
   .blog-preview-grid > .blog-preview-4th,
   .blog-preview-grid > .blog-preview-5th {
     display: none;
   }
 
-  /* 640px+: 2 columns, still 3 posts */
+  /* 640px+: 2 columns, still 2 posts */
   @media (min-width: 640px) {
     .blog-preview-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
-  /* 900px+: 3 columns, still 3 posts */
+  /* 900px+: 3 columns, reveal 3rd post */
   @media (min-width: 900px) {
     .blog-preview-grid {
       grid-template-columns: repeat(3, 1fr);
+    }
+    .blog-preview-grid > .blog-preview-3rd {
+      display: flex;
     }
   }
 
