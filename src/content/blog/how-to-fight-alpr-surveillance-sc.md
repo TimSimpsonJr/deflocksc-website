@@ -31,8 +31,10 @@ Start by seeing what's near you.
 
 Once you know cameras exist in your area, the next question is who put them there. The site has a rep finder tool that matches your address to your city council, county council, and state legislators.
 
-<div class="not-prose my-8 text-center">
-  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer">Find Your Rep</button>
+<div class="not-prose my-10 border border-[rgba(255,255,255,0.07)] bg-[#1a1a1a] px-8 py-8 text-center">
+  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Take Action</p>
+  <p class="text-[#a3a3a3] text-sm mb-5">Find your city council, county council, and state legislators.</p>
+  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer">Find Your Rep</button>
 </div>
 
 Here's what most people miss: camera contracts in SC were almost always signed at the city or county level, usually by a police chief or sheriff, without any vote from elected officials.
@@ -47,7 +49,7 @@ This is the most important step. And it's easier than you think.
 
 South Carolina's Freedom of Information Act (Section 30-4-10) gives you the right to request public records from any government body. They have 10 business days to respond. Electronic records should be free or low-cost.
 
-The [FOIA toolkit](/toolkit#request-records) has 4 ready-to-send templates:
+The [FOIA toolkit](/toolkit/foia) has 4 ready-to-send templates:
 
 1. **Camera locations and quantities.** How many cameras, and where exactly?
 2. **Data retention and deletion policies.** How long do they keep your plate scans?
@@ -68,7 +70,7 @@ For context: in Eugene, Oregon, activists filed similar requests and found that 
 
 ## Show up at a council meeting
 
-The [speaking prep section](/toolkit#speak-up) of the toolkit has a talk track, tips, and rebuttals. Read through it before you go. But don't overthink this.
+The [speaking prep section](/toolkit/speaking) of the toolkit has a talk track, tips, and rebuttals. Read through it before you go. But don't overthink this.
 
 How to find your next meeting: check your city or county website for agendas and meeting schedules. Most SC councils post agendas 24 to 48 hours in advance. Public comment is usually at the beginning or end. You sign up when you arrive.
 
@@ -94,7 +96,7 @@ You don't have to win the argument in 3 minutes. You just have to put the questi
 
 ## Get your neighbors asking questions
 
-One person asking is easy to dismiss. Ten people asking is a pattern. The [outreach section](/toolkit#spread-the-word) of the toolkit has materials you can share: a one-pager PDF, social media cards, and email templates. All free to download and use.
+One person asking is easy to dismiss. Ten people asking is a pattern. The [outreach section](/toolkit/outreach) of the toolkit has materials you can share: a one-pager PDF, social media cards, and email templates. All free to download and use.
 
 Think about your channels. Your HOA, neighborhood Facebook group, Nextdoor, your church or PTA. Wherever people in your area already talk to each other.
 
@@ -122,8 +124,10 @@ Don't try to do all 5 at once. Pick one. Do it today.
 
 If you don't know where to start, start with step 1. Open the [camera map](/#camera-map). See what's near you. Then decide what comes next.
 
-<div class="not-prose my-8 text-center">
-  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer">Find Your Rep</button>
+<div class="not-prose my-10 border border-[rgba(255,255,255,0.07)] bg-[#1a1a1a] px-8 py-8 text-center">
+  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Take Action</p>
+  <p class="text-[#a3a3a3] text-sm mb-5">Find your city council, county council, and state legislators.</p>
+  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer">Find Your Rep</button>
 </div>
 
 ## Frequently asked questions
@@ -134,7 +138,7 @@ Yes. The [camera map](/#camera-map) shows every known ALPR camera in South Carol
 
 ### How do I file a FOIA request for ALPR data in South Carolina?
 
-South Carolina's Freedom of Information Act (Section 30-4-10) gives you the right to request records from any public body. The [FOIA toolkit](/toolkit#request-records) has 4 ready-to-send templates. Agencies have 10 business days to respond.
+South Carolina's Freedom of Information Act (Section 30-4-10) gives you the right to request records from any public body. The [FOIA toolkit](/toolkit/foia) has 4 ready-to-send templates. Agencies have 10 business days to respond.
 
 ### What bills would regulate license plate cameras in SC?
 

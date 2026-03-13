@@ -22,7 +22,7 @@ GPD used that money to purchase surveillance cameras that now record the license
 
 <strong class="red">They used money taken from residents to build a system that tracks residents.</strong> And they never asked anyone's permission.
 
-We know this because we [filed a FOIA request](/toolkit#request-records). We asked the City of Greenville for every Flock Safety contract, license, MOU, data agreement, letter of intent, and scope of work document active between January 2020 and October 2025. The city sent back 96 pages.
+We know this because we [filed a FOIA request](/toolkit/foia). We asked the City of Greenville for every Flock Safety contract, license, MOU, data agreement, letter of intent, and scope of work document active between January 2020 and October 2025. The city sent back 96 pages.
 
 Those 96 pages tell a story about how a $2,000 pilot program turned into a $131,000-per-year surveillance operation, spread across two city departments, without a single recorded vote from any elected official.
 
@@ -162,7 +162,7 @@ Six years. A 62x cost increase. Two contracts. 52 cameras (at minimum). Zero pub
 
 The 96 pages we received answer a lot of questions. They also open new ones.
 
-We've drafted a follow-up FOIA request asking for search and query logs (how often are the cameras being searched, and by whom), authorized user counts, any federal data-sharing agreements, and council minutes that reference Flock or ALPR technology. If council did discuss this behind closed doors, those records should exist. If you want to file your own requests, the [FOIA toolkit](/toolkit#request-records) has templates ready to go.
+We've drafted a follow-up FOIA request asking for search and query logs (how often are the cameras being searched, and by whom), authorized user counts, any federal data-sharing agreements, and council minutes that reference Flock or ALPR technology. If council did discuss this behind closed doors, those records should exist. If you want to file your own requests, the [FOIA toolkit](/toolkit/foia) has templates ready to go.
 
 We also want the full RFP response documents. The FOIA gave us the city's solicitation and Flock's signed contract, but not Flock's actual proposal. And we'd like to know whether the Public Works cameras at those two recycling centers are actively capturing license plates or serving some other function. The addresses are known. On-site verification is next.
 
@@ -170,8 +170,10 @@ At the state level, [four bills are sitting in committee right now](/#bill-track
 
 If your state rep sits on Judiciary or Education and Public Works, they have a say in whether those bills get a hearing.
 
-<div class="flex justify-center my-10">
-  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer">Find Your Rep</button>
+<div class="not-prose my-10 border border-[rgba(255,255,255,0.07)] bg-[#1a1a1a] px-8 py-8 text-center">
+  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Take Action</p>
+  <p class="text-[#a3a3a3] text-sm mb-5">Find your city council, county council, and state legislators.</p>
+  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer">Find Your Rep</button>
 </div>
 
 ## Read the documents yourself

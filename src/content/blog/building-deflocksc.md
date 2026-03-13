@@ -68,13 +68,13 @@ The same research that fed the letters also fed the [citizen toolkit](/toolkit).
 
 So we built 4 toolkits and bolted them onto the site:
 
-**[FOIA templates.](/toolkit#request-records)** 4 ready-to-file records requests covering camera locations, data retention policies, federal data sharing agreements, and the actual Flock contract your city signed. All formatted for SC's Freedom of Information Act (§ 30-4-10). Copy, paste, send.
+**[FOIA templates.](/toolkit/foia)** 4 ready-to-file records requests covering camera locations, data retention policies, federal data sharing agreements, and the actual Flock contract your city signed. All formatted for SC's Freedom of Information Act (§ 30-4-10). Copy, paste, send.
 
-**[Council meeting prep.](/toolkit#speak-up)** Talking points, sample questions, and a rundown of how public comment periods work in SC. Most people have never spoken at a council meeting. We tried to make it less intimidating.
+**[Council meeting prep.](/toolkit/speaking)** Talking points, sample questions, and a rundown of how public comment periods work in SC. Most people have never spoken at a council meeting. We tried to make it less intimidating.
 
-**[Outreach materials.](/toolkit#spread-the-word)** Flyers, social media graphics, and email templates for organizing in your community. If you want to get your neighbors asking questions too, the assets are there.
+**[Outreach materials.](/toolkit/outreach)** Flyers, social media graphics, and email templates for organizing in your community. If you want to get your neighbors asking questions too, the assets are there.
 
-**[Legal resources.](/toolkit#know-your-rights)** A plain-language breakdown of your rights around ALPR surveillance, what the law currently says (not much), and what the 4 pending bills would change.
+**[Legal resources.](/toolkit/legal)** A plain-language breakdown of your rights around ALPR surveillance, what the law currently says (not much), and what the 4 pending bills would change.
 
 The toolkit came together because we kept finding material that didn't fit in a letter but was too useful to leave on the cutting room floor. It's the same research pipeline, just pointed at a different output.
 
