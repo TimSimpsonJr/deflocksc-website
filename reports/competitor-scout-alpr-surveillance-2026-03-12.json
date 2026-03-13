@@ -1,0 +1,526 @@
+[
+  {
+    "keyword": "ALPR surveillance South Carolina",
+    "threat_level": "MEDIUM",
+    "search_intent": "informational",
+    "serp_features": ["news_results", "people_also_ask"],
+    "competitors": [
+      {
+        "rank": 1,
+        "url": "https://www.policingproject.org/south-carolina-license-plate-reader-lawsuit",
+        "domain": "policingproject.org",
+        "title": "SCPIF vs. SLED — The Policing Project",
+        "content_depth_score": 5,
+        "title_optimization_score": 4,
+        "recency_score": 6,
+        "domain_authority_tier": "MODERATE",
+        "weaknesses": ["Only 800 words", "No headings structure", "No FAQ schema", "No interactive elements"]
+      },
+      {
+        "rank": 2,
+        "url": "https://www.postandcourier.com/greenville/news/greenville-adding-more-cameras-to-read-license-plates-raising-questions-of-oversight-privacy/article_4cf2761a-4157-11eb-98b9-9b7e9434164e.html",
+        "domain": "postandcourier.com",
+        "title": "Greenville adding more cameras to read license plates",
+        "content_depth_score": 7,
+        "title_optimization_score": 5,
+        "recency_score": 4,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Article from 2020", "No 2025-2026 legislative updates", "No interactive tools"]
+      },
+      {
+        "rank": 3,
+        "url": "https://sclawreview.org/article/enhancing-law-enforcement-or-compromising-privacy-the-problem-with-south-carolinas-use-of-automatic-license-plate-readers/",
+        "domain": "sclawreview.org",
+        "title": "Enhancing Law Enforcement or Compromising Privacy? The Problem With SC's Use of ALPRs",
+        "content_depth_score": 9,
+        "title_optimization_score": 7,
+        "recency_score": 7,
+        "domain_authority_tier": "MODERATE",
+        "weaknesses": ["Academic density limits audience reach", "No interactive elements", "Single article with no supporting content cluster"]
+      }
+    ],
+    "win_factors": [
+      "Policing Project page (rank 1) has only 800 words with no headings and no FAQ schema -- a structured 2,500-word guide with FAQ markup provides substantially more value",
+      "Post and Courier article (rank 2) is from 2020 with no 2025-2026 legislative updates -- referencing three pending bills (S447, H3155, H4675) signals freshness",
+      "No top-3 result includes an interactive map of SC ALPR camera locations -- DeflockSC's MapLibre integration is a unique differentiator",
+      "SC Law Review article (rank 3) is academic at 9,000 words -- a citizen-focused explainer fills a readability gap"
+    ],
+    "displacement_strategy": {
+      "content_format": "comprehensive_state_guide",
+      "target_word_count": 2800,
+      "must_include": ["interactive_camera_map", "bill_status_tracker", "sled_database_stats", "county_deployment_data", "faq_schema", "event_timeline"],
+      "recommended_title": "ALPR Surveillance in South Carolina: Camera Locations, Laws, and What You Can Do (2026)",
+      "differentiation_angle": "Only page combining live camera map data, legislative tracker, and citizen action tools in one resource"
+    },
+    "priority": "IMMEDIATE"
+  },
+  {
+    "keyword": "license plate readers SC",
+    "threat_level": "LOW",
+    "search_intent": "informational",
+    "serp_features": ["government_links", "news_results"],
+    "competitors": [
+      {
+        "rank": 1,
+        "url": "https://www.scstatehouse.gov/sess126_2025-2026/bills/447.htm",
+        "domain": "scstatehouse.gov",
+        "title": "2025-2026 Bill 447: License plate reader system",
+        "content_depth_score": 3,
+        "title_optimization_score": 2,
+        "recency_score": 8,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Raw bill text with zero explanatory content", "No summaries or context", "No structured data"]
+      },
+      {
+        "rank": 2,
+        "url": "https://www.scstatehouse.gov/sess125_2023-2024/bills/3374.htm",
+        "domain": "scstatehouse.gov",
+        "title": "2023-2024 Bill 3374: Automatic license plate readers",
+        "content_depth_score": 3,
+        "title_optimization_score": 2,
+        "recency_score": 3,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Expired legislation from previous session", "Raw bill text", "No editorial content"]
+      },
+      {
+        "rank": 3,
+        "url": "https://www.scstatehouse.gov/sess126_2025-2026/bills/3155.htm",
+        "domain": "scstatehouse.gov",
+        "title": "2025-2026 Bill 3155: Automatic license plate readers",
+        "content_depth_score": 3,
+        "title_optimization_score": 2,
+        "recency_score": 7,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Raw bill text", "No comparison to other bills", "No citizen-facing context"]
+      }
+    ],
+    "win_factors": [
+      "All top results are raw bill text from scstatehouse.gov with zero explanatory content -- any editorial page explaining what these bills mean would outperform on engagement",
+      "Second-ranked result (H3374) is expired 2023-2024 legislation -- stale content a current tracker supersedes",
+      "No result includes comparison of competing bills (S447 vs H3155 vs H4675) -- a side-by-side table showing retention periods and enforcement mechanisms would be uniquely valuable",
+      "Zero results have FAQ schema, HowTo schema, or structured data beyond basic government markup"
+    ],
+    "displacement_strategy": {
+      "content_format": "legislative_explainer_with_comparison",
+      "target_word_count": 2000,
+      "must_include": ["bill_comparison_table", "plain_language_summaries", "status_badges", "faq_schema", "rep_contact_links", "bill_tracker_embed"],
+      "recommended_title": "License Plate Reader Bills in SC: What Each Proposal Means for Your Privacy (2026)",
+      "differentiation_angle": "Only human-readable comparison of all three active bills with real-time status tracking"
+    },
+    "priority": "IMMEDIATE"
+  },
+  {
+    "keyword": "Flock Safety cameras",
+    "threat_level": "HIGH",
+    "search_intent": "informational_navigational",
+    "serp_features": ["knowledge_panel", "people_also_ask", "news_carousel", "wikipedia_infobox"],
+    "competitors": [
+      {
+        "rank": 1,
+        "url": "https://www.flocksafety.com/",
+        "domain": "flocksafety.com",
+        "title": "Flock Safety - Shaping the Future of Safety",
+        "content_depth_score": 8,
+        "title_optimization_score": 7,
+        "recency_score": 9,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Corporate messaging, not objective analysis", "No deployment location data", "Defensive tone on controversy content"]
+      },
+      {
+        "rank": 2,
+        "url": "https://en.wikipedia.org/wiki/Flock_Safety",
+        "domain": "en.wikipedia.org",
+        "title": "Flock Safety - Wikipedia",
+        "content_depth_score": 9,
+        "title_optimization_score": 6,
+        "recency_score": 9,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Cannot include advocacy CTAs", "Cannot embed interactive tools", "Neutral encyclopedic tone"]
+      },
+      {
+        "rank": 3,
+        "url": "https://www.aclu.org/news/privacy-technology/flock-roundup",
+        "domain": "aclu.org",
+        "title": "Flock's Aggressive Expansions Go Far Beyond Simple Driver Surveillance",
+        "content_depth_score": 8,
+        "title_optimization_score": 8,
+        "recency_score": 8,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["National scope only", "No interactive camera map", "No state-specific data"]
+      }
+    ],
+    "win_factors": [
+      "None of the top 3 provide a South Carolina-specific Flock deployment map -- DeflockSC's camera map showing SC Flock installations is data no national org publishes",
+      "Flock's own blog omits deployment counts, cost data, and contract terms revealed through public records -- a fact-checked counter-narrative citing EFF/ACLU findings fills an accountability gap",
+      "Wikipedia cannot include advocacy CTAs or interactive tools -- DeflockSC supplements factual coverage with actionable next steps"
+    ],
+    "displacement_strategy": null,
+    "long_term_positioning": "Target long-tail variants: 'Flock Safety cameras South Carolina', 'Flock Safety camera locations near me'. Build topical authority through Flock-specific content cluster. Existing blog post 'Flock Safety Track Record' is a starting point.",
+    "priority": "LONG-TERM"
+  },
+  {
+    "keyword": "automated license plate reader privacy",
+    "threat_level": "HIGH",
+    "search_intent": "informational",
+    "serp_features": ["featured_snippet_potential", "people_also_ask", "knowledge_panel"],
+    "competitors": [
+      {
+        "rank": 1,
+        "url": "https://www.brennancenter.org/our-work/research-reports/automatic-license-plate-readers-legal-status-and-policy-recommendations",
+        "domain": "brennancenter.org",
+        "title": "Automatic License Plate Readers: Legal Status and Policy Recommendations",
+        "content_depth_score": 10,
+        "title_optimization_score": 8,
+        "recency_score": 5,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Published September 2020", "Predates Flock/ICE revelations and Norfolk VA ruling", "No interactive elements"]
+      },
+      {
+        "rank": 2,
+        "url": "https://www.aclu.org/issues/privacy-technology/location-tracking/automatic-license-plate-readers",
+        "domain": "aclu.org",
+        "title": "Automatic License Plate Readers | ACLU",
+        "content_depth_score": 5,
+        "title_optimization_score": 7,
+        "recency_score": 7,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Only 450 words of main content", "Topic hub not standalone resource", "No interactive tools"]
+      },
+      {
+        "rank": 3,
+        "url": "https://www.congress.gov/crs-product/IF13068",
+        "domain": "congress.gov",
+        "title": "Automated License Plate Readers: Background and Legal Issues",
+        "content_depth_score": 7,
+        "title_optimization_score": 7,
+        "recency_score": 6,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Policy-neutral tone", "No interactive elements", "No citizen-focused framing"]
+      }
+    ],
+    "win_factors": [
+      "Brennan Center report (rank 1) is from September 2020 -- predates Flock/ICE revelations, Norfolk VA Fourth Amendment ruling, and wave of city contract cancellations",
+      "ACLU page (rank 2) is surprisingly thin at 450 words -- a comprehensive guide would exceed it on content depth",
+      "None of the top 3 include interactive elements -- a 'how many times have you been scanned' estimator based on driving patterns would be a unique engagement hook"
+    ],
+    "displacement_strategy": null,
+    "long_term_positioning": "Competing with Brennan Center, ACLU, and Congress.gov requires building domain authority through SC-specific content first. Expand to broader national coverage as topical authority grows.",
+    "priority": "LONG-TERM"
+  },
+  {
+    "keyword": "ALPR laws South Carolina",
+    "threat_level": "LOW",
+    "search_intent": "informational",
+    "serp_features": ["government_links", "news_results"],
+    "competitors": [
+      {
+        "rank": 1,
+        "url": "https://www.scstatehouse.gov/sess126_2025-2026/bills/4675.htm",
+        "domain": "scstatehouse.gov",
+        "title": "2025-2026 Bill 4675: Video Surveillance",
+        "content_depth_score": 3,
+        "title_optimization_score": 2,
+        "recency_score": 8,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Raw bill text", "No editorial context", "No citizen-facing explanations"]
+      },
+      {
+        "rank": 2,
+        "url": "https://www.billtrack50.com/billdetail/1867461",
+        "domain": "billtrack50.com",
+        "title": "SC S0447 | BillTrack50",
+        "content_depth_score": 4,
+        "title_optimization_score": 5,
+        "recency_score": 7,
+        "domain_authority_tier": "MODERATE",
+        "weaknesses": ["Bill metadata only, no analysis", "No plain-language summary", "No action items"]
+      },
+      {
+        "rank": 3,
+        "url": "https://www.policingproject.org/south-carolina-license-plate-reader-lawsuit",
+        "domain": "policingproject.org",
+        "title": "SCPIF vs. SLED — The Policing Project",
+        "content_depth_score": 5,
+        "title_optimization_score": 4,
+        "recency_score": 6,
+        "domain_authority_tier": "MODERATE",
+        "weaknesses": ["Focuses on lawsuit only, not comprehensive law analysis", "Only 800 words", "No interactive elements"]
+      }
+    ],
+    "win_factors": [
+      "Top result is raw bill text with no editorial context -- zero competition from explanatory content for this exact keyword",
+      "BillTrack50 (rank 2) provides bill metadata but no analysis or plain-language summary -- 'what this means for you' framing differentiates immediately",
+      "Policing Project (rank 3) focuses on lawsuit, not comprehensive SC ALPR law analysis -- a page covering the legal vacuum, pending bills, AND lawsuit provides the complete picture",
+      "Existing DeflockSC blog post 'SC Has No License Plate Camera Law' directly targets this but may need keyword optimization"
+    ],
+    "displacement_strategy": {
+      "content_format": "legal_landscape_explainer",
+      "target_word_count": 2200,
+      "must_include": ["no_law_exists_framing", "bill_comparison_table", "scpif_v_sled_lawsuit", "state_constitutional_protections", "faq_schema", "state_comparison"],
+      "recommended_title": "ALPR Laws in South Carolina: No Law Exists Yet -- Here Is What Is Being Proposed (2026)",
+      "differentiation_angle": "Only page combining the legal vacuum, all pending legislation, active lawsuit, and citizen advocacy tools"
+    },
+    "priority": "IMMEDIATE"
+  },
+  {
+    "keyword": "stop surveillance cameras South Carolina",
+    "threat_level": "LOW",
+    "search_intent": "transactional",
+    "serp_features": ["minimal"],
+    "competitors": [
+      {
+        "rank": 1,
+        "url": "https://www.scstatehouse.gov/query.php",
+        "domain": "scstatehouse.gov",
+        "title": "SC Legislature Online - Search",
+        "content_depth_score": 2,
+        "title_optimization_score": 1,
+        "recency_score": 5,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Search results page, not content", "Topically mismatched", "No action-oriented content"]
+      },
+      {
+        "rank": 2,
+        "url": "https://brewerlawfirmsc.com/invasion-of-privacy/",
+        "domain": "brewerlawfirmsc.com",
+        "title": "Invasion of Privacy - All you Need to Know",
+        "content_depth_score": 3,
+        "title_optimization_score": 3,
+        "recency_score": 4,
+        "domain_authority_tier": "LOW",
+        "weaknesses": ["General privacy law, not surveillance specific", "Law firm content marketing", "No ALPR focus"]
+      },
+      {
+        "rank": 3,
+        "url": "https://www.backstreet-surveillance.com/education-advice-tips/state-video-audio-surveillance-laws-regulations.html",
+        "domain": "backstreet-surveillance.com",
+        "title": "Video Surveillance Laws by State: CCTV & Audio Recording 2026",
+        "content_depth_score": 4,
+        "title_optimization_score": 4,
+        "recency_score": 6,
+        "domain_authority_tier": "LOW",
+        "weaknesses": ["Surveillance product company, not advocacy", "General CCTV focus, not ALPR", "No SC-specific depth"]
+      }
+    ],
+    "win_factors": [
+      "No result addresses actual search intent -- users want to take action, not read bill text or surveillance product reviews. Completely unserved query.",
+      "Top results are topically mismatched (general privacy law, security camera products) -- a purpose-built action page would be the only relevant result",
+      "DeflockSC already has the infrastructure: Take Action modal, citizen toolkit (FOIA, public comment scripts, rep contact), and localized letters for all 46 counties"
+    ],
+    "displacement_strategy": {
+      "content_format": "action_guide",
+      "target_word_count": 1800,
+      "must_include": ["step_by_step_guide", "rep_finder_embed", "foia_template_links", "public_comment_talking_points", "camera_map_link", "success_stories", "faq_schema"],
+      "recommended_title": "How to Stop Surveillance Cameras in South Carolina: A Citizen Action Guide (2026)",
+      "differentiation_angle": "Only page matching action-oriented intent with ready-to-use tools, templates, and step-by-step playbook"
+    },
+    "priority": "IMMEDIATE"
+  },
+  {
+    "keyword": "Flock Safety controversy",
+    "threat_level": "MEDIUM",
+    "search_intent": "informational",
+    "serp_features": ["news_carousel", "people_also_ask", "knowledge_panel"],
+    "competitors": [
+      {
+        "rank": 1,
+        "url": "https://www.eff.org/deeplinks/2025/12/effs-investigations-expose-flock-safetys-surveillance-abuses-2025-review",
+        "domain": "eff.org",
+        "title": "EFF's Investigations Expose Flock Safety's Surveillance Abuses: 2025 in Review",
+        "content_depth_score": 9,
+        "title_optimization_score": 7,
+        "recency_score": 9,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["National scope only", "Fragmented across many blog posts", "No consolidated timeline"]
+      },
+      {
+        "rank": 2,
+        "url": "https://www.npr.org/2026/02/17/nx-s1-5612825/flock-contracts-canceled-immigration-survillance-concerns",
+        "domain": "npr.org",
+        "title": "Why some cities are canceling Flock license plate reader contracts",
+        "content_depth_score": 7,
+        "title_optimization_score": 7,
+        "recency_score": 9,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Single article, not comprehensive resource", "National scope", "No interactive elements"]
+      },
+      {
+        "rank": 3,
+        "url": "https://www.cnn.com/2026/02/13/tech/amazon-ring-flock-partnership-ice",
+        "domain": "cnn.com",
+        "title": "Amazon's Ring cancels controversial partnership with Flock amid privacy concerns",
+        "content_depth_score": 6,
+        "title_optimization_score": 7,
+        "recency_score": 9,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Single news story", "No SC-specific angle", "No ongoing coverage"]
+      }
+    ],
+    "win_factors": [
+      "All coverage is national in scope -- a page documenting Flock controversies specifically in South Carolina (unauthorized SCDOT installations, SLED database, Greenville expansion) has no competition",
+      "EFF's coverage (rank 1) is fragmented across many blog posts -- a consolidated chronological timeline of all Flock controversies provides a reference resource EFF does not offer",
+      "Existing DeflockSC blog post 'Flock Safety Track Record' partially covers this but could be expanded with SC-specific deployment data and camera map links"
+    ],
+    "displacement_strategy": {
+      "content_format": "investigative_timeline",
+      "target_word_count": 2800,
+      "must_include": ["chronological_timeline", "sc_specific_incidents", "deployment_cost_data", "camera_map_embed", "foia_documents", "faq_schema"],
+      "recommended_title": "Flock Safety in South Carolina: Controversies, Camera Locations, and Unanswered Questions (2026)",
+      "differentiation_angle": "Only Flock controversy page with SC-specific evidence, local deployment data, and embedded camera locations"
+    },
+    "priority": "SHORT-TERM"
+  },
+  {
+    "keyword": "license plate reader laws",
+    "threat_level": "HIGH",
+    "search_intent": "informational",
+    "serp_features": ["featured_snippet", "people_also_ask"],
+    "competitors": [
+      {
+        "rank": 1,
+        "url": "https://www.ncsl.org/technology-and-communication/automated-license-plate-readers-state-statutes",
+        "domain": "ncsl.org",
+        "title": "Automated License Plate Readers: State Statutes",
+        "content_depth_score": 7,
+        "title_optimization_score": 8,
+        "recency_score": 5,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Last updated February 2022", "Does not include 2025-2026 legislative wave", "Policy-neutral, not citizen-facing"]
+      },
+      {
+        "rank": 2,
+        "url": "https://www.brennancenter.org/our-work/research-reports/automatic-license-plate-readers-legal-status-and-policy-recommendations",
+        "domain": "brennancenter.org",
+        "title": "Automatic License Plate Readers: Legal Status and Policy Recommendations",
+        "content_depth_score": 10,
+        "title_optimization_score": 8,
+        "recency_score": 5,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Published September 2020", "Predates Flock/ICE revelations", "12,500 words may be too dense"]
+      },
+      {
+        "rank": 3,
+        "url": "https://www.congress.gov/crs-product/IF13068",
+        "domain": "congress.gov",
+        "title": "Automated License Plate Readers: Background and Legal Issues",
+        "content_depth_score": 7,
+        "title_optimization_score": 7,
+        "recency_score": 6,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Congressional research format", "Policy-neutral", "No interactive elements"]
+      }
+    ],
+    "win_factors": [
+      "NCSL state statute table (rank 1) was last updated February 2022 -- does not include the 2025-2026 legislative wave across multiple states",
+      "None of the top 3 present from an advocacy/citizen perspective -- they are policy-neutral reference materials aimed at policymakers",
+      "Brennan Center report (rank 2) is from 2020 and predates the Flock/ICE revelations and Norfolk VA Fourth Amendment ruling"
+    ],
+    "displacement_strategy": null,
+    "long_term_positioning": "Create a 'License Plate Reader Laws by State' page expanding existing toolkit-legal data. Build topical authority through SC-specific content first, then expand nationally.",
+    "priority": "LONG-TERM"
+  },
+  {
+    "keyword": "ALPR fourth amendment",
+    "threat_level": "HIGH",
+    "search_intent": "informational",
+    "serp_features": ["people_also_ask", "academic_results"],
+    "competitors": [
+      {
+        "rank": 1,
+        "url": "https://www.eff.org/deeplinks/2020/05/courts-issue-rulings-two-cases-challenging-law-enforcement-searches-license-plate",
+        "domain": "eff.org",
+        "title": "Courts Issue Rulings in Two Cases Challenging License Plate Database Searches",
+        "content_depth_score": 7,
+        "title_optimization_score": 6,
+        "recency_score": 6,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Case-specific, not comprehensive overview", "No state-by-state analysis", "No interactive elements"]
+      },
+      {
+        "rank": 2,
+        "url": "https://www.law.berkeley.edu/wp-content/uploads/2015/04/2016-4-28_ALPR-Primer_Final.pdf",
+        "domain": "law.berkeley.edu",
+        "title": "ALPR Primer - Berkeley Law",
+        "content_depth_score": 9,
+        "title_optimization_score": 5,
+        "recency_score": 3,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["From 2016, predates Carpenter v. United States (2018)", "PDF format limits SEO", "Severely outdated"]
+      },
+      {
+        "rank": 3,
+        "url": "https://www.congress.gov/crs-product/IF13068",
+        "domain": "congress.gov",
+        "title": "Automated License Plate Readers: Background and Legal Issues",
+        "content_depth_score": 7,
+        "title_optimization_score": 7,
+        "recency_score": 6,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Congressional research format", "Does not cover state constitutional variations", "No interactive elements"]
+      }
+    ],
+    "win_factors": [
+      "Berkeley Law primer (rank 2) is from 2016 and predates Carpenter v. United States (2018), Norfolk VA ruling (2024), and Virginia Court of Appeals ruling -- severely outdated",
+      "EFF coverage (rank 1) is case-specific rather than comprehensive Fourth Amendment analysis -- a structured explainer covering plain view doctrine, mosaic theory, and Carpenter framework would be more complete",
+      "SC's state constitution (Article 1, Section 10) provides stronger privacy protections than the federal Fourth Amendment -- unique angle only an SC-focused site can leverage"
+    ],
+    "displacement_strategy": null,
+    "long_term_positioning": "The SC constitutional angle is the differentiator. Expand existing blog post 'The 4th Amendment Loophole' into comprehensive guide targeting 'ALPR fourth amendment South Carolina' long-tail.",
+    "priority": "LONG-TERM"
+  },
+  {
+    "keyword": "surveillance camera advocacy",
+    "threat_level": "MEDIUM",
+    "search_intent": "informational",
+    "serp_features": ["organization_listings", "people_also_ask"],
+    "competitors": [
+      {
+        "rank": 1,
+        "url": "https://www.stopspying.org/",
+        "domain": "stopspying.org",
+        "title": "S.T.O.P. - The Surveillance Technology Oversight Project",
+        "content_depth_score": 6,
+        "title_optimization_score": 5,
+        "recency_score": 7,
+        "domain_authority_tier": "MODERATE",
+        "weaknesses": ["NYC-focused only", "No national directory", "No state-specific resources"]
+      },
+      {
+        "rank": 2,
+        "url": "https://www.law.georgetown.edu/privacy-technology-center/",
+        "domain": "law.georgetown.edu",
+        "title": "Center on Privacy and Technology",
+        "content_depth_score": 5,
+        "title_optimization_score": 4,
+        "recency_score": 5,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Research-oriented, not action-oriented", "Academic framing", "No interactive tools"]
+      },
+      {
+        "rank": 3,
+        "url": "https://www.eff.org/",
+        "domain": "eff.org",
+        "title": "Electronic Frontier Foundation",
+        "content_depth_score": 7,
+        "title_optimization_score": 3,
+        "recency_score": 7,
+        "domain_authority_tier": "HIGH",
+        "weaknesses": ["Homepage, not targeted content", "Broad digital rights focus", "No advocacy directory"]
+      }
+    ],
+    "win_factors": [
+      "S.T.O.P. (rank 1) is NYC-focused -- no national directory of surveillance advocacy organizations exists that includes state-level groups",
+      "Georgetown (rank 2) is research-oriented, not action-oriented -- a page listing advocacy orgs with direct links to campaigns and toolkits serves the intent better",
+      "None of the top results mention the DeFlock movement, BanTheCams, or city-level Flock cancellation campaigns -- a comprehensive movement resource page fills this gap",
+      "DeflockSC can position as the SC chapter of the broader anti-surveillance movement, creating natural linking opportunities"
+    ],
+    "displacement_strategy": {
+      "content_format": "resource_directory",
+      "target_word_count": 2200,
+      "must_include": ["advocacy_org_directory", "flock_cancellation_map", "toolkit_links", "sc_specific_actions", "faq_schema"],
+      "recommended_title": "Surveillance Camera Advocacy: Organizations, Campaigns, and How to Get Involved (2026)",
+      "differentiation_angle": "Only comprehensive directory combining national organizations, grassroots campaigns, and actionable tools"
+    },
+    "priority": "SHORT-TERM"
+  }
+]

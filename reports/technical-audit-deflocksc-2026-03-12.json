@@ -1,0 +1,210 @@
+{
+  "audit_target": "https://deflocksc.org",
+  "audit_mode": "hybrid",
+  "local_path": "C:\\Users\\tim\\OneDrive\\Documents\\Projects\\deflocksc-website",
+  "pages_scanned": 10,
+  "timestamp": "2026-03-12T00:00:00Z",
+  "health_score": 48,
+  "summary": {
+    "critical": 5,
+    "warning": 9,
+    "info": 7
+  },
+  "issues": [
+    {
+      "check": "robots_txt",
+      "severity": "CRITICAL",
+      "page": "https://deflocksc.org/robots.txt",
+      "finding": "robots.txt file does not exist (returns 404)",
+      "recommendation": "Create public/robots.txt with User-agent: *, Allow: /, and Sitemap directive"
+    },
+    {
+      "check": "xml_sitemap",
+      "severity": "CRITICAL",
+      "page": "https://deflocksc.org/sitemap.xml",
+      "finding": "@astrojs/sitemap not installed; no sitemap generated",
+      "recommendation": "Install @astrojs/sitemap and add to astro.config.mjs integrations array"
+    },
+    {
+      "check": "canonical_url",
+      "severity": "CRITICAL",
+      "page": "all",
+      "finding": "No <link rel='canonical'> tag rendered on any page despite canonicalURL variable being computed",
+      "file": "src/layouts/Base.astro",
+      "line": 14,
+      "recommendation": "Add <link rel='canonical' href={canonicalURL} /> to the <head> section"
+    },
+    {
+      "check": "fallback_domain",
+      "severity": "CRITICAL",
+      "page": "all",
+      "finding": "Fallback domain is deflocksc.netlify.app instead of deflocksc.org",
+      "file": "src/layouts/Base.astro",
+      "lines": [14, 15],
+      "recommendation": "Change fallback from 'https://deflocksc.netlify.app' to 'https://deflocksc.org'"
+    },
+    {
+      "check": "404_page",
+      "severity": "CRITICAL",
+      "page": "all",
+      "finding": "No custom 404 page exists (src/pages/404.astro missing)",
+      "recommendation": "Create src/pages/404.astro with branded layout, navigation links, and search suggestion"
+    },
+    {
+      "check": "schema_markup",
+      "severity": "WARNING",
+      "page": "all",
+      "finding": "Zero JSON-LD structured data on any page",
+      "recommendation": "Add FAQPage schema to homepage, Article schema to blog posts, Organization schema sitewide"
+    },
+    {
+      "check": "image_dimensions",
+      "severity": "WARNING",
+      "page": "/blog, /blog/[slug]",
+      "finding": "Blog featured images missing width and height attributes causing CLS",
+      "files": ["src/pages/blog/index.astro", "src/pages/blog/[...slug].astro"],
+      "recommendation": "Add width and height attributes or CSS aspect-ratio to reserve layout space"
+    },
+    {
+      "check": "image_lazy_loading",
+      "severity": "WARNING",
+      "page": "/blog/[slug]",
+      "finding": "Related post images missing loading='lazy' attribute",
+      "file": "src/pages/blog/[...slug].astro",
+      "line": 150,
+      "recommendation": "Add loading='lazy' to related post images"
+    },
+    {
+      "check": "security_headers",
+      "severity": "WARNING",
+      "page": "all",
+      "finding": "No security headers configured in netlify.toml",
+      "file": "netlify.toml",
+      "recommendation": "Add [[headers]] section with X-Content-Type-Options, X-Frame-Options, Referrer-Policy"
+    },
+    {
+      "check": "font_loading",
+      "severity": "WARNING",
+      "page": "all",
+      "finding": "Google Fonts loaded via render-blocking <link> stylesheet",
+      "file": "src/layouts/Base.astro",
+      "line": 24,
+      "recommendation": "Self-host fonts or use non-render-blocking loading pattern"
+    },
+    {
+      "check": "meta_description_length",
+      "severity": "WARNING",
+      "page": "/",
+      "finding": "Homepage meta description is 101 characters (below 120 recommended minimum)",
+      "file": "src/layouts/Base.astro",
+      "line": 13,
+      "recommendation": "Expand to 130-155 characters while keeping the urgency"
+    },
+    {
+      "check": "og_type",
+      "severity": "WARNING",
+      "page": "/blog/[slug]",
+      "finding": "og:type hardcoded to 'website' on blog posts instead of 'article'",
+      "file": "src/layouts/Base.astro",
+      "line": 32,
+      "recommendation": "Accept ogType prop, default to 'website', pass 'article' from blog template"
+    },
+    {
+      "check": "og_site_name",
+      "severity": "WARNING",
+      "page": "all",
+      "finding": "Missing og:site_name meta property",
+      "file": "src/layouts/Base.astro",
+      "recommendation": "Add <meta property='og:site_name' content='DeflockSC' />"
+    },
+    {
+      "check": "default_title",
+      "severity": "WARNING",
+      "page": "any page without title prop",
+      "finding": "Default title fallback is only 'DeflockSC' (11 chars, not descriptive)",
+      "file": "src/layouts/Base.astro",
+      "line": 13,
+      "recommendation": "Change default to 'DeflockSC - Stop License Plate Surveillance in South Carolina'"
+    },
+    {
+      "check": "hreflang",
+      "severity": "INFO",
+      "page": "all",
+      "finding": "No hreflang tags (expected for single-language English site)",
+      "recommendation": "No action needed unless adding multilingual content"
+    },
+    {
+      "check": "unused_dependency",
+      "severity": "INFO",
+      "page": "n/a",
+      "finding": "@fontsource-variable/inter is in package.json but never imported",
+      "file": "package.json",
+      "line": 18,
+      "recommendation": "Remove with npm uninstall @fontsource-variable/inter"
+    },
+    {
+      "check": "rss_feed",
+      "severity": "INFO",
+      "page": "/rss.xml",
+      "finding": "RSS feed properly implemented with auto-discovery link in head",
+      "recommendation": "No action needed"
+    },
+    {
+      "check": "generator_meta",
+      "severity": "INFO",
+      "page": "all",
+      "finding": "Astro.generator meta tag reveals framework version",
+      "file": "src/layouts/Base.astro",
+      "line": 26,
+      "recommendation": "Optional: remove to avoid revealing tech stack"
+    },
+    {
+      "check": "external_links",
+      "severity": "INFO",
+      "page": "all",
+      "finding": "All external links use rel='noopener' and sr-only 'opens in new tab' text",
+      "recommendation": "No action needed -- excellent practice"
+    },
+    {
+      "check": "image_alt_text",
+      "severity": "INFO",
+      "page": "all",
+      "finding": "All images have appropriate alt text; decorative images use alt='' aria-hidden='true'",
+      "recommendation": "No action needed"
+    },
+    {
+      "check": "reduced_motion",
+      "severity": "INFO",
+      "page": "all",
+      "finding": "All animations respect prefers-reduced-motion media query",
+      "recommendation": "No action needed -- excellent accessibility practice"
+    }
+  ],
+  "checklist": [
+    {"check": "title_tags", "status": "PASS", "severity": "--", "details": "All 4 page templates have unique, descriptive titles under 60 chars"},
+    {"check": "meta_descriptions", "status": "PASS", "severity": "WARNING", "details": "Present on all pages; homepage at 101 chars is below 120 target"},
+    {"check": "canonical_urls", "status": "FAIL", "severity": "CRITICAL", "details": "No <link rel='canonical'> rendered on any page"},
+    {"check": "heading_hierarchy", "status": "PASS", "severity": "--", "details": "Exactly 1 H1 per page; proper H2>H3 nesting in all components"},
+    {"check": "image_alt_text", "status": "PASS", "severity": "--", "details": "All images have descriptive alt text"},
+    {"check": "schema_markup", "status": "FAIL", "severity": "WARNING", "details": "Zero structured data on any page"},
+    {"check": "robots_txt", "status": "FAIL", "severity": "CRITICAL", "details": "File does not exist"},
+    {"check": "xml_sitemap", "status": "FAIL", "severity": "CRITICAL", "details": "@astrojs/sitemap not installed"},
+    {"check": "https", "status": "PASS", "severity": "--", "details": "HTTPS enforced; no mixed content in source"},
+    {"check": "viewport_meta", "status": "PASS", "severity": "--", "details": "Proper width=device-width, initial-scale=1"},
+    {"check": "open_graph", "status": "PASS", "severity": "WARNING", "details": "og:type hardcoded; missing og:site_name"},
+    {"check": "twitter_cards", "status": "PASS", "severity": "--", "details": "summary_large_image with all required fields"},
+    {"check": "internal_links", "status": "PASS", "severity": "--", "details": "Nav links all pages; toolkit uses descriptive anchor text"},
+    {"check": "404_page", "status": "FAIL", "severity": "CRITICAL", "details": "No custom 404 page"},
+    {"check": "security_headers", "status": "FAIL", "severity": "WARNING", "details": "No headers in netlify.toml"},
+    {"check": "font_loading", "status": "PASS", "severity": "WARNING", "details": "Render-blocking Google Fonts link"},
+    {"check": "image_dimensions", "status": "FAIL", "severity": "WARNING", "details": "Blog images missing width/height"},
+    {"check": "rss_feed", "status": "PASS", "severity": "--", "details": "Properly implemented with auto-discovery"},
+    {"check": "skip_link", "status": "PASS", "severity": "--", "details": "Skip to main content link present"},
+    {"check": "lang_attribute", "status": "PASS", "severity": "--", "details": "html lang='en' set"},
+    {"check": "charset", "status": "PASS", "severity": "--", "details": "meta charset='utf-8' present"},
+    {"check": "favicon", "status": "PASS", "severity": "--", "details": "SVG favicon properly linked"},
+    {"check": "noindex_check", "status": "PASS", "severity": "--", "details": "No accidental noindex directives"},
+    {"check": "fallback_domain", "status": "FAIL", "severity": "CRITICAL", "details": "Fallback is deflocksc.netlify.app not .org"},
+    {"check": "lazy_loading", "status": "PASS", "severity": "WARNING", "details": "Most images lazy-loaded; related posts missing it"}
+  ]
+}

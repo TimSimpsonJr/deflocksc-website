@@ -22,7 +22,7 @@ The **/toolkit** page provides four tabs of hands-on advocacy resources:
 - **Request Records** -- four ready-to-file SC FOIA letter templates (contracts, retention policies, camera locations, federal data-sharing agreements) with placeholder highlighting, copy-to-clipboard, and PDF download
 - **Speak Up** -- public comment preparation for council meetings: a timed 3-minute talk track, seven practical tips, and five pre-written rebuttals to common pushback from elected officials
 - **Spread the Word** -- peer-to-peer outreach materials: a one-pager overview, audience-specific conversation starters, print-ready business card designs (PNG + Avery 8371 PDF), and pre-filled social media share links
-- **Know Your Rights** -- legal context including a 4th Amendment primer (*Carpenter v. United States*, SC Constitution Article I §10), an interactive state comparison map showing ALPR laws in seven states, and a gap analysis of SC's three pending bills
+- **Know Your Rights** -- legal context including a 4th Amendment primer (*Carpenter v. United States*, SC Constitution Article I §10), an interactive state comparison map showing ALPR laws in seven states, and a gap analysis of SC's four pending bills
 
 ## Tech Stack
 

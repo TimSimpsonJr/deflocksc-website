@@ -69,12 +69,14 @@ Flock tells SC cities their data is "permanently deleted after 30 days." That's 
 
 The company that ran a secret federal pilot program without telling its own customers, whose CEO denied federal contracts on camera 3 weeks before being publicly exposed, whose cameras kept running after cities ordered them shut down: that's the company managing the surveillance infrastructure for communities across South Carolina.
 
-Three bills are sitting in committee right now that would set basic rules for this technology: retention limits, access controls, penalties for misuse. None of them have moved.
+Four bills are sitting in committee right now. H. 4675 is the strongest: it would ban Flock's cloud storage entirely and void every existing Flock contract in the state. The other three (S. 447, H. 3155, H. 4013) would set retention limits, access controls, and penalties for misuse. None of them have moved.
 
 If your rep sits on Judiciary or Education & Public Works, they have a direct say in whether these bills advance.
 
-<div class="flex justify-center my-10">
-  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer">Find Your Rep</button>
+<div class="not-prose my-10 border border-[rgba(255,255,255,0.07)] bg-[#1a1a1a] px-8 py-8 text-center">
+  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Take Action</p>
+  <p class="text-[#a3a3a3] text-sm mb-5">Find your city council, county council, and state legislators.</p>
+  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer">Find Your Rep</button>
 </div>
 
 ## Sources
@@ -85,4 +87,5 @@ If your rep sits on Judiciary or Education & Public Works, they have a direct sa
 - [Chicago Tribune: Evanston halts cameras after Illinois data shared with feds](https://www.chicagotribune.com/2025/09/02/evanston-halts-license-plate-reader-cameras-after-illinois-data-shared-with-feds/)
 - [Augusta Free Press: Staunton to cancel Flock contract](https://augustafreepress.com/news/staunton-to-cancel-flock-safety-camera-contract-doesnt-agree-with-ideology-of-ceo/)
 - [The Record: Flock cameras remained active after cities asked them turned off](https://therecord.media/flock-safety-cameras-remained-active-after-cities-asked-turned-off)
+- [SC Legislature: H. 4675](https://www.scstatehouse.gov/billsearch.php?billnumbers=4675&session=126)
 - [Post and Courier: SC ALPR cameras investigation (2024)](https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html)

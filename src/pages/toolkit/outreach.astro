@@ -1,0 +1,58 @@
+---
+import Base from '../../layouts/Base.astro';
+import ToolkitOutreach from '../../components/ToolkitOutreach.astro';
+
+const title = "Community Outreach Materials — Fight ALPR Surveillance in SC | DeflockSC";
+const description = "Business cards, one-pager, conversation starters, and social media share links to spread awareness about license plate surveillance in South Carolina.";
+
+const siblings = [
+  { href: '/toolkit/foia', label: 'Request Records' },
+  { href: '/toolkit/speaking', label: 'Speak Up' },
+  { href: '/toolkit/legal', label: 'Know Your Rights' },
+];
+---
+
+<Base title={title} description={description}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://deflocksc.org/" },
+      { "@type": "ListItem", "position": 2, "name": "Toolkit", "item": "https://deflocksc.org/toolkit" },
+      { "@type": "ListItem", "position": 3, "name": "Spread the Word", "item": "https://deflocksc.org/toolkit/outreach" }
+    ]
+  })} />
+
+  <section class="bg-[#111111] pt-24 pb-6">
+    <div class="max-w-4xl mx-auto px-6">
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex items-center gap-2 font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.14em]">
+          <li><a href="/" class="text-[#737373] hover:text-[#a3a3a3] transition-colors">Home</a></li>
+          <li class="text-[#525252]">/</li>
+          <li><a href="/toolkit" class="text-[#737373] hover:text-[#a3a3a3] transition-colors">Toolkit</a></li>
+          <li class="text-[#525252]">/</li>
+          <li class="text-[#e8e8e8]">Spread the Word</li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+  <section class="bg-[#111111]">
+    <div class="max-w-4xl mx-auto px-6 pb-20 md:pb-28">
+      <ToolkitOutreach />
+    </div>
+  </section>
+
+  <section class="bg-[#141414] border-t border-[rgba(255,255,255,0.07)]">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-4">More from the Toolkit</p>
+      <div class="flex flex-wrap gap-3">
+        {siblings.map((s) => (
+          <a href={s.href} class="font-['DM_Mono',monospace] text-[11px] uppercase tracking-[0.1em] text-[#a3a3a3] hover:text-[#e8e8e8] border border-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] px-4 py-2.5 transition-colors">
+            {s.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

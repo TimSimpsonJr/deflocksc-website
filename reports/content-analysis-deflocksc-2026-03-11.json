@@ -1,0 +1,270 @@
+{
+  "content_target": "https://deflocksc.org",
+  "local_source": "C:\\Users\\tim\\OneDrive\\Documents\\Projects\\deflocksc-website",
+  "target_keyword": "ALPR surveillance South Carolina",
+  "secondary_keywords": [
+    "license plate readers South Carolina",
+    "Flock Safety cameras SC",
+    "surveillance cameras SC",
+    "DeflockSC"
+  ],
+  "word_count": {
+    "homepage": 1800,
+    "toolkit": 3500,
+    "blog_published": 5050,
+    "blog_draft": 6500,
+    "total_indexable": 10350,
+    "total_with_drafts": 16850
+  },
+  "timestamp": "2026-03-11T00:00:00Z",
+  "quality_score": 58,
+  "dimensions": {
+    "keyword_usage": {
+      "score": 48,
+      "weighted_contribution": 12.0,
+      "density": {
+        "alpr": 0.0,
+        "license_plate": 0.22,
+        "surveillance": 0.17,
+        "flock_safety": 0.67,
+        "south_carolina": 0.44
+      },
+      "in_title": false,
+      "in_h1": false,
+      "in_first_paragraph": false,
+      "in_subheadings": 0,
+      "issues": [
+        "Primary keyword 'ALPR' appears zero times in homepage body text",
+        "Homepage H1 contains no target keywords (uses literary reference instead)",
+        "Homepage title tag contains 'Upstate SC' instead of 'South Carolina' - limits geographic scope",
+        "Zero H2 subheadings on homepage contain ALPR, surveillance, or license plate reader",
+        "Toolkit title tag 'Citizen Toolkit - DeflockSC' contains no topic keywords",
+        "Blog index title 'Blog -- DeflockSC' contains no keywords",
+        "Hero metadata bar with 'Automated License Plate Readers' is marked aria-hidden",
+        "Blog posts have better keyword usage but 4 of 6 are in draft state"
+      ]
+    },
+    "heading_structure": {
+      "score": 72,
+      "weighted_contribution": 10.8,
+      "pages": {
+        "homepage": {
+          "h1_count": 1,
+          "hierarchy_valid": true,
+          "heading_count": 12,
+          "issues": [
+            "H1 is editorial/literary, contains no target keywords",
+            "No H2 contains target keyword or variant"
+          ]
+        },
+        "toolkit": {
+          "h1_count": 1,
+          "hierarchy_valid": true,
+          "heading_count": 14,
+          "issues": [
+            "H1 'Push back. Start here.' is generic with no keywords"
+          ]
+        },
+        "blog_index": {
+          "h1_count": 1,
+          "hierarchy_valid": true,
+          "heading_count": 1,
+          "issues": [
+            "H1 is single word 'Blog' with zero keyword value"
+          ]
+        },
+        "blog_posts": {
+          "h1_count_per_post": 1,
+          "hierarchy_valid": true,
+          "issues": []
+        }
+      },
+      "issues": [
+        "Homepage, toolkit, and blog index H1s contain no target keywords",
+        "FAQ heading 'But what about...' is vague and not search-friendly"
+      ]
+    },
+    "readability": {
+      "score": 78,
+      "weighted_contribution": 11.7,
+      "avg_sentence_length": 18,
+      "avg_paragraph_length": 3.2,
+      "passive_voice_pct": 8,
+      "issues": [
+        "BillTracker has one 63-word sentence about Flock's network gap",
+        "FAQ answers are hidden behind sidebar click interaction - not scannable by default",
+        "Greenville FOIA post (4,200 words) could use a TLDR/summary section at top"
+      ]
+    },
+    "content_depth": {
+      "score": 55,
+      "weighted_contribution": 16.5,
+      "subtopics_covered": 7,
+      "subtopics_expected": 12,
+      "missing_subtopics": [
+        "What is ALPR / how do license plate readers work (definitional explainer)",
+        "ALPR camera locations and map (text content wrapper for the interactive map)",
+        "How to opt out of ALPR surveillance",
+        "ALPR data retention comparison by state (standalone page)",
+        "SC Bill H.4675 coverage (newest, strongest ALPR bill)",
+        "ALPR accuracy and false arrest statistics"
+      ],
+      "issues": [
+        "4 of 6 blog posts are draft and not indexable - represents 6,500 words of lost content",
+        "Homepage is thin (~1,800 words) for competitive advocacy keywords",
+        "Toolkit content (~2,500 words) hidden in inactive tabs may be deprioritized",
+        "No top-of-funnel 'What is ALPR' explainer content exists",
+        "SC Bill H.4675 (stricter provisions, warrant requirement) not tracked"
+      ]
+    },
+    "internal_linking": {
+      "score": 35,
+      "weighted_contribution": 5.25,
+      "link_counts": {
+        "homepage": 4,
+        "toolkit": 0,
+        "blog_index": 1,
+        "blog_post_avg": 0.5,
+        "footer": 0,
+        "nav": 3
+      },
+      "generic_anchors": 0,
+      "issues": [
+        "Homepage has only 4 internal links (all to toolkit page sections)",
+        "Zero links from homepage to blog",
+        "Zero links from blog posts back to homepage sections",
+        "Zero links between blog posts (relies on automated 'related posts' only)",
+        "Footer contains zero internal links (only external resources)",
+        "Toolkit does not link to any blog posts despite overlapping content",
+        "Blog post 'Bought With Your Money' has zero internal links despite 4,200 words",
+        "MapSection doesn't link to Greenville FOIA blog post",
+        "BillTracker doesn't link to legislation blog post"
+      ]
+    }
+  },
+  "technical_seo_issues": [
+    {
+      "issue": "Missing <link rel='canonical'> tag",
+      "severity": "critical",
+      "detail": "canonicalURL computed in Base.astro but never rendered as <link> element"
+    },
+    {
+      "issue": "No sitemap",
+      "severity": "high",
+      "detail": "No @astrojs/sitemap integration, no sitemap.xml"
+    },
+    {
+      "issue": "No robots.txt",
+      "severity": "high",
+      "detail": "No public/robots.txt file exists"
+    },
+    {
+      "issue": "No structured data",
+      "severity": "high",
+      "detail": "No JSON-LD for FAQPage, Article, Organization, or BreadcrumbList"
+    },
+    {
+      "issue": "Canonical fallback to Netlify domain",
+      "severity": "medium",
+      "detail": "Base.astro falls back to deflocksc.netlify.app if Astro.site undefined"
+    },
+    {
+      "issue": "SC Bill H.4675 not tracked",
+      "severity": "medium",
+      "detail": "Newest SC ALPR bill with strictest provisions not included in bill tracker"
+    }
+  ],
+  "recommendations": [
+    {
+      "action": "Publish the 4 draft blog posts by setting draft: false in frontmatter of 99-percent-of-the-plates-they-scan.md, flock-safetys-track-record.md, sc-has-no-license-plate-camera-law.md, and the-4th-amendment-loophole.md",
+      "dimension": "content_depth",
+      "impact": "high",
+      "effort": "quick_win",
+      "estimated_score_gain": 13
+    },
+    {
+      "action": "Add <link rel='canonical' href={canonicalURL} /> to the <head> section in src/layouts/Base.astro after the existing meta description tag",
+      "dimension": "technical",
+      "impact": "high",
+      "effort": "quick_win",
+      "estimated_score_gain": 0
+    },
+    {
+      "action": "Rewrite homepage title to 'DeflockSC -- Stop ALPR Surveillance in South Carolina | License Plate Reader Oversight'",
+      "dimension": "keyword_usage",
+      "impact": "high",
+      "effort": "quick_win",
+      "estimated_score_gain": 4
+    },
+    {
+      "action": "Install @astrojs/sitemap and create public/robots.txt pointing to sitemap",
+      "dimension": "technical",
+      "impact": "high",
+      "effort": "quick_win",
+      "estimated_score_gain": 0
+    },
+    {
+      "action": "Add FAQPage JSON-LD structured data to FAQ.astro using the existing faqs array",
+      "dimension": "keyword_usage",
+      "impact": "medium",
+      "effort": "quick_win",
+      "estimated_score_gain": 2
+    },
+    {
+      "action": "Add internal links to footer: Home, Toolkit, Blog, Camera Map, Bill Tracker, Take Action",
+      "dimension": "internal_linking",
+      "impact": "medium",
+      "effort": "quick_win",
+      "estimated_score_gain": 3
+    },
+    {
+      "action": "Rewrite toolkit title to 'ALPR Surveillance Toolkit -- FOIA Templates & Legal Resources | DeflockSC' and blog title to 'ALPR & License Plate Surveillance News -- DeflockSC Blog'",
+      "dimension": "keyword_usage",
+      "impact": "medium",
+      "effort": "quick_win",
+      "estimated_score_gain": 2
+    },
+    {
+      "action": "Break toolkit into 4 separate URL-based pages (/toolkit/foia, /toolkit/speaking, /toolkit/outreach, /toolkit/legal) each with unique title, meta description, and H1",
+      "dimension": "content_depth",
+      "impact": "high",
+      "effort": "deep_improvement",
+      "estimated_score_gain": 10
+    },
+    {
+      "action": "Create a 'What is ALPR' explainer page targeting top-of-funnel definitional queries",
+      "dimension": "content_depth",
+      "impact": "high",
+      "effort": "deep_improvement",
+      "estimated_score_gain": 5
+    },
+    {
+      "action": "Add 3-5 internal links to every blog post linking to homepage sections, toolkit pages, and other blog posts. Add links from homepage sections to relevant blog posts.",
+      "dimension": "internal_linking",
+      "impact": "high",
+      "effort": "deep_improvement",
+      "estimated_score_gain": 5
+    },
+    {
+      "action": "Add Article JSON-LD structured data to blog post template with headline, datePublished, author, description, and image",
+      "dimension": "keyword_usage",
+      "impact": "medium",
+      "effort": "deep_improvement",
+      "estimated_score_gain": 2
+    },
+    {
+      "action": "Add SC Bill H.4675 to bill tracker and write a blog post covering its stricter ALPR provisions",
+      "dimension": "content_depth",
+      "impact": "medium",
+      "effort": "deep_improvement",
+      "estimated_score_gain": 3
+    },
+    {
+      "action": "Optimize H1 tags: homepage to include 'ALPR Surveillance' or 'License Plate Cameras', toolkit to 'ALPR Surveillance Toolkit for South Carolina Residents', blog index to 'ALPR Surveillance News & Research'",
+      "dimension": "keyword_usage",
+      "impact": "medium",
+      "effort": "deep_improvement",
+      "estimated_score_gain": 3
+    }
+  ]
+}

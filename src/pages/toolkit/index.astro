@@ -1,0 +1,116 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const cards = [
+  {
+    title: 'Request Records',
+    heading: 'Four FOIA templates. Ready to file.',
+    desc: 'Camera location data, retention policies, federal sharing agreements, and Flock contracts. Fill in your agency and hit send.',
+    tags: ['4 PDF templates', 'Copy & send', 'SC FOIA § 30-4-10'],
+    href: '/toolkit/foia',
+    span: 2,
+  },
+  {
+    title: 'Speak Up',
+    heading: 'Show up to council. Say exactly this.',
+    desc: 'Full talk track for public comment. Rebuttals for common pushback. Council handout PDF to leave behind.',
+    tags: ['Talk track', 'Rebuttals', 'Handout PDF'],
+    href: '/toolkit/speaking',
+    span: 1,
+  },
+  {
+    title: 'Spread the Word',
+    heading: 'Cards, one-pager, conversation starters.',
+    desc: 'Four business card designs. Print on Avery 8371. Leave at coffee shops, hand out at events.',
+    tags: ['4 card designs', 'One-pager', 'Print-ready PDFs'],
+    href: '/toolkit/outreach',
+    span: 1,
+  },
+  {
+    title: 'Know Your Rights',
+    heading: 'The 4th Amendment. What SC is missing. What other states did.',
+    desc: 'Six states have passed ALPR limits. South Carolina has none. Here\'s what the law says and what the pending bills don\'t cover.',
+    tags: ['4th Amendment primer', 'State comparison', 'Bill gap analysis'],
+    href: '/toolkit/legal',
+    span: 2,
+  },
+];
+
+const hashRedirects: Record<string, string> = {
+  'request-records': '/toolkit/foia',
+  'speak-up': '/toolkit/speaking',
+  'spread-the-word': '/toolkit/outreach',
+  'know-your-rights': '/toolkit/legal',
+};
+---
+
+<Base title="ALPR Surveillance Toolkit — FOIA Templates & Action Guides | DeflockSC" description="FOIA request templates, council meeting prep, outreach materials, and legal resources for South Carolina residents fighting license plate surveillance.">
+  <section class="bg-[#111111] pt-28 pb-12 relative overflow-hidden">
+    <div class="absolute left-4 -top-2 font-bold leading-none text-[rgba(255,255,255,0.025)] pointer-events-none select-none" style="font-size: clamp(5rem, 10vw, 9rem)" aria-hidden="true">TOOLKIT</div>
+    <div class="max-w-4xl mx-auto px-6 relative z-10">
+      <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Citizen Toolkit</p>
+      <h1 class="text-[#e8e8e8] font-bold text-3xl md:text-5xl tracking-[-0.02em] mb-4">
+        Push back. Start here.
+      </h1>
+      <p class="text-[#a0a0a0] text-lg max-w-2xl">
+        Everything you need to push back against mass surveillance in South Carolina. File records requests, speak at council meetings, or spread the word in your community.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-[#111111] pb-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="hub-grid bg-[rgba(255,255,255,0.07)]" style="display:grid;gap:1px;">
+        {cards.map((card) => (
+          <a
+            href={card.href}
+            class="hub-card group"
+            style={card.span === 2 ? 'grid-column:span 2;' : ''}
+          >
+            <div class="p-7 flex flex-col h-full bg-[#111111] group-hover:bg-[#1a1a1a] transition-colors relative border-t-2 border-[#dc2626] overflow-hidden">
+              <p class="font-['DM_Mono',monospace] text-[9px] uppercase tracking-[0.2em] text-[#737373] mb-3 flex items-center gap-2 relative z-10">
+                <span class="w-[5px] h-[5px] rounded-full bg-[#dc2626] flex-shrink-0" style="box-shadow: 0 0 4px rgba(220,38,38,0.6);" aria-hidden="true"></span>
+                {card.title}
+              </p>
+              <h2 class="text-[18px] font-extrabold tracking-[-0.02em] text-[#e8e8e8] mb-2.5 leading-[1.2] relative z-10">{card.heading}</h2>
+              <p class="text-[14px] text-[#a3a3a3] leading-[1.6] flex-1 mb-6 relative z-10">{card.desc}</p>
+              <div class="flex flex-wrap gap-1 mb-0 relative z-10">
+                {card.tags.map((tag) => (
+                  <span class="font-['DM_Mono',monospace] text-[9px] tracking-[0.1em] uppercase text-[#fbbf24] border border-[rgba(251,191,36,0.2)] px-2 py-[3px]">{tag}</span>
+                ))}
+              </div>
+              <div class="absolute bottom-5 right-5 z-10 text-[#737373] group-hover:text-[#dc2626] transition-colors">
+                <svg class="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  @media (min-width: 768px) {
+    .hub-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 767px) {
+    .hub-grid {
+      grid-template-columns: 1fr;
+    }
+    .hub-card[style*="grid-column:span 2"] {
+      grid-column: span 1 !important;
+    }
+  }
+</style>
+
+<script define:vars={{ hashRedirects }}>
+  const hash = window.location.hash.slice(1);
+  if (hash && hash in hashRedirects) {
+    window.location.replace(hashRedirects[hash]);
+  }
+</script>

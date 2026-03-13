@@ -10,7 +10,22 @@
 
     <div class="flex items-center gap-4">
       <a href="/" class="hidden md:inline text-[#a3a3a3] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors">Home</a>
-      <a href="/toolkit" class="hidden md:inline text-[#a3a3a3] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors">Toolkit</a>
+      <div class="hidden md:inline-block relative" id="toolkit-dropdown">
+        <a href="/toolkit" class="text-[#a3a3a3] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors inline-flex items-center gap-1">
+          Toolkit
+          <svg class="w-3 h-3 toolkit-chevron transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+          </svg>
+        </a>
+        <div class="toolkit-menu absolute top-full left-1/2 -translate-x-1/2 pt-3 opacity-0 invisible transition-[opacity,visibility] duration-200">
+          <div class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] min-w-[180px]">
+            <a href="/toolkit/foia" class="block px-4 py-2.5 text-[#a3a3a3] hover:text-white hover:bg-[rgba(255,255,255,0.04)] font-bold text-[11px] uppercase tracking-[0.1em] transition-colors">FOIA Templates</a>
+            <a href="/toolkit/speaking" class="block px-4 py-2.5 text-[#a3a3a3] hover:text-white hover:bg-[rgba(255,255,255,0.04)] font-bold text-[11px] uppercase tracking-[0.1em] transition-colors">Speaking Guide</a>
+            <a href="/toolkit/outreach" class="block px-4 py-2.5 text-[#a3a3a3] hover:text-white hover:bg-[rgba(255,255,255,0.04)] font-bold text-[11px] uppercase tracking-[0.1em] transition-colors">Outreach Kit</a>
+            <a href="/toolkit/legal" class="block px-4 py-2.5 text-[#a3a3a3] hover:text-white hover:bg-[rgba(255,255,255,0.04)] font-bold text-[11px] uppercase tracking-[0.1em] transition-colors">Legal Primer</a>
+          </div>
+        </div>
+      </div>
       <a href="/blog" class="hidden md:inline text-[#a3a3a3] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors">Blog</a>
       <button type="button" data-open-action class="hidden md:inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.1em] px-5 py-2.5 transition-colors cursor-pointer">Take Action</button>
       <button type="button" id="nav-hamburger" class="md:hidden w-10 h-10 flex items-center justify-center text-[#a3a3a3] hover:text-white transition-colors cursor-pointer" aria-label="Open menu" aria-expanded="false">
@@ -24,7 +39,21 @@
   <!-- Mobile menu -->
   <div id="nav-mobile-menu" class="md:hidden hidden bg-[#111111] border-t border-[rgba(255,255,255,0.07)] px-6 py-4 flex flex-col gap-3">
     <a href="/" class="text-[#a3a3a3] hover:text-white font-bold text-sm uppercase tracking-[0.1em] transition-colors py-2">Home</a>
-    <a href="/toolkit" class="text-[#a3a3a3] hover:text-white font-bold text-sm uppercase tracking-[0.1em] transition-colors py-2">Toolkit</a>
+    <div>
+      <button type="button" id="mobile-toolkit-toggle" class="w-full text-left text-[#a3a3a3] hover:text-white font-bold text-sm uppercase tracking-[0.1em] transition-colors py-2 flex items-center justify-between cursor-pointer">
+        Toolkit
+        <svg class="w-3.5 h-3.5 mobile-toolkit-chevron transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div id="mobile-toolkit-sub" class="hidden pl-4 flex flex-col gap-1 pb-1">
+        <a href="/toolkit" class="text-[#737373] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors py-1.5">All Tools</a>
+        <a href="/toolkit/foia" class="text-[#737373] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors py-1.5">FOIA Templates</a>
+        <a href="/toolkit/speaking" class="text-[#737373] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors py-1.5">Speaking Guide</a>
+        <a href="/toolkit/outreach" class="text-[#737373] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors py-1.5">Outreach Kit</a>
+        <a href="/toolkit/legal" class="text-[#737373] hover:text-white font-bold text-xs uppercase tracking-[0.1em] transition-colors py-1.5">Legal Primer</a>
+      </div>
+    </div>
     <a href="/blog" class="text-[#a3a3a3] hover:text-white font-bold text-sm uppercase tracking-[0.1em] transition-colors py-2">Blog</a>
     <button type="button" data-open-action class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-3 mt-1 transition-colors cursor-pointer text-left">Take Action</button>
   </div>
@@ -63,6 +92,47 @@
         mobileMenu.classList.add('hidden');
         hamburger.setAttribute('aria-expanded', 'false');
       });
+    });
+  }
+
+  // Desktop toolkit dropdown — hover with delay
+  const dropdown = document.getElementById('toolkit-dropdown');
+  if (dropdown) {
+    const menu = dropdown.querySelector('.toolkit-menu') as HTMLElement;
+    const chevron = dropdown.querySelector('.toolkit-chevron') as HTMLElement;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const show = () => {
+      clearTimeout(timeout);
+      menu.classList.remove('opacity-0', 'invisible');
+      menu.classList.add('opacity-100', 'visible');
+      chevron.style.transform = 'rotate(180deg)';
+    };
+    const hide = () => {
+      timeout = setTimeout(() => {
+        menu.classList.add('opacity-0', 'invisible');
+        menu.classList.remove('opacity-100', 'visible');
+        chevron.style.transform = '';
+      }, 150);
+    };
+
+    dropdown.addEventListener('mouseenter', show);
+    dropdown.addEventListener('mouseleave', hide);
+    dropdown.addEventListener('focusin', show);
+    dropdown.addEventListener('focusout', (e) => {
+      if (!dropdown.contains((e as FocusEvent).relatedTarget as Node)) hide();
+    });
+  }
+
+  // Mobile toolkit sub-menu toggle
+  const mobileToggle = document.getElementById('mobile-toolkit-toggle');
+  const mobileSub = document.getElementById('mobile-toolkit-sub');
+  if (mobileToggle && mobileSub) {
+    mobileToggle.addEventListener('click', () => {
+      const isOpen = !mobileSub.classList.contains('hidden');
+      mobileSub.classList.toggle('hidden');
+      const chevron = mobileToggle.querySelector('.mobile-toolkit-chevron') as HTMLElement;
+      if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
     });
   }
 </script>

@@ -53,7 +53,9 @@ The argument for these cameras assumes the system works as advertised, that only
 
 ## What would change
 
-Three bills in the SC Legislature would set basic guardrails:
+Four bills in the SC Legislature would set basic guardrails:
+
+**H. 4675** is the strongest. It would ban Flock's cloud storage entirely, prohibit AI-based vehicle tracking, set a 21-day retention limit, and block immigration enforcement access. Sponsored by 4 Freedom Caucus Republicans.
 
 **S. 447** and **H. 3155** require visual confirmation before ALPR-based traffic stops, limit retention to 90 days (down from SLED's current 3 years), prohibit selling data, and create misdemeanor penalties for violations.
 
@@ -63,8 +65,10 @@ These aren't radical proposals. They're the minimum: tell people how long you're
 
 If your rep sits on Judiciary or Education & Public Works, they decide whether these bills move.
 
-<div class="flex justify-center my-10">
-  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 rounded transition-colors cursor-pointer">Find Your Rep</button>
+<div class="not-prose my-10 border border-[rgba(255,255,255,0.07)] bg-[#1a1a1a] px-8 py-8 text-center">
+  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Take Action</p>
+  <p class="text-[#a3a3a3] text-sm mb-5">Find your city council, county council, and state legislators.</p>
+  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer">Find Your Rep</button>
 </div>
 
 ## Sources
@@ -74,6 +78,7 @@ If your rep sits on Judiciary or Education & Public Works, they decide whether t
 - [Oyez: Carpenter v. United States (2018)](https://www.oyez.org/cases/2017/16-402)
 - [The 74: ICE taps into school security cameras (Feb 2026)](https://www.the74million.org/article/ice-taps-into-school-security-cameras-to-aid-trumps-immigration-crackdown-74-investigation-shows/)
 - [The Policing Project: SCPIF v. SLED](https://www.policingproject.org/south-carolina-license-plate-reader-lawsuit)
+- [SC Legislature: H. 4675](https://www.scstatehouse.gov/billsearch.php?billnumbers=4675&session=126)
 - [SC Legislature: S. 447](https://www.scstatehouse.gov/billsearch.php?billnumbers=447&session=126)
 - [SC Legislature: H. 3155](https://www.scstatehouse.gov/billsearch.php?billnumbers=3155&session=126)
 - [SC Legislature: H. 4013](https://www.scstatehouse.gov/billsearch.php?billnumbers=4013&session=126)
