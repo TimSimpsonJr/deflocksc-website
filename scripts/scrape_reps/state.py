@@ -96,6 +96,47 @@ def _scrape_phone(member_url: str) -> str:
         return ""
 
 
+def _generate_email(name: str, chamber: str) -> str:
+    """Generate an email from the legislator's name using the SC convention.
+
+    SC House uses firstnamelastname@schouse.gov and Senate uses
+    firstnamelastname@scsenate.gov.  Hyphens, periods, suffixes (Jr, Sr,
+    III, etc.) and middle names/initials are stripped.
+    """
+    domain = "scsenate.gov" if chamber == "senate" else "schouse.gov"
+
+    # Remove common suffixes
+    cleaned = re.sub(r",?\s+(Jr\.?|Sr\.?|II|III|IV)\s*$", "", name, flags=re.IGNORECASE)
+    parts = cleaned.split()
+    if len(parts) < 2:
+        return ""
+
+    first = parts[0]
+    last = parts[-1]
+
+    # Strip non-alpha characters (hyphens, periods, apostrophes)
+    local = re.sub(r"[^a-zA-Z]", "", first + last).lower()
+    return f"{local}@{domain}"
+
+
+def _backfill_emails(data: dict):
+    """Generate emails for members missing them using the SC naming convention."""
+    filled = 0
+    for chamber in ("senate", "house"):
+        for dist, rec in data.get(chamber, {}).items():
+            if not rec.get("email") and rec.get("name"):
+                email = _generate_email(rec["name"], chamber)
+                if email:
+                    rec["email"] = email
+                    filled += 1
+                    print(f"    Generated email for {rec['name']}: {email}")
+
+    if filled:
+        print(f"  Backfilled {filled} email(s) from name convention")
+    else:
+        print("  All members already have email addresses")
+
+
 def _backfill_phones(data: dict):
     """Fetch phone numbers from scstatehouse.gov for members missing them."""
     members = []
@@ -168,6 +209,9 @@ def update_state_legislators(source_url: str, output_path: str):
                 print(f"  WARNING: {chamber_name}[{district}] ({record.get('name', '?')}) has no email or phone")
 
     data = {"senate": senate, "house": house}
+
+    # Backfill missing emails using SC naming convention
+    _backfill_emails(data)
 
     # Backfill phone numbers from scstatehouse.gov member pages
     _backfill_phones(data)
