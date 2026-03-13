@@ -8,7 +8,7 @@ tags:
   - privacy
 draft: false
 featuredImage: /blog/sc-no-alpr-law-surveillance.png
-featuredImageAlt: "SC license plate camera surveillance — no law governs it"
+featuredImageAlt: "SC license plate camera surveillance: no law governs it"
 ---
 
 In June 2024, a North Charleston police lieutenant named Ryan Terrell used the city's surveillance camera network to track his wife. He suspected she was having an affair with a fellow sergeant. Over multiple days, he accessed city-owned camera feeds, followed her movements through live video, and eventually confronted her and the other officer in a Target parking lot.
@@ -59,7 +59,7 @@ And here's the detail that captures the whole problem in miniature: Florence Cou
 
 ## The transparency test
 
-In December 2025, the Columbia Muckraker sent identical FOIA requests to multiple South Carolina law enforcement agencies. The request was straightforward: audit logs from Flock's system. Who searched what, and when.
+In December 2025, the Columbia Muckraker sent identical FOIA requests to multiple South Carolina law enforcement agencies. The request was simple: audit logs from Flock's system. Who searched what, and when.
 
 The responses told you everything you need to know about the current state of ALPR accountability in South Carolina.
 
@@ -89,7 +89,7 @@ Every case study in this post traces back to the same root cause. South Carolina
 
 **No democratic oversight.** Berkeley County's cameras went up without a vote. Florence PD's cameras were funded by state appropriation, not local budget approval. The public has no formal say in whether these systems get deployed in their communities.
 
-<strong class="red">None of this is illegal. That's the problem.</strong> [Bills exist](h4675-strongest-alpr-bill-in-sc) that would change this. They're sitting in committee. Meanwhile, the cameras keep scanning and the database keeps growing, governed by nothing but internal policy and good intentions.
+<strong class="red">None of this is illegal. That's the problem.</strong> [Bills exist](/blog/h4675-strongest-alpr-bill-in-sc) that would change this. They're sitting in committee. Meanwhile, the cameras keep scanning and the database keeps growing, governed by nothing but internal policy and good intentions.
 
 If you want to do something about it, the [action guide](/blog/how-to-fight-alpr-surveillance-sc) has 5 concrete steps: FOIA requests, council meetings, outreach, and more.
 

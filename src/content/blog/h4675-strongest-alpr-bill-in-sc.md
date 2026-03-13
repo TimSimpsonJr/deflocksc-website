@@ -9,7 +9,7 @@ tags:
   - h4675
 draft: false
 featuredImage: /blog/sc-alpr-bill-h4675-legislation.png
-featuredImageAlt: "SC license plate camera bill H4675 — legal documents and gavel illustration"
+featuredImageAlt: "SC license plate camera bill H4675: legal documents and gavel illustration"
 ---
 
 South Carolina has [4 bills](/blog/sc-has-no-license-plate-camera-law) that would regulate license plate cameras. Three of them set rules for what police can do with camera data. H4675 sets rules for what Flock Safety can do with it.

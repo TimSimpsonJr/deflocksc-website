@@ -9,7 +9,7 @@ tags:
   - legislation
 draft: false
 featuredImage: /blog/4th-amendment-loophole-legislation.png
-featuredImageAlt: "The 4th Amendment loophole — legal documents and gavel illustration"
+featuredImageAlt: "The 4th Amendment loophole: legal documents and gavel illustration"
 ---
 
 ## The promise

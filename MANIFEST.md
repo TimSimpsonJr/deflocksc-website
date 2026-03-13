@@ -2,8 +2,8 @@
 
 ## Stack
 
-Astro 5 + Tailwind CSS 4 single-page advocacy site against ALPR surveillance in South Carolina.
-MapLibre GL JS for camera map. Satori + Sharp for OG images. TinaCMS for blog editing.
+Astro 5 + Tailwind CSS 4 advocacy site against ALPR surveillance in South Carolina.
+MapLibre GL JS for camera map. Self-hosted fonts (Instrument Sans Variable, DM Mono via @fontsource).
 Deployed on Netlify (auto-deploy from master). Analytics via Umami (proxied).
 
 ## Structure
@@ -11,26 +11,33 @@ Deployed on Netlify (auto-deploy from master). Analytics via Umami (proxied).
 ```
 src/
   layouts/
-    Base.astro                  # Shell: Nav, main slot, Footer
+    Base.astro                  # Shell: Nav, main slot, Footer, JSON-LD, skip-to-content
   components/
-    Nav.astro                   # Fixed nav — logo, Home/Toolkit/Blog links + "Take Action" CTA
+    Nav.astro                   # Fixed nav — logo, Toolkit dropdown, Blog link, hamburger, "Take Action" CTA
     Hero.astro                  # Camera PNG + animated SVG light cones
     HowItWorks.astro            # Carousel explaining ALPR surveillance
     HowItWorksOverlays.astro    # Case study overlay panels (extracted from HowItWorks)
-    MapSection.astro             # MapLibre camera map with clustering + popups
+    MapSection.astro            # MapLibre camera map with clustering + popups
     BillTracker.astro           # SC legislature bill status cards
+    BlogPreview.astro           # Homepage 5-post carousel grid
     FAQ.astro                   # Accordion with optional source citations
+    CitizenToolkit.astro        # Homepage toolkit preview cards → links to /toolkit/*
     TakeAction.astro            # CTA section, opens ActionModal
     ActionModal.astro           # Rep lookup: geolocation, address, or manual dropdown
-    Footer.astro                # 2-column: About + Resources
-    ToolkitTabs.astro           # Four-tab container with sticky nav + hash routing
+    Footer.astro                # 3-column: About, Blog, Resources
     ToolkitFoia.astro           # FOIA agency finder + letter templates with auto-fill
     ToolkitSpeaking.astro       # Public comment guide: talk track, tips, rebuttals
     ToolkitOutreach.astro       # One-pager, conversation starters, business cards, share links
     ToolkitLegal.astro          # 4th Amendment primer, state map, bill gap analysis
   pages/
     index.astro                 # Homepage — assembles all section components
-    toolkit.astro               # Citizen toolkit page (FOIA, speaking, outreach, legal)
+    404.astro                   # Branded error page
+    toolkit/
+      index.astro               # Toolkit hub — card grid linking to 4 subpages + hash redirects
+      foia.astro                # FOIA templates subpage
+      speaking.astro            # Council meeting prep subpage
+      outreach.astro            # Outreach materials subpage
+      legal.astro               # Legal resources subpage
     blog/index.astro            # Blog listing — featured hero + grid + tag filtering
     blog/[...slug].astro        # Individual post — TOC sidebar, progress bar, read time, related posts
     blog/[...slug]/og.png.ts    # Dynamic OG image generation per post
@@ -55,7 +62,7 @@ src/
     foia-finder.ts              # Agency finder: location lookup, browse/filter, auto-fill
     toolkit-legal.ts            # State comparison map, bill gap analysis interactivity
   data/
-    bills.json                  # SC legislature bills (populated by scraper)
+    bills.json                  # SC legislature bills — 4 bills (populated by scraper)
     state-legislators.json      # State reps and senators
     local-councils.json         # County/city council members
     action-letters.json         # 85 locally tailored letter templates (all 46 counties)
@@ -66,11 +73,21 @@ src/
     toolkit-outreach.json       # One-pager, conversation starters, business card designs
     toolkit-legal.json          # 4th Amendment cases, state comparison, bill gap analysis
   styles/
-    global.css                  # Tailwind base, glow-frame, custom utilities
+    global.css                  # Self-hosted font imports, Tailwind base, glow-frame, custom utilities
   content/
-    blog/                       # Markdown blog posts (Astro content collections)
+    blog/                       # 8 Markdown blog posts (Astro content collections)
   content.config.ts             # Content collection definitions (glob loader)
   umami.d.ts                    # Type declarations for Umami analytics
+
+public/
+  robots.txt                    # Search engine crawl directives + sitemap reference
+  districts/                    # GeoJSON boundaries (state leg, county, city)
+  camera-data.json              # Cached Deflock camera data
+  map-style.json                # Customized OpenFreeMap dark tile style
+  hero-cameras*.png             # Responsive hero image variants (650w–2600w)
+  og-image.png                  # Default Open Graph image
+  favicon.svg                   # Site favicon
+  _headers                      # Netlify security headers (CSP, X-Frame-Options, Permissions-Policy)
 
 scripts/
   scraper.py                    # SC statehouse bill scraper → bills.json
@@ -83,14 +100,6 @@ scripts/
   fetch-camera-data.mjs         # Deflock CDN camera data fetch
   publish.py                    # Obsidian vault → blog post publisher (auto git commit + push)
 
-public/
-  districts/                    # GeoJSON boundaries (state leg, county, city)
-  camera-data.json              # Cached Deflock camera data
-  map-style.json                # Customized OpenFreeMap dark tile style
-  hero-cameras*.png             # Responsive hero image variants (650w–2600w)
-  og-image.png                  # Default Open Graph image
-  favicon.svg                   # Site favicon
-
 .github/workflows/
   scrape-bills.yml              # Weekly bill scraping (Jan–Jun), monthly off-session
   scrape-reps.yml               # Rep data scraping
@@ -99,8 +108,8 @@ public/
 
 docs/
   architecture.md               # System architecture overview
-  adapting-scrapers.md           # Adding your state's rep data
-  research-workflow.md           # Creating localized copy, research, and form letters
+  adapting-scrapers.md          # Adding your state's rep data
+  research-workflow.md          # Creating localized copy, research, and form letters
   deployment.md                 # Netlify deployment guide
   plans/                        # Design docs and implementation plans
 ```
@@ -112,6 +121,9 @@ docs/
 - **camera-map.ts extracted from MapSection** — MapLibre init, layers, popups, cluster handling
 - **carousel.ts extracted from HowItWorks** — auto-advance, navigation, keyboard a11y
 - **HowItWorksOverlays.astro extracted from HowItWorks** — case study overlay panels
+- **toolkit/index.astro hub → toolkit/*.astro subpages** — card grid links + client-side hash redirects for backward compat
+- **ToolkitFoia/Speaking/Outreach/Legal.astro** — rendered directly in subpages, shared across hub and subpage contexts
+- **BlogPreview.astro ← content/blog/** — homepage carousel pulls latest 5 published posts
 - **scraper.py → bills.json** — GitHub Actions runs scraper, commits updated bill data
 - **build-districts.py → public/districts/** — generates GeoJSON consumed by district-matcher.ts at runtime
 - **publish.py ← Obsidian vault** — pulls blog posts tagged `publish: deflocksc`, auto commits + pushes
@@ -119,3 +131,4 @@ docs/
 - **blog/index.astro** — client-side tag filtering with URL hash persistence
 - **fetch-camera-data.mjs → camera-data.json** — caches Deflock CDN data for the map
 - **validate-data.py** — runs in scraper CI workflows to catch malformed data before commit
+- **netlify.toml + _headers** — both set security headers; _headers has CSP, netlify.toml has the rest (keep in sync)
