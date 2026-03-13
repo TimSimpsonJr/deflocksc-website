@@ -224,9 +224,7 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
       format: 'json',
     });
 
-    const res = await fetch(
-      'https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?' + params.toString()
-    );
+    const res = await fetch('/api/geocode?' + params.toString());
 
     if (!res.ok) throw new Error('Census geocoder HTTP ' + res.status);
 
