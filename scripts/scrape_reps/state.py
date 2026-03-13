@@ -78,22 +78,115 @@ def _first_link(links_str: str) -> str:
     return links_str.strip().split(";")[0].strip()
 
 
-def _scrape_phone(member_url: str) -> str:
-    """Scrape Columbia office phone from a scstatehouse.gov member page."""
+def _scrape_member_page(member_url: str) -> dict:
+    """Scrape email and phone from a scstatehouse.gov member page.
+
+    Returns a dict with optional "email" and "phone" keys.
+    """
+    result = {}
     try:
         resp = requests.get(member_url, timeout=15, headers=HEADERS)
         resp.raise_for_status()
         soup = BeautifulSoup(resp.text, "html.parser")
+
+        # Look for email in mailto links
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if href.startswith("mailto:"):
+                email = href[7:].strip()
+                if "@" in email:
+                    result["email"] = email
+                    break
+
+        # Look for email in page text if no mailto link found
+        if "email" not in result:
+            text = soup.get_text()
+            match = re.search(
+                r"[a-zA-Z0-9._%+-]+@(?:schouse|scsenate)\.gov", text
+            )
+            if match:
+                result["email"] = match.group(0)
+
+        # Look for phone
         for span in soup.find_all("span"):
             if span.get_text(strip=True) == "Business Phone":
                 p_text = span.parent.get_text(strip=True)
                 match = re.search(r"\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}", p_text)
                 if match:
-                    return match.group(0)
-        return ""
+                    result["phone"] = match.group(0)
+                    break
+
     except Exception as e:
-        print(f"    WARNING: Failed to scrape phone from {member_url}: {e}")
+        print(f"    WARNING: Failed to scrape {member_url}: {e}")
+
+    return result
+
+
+def _generate_email(name: str, chamber: str) -> str:
+    """Generate an email from the legislator's name using the SC convention.
+
+    SC House uses firstnamelastname@schouse.gov and Senate uses
+    firstnamelastname@scsenate.gov.  Hyphens, periods, suffixes (Jr, Sr,
+    III, etc.) and middle names/initials are stripped.
+    """
+    domain = "scsenate.gov" if chamber == "senate" else "schouse.gov"
+
+    # Remove common suffixes
+    cleaned = re.sub(r",?\s+(Jr\.?|Sr\.?|II|III|IV)\s*$", "", name, flags=re.IGNORECASE)
+    parts = cleaned.split()
+    if len(parts) < 2:
         return ""
+
+    first = parts[0]
+    last = parts[-1]
+
+    # Strip non-alpha characters (hyphens, periods, apostrophes)
+    local = re.sub(r"[^a-zA-Z]", "", first + last).lower()
+    return f"{local}@{domain}"
+
+
+def _backfill_emails(data: dict):
+    """Backfill emails by scraping scstatehouse.gov, then fall back to name convention."""
+    members = []
+    for chamber in ("senate", "house"):
+        for dist, rec in data.get(chamber, {}).items():
+            if not rec.get("email") and rec.get("name"):
+                members.append((chamber, rec))
+
+    if not members:
+        print("  All members already have email addresses")
+        return
+
+    print(f"  Backfilling emails for {len(members)} member(s)...")
+    scraped = 0
+    generated = 0
+
+    for i, (chamber, rec) in enumerate(members):
+        # Try scraping from scstatehouse.gov first
+        if rec.get("website"):
+            info = _scrape_member_page(rec["website"])
+            if info.get("email"):
+                rec["email"] = info["email"]
+                scraped += 1
+                print(f"    Scraped email for {rec['name']}: {info['email']}")
+                # Also grab phone if we got it for free
+                if info.get("phone") and not rec.get("phone"):
+                    rec["phone"] = info["phone"]
+                if (i + 1) < len(members):
+                    time.sleep(0.3)  # polite rate limiting
+                continue
+            if (i + 1) < len(members):
+                time.sleep(0.3)
+
+        # Fall back to name-based generation
+        email = _generate_email(rec["name"], chamber)
+        if email:
+            rec["email"] = email
+            generated += 1
+            print(f"    Generated email for {rec['name']}: {email}")
+
+    print(f"  Backfilled {scraped + generated} email(s) "
+          f"({scraped} scraped, {generated} generated from name convention)")
 
 
 def _backfill_phones(data: dict):
@@ -111,10 +204,13 @@ def _backfill_phones(data: dict):
     print(f"  Backfilling phone numbers for {len(members)} members from scstatehouse.gov...")
     filled = 0
     for i, rec in enumerate(members):
-        phone = _scrape_phone(rec["website"])
-        if phone:
-            rec["phone"] = phone
+        info = _scrape_member_page(rec["website"])
+        if info.get("phone"):
+            rec["phone"] = info["phone"]
             filled += 1
+        # Also grab email if we got it for free
+        if info.get("email") and not rec.get("email"):
+            rec["email"] = info["email"]
         if (i + 1) % 20 == 0:
             print(f"    ... {i + 1}/{len(members)} done")
         time.sleep(0.3)  # polite rate limiting
@@ -168,6 +264,9 @@ def update_state_legislators(source_url: str, output_path: str):
                 print(f"  WARNING: {chamber_name}[{district}] ({record.get('name', '?')}) has no email or phone")
 
     data = {"senate": senate, "house": house}
+
+    # Backfill missing emails using SC naming convention
+    _backfill_emails(data)
 
     # Backfill phone numbers from scstatehouse.gov member pages
     _backfill_phones(data)
