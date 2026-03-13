@@ -91,7 +91,7 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
       {posts.length > 1 && (
         <div class="grid md:grid-cols-2 gap-6" id="post-grid">
           {posts.slice(1).map((post) => (
-            <a href={`/blog/${post.id}`} class="block group blog-card" data-tags={(post.data.tags ?? []).join(',')}>
+            <a href={`/blog/${post.id}`} class="block group blog-card min-w-0" data-tags={(post.data.tags ?? []).join(',')}>
               <article class="bg-[#111111] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.07)] group-hover:border-[rgba(255,255,255,0.12)] transition-all duration-200 group-hover:-translate-y-0.5 h-full">
                 {post.data.featuredImage && (
                   <img
