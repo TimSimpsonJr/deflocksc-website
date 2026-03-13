@@ -32,7 +32,9 @@ function init(data: ModalData): void {
     const groups = buildGroups(match, actionLetters, stateLegislators, localCouncils);
     showState('results');
     renderResults(groups, cameraCounts);
-    document.getElementById('action-results')?.focus();
+    document.getElementById('action-results')?.focus({ preventScroll: true });
+    document.getElementById('action-modal')!.scrollTop = 0;
+    document.getElementById('action-modal-card')!.scrollTop = 0;
   }
 
   // Geolocation button
