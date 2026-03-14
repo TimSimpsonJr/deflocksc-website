@@ -6,10 +6,11 @@
     "dev": "astro dev",
     "tina": "tinacms dev -c \"astro dev\"",
     "start": "astro dev",
+    "prebuild": "node scripts/sync-open-civics.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "validate": "python scripts/validate-data.py",
+    "sync-data": "node scripts/sync-open-civics.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
