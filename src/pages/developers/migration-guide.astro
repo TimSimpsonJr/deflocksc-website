@@ -1,0 +1,442 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const title = "Migration Guide — Replace Scrapers with open-civics | DeflockSC";
+const description = "Step-by-step guide for replacing existing scraper infrastructure with the open-civics npm packages for SC legislator contact data and district boundaries.";
+---
+
+<Base title={title} description={description}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://deflocksc.org/" },
+      { "@type": "ListItem", "position": 2, "name": "Developers", "item": "https://deflocksc.org/developers" },
+      { "@type": "ListItem", "position": 3, "name": "Migration Guide", "item": "https://deflocksc.org/developers/migration-guide" }
+    ]
+  })} />
+
+  <section class="bg-[#111111] pt-24 pb-6">
+    <div class="max-w-4xl mx-auto px-6">
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex items-center gap-2 font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.14em]">
+          <li><a href="/" class="text-[#737373] hover:text-[#a3a3a3] transition-colors">Home</a></li>
+          <li class="text-[#525252]">/</li>
+          <li class="text-[#e8e8e8]">Migration Guide</li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+  <section class="bg-[#111111]">
+    <div class="max-w-4xl mx-auto px-6 pb-20 md:pb-28">
+
+      <!-- Header -->
+      <div class="mb-12">
+        <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">Developer Guide</p>
+        <h1 class="text-[#e8e8e8] font-bold text-2xl md:text-3xl tracking-[-0.02em] mb-4">
+          Migrating to open-civics
+        </h1>
+        <p class="text-[#d4d4d4] text-base leading-[1.7] mb-6">
+          Instructions for replacing existing scraper infrastructure in DeflockSC and Call Y'all with the
+          <a href="https://github.com/TimSimpsonJr/open-civics" target="_blank" rel="noopener" class="text-[#fbbf24] underline">open-civics</a> npm packages.
+        </p>
+      </div>
+
+      <!-- What open-civics provides -->
+      <div class="mb-12">
+        <h2 class="text-[#e8e8e8] font-bold text-lg mb-4">What open-civics provides</h2>
+        <p class="text-[#d4d4d4] text-base leading-[1.7] mb-4">Two npm packages, updated weekly via automated scrapers:</p>
+        <ul class="space-y-3 mb-4">
+          <li class="flex gap-3">
+            <span class="text-[#dc2626] mt-1.5 flex-shrink-0">&#9632;</span>
+            <span class="text-[#d4d4d4] text-base leading-[1.7]">
+              <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-sm font-['DM_Mono',monospace]">open-civics</code>
+              &mdash; contact data (names, titles, emails, phones, districts, parties) for SC state legislators and 96 local jurisdictions
+            </span>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-[#dc2626] mt-1.5 flex-shrink-0">&#9632;</span>
+            <span class="text-[#d4d4d4] text-base leading-[1.7]">
+              <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-sm font-['DM_Mono',monospace]">open-civics-boundaries</code>
+              &mdash; GeoJSON district boundaries for client-side point-in-polygon matching
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Install -->
+      <div class="mb-12">
+        <h2 class="text-[#e8e8e8] font-bold text-lg mb-4">Install</h2>
+        <div class="bg-[#0a0a0a] border border-[rgba(255,255,255,0.07)] p-5 overflow-x-auto">
+          <pre class="text-sm font-['DM_Mono',monospace] text-[#d4d4d4]"><code>npm install open-civics open-civics-boundaries</code></pre>
+        </div>
+      </div>
+
+      <!-- Data shapes -->
+      <div class="mb-12">
+        <h2 class="text-[#e8e8e8] font-bold text-lg mb-6">Data shapes</h2>
+
+        <!-- State legislators -->
+        <div class="mb-8">
+          <h3 class="text-[#e8e8e8] font-semibold text-base mb-3">
+            State legislators
+            <span class="text-[#737373] font-normal text-sm ml-2 font-['DM_Mono',monospace]">open-civics/sc/state.json</span>
+          </h3>
+          <div class="bg-[#0a0a0a] border border-[rgba(255,255,255,0.07)] p-5 overflow-x-auto">
+            <pre class="text-sm font-['DM_Mono',monospace] text-[#d4d4d4]"><code>{`{
+  meta: { state: "SC", level: "state", lastUpdated: "2026-03-14" },
+  senate: {
+    [districtNumber: string]: {
+      name: string,
+      district: string,
+      party: "R" | "D",
+      email: string,
+      phone: string,
+      photoUrl?: string,
+      website?: string
+    }
+  },
+  house: { /* same shape */ },
+  governor: { name, title, email, phone, website }
+}`}</code></pre>
+          </div>
+        </div>
+
+        <!-- Local councils -->
+        <div class="mb-8">
+          <h3 class="text-[#e8e8e8] font-semibold text-base mb-3">
+            Local councils
+            <span class="text-[#737373] font-normal text-sm ml-2 font-['DM_Mono',monospace]">open-civics/sc/local/county-greenville.json</span>
+          </h3>
+          <div class="bg-[#0a0a0a] border border-[rgba(255,255,255,0.07)] p-5 overflow-x-auto">
+            <pre class="text-sm font-['DM_Mono',monospace] text-[#d4d4d4]"><code>{`{
+  meta: {
+    state: "SC",
+    level: "local",
+    jurisdiction: "county:greenville",  // or "place:greenville"
+    label: "Greenville County Council",
+    lastUpdated: "2026-03-14"
+  },
+  members: [
+    {
+      name: string,
+      title: string,       // e.g. "Council Member, District 17"
+      email?: string,
+      phone?: string
+    }
+  ]
+}`}</code></pre>
+          </div>
+          <p class="text-[#a3a3a3] text-sm mt-3">
+            Jurisdiction naming: <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">county-{'{name}'}.json</code> for counties,
+            <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">place-{'{name}'}.json</code> for cities/towns.
+          </p>
+        </div>
+
+        <!-- Boundaries -->
+        <div class="mb-8">
+          <h3 class="text-[#e8e8e8] font-semibold text-base mb-3">
+            Boundaries
+            <span class="text-[#737373] font-normal text-sm ml-2 font-['DM_Mono',monospace]">open-civics-boundaries/sc/boundaries/*.json</span>
+          </h3>
+          <p class="text-[#d4d4d4] text-base leading-[1.7] mb-4">
+            Standard GeoJSON FeatureCollections. Each feature has <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">properties.district</code> matching the district keys in contact data.
+          </p>
+          <ul class="space-y-2 text-[#d4d4d4] text-sm leading-[1.7]">
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span><code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">sldu.json</code> &mdash; state senate districts (46 features)</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span><code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">sldl.json</code> &mdash; state house districts (124 features)</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span><code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">county-{'{name}'}.json</code> &mdash; county council districts</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span><code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">place-{'{name}'}.json</code> &mdash; city council districts (where available)</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Import examples -->
+      <div class="mb-12">
+        <h2 class="text-[#e8e8e8] font-bold text-lg mb-4">Import examples</h2>
+        <div class="bg-[#0a0a0a] border border-[rgba(255,255,255,0.07)] p-5 overflow-x-auto">
+          <pre class="text-sm font-['DM_Mono',monospace] text-[#d4d4d4]"><code>{`// State legislators
+import scState from 'open-civics/sc/state.json';
+const senator = scState.senate["1"];
+const rep = scState.house["42"];
+const governor = scState.governor;
+
+// All senators as array
+const allSenators = Object.values(scState.senate);
+
+// Local councils
+import greenvilleCounty from 'open-civics/sc/local/county-greenville.json';
+const members = greenvilleCounty.members;
+
+// Boundaries for point-in-polygon lookup
+import senateBoundaries from 'open-civics-boundaries/sc/boundaries/sldu.json';
+import houseBoundaries from 'open-civics-boundaries/sc/boundaries/sldl.json';
+import countyBoundaries from 'open-civics-boundaries/sc/boundaries/county-greenville.json';`}</code></pre>
+        </div>
+      </div>
+
+      <!-- Dynamic loading -->
+      <div class="mb-12">
+        <h2 class="text-[#e8e8e8] font-bold text-lg mb-4">Dynamic loading</h2>
+        <p class="text-[#d4d4d4] text-base leading-[1.7] mb-4">If you need all jurisdictions:</p>
+        <div class="bg-[#0a0a0a] border border-[rgba(255,255,255,0.07)] p-5 overflow-x-auto">
+          <pre class="text-sm font-['DM_Mono',monospace] text-[#d4d4d4]"><code>{`// Load all local council files dynamically
+const localFiles = [
+  'county-greenville', 'county-spartanburg', 'place-greenville',
+  // ... full list at: github.com/TimSimpsonJr/open-civics/tree/master/data/sc/local
+];
+
+const councils = await Promise.all(
+  localFiles.map(f => import(\`open-civics/sc/local/\${f}.json\`))
+);`}</code></pre>
+        </div>
+      </div>
+
+      <!-- Point-in-polygon lookup -->
+      <div class="mb-12">
+        <h2 class="text-[#e8e8e8] font-bold text-lg mb-4">Point-in-polygon lookup</h2>
+        <p class="text-[#d4d4d4] text-base leading-[1.7] mb-4">
+          Use any geocoding service to get lat/lng from an address, then use Turf.js (or similar) to find which districts contain that point:
+        </p>
+        <div class="bg-[#0a0a0a] border border-[rgba(255,255,255,0.07)] p-5 overflow-x-auto">
+          <pre class="text-sm font-['DM_Mono',monospace] text-[#d4d4d4]"><code>{`import * as turf from '@turf/turf';
+import senateBoundaries from 'open-civics-boundaries/sc/boundaries/sldu.json';
+import scState from 'open-civics/sc/state.json';
+
+function findSenator(lat, lng) {
+  const point = turf.point([lng, lat]);
+  const district = senateBoundaries.features.find(f =>
+    turf.booleanPointInPolygon(point, f)
+  );
+  if (!district) return null;
+  return scState.senate[district.properties.district];
+}`}</code></pre>
+        </div>
+      </div>
+
+      <!-- Migration checklist -->
+      <div class="mb-12">
+        <h2 class="text-[#e8e8e8] font-bold text-lg mb-6">Migration checklist</h2>
+
+        <!-- Step 1 -->
+        <div class="mb-8">
+          <div class="flex items-start gap-3 mb-3">
+            <span class="font-['DM_Mono',monospace] text-[#dc2626] text-sm font-bold mt-0.5 flex-shrink-0">01</span>
+            <h3 class="text-[#e8e8e8] font-semibold text-base">Remove existing scraper code</h3>
+          </div>
+          <ul class="pl-9 space-y-2 text-[#d4d4d4] text-base leading-[1.7]">
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Delete any scraper scripts, cron jobs, or serverless functions that fetch legislator data</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Delete any local JSON/DB storage of legislator contact info</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Delete any boundary/district data files you maintain</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="mb-8">
+          <div class="flex items-start gap-3 mb-3">
+            <span class="font-['DM_Mono',monospace] text-[#dc2626] text-sm font-bold mt-0.5 flex-shrink-0">02</span>
+            <h3 class="text-[#e8e8e8] font-semibold text-base">Replace data access</h3>
+          </div>
+          <ul class="pl-9 space-y-2 text-[#d4d4d4] text-base leading-[1.7]">
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Install packages: <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">npm install open-civics open-civics-boundaries</code></span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Replace all data reads with imports from the packages (see examples above)</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>State legislators: <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">import scState from 'open-civics/sc/state.json'</code></span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Local councils: <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">{`import data from 'open-civics/sc/local/{jurisdiction}.json'`}</code></span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Boundaries: <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">{`import geo from 'open-civics-boundaries/sc/boundaries/{file}.json'`}</code></span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="mb-8">
+          <div class="flex items-start gap-3 mb-3">
+            <span class="font-['DM_Mono',monospace] text-[#dc2626] text-sm font-bold mt-0.5 flex-shrink-0">03</span>
+            <h3 class="text-[#e8e8e8] font-semibold text-base">Adapt to the data shape</h3>
+          </div>
+          <ul class="pl-9 space-y-2 text-[#d4d4d4] text-base leading-[1.7]">
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>State data is keyed by district number, not an array &mdash; use <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">Object.values()</code> if you need arrays</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Local members are in a <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">members</code> array with <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">name</code>, <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">title</code>, <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">email</code>, <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">phone</code></span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Party info is only on state legislators (not local)</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Some local members may be missing email or phone (the optional fields above)</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="mb-8">
+          <div class="flex items-start gap-3 mb-3">
+            <span class="font-['DM_Mono',monospace] text-[#dc2626] text-sm font-bold mt-0.5 flex-shrink-0">04</span>
+            <h3 class="text-[#e8e8e8] font-semibold text-base">Update any district lookup logic</h3>
+          </div>
+          <ul class="pl-9 space-y-2 text-[#d4d4d4] text-base leading-[1.7]">
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Replace any server-side geocoding/district lookup with client-side point-in-polygon using the boundary GeoJSON</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="text-[#525252] flex-shrink-0">&bull;</span>
+              <span>Or keep server-side if you prefer &mdash; just import the boundary files there instead</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Staying up to date -->
+      <div class="mb-12">
+        <h2 class="text-[#e8e8e8] font-bold text-lg mb-6">Staying up to date</h2>
+
+        <!-- Option A -->
+        <div class="mb-8">
+          <h3 class="text-[#e8e8e8] font-semibold text-base mb-3">
+            Option A: Dependabot
+            <span class="ml-2 text-[#dc2626] font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em]">Recommended</span>
+          </h3>
+          <p class="text-[#d4d4d4] text-base leading-[1.7] mb-4">
+            Add to <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">.github/dependabot.yml</code>:
+          </p>
+          <div class="bg-[#0a0a0a] border border-[rgba(255,255,255,0.07)] p-5 overflow-x-auto">
+            <pre class="text-sm font-['DM_Mono',monospace] text-[#d4d4d4]"><code>{`version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-name: "open-civics"
+      - dependency-name: "open-civics-boundaries"`}</code></pre>
+          </div>
+          <p class="text-[#a3a3a3] text-sm mt-3">This opens a PR whenever new data is published (weekly). Merge it to get fresh data.</p>
+        </div>
+
+        <!-- Option B -->
+        <div class="mb-8">
+          <h3 class="text-[#e8e8e8] font-semibold text-base mb-3">Option B: Pin to latest in CI</h3>
+          <p class="text-[#d4d4d4] text-base leading-[1.7] mb-4">In your deploy/build pipeline:</p>
+          <div class="bg-[#0a0a0a] border border-[rgba(255,255,255,0.07)] p-5 overflow-x-auto">
+            <pre class="text-sm font-['DM_Mono',monospace] text-[#d4d4d4]"><code>npm update open-civics open-civics-boundaries</code></pre>
+          </div>
+          <p class="text-[#a3a3a3] text-sm mt-3">This pulls the latest version on every deploy.</p>
+        </div>
+
+        <!-- Option C -->
+        <div class="mb-8">
+          <h3 class="text-[#e8e8e8] font-semibold text-base mb-3">Option C: Wildcard version range</h3>
+          <p class="text-[#d4d4d4] text-base leading-[1.7] mb-4">
+            In <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">package.json</code>:
+          </p>
+          <div class="bg-[#0a0a0a] border border-[rgba(255,255,255,0.07)] p-5 overflow-x-auto">
+            <pre class="text-sm font-['DM_Mono',monospace] text-[#d4d4d4]"><code>{`{
+  "dependencies": {
+    "open-civics": "*",
+    "open-civics-boundaries": "*"
+  }
+}`}</code></pre>
+          </div>
+          <p class="text-[#a3a3a3] text-sm mt-3">Every <code class="text-[#fbbf24] bg-[rgba(251,191,36,0.1)] px-1.5 py-0.5 text-xs font-['DM_Mono',monospace]">npm install</code> gets the latest. Less reproducible but always fresh.</p>
+        </div>
+
+        <div class="border-l-2 border-[#dc2626] pl-4 mb-6">
+          <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-1">Recommendation</p>
+          <p class="text-[#a3a3a3] text-sm leading-[1.6]">
+            Use Dependabot (Option A). It gives you visibility into what changed, lets you review before merging, and keeps your lockfile deterministic.
+          </p>
+        </div>
+      </div>
+
+      <!-- Update cadence -->
+      <div class="mb-12">
+        <h2 class="text-[#e8e8e8] font-bold text-lg mb-4">Update cadence</h2>
+        <div class="space-y-4">
+          <div class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] p-5">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#dc2626]">Contact Data</span>
+            </div>
+            <p class="text-[#d4d4d4] text-sm leading-[1.7]">
+              Scraped and published weekly (Mondays). State legislators change rarely; local councils change when elections happen or members resign.
+            </p>
+          </div>
+          <div class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] p-5">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#dc2626]">Boundary Data</span>
+            </div>
+            <p class="text-[#d4d4d4] text-sm leading-[1.7]">
+              Rebuilt monthly (1st of month). Boundaries only change after redistricting (every 10 years for state, occasionally for local).
+            </p>
+          </div>
+          <div class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] p-5">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#dc2626]">npm Publish</span>
+            </div>
+            <p class="text-[#d4d4d4] text-sm leading-[1.7]">
+              Every Friday if data changed since last release.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coverage -->
+      <div class="mb-12">
+        <h2 class="text-[#e8e8e8] font-bold text-lg mb-4">Available jurisdictions</h2>
+        <p class="text-[#d4d4d4] text-base leading-[1.7]">
+          96 local jurisdictions are covered &mdash; every SC county and incorporated municipality. Full list of files:
+          <a href="https://github.com/TimSimpsonJr/open-civics/tree/master/data/sc/local" target="_blank" rel="noopener" class="text-[#fbbf24] underline">open-civics/data/sc/local</a>
+        </p>
+      </div>
+
+      <!-- Source -->
+      <div class="border-t border-[rgba(255,255,255,0.07)] pt-8">
+        <p class="text-[#737373] text-sm">
+          Source: <a href="https://github.com/TimSimpsonJr/open-civics" target="_blank" rel="noopener" class="text-[#fbbf24] underline">github.com/TimSimpsonJr/open-civics</a>
+        </p>
+      </div>
+
+    </div>
+  </section>
+</Base>
