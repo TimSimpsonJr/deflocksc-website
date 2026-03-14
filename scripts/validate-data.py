@@ -308,11 +308,8 @@ def validate_boundary_files(registry):
 def main():
     print("Validating data files...\n")
 
-    # Load and validate each file
-    legislators = load_json("state-legislators.json")
-    if legislators is not None:
-        validate_state_legislators(legislators)
-        print("  Checked state-legislators.json")
+    # State legislator data now comes from the open-civics npm package.
+    # Validation of that data is handled upstream by the package maintainers.
 
     councils = load_json("local-councils.json")
     if councils is not None:

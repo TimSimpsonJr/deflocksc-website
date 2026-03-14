@@ -1,9 +1,11 @@
 name: Scrape Rep Data
 
+# State legislator data now comes from the open-civics npm package
+# (updated via Dependabot). This workflow only handles local councils
+# and district boundaries until those are also available in open-civics.
+
 on:
   schedule:
-    # Weekly Monday 10am ET (UTC-5 = 15:00 UTC)
-    - cron: '0 15 * * 1'
     # Monthly 1st at 10am ET
     - cron: '0 15 1 * *'
   workflow_dispatch:
@@ -15,34 +17,13 @@ on:
         type: choice
         options:
           - all
-          - state-only
           - local-only
           - boundaries-only
 
 jobs:
-  update-state-legislators:
-    if: >-
-      github.event_name == 'schedule' ||
-      github.event.inputs.scope == 'all' ||
-      github.event.inputs.scope == 'state-only'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install -r requirements.txt
-      - run: python -m scripts.scrape_reps --state-only
-      - run: python scripts/validate-data.py
-      - name: Commit if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --quiet src/data/state-legislators.json || (git add src/data/state-legislators.json && git commit -m "chore: update state legislator data" && git push)
-
   scrape-local-councils:
     if: >-
-      github.event.schedule == '0 15 1 * *' ||
+      github.event_name == 'schedule' ||
       github.event.inputs.scope == 'all' ||
       github.event.inputs.scope == 'local-only'
     runs-on: ubuntu-latest
@@ -62,7 +43,7 @@ jobs:
 
   build-boundaries:
     if: >-
-      github.event.schedule == '0 15 1 * *' ||
+      github.event_name == 'schedule' ||
       github.event.inputs.scope == 'all' ||
       github.event.inputs.scope == 'boundaries-only'
     runs-on: ubuntu-latest

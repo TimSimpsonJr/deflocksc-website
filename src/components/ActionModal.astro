@@ -1,6 +1,7 @@
 ---
 import actionLetters from '../data/action-letters.json';
-import stateLegislators from '../data/state-legislators.json';
+import scState from 'open-civics/sc/state.json';
+const stateLegislators = { senate: scState.senate, house: scState.house };
 import localCouncils from '../data/local-councils.json';
 import registryFull from '../data/registry.json';
 import cameraCounts from '../../public/camera-counts.json';

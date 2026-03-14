@@ -22,6 +22,8 @@
     "@tinacms/cli": "^2.1.9",
     "astro": "^5.18.0",
     "maplibre-gl": "^5.19.0",
+    "open-civics": "^0.1.1",
+    "open-civics-boundaries": "^0.1.1",
     "satori": "^0.24.1",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.2.1",

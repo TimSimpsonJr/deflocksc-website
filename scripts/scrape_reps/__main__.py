@@ -1,13 +1,14 @@
 """
 Scrape representative data for SC jurisdictions.
 
-Reads registry.json, dispatches adapters, updates local-councils.json
-and state-legislators.json.
+Reads registry.json, dispatches adapters, updates local-councils.json.
+
+State legislator data now comes from the open-civics npm package
+and is updated via Dependabot.
 
 Usage:
-    python -m scripts.scrape_reps                   # scrape all
-    python -m scripts.scrape_reps --state-only       # state legislators only
-    python -m scripts.scrape_reps --local-only       # local councils only
+    python -m scripts.scrape_reps                   # scrape all local councils
+    python -m scripts.scrape_reps --local-only       # same (kept for compat)
     python -m scripts.scrape_reps --jurisdiction county:greenville  # one only
     python -m scripts.scrape_reps --dry-run          # show what would run
 """
@@ -20,7 +21,6 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.join(SCRIPT_DIR, "..", "..")
 REGISTRY_PATH = os.path.join(PROJECT_ROOT, "src", "data", "registry.json")
-STATE_JSON = os.path.join(PROJECT_ROOT, "src", "data", "state-legislators.json")
 LOCAL_JSON = os.path.join(PROJECT_ROOT, "src", "data", "local-councils.json")
 
 # Adapter registry -- import adapters here as they are built
@@ -50,21 +50,6 @@ def get_adapter(entry: dict):
         print(f"  WARNING: No adapter registered for '{adapter_name}', skipping {entry['id']}")
         return None
     return cls(entry)
-
-
-def scrape_state(registry: dict, dry_run: bool = False):
-    """Download OpenStates CSV and update state-legislators.json."""
-    state_config = registry.get("state", {})
-    source_url = state_config.get("openStatesUrl", "")
-    print(f"\n=== State Legislators ===")
-    print(f"  Source: {source_url}")
-
-    if dry_run:
-        print("  [DRY RUN] Would download and update state-legislators.json")
-        return
-
-    from .state import update_state_legislators
-    update_state_legislators(source_url, STATE_JSON)
 
 
 def scrape_local(registry: dict, jurisdiction_filter: str = None, dry_run: bool = False):
@@ -115,20 +100,14 @@ def scrape_local(registry: dict, jurisdiction_filter: str = None, dry_run: bool 
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Scrape SC representative data.")
-    parser.add_argument("--state-only", action="store_true", help="Only update state legislators")
-    parser.add_argument("--local-only", action="store_true", help="Only update local councils")
+    parser = argparse.ArgumentParser(description="Scrape SC local council data.")
+    parser.add_argument("--local-only", action="store_true", help="Only update local councils (default behavior)")
     parser.add_argument("--jurisdiction", type=str, help="Scrape a single jurisdiction by ID")
     parser.add_argument("--dry-run", action="store_true", help="Show what would run without scraping")
     args = parser.parse_args()
 
     registry = load_registry()
-
-    if not args.local_only:
-        scrape_state(registry, dry_run=args.dry_run)
-
-    if not args.state_only:
-        scrape_local(registry, jurisdiction_filter=args.jurisdiction, dry_run=args.dry_run)
+    scrape_local(registry, jurisdiction_filter=args.jurisdiction, dry_run=args.dry_run)
 
 
 if __name__ == "__main__":
