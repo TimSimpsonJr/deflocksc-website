@@ -4,7 +4,7 @@
 
 Astro 5 + Tailwind CSS 4 advocacy site against ALPR surveillance in South Carolina.
 MapLibre GL JS for camera map. Self-hosted fonts (Instrument Sans Variable, DM Mono via @fontsource).
-Deployed on Netlify (auto-deploy from master). Analytics via Umami (proxied).
+Rep data from `open-civics` / `open-civics-boundaries` npm packages. Deployed on Netlify (auto-deploy from master).
 
 ## Structure
 
@@ -13,7 +13,7 @@ src/
   layouts/
     Base.astro                  # Shell: Nav, main slot, Footer, JSON-LD, skip-to-content
   components/
-    Nav.astro                   # Fixed nav — logo, Toolkit dropdown, Blog link, hamburger, "Take Action" CTA
+    Nav.astro                   # Fixed nav — logo, Toolkit dropdown, Blog link, "Take Action" CTA
     Hero.astro                  # Camera PNG + animated SVG light cones
     HowItWorks.astro            # Carousel explaining ALPR surveillance
     HowItWorksOverlays.astro    # Case study overlay panels (extracted from HowItWorks)
@@ -62,11 +62,9 @@ src/
     foia-finder.ts              # Agency finder: location lookup, browse/filter, auto-fill
     toolkit-legal.ts            # State comparison map, bill gap analysis interactivity
   data/
-    bills.json                  # SC legislature bills — 4 bills (populated by scraper)
-    state-legislators.json      # State reps and senators
-    local-councils.json         # County/city council members
+    bills.json                  # SC legislature bills (populated by scraper)
     action-letters.json         # 85 locally tailored letter templates (all 46 counties)
-    registry.json               # Rep data registry (adapter metadata)
+    registry.json               # Jurisdiction metadata for district matching
     foia-contacts.json          # 64 curated FOIA contact records (agencies + custodians)
     toolkit-foia.json           # 4 FOIA request templates
     toolkit-speaking.json       # Public comment tips, talk track, rebuttals
@@ -81,8 +79,9 @@ src/
 
 public/
   robots.txt                    # Search engine crawl directives + sitemap reference
-  districts/                    # GeoJSON boundaries (state leg, county, city)
+  districts/                    # GeoJSON boundaries (synced from open-civics-boundaries npm)
   camera-data.json              # Cached Deflock camera data
+  camera-counts.json            # Per-jurisdiction camera counts (build-time)
   map-style.json                # Customized OpenFreeMap dark tile style
   hero-cameras*.png             # Responsive hero image variants (650w–2600w)
   og-image.png                  # Default Open Graph image
@@ -91,44 +90,45 @@ public/
 
 scripts/
   scraper.py                    # SC statehouse bill scraper → bills.json
-  scrape_reps/                  # Rep data scraper package
-    __main__.py                 #   Entry point
-    state.py                    #   State legislator scraper (scstatehouse.gov)
-    adapters/                   #   Local council scrapers (CivicPlus, custom)
-  build-districts.py            # Census TIGER/Line → simplified GeoJSON
+  validate-bills.py             # Bill data schema validation (runs in CI after scrape)
+  sync-open-civics.mjs          # Prebuild: syncs npm package data into project
   build-map-style.mjs           # OpenFreeMap dark style customization
+  build-camera-counts.py        # Deflock data → per-jurisdiction camera counts
+  build-county-map-iso.py       # Isometric SC county map SVG generator
+  build-county-map-svg.py       # Flat SC county map SVG generator
   fetch-camera-data.mjs         # Deflock CDN camera data fetch
+  generate-business-cards.js    # Advocacy business card PNG + PDF generator
+  generate-toolkit-pdfs.js      # FOIA template PDF generator
   publish.py                    # Obsidian vault → blog post publisher (auto git commit + push)
 
-.github/workflows/
-  scrape-bills.yml              # Weekly bill scraping (Jan–Jun), monthly off-session
-  scrape-reps.yml               # Rep data scraping
-  refresh-camera-data.yml       # Camera data refresh
-  lighthouse.yml                # Lighthouse CI on PRs
+.github/
+  workflows/
+    scrape-bills.yml            # Weekly bill scraping (Jan–Jun), monthly off-session
+    refresh-camera-data.yml     # Camera data refresh
+    lighthouse.yml              # Lighthouse CI on PRs
+  dependabot.yml                # Watches open-civics npm packages for updates
+  pull_request_template.md      # PR checklist with action modal smoke test
 
 docs/
   architecture.md               # System architecture overview
-  adapting-scrapers.md          # Adding your state's rep data
+  adapting-scrapers.md          # Adapting data sources for other states
   research-workflow.md          # Creating localized copy, research, and form letters
   deployment.md                 # Netlify deployment guide
+  maintainability.md            # Maintainability evaluation
   plans/                        # Design docs and implementation plans
 ```
 
 ## Key Relationships
 
+- **sync-open-civics.mjs (prebuild) → local-councils.json + public/districts/** — assembles npm package data into project formats
+- **ActionModal.astro imports open-civics/sc/state.json** — state legislator data comes directly from npm package
 - **foia-finder.ts imports district-matcher.ts** — reuses geocoder + district matching for agency location lookup
 - **action-modal/ imports district-matcher.ts + geo-utils.ts** — client-side rep lookup, letter rendering, district matching
 - **camera-map.ts extracted from MapSection** — MapLibre init, layers, popups, cluster handling
 - **carousel.ts extracted from HowItWorks** — auto-advance, navigation, keyboard a11y
-- **HowItWorksOverlays.astro extracted from HowItWorks** — case study overlay panels
 - **toolkit/index.astro hub → toolkit/*.astro subpages** — card grid links + client-side hash redirects for backward compat
-- **ToolkitFoia/Speaking/Outreach/Legal.astro** — rendered directly in subpages, shared across hub and subpage contexts
 - **BlogPreview.astro ← content/blog/** — homepage carousel pulls latest 5 published posts
 - **scraper.py → bills.json** — GitHub Actions runs scraper, commits updated bill data
-- **build-districts.py → public/districts/** — generates GeoJSON consumed by district-matcher.ts at runtime
 - **publish.py ← Obsidian vault** — pulls blog posts tagged `publish: deflocksc`, auto commits + pushes
-- **blog-utils.ts ← blog/[...slug].astro** — read time and related posts used in post page template
-- **blog/index.astro** — client-side tag filtering with URL hash persistence
-- **fetch-camera-data.mjs → camera-data.json** — caches Deflock CDN data for the map
-- **validate-data.py** — runs in scraper CI workflows to catch malformed data before commit
+- **dependabot.yml** — watches open-civics packages, opens PRs when new versions are published
 - **netlify.toml + _headers** — both set security headers; _headers has CSP, netlify.toml has the rest (keep in sync)

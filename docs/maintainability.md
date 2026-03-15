@@ -20,17 +20,17 @@ PR #41 (`feature/ui-overhaul`) added well-written TypeScript modules (`camera-ma
 - **MANIFEST.md** provides a structural map of every file and its purpose.
 - A full **docs/** folder (35+ planning/design documents) covers architecture, scraper adaptation, deployment, and research workflows.
 - **README.md** includes a guide for forking/adapting the project to other states.
-- Configuration files (registry.json) serve as a single source of truth for jurisdiction metadata, keeping the scraper infrastructure and frontend in sync.
+- Configuration files (registry.json) serve as a single source of truth for jurisdiction metadata, keeping the data pipeline and frontend in sync.
 
 ### 2. Data-Driven Design (9/10)
-- Content is cleanly separated into JSON data files (`bills.json`, `state-legislators.json`, `action-letters.json`, `registry.json`).
-- Scrapers (Python) write structured data that the frontend consumes directly—no manual synchronization needed.
-- GitHub Actions automate data refresh on schedules (weekly bill scraping, periodic rep and camera data updates).
+- Content is cleanly separated into JSON data files (`bills.json`, `action-letters.json`, `registry.json`).
+- Representative data comes from npm packages (`open-civics`, `open-civics-boundaries`), synced at build time via a prebuild script.
+- GitHub Actions automate bill and camera data refresh on schedules.
 
 ### 3. Small, Focused Dependency Surface (9/10)
 - Only 10 production dependencies and 2 dev dependencies.
 - No heavy frontend framework (React, Vue, etc.)—Astro's island architecture keeps the client bundle minimal.
-- Python scraping scripts use standard, well-known libraries (BeautifulSoup, requests, geopandas).
+- Python bill scraper uses standard, well-known libraries (BeautifulSoup, requests).
 
 ### 4. Privacy-by-Design (8/10)
 - Geocoding runs client-side through the Census Bureau (proxied to avoid CORS).
@@ -73,7 +73,7 @@ This single file contains:
 - There are **zero unit tests, integration tests, or end-to-end tests**.
 - No test framework is installed; no `test` script in `package.json`.
 - Lighthouse CI checks performance/accessibility but does not verify functional correctness.
-- `validate-data.py` checks data schemas but there's no equivalent for JavaScript/TypeScript code.
+- There is no data validation step for JavaScript/TypeScript code.
 
 **Impact:** Refactoring any component or library (especially `district-matcher.js` or `geo-utils.js`) carries risk of silent regressions. The spatial matching algorithms are particularly critical and testable.
 
@@ -115,12 +115,9 @@ Inline scripts are harder to lint, type-check, and test than extracted modules.
 
 **Recommendation:** Define the color palette as CSS custom properties or a Tailwind theme extension, then reference those tokens instead of raw hex values.
 
-### 6. Data Validation Not Enforced in CI (Low)
-- `validate-data.py` exists (362 lines) and is wired to `npm run validate` for local use.
-- However, it is **not run in any CI workflow** — not in `scrape-bills.yml`, `scrape-reps.yml`, `refresh-camera-data.yml`, or `lighthouse.yml`.
-- Adapter errors could silently produce malformed data that wouldn't be caught until it reaches the frontend.
-
-**Recommendation:** Add `validate-data.py` as a step in the `scrape-bills.yml` and `scrape-reps.yml` workflows, so bad data is caught before it's committed.
+### 6. Data Validation (Low — Resolved)
+- Representative data validation is handled by the `open-civics` npm packages at publish time.
+- Bill scraper output is validated by `scripts/validate-bills.py`, which runs in the `scrape-bills.yml` workflow after each scrape.
 
 ---
 
@@ -133,7 +130,7 @@ Inline scripts are harder to lint, type-check, and test than extracted modules.
 | Dependency Management      | 9/10   | Minimal, well-chosen dependencies                           |
 | Test Coverage              | 2/10   | No automated tests for application logic                    |
 | Type Safety                | 5/10   | Strict tsconfig but core libs are plain JS                  |
-| CI/CD                      | 7/10   | Strong automation, missing test + validation steps          |
+| CI/CD                      | 7/10   | Strong automation, missing test steps                       |
 | Data Architecture          | 9/10   | Clean JSON-driven, registry as single source                |
 | Onboarding / Forkability   | 8/10   | Docs explicitly address adapting to other states            |
 | Component Granularity      | 6/10   | ActionModal too large; others well-scoped                   |
@@ -148,4 +145,4 @@ Inline scripts are harder to lint, type-check, and test than extracted modules.
 2. **Add unit tests** for `geo-utils.js` and `district-matcher.js` (highest ROI)
 3. **Convert core libs to TypeScript** (`district-matcher.js`, `geo-utils.js`)
 4. **Extract BillTracker and ToolkitLegal inline scripts** into `src/scripts/` modules
-5. **Run data validation in CI** as part of scraper workflows
+5. ~~Add bill data validation in CI~~ — done (`validate-bills.py` in `scrape-bills.yml`)
