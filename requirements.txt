@@ -1,10 +1,6 @@
-# scraper.py + scrape_reps
+# scraper.py (bill scraper)
 requests
 beautifulsoup4
-
-# build-districts.py
-geopandas
-shapely
 
 # publish.py
 pyyaml

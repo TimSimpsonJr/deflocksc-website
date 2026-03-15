@@ -13,3 +13,7 @@ public/dev-preview.html
 tina/__generated__/
 public/admin/
 lighthouse*.json
+
+# Generated from open-civics npm packages (see scripts/sync-open-civics.mjs)
+public/districts/
+src/data/local-councils.json
