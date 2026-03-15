@@ -15,14 +15,22 @@
 }
 
 /* Global focus-visible styles for keyboard navigation */
-:focus-visible {
-  outline: 2px solid #dc2626;
-  outline-offset: 2px;
+/* Placed in @layer base so component/utility classes can override */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #dc2626;
+    outline-offset: 2px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
-/* Remove default focus ring for mouse/touch interactions */
-:focus:not(:focus-visible) {
-  outline: none;
+/* Dark scrollbars — matches site background */
+* {
+  scrollbar-color: #404040 transparent;
+  scrollbar-width: thin;
 }
 
 /* Sidebar + panel pattern (FAQ, FOIA templates, Rebuttals, Legal) */

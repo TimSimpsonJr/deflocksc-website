@@ -79,7 +79,7 @@ const registry = {
               autocomplete="street-address"
               placeholder="123 Main St, Greenville, SC"
               required
-              class="flex-1 bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-4 py-3 text-base placeholder-[#888] focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4] transition-colors"
+              class="flex-1 bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-4 py-3 text-base placeholder-[#888] focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4] transition-colors"
             />
             <button
               type="submit"
@@ -102,13 +102,13 @@ const registry = {
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="manual-senate" class="text-[#a3a3a3] text-xs block mb-1">Senate District</label>
-                <select id="manual-senate" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-senate" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select...</option>
                 </select>
               </div>
               <div>
                 <label for="manual-house" class="text-[#a3a3a3] text-xs block mb-1">House District</label>
-                <select id="manual-house" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-house" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select...</option>
                 </select>
               </div>
@@ -116,7 +116,7 @@ const registry = {
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="manual-county" class="text-[#a3a3a3] text-xs block mb-1">County</label>
-                <select id="manual-county" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-county" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select...</option>
                   {registry.jurisdictions.filter(j => j.type === 'county').map(j => (
                     <option value={j.county.toLowerCase()}>{j.county}</option>
@@ -125,7 +125,7 @@ const registry = {
               </div>
               <div>
                 <label for="manual-county-district" class="text-[#a3a3a3] text-xs block mb-1">County District</label>
-                <select id="manual-county-district" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-county-district" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select county first</option>
                 </select>
               </div>
@@ -133,13 +133,13 @@ const registry = {
             <div id="manual-city-row" class="grid grid-cols-2 gap-3 hidden">
               <div>
                 <label for="manual-city" class="text-[#a3a3a3] text-xs block mb-1">City</label>
-                <select id="manual-city" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-city" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">None</option>
                 </select>
               </div>
               <div>
                 <label for="manual-city-district" class="text-[#a3a3a3] text-xs block mb-1">City District</label>
-                <select id="manual-city-district" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-city-district" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
                   <option value="">Select city first</option>
                 </select>
               </div>
@@ -169,7 +169,7 @@ const registry = {
     </div>
 
     <!-- Results State -->
-    <div id="action-results" class="hidden" aria-live="polite" tabindex="-1">
+    <div id="action-results" class="hidden outline-none" aria-live="polite" tabindex="-1">
       <div id="action-results-list"></div>
       <div class="text-center mt-8">
         <button
