@@ -38,7 +38,7 @@ The system goes further. It describes tracking individuals across multiple camer
 
 The filing also describes what it calls "facial recognition data points" as part of the system's classification toolkit. Not full facial recognition in the consumer sense, but biometric feature extraction from faces captured on camera, fed into the same neural networks that classify race and gender.
 
-Patents are filed under penalty of perjury. This isn't a marketing deck or a sales pitch. It's a sworn technical description of what Flock built and asked the US government to protect as their intellectual property.
+Patents are filed under penalty of perjury. A sworn technical description of what Flock built, submitted to the US government so they could protect it as their intellectual property.
 
 Every Flock camera in South Carolina is hardware that could run this software. The patent doesn't describe a different device. It describes what these cameras are designed to do.
 
@@ -113,7 +113,7 @@ The other 3 bills regulate retention periods and access rules. Those matter, but
 
 Without H4675 or a local ordinance, there is no legal barrier between the patent and your cameras. No federal law covers it. No state law covers it. No contract clause prevents it. The only thing standing between Flock's patented racial classification system and your city's cameras is Flock's word that they won't turn it on.
 
-For the full picture of SC's regulatory vacuum, see [SC Has No License Plate Camera Law](/blog/sc-has-no-license-plate-camera-law).
+For the full picture of SC's regulatory vacuum, see [SC Has No License Plate Camera Law](/blog/sc-has-no-license-plate-camera-law). For a step-by-step playbook on what to do about it, see the [action guide](/blog/how-to-fight-alpr-surveillance-sc).
 
 ## What you can do
 
