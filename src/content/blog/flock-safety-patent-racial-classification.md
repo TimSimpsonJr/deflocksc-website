@@ -1,22 +1,22 @@
 ---
-title: "Flock Safety Patented Racial Classification. SC Has No Law Against It."
-subtitle: "What Patent US11416545B1 Says About the Cameras on Your Roads"
-date: 2026-03-20
-summary: "Flock Safety says their cameras don't identify race, gender, or ethnicity. Patent US11416545B1, granted in August 2022, describes a system that does exactly that. Every Flock camera in South Carolina is hardware that could run this software. No SC law prevents it."
+subtitle: What Patent US11416545B1 Says About the Cameras on Your Roads
+featuredImageAlt: Flock Safety patent US11416545B1 describing racial and gender classification capabilities vs. company marketing denial
+title: Flock Told the Patent Office One Thing. They Tell Your City Another.
+date: 2026-03-27T00:00:00.000Z
+summary: 'Flock Safety says their cameras don''t identify race, gender, or ethnicity. Patent US11416545B1, granted in August 2022, describes a system that does exactly that. Every Flock camera in South Carolina is hardware that could run this software. No SC law prevents it.'
 tags:
   - flock-safety
   - privacy
   - research
   - sc
   - patents
-featuredImage: /blog/flock-patent-racial-classification.png
-featuredImageAlt: "Flock Safety patent US11416545B1 describing racial and gender classification capabilities vs. company marketing denial"
-draft: true
+draft: false
+featuredImage: /uploads/blog/TheTimtastic_identification_system_minimalist_vector_illustra_df54727a-1b67-4766-8137-da4dadf880f4_0.png
 ---
 
-Flock Safety's own [discrimination FAQ](https://www.flocksafety.com/blog/are-flock-products-discriminatory/) says their system "targets only vehicles linked to crime, not individuals or protected characteristics." Their product page says the cameras don't use facial recognition. Their reps tell city councils the same thing.
+Flock Safety's [discrimination FAQ](https://www.flocksafety.com/blog/are-flock-products-discriminatory/) says their system "targets only vehicles linked to crime, not individuals or protected characteristics." Their product page says the cameras don't use facial recognition. Their reps tell city councils the same thing.
 
-[Patent US11416545B1](https://patents.google.com/patent/US11416545B1/en), granted to Flock Group Inc. in August 2022, describes a system that classifies people by race, gender, estimated height and weight, clothing, and facial recognition data points. It describes neural networks trained to do this automatically. It describes searching archived footage by those characteristics across multiple camera locations.
+However, [Patent US11416545B1](https://patents.google.com/patent/US11416545B1/en), granted to Flock Group Inc. in August 2022, describes a system that classifies people by race, gender, estimated height and weight, clothing, and facial recognition data points. It describes neural networks trained to do this automatically. It describes searching archived footage by those characteristics across multiple camera locations.
 
 Flock operates over 1,000 cameras in South Carolina. Those cameras feed SLED's statewide database: 422 million license plate reads, 3-year retention, 2,000+ users across 99+ agencies. Zero state laws govern what analysis Flock can run on that data.
 
@@ -48,16 +48,16 @@ Flock's [FreeForm AI](https://www.flocksafety.com/products/flock-freeform) produ
 
 FreeForm already does some of what the patent describes. Here's how the capabilities line up:
 
-| Capability | Patent describes | FreeForm AI does today | Flock says publicly |
-|---|---|---|---|
-| License plate capture | Yes | Yes | Yes |
-| Vehicle make/model/color | Yes | Yes | Yes |
-| Body type / clothing | Yes | Yes | "Vehicle Fingerprint" |
-| Height / weight estimation | Yes | No (public) | No mention |
-| Gender classification | Yes | No (public) | "We don't identify gender" |
-| Race / ethnicity classification | Yes | No (public) | "We don't identify race" |
-| Facial recognition data points | Yes | No (public) | "We do not use facial recognition" |
-| Cross-camera person tracking | Yes | No (public) | "Point-in-time images only" |
+| Capability                      | Patent describes | FreeForm AI does today | Flock says publicly                |
+| ------------------------------- | ---------------- | ---------------------- | ---------------------------------- |
+| License plate capture           | Yes              | Yes                    | Yes                                |
+| Vehicle make/model/color        | Yes              | Yes                    | Yes                                |
+| Body type / clothing            | Yes              | Yes                    | "Vehicle Fingerprint"              |
+| Height / weight estimation      | Yes              | No (public)            | No mention                         |
+| Gender classification           | Yes              | No (public)            | "We don't identify gender"         |
+| Race / ethnicity classification | Yes              | No (public)            | "We don't identify race"           |
+| Facial recognition data points  | Yes              | No (public)            | "We do not use facial recognition" |
+| Cross-camera person tracking    | Yes              | No (public)            | "Point-in-time images only"        |
 
 The bottom four rows are the ones that matter. Flock has patented all of them. FreeForm already handles body type and clothing classification. <strong class="red">The gap between what FreeForm does today and what the patent describes is a software update, not a hardware change.</strong>
 
@@ -197,12 +197,12 @@ Greenville's Flock contract (Section 2.12) allows Flock to make "any upgrades to
 
 ## Sources
 
-- [Patent US11416545B1: System and method for object based query of video content (Google Patents)](https://patents.google.com/patent/US11416545B1/en)
-- [Flock Safety: Are Flock Products Discriminatory? (Feb 2026)](https://www.flocksafety.com/blog/are-flock-products-discriminatory/)
-- [Flock Safety: FreeForm Product Page](https://www.flocksafety.com/products/flock-freeform)
-- [ACLU: Surveillance Company Flock Using AI to Report Suspicious Movement Patterns (Jul 2025)](https://www.aclu.org/news/national-security/surveillance-company-flock-now-using-ai-to-report-us-to-police-if-it-thinks-our-movement-patterns-are-suspicious)
-- [Consumer Rights Wiki: Flock License Plate Readers / Norfolk federal case](https://consumerrights.wiki/w/Flock_license_plate_readers)
-- [Business Insider: Flock Safety ALPR camera misreads (2024)](https://www.businessinsider.com/flock-safety-alpr-cameras-misreads-2024)
-- [Post and Courier: SC ALPR cameras investigation (Mar 2024)](https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html)
-- [WPDE: Deputies navigate obstacles to install cameras in Florence County](https://wpde.com/news/local/deputies-navigate-obstacles-to-put-up-more-security-cameras-in-florence-county-tj-joye-scdot-crime-flock)
-- [SC Legislature: H. 4675](https://www.scstatehouse.gov/sess126_2025-2026/bills/4675.htm)
+* [Patent US11416545B1: System and method for object based query of video content (Google Patents)](https://patents.google.com/patent/US11416545B1/en)
+* [Flock Safety: Are Flock Products Discriminatory? (Feb 2026)](https://www.flocksafety.com/blog/are-flock-products-discriminatory/)
+* [Flock Safety: FreeForm Product Page](https://www.flocksafety.com/products/flock-freeform)
+* [ACLU: Surveillance Company Flock Using AI to Report Suspicious Movement Patterns (Jul 2025)](https://www.aclu.org/news/national-security/surveillance-company-flock-now-using-ai-to-report-us-to-police-if-it-thinks-our-movement-patterns-are-suspicious)
+* [Consumer Rights Wiki: Flock License Plate Readers / Norfolk federal case](https://consumerrights.wiki/w/Flock_license_plate_readers)
+* [Business Insider: Flock Safety ALPR camera misreads (2024)](https://www.businessinsider.com/flock-safety-alpr-cameras-misreads-2024)
+* [Post and Courier: SC ALPR cameras investigation (Mar 2024)](https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html)
+* [WPDE: Deputies navigate obstacles to install cameras in Florence County](https://wpde.com/news/local/deputies-navigate-obstacles-to-put-up-more-security-cameras-in-florence-county-tj-joye-scdot-crime-flock)
+* [SC Legislature: H. 4675](https://www.scstatehouse.gov/sess126_2025-2026/bills/4675.htm)
