@@ -1,6 +1,6 @@
 ---
 subtitle: What Patent US11416545B1 Says About the Cameras on Your Roads
-featuredImageAlt: Flock Safety patent US11416545B1 describing racial and gender classification capabilities vs. company marketing denial
+featuredImageAlt: Flock Safety patent US11416545B1 describing facial recognition and demographic classification capabilities vs. company marketing denial
 title: Flock Told the Patent Office One Thing. They Tell Your City Another.
 date: 2026-03-27T00:00:00.000Z
 summary: 'Flock Safety says their cameras don''t identify race, gender, or ethnicity. Patent US11416545B1, granted in August 2022, describes a system that does exactly that. Every Flock camera in South Carolina is hardware that could run this software. No SC law prevents it.'
@@ -11,7 +11,7 @@ tags:
   - sc
   - patents
 draft: false
-featuredImage: /uploads/blog/flock-safety-patent-racial-classification.png
+featuredImage: /uploads/blog/flock-safety-patent-facial-recognition.png
 ---
 
 Flock Safety's [discrimination FAQ](https://www.flocksafety.com/blog/are-flock-products-discriminatory/) says their system "targets only vehicles linked to crime, not individuals or protected characteristics." Their product page says the cameras don't use facial recognition. Their reps tell city councils the same thing.
@@ -30,7 +30,7 @@ Here's the patent's own language describing what its neural networks classify:
 
 > A neural network may be trained to detect characteristics and features of an object, such as race, gender, ethnicity, height, weight, and clothing.
 
-That's not a hypothetical capability buried in an appendix. It's the core of what the patent claims to protect.
+That language sits in the patent's primary claims. It's what the entire filing exists to protect.
 
 The system goes further. It describes tracking individuals across multiple camera locations using "statistical similarity," matching a person's physical profile from one camera feed to another without needing to identify them by name. Cross-camera person tracking by body type, clothing, and demographic characteristics.
 
@@ -48,16 +48,16 @@ Flock's [FreeForm AI](https://www.flocksafety.com/products/flock-freeform) produ
 
 FreeForm already does some of what the patent describes. Here's how the capabilities line up:
 
-| Capability                      | Patent describes | FreeForm AI does today | Flock says publicly                |
-| ------------------------------- | ---------------- | ---------------------- | ---------------------------------- |
-| License plate capture           | Yes              | Yes                    | Yes                                |
-| Vehicle make/model/color        | Yes              | Yes                    | Yes                                |
-| Body type / clothing            | Yes              | Yes                    | "Vehicle Fingerprint"              |
-| Height / weight estimation      | Yes              | No (public)            | No mention                         |
-| Gender classification           | Yes              | No (public)            | "We don't identify gender"         |
-| Race / ethnicity classification | Yes              | No (public)            | "We don't identify race"           |
-| Facial recognition data points  | Yes              | No (public)            | "We do not use facial recognition" |
-| Cross-camera person tracking    | Yes              | No (public)            | "Point-in-time images only"        |
+| Capability | Patent | FreeForm AI | Flock says publicly |
+| --- | --- | --- | --- |
+| License plate capture | Yes | Yes | Yes |
+| Vehicle make/model/color | Yes | Yes | Yes |
+| Body type / clothing | Yes | Yes | "Vehicle Fingerprint" |
+| Height / weight estimation | Yes | No (public) | No mention |
+| Gender classification | Yes | No (public) | "We don't identify gender" |
+| Race / ethnicity classification | Yes | No (public) | "We don't identify race" |
+| Facial recognition data points | Yes | No (public) | "We do not use facial recognition" |
+| Cross-camera person tracking | Yes | No (public) | "Point-in-time images only" |
 
 The bottom four rows are the ones that matter. Flock has patented all of them. FreeForm already handles body type and clothing classification. <strong class="red">The gap between what FreeForm does today and what the patent describes is a software update, not a hardware change.</strong>
 
@@ -73,7 +73,7 @@ Flock holds two contradictory positions at the same time.
 
 A company doesn't file for patent protection on capabilities it never intends to deploy. Patent prosecution costs tens of thousands of dollars between attorney fees, filing fees, examination, and response drafting. You don't spend that on a hypothetical. You spend it to protect something you've built and plan to use.
 
-<strong class="red">Flock told the US Patent Office their system classifies by race. They tell your city council it doesn't.</strong>
+<strong class="red">Flock told the US Patent Office their system classifies people by physical characteristics. They tell your city council it doesn't.</strong>
 
 Which position governs what happens to 422 million plate reads in SLED's database? Which one did your county council vote on?
 
@@ -87,7 +87,7 @@ We've already broken down Greenville's Flock contract clause by clause in our [G
 
 Read that carefully. Flock decides what's necessary or useful. Flock decides whether the upgrade materially changes the terms. The city doesn't get a veto. The city doesn't even get a notification.
 
-<strong class="red">The contract lets Flock activate patented capabilities, including racial classification, without council approval, without public notice, without renegotiating.</strong>
+<strong class="red">The contract lets Flock activate patented capabilities, including demographic classification and facial recognition, without council approval, without public notice, without renegotiating.</strong>
 
 **Section 4.5** grants Flock a "non-exclusive, worldwide, perpetual, royalty-free right (during and after the Term)" to use anonymized customer data. "After the Term" means even if Greenville canceled tomorrow, Flock keeps the right to use the data it already collected.
 
@@ -99,9 +99,11 @@ Now consider the compound risks. In Greenville, two sisters were [pulled over at
 
 Flock processes 20 billion license plate scans every month across its national network. Over 100,000 cameras in 49 states. The [ACLU reported](https://www.aclu.org/news/national-security/surveillance-company-flock-now-using-ai-to-report-us-to-police-if-it-thinks-our-movement-patterns-are-suspicious) that Flock uses AI to flag drivers whose movement patterns it considers "suspicious" and alerts police automatically. Not because of a warrant. Not because of a crime. Because an algorithm decided your driving pattern looked wrong.
 
+Flock's word is already compromised. Their CEO [denied federal contracts on camera](/blog/flock-safetys-track-record), then admitted three weeks later to secretly giving Border Patrol access to local police cameras nationwide. If the company lied about who could search your plates, why would you trust them not to activate what they patented?
+
 In Norfolk, Virginia, a federal judge ruled in February 2025 that extensive Flock camera use "may require warrants under Carpenter v. United States." The case revealed that one Norfolk resident had been tracked [526 times in 4.5 months](https://consumerrights.wiki/w/Flock_license_plate_readers) across 172 cameras. Five hundred twenty-six data points on one person's movements, without a warrant.
 
-South Carolina's SLED database is exactly the kind of data lake where patent capabilities become most dangerous. [422 million plate reads](https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html), stored for 3 years, accessible to 2,000+ users across 99+ law enforcement agencies. The cross-camera tracking infrastructure the patent describes already exists here. The 99+ agencies sharing data means a person can be tracked from one end of the state to the other.
+South Carolina's SLED database is where these patent capabilities stop being theoretical. [422 million plate reads](https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html), stored for 3 years, accessible to 2,000+ users across 99+ law enforcement agencies. The cross-camera tracking infrastructure the patent describes already exists here. The 99+ agencies sharing data means a person can be tracked from one end of the state to the other.
 
 For a full breakdown of why this matters under the 4th Amendment, see our [Carpenter analysis](/blog/the-4th-amendment-loophole).
 
@@ -117,42 +119,64 @@ For the full picture of SC's regulatory vacuum, see [SC Has No License Plate Cam
 
 ## What you can do
 
-Two things.
-
 **First, ask your local council.** If your city or county has Flock cameras, these questions deserve answers:
 
-1. Did you know your camera vendor patented racial classification technology?
-2. Has anyone on council read Patent US11416545B1?
-3. Does your contract allow Flock to push software upgrades without council approval?
-4. What happens when a company that patents racial classification also controls the cameras on our roads?
+- Did you know your camera vendor patented demographic classification and facial recognition technology? ([Read the patent](https://patents.google.com/patent/US11416545B1/en))
+- Has anyone on council read Patent US11416545B1?
+- Does your contract allow Flock to push software upgrades without council approval?
+- What happens when a company that patents these capabilities also controls the cameras on our roads?
 
-You don't need to be an expert. You just need to ask. Print the patent number. Bring it to a council meeting. Ask them if they've read it.
+You don't need to be an expert. You just need to ask. Print the patent number. Bring it to a council meeting. Ask them if they've read it. Our [speaking toolkit](/toolkit/speaking) has tips for making your time at the podium count.
 
 **Second, support H4675.** It's the only pending bill that would actually prevent Flock from activating these capabilities in South Carolina. Find your state legislators and tell them to support it. Our [H4675 breakdown](/blog/h4675-strongest-alpr-bill-in-sc) has the full details.
 
 <div class="not-prose my-10 border border-[rgba(255,255,255,0.07)] bg-[#1a1a1a] px-8 py-8 text-center">
-  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#737373] mb-3">Take Action</p>
+  <p class="label-mono-heading mb-3">Contact your reps about H4675</p>
   <p class="text-[#a3a3a3] text-sm mb-5">Find your city council, county council, and state legislators.</p>
   <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer">Find Your Rep</button>
 </div>
 
-## Frequently asked questions
-
-### Does Flock Safety use facial recognition?
-
-Their patent (US11416545B1) describes facial recognition data points as a core capability of the system. Their product page says they "do not use facial recognition technology." The patent represents what they built and filed with the US government. The product page represents what they tell customers.
-
-### Can Flock Safety cameras identify race or gender?
-
-Patent US11416545B1 explicitly describes classification by race, gender, estimated height, and weight using neural networks. Flock's marketing says they don't identify these characteristics. The capabilities are patented. Whether they're active on any given camera is a software configuration.
-
-### What does Flock Safety's patent cover?
-
-US11416545B1 covers object-based queries of video surveillance content, including classification of people by race, gender, height, weight, and clothing, plus cross-camera tracking via statistical similarity. Filed October 2020, granted August 2022, assigned to Flock Group Inc.
-
-### Can Flock activate new capabilities without city approval?
-
-Greenville's Flock contract (Section 2.12) allows Flock to make "any upgrades to the system or platform that it deems necessary or useful" without the city's consent, as long as changes don't "materially change any terms or conditions." If your city has a similar contract, Flock can push updates without asking.
+<div class="not-prose my-10 border border-[rgba(255,255,255,0.07)] bg-[#161616]">
+  <div class="px-8 pt-8 pb-4">
+    <p class="label-mono-heading mb-2">Frequently asked questions</p>
+  </div>
+  <details class="border-t border-[rgba(255,255,255,0.07)] group" open>
+    <summary class="px-8 py-5 cursor-pointer text-[#e8e8e8] font-semibold text-base leading-snug list-none flex justify-between items-center hover:bg-[rgba(255,255,255,0.02)] transition-colors [&::-webkit-details-marker]:hidden">
+      Does Flock Safety use facial recognition?
+      <span class="text-[#737373] text-xl ml-4 shrink-0 group-open:rotate-45 transition-transform">+</span>
+    </summary>
+    <div class="px-8 pb-6 text-[#a0a0a0] text-[15px] leading-relaxed max-w-[560px]">
+      <strong class="text-[#e8e8e8]">Their patent describes it. Their product page denies it.</strong> Patent US11416545B1 describes facial recognition data points as part of the classification system. Their product page says they "do not use facial recognition technology." The patent represents what they built and filed with the US government. The product page represents what they tell customers.
+    </div>
+  </details>
+  <details class="border-t border-[rgba(255,255,255,0.07)] group">
+    <summary class="px-8 py-5 cursor-pointer text-[#e8e8e8] font-semibold text-base leading-snug list-none flex justify-between items-center hover:bg-[rgba(255,255,255,0.02)] transition-colors [&::-webkit-details-marker]:hidden">
+      Can Flock Safety cameras identify race or gender?
+      <span class="text-[#737373] text-xl ml-4 shrink-0 group-open:rotate-45 transition-transform">+</span>
+    </summary>
+    <div class="px-8 pb-6 text-[#a0a0a0] text-[15px] leading-relaxed max-w-[560px]">
+      <strong class="text-[#e8e8e8]">The capabilities are patented.</strong> US11416545B1 explicitly describes classification by race, gender, estimated height, and weight using neural networks. Flock's marketing says they don't identify these characteristics. Whether they're active on any given camera is a software configuration.
+    </div>
+  </details>
+  <details class="border-t border-[rgba(255,255,255,0.07)] group">
+    <summary class="px-8 py-5 cursor-pointer text-[#e8e8e8] font-semibold text-base leading-snug list-none flex justify-between items-center hover:bg-[rgba(255,255,255,0.02)] transition-colors [&::-webkit-details-marker]:hidden">
+      What does Flock Safety's patent cover?
+      <span class="text-[#737373] text-xl ml-4 shrink-0 group-open:rotate-45 transition-transform">+</span>
+    </summary>
+    <div class="px-8 pb-6 text-[#a0a0a0] text-[15px] leading-relaxed max-w-[560px]">
+      US11416545B1 covers object-based queries of video surveillance content, including classification of people by race, gender, height, weight, and clothing, plus cross-camera tracking via statistical similarity. Filed October 2020, granted August 2022, assigned to Flock Group Inc.
+    </div>
+  </details>
+  <details class="border-t border-[rgba(255,255,255,0.07)] group">
+    <summary class="px-8 py-5 cursor-pointer text-[#e8e8e8] font-semibold text-base leading-snug list-none flex justify-between items-center hover:bg-[rgba(255,255,255,0.02)] transition-colors [&::-webkit-details-marker]:hidden">
+      Can Flock activate new capabilities without city approval?
+      <span class="text-[#737373] text-xl ml-4 shrink-0 group-open:rotate-45 transition-transform">+</span>
+    </summary>
+    <div class="px-8 pb-6 text-[#a0a0a0] text-[15px] leading-relaxed max-w-[560px]">
+      <strong class="text-[#e8e8e8]">Greenville's contract says yes.</strong> Section 2.12 allows Flock to make "any upgrades to the system or platform that it deems necessary or useful" without the city's consent, as long as changes don't "materially change any terms or conditions." If your city has a similar contract, Flock can push updates without asking.
+    </div>
+  </details>
+</div>
 
 <script type="application/ld+json">
 {

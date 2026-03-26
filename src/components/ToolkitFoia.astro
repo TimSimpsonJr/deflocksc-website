@@ -12,7 +12,7 @@ function highlightPlaceholders(text: string): string {
 
 <!-- Zone 1: Agency Finder -->
 <div class="mb-12">
-  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">FOIA Templates</p>
+  <p class="label-mono text-[#a3a3a3] mb-3">FOIA Templates</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-4">
     Find Your Agency &amp; Request Records
   </h2>
@@ -120,7 +120,7 @@ function highlightPlaceholders(text: string): string {
 
   <!-- Template list (sidebar) -->
   <div class="bg-[#111111]">
-    <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
+    <div class="label-mono text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
       Templates
     </div>
     {foiaTemplates.map((tmpl: any, i: number) => (
@@ -139,13 +139,13 @@ function highlightPlaceholders(text: string): string {
   <div class="bg-[#111111] p-8 md:p-10">
     {foiaTemplates.map((tmpl: any, i: number) => (
       <div class:list={['foia-panel', i !== 0 && 'hidden']} data-foia-panel={i}>
-        <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#a3a3a3] mb-2">Template {String(i + 1).padStart(2, '0')}</p>
+        <p class="label-mono-tight text-[#a3a3a3] mb-2">Template {String(i + 1).padStart(2, '0')}</p>
         <h3 class="text-[#e8e8e8] font-bold text-lg mb-3">{tmpl.title}</h3>
         <p class="text-[#a3a3a3] text-sm leading-[1.6] mb-4">{tmpl.description}</p>
 
         <!-- Why this matters (inline, no accordion) -->
         <div class="border-l-2 border-[#dc2626] pl-4 mb-6">
-          <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-1">Why this matters</p>
+          <p class="label-mono text-[#a3a3a3] mb-1">Why this matters</p>
           <p class="text-[#a3a3a3] text-sm leading-[1.6]">{tmpl.why}</p>
         </div>
 

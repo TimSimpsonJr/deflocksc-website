@@ -16,7 +16,7 @@ function highlightPlaceholders(text: string): string {
 
 <!-- Intro + Tips -->
 <div class="mb-12">
-  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">Public Comment</p>
+  <p class="label-mono text-[#a3a3a3] mb-3">Public Comment</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-4">
     Speak at a Council Meeting
   </h2>
@@ -37,7 +37,7 @@ function highlightPlaceholders(text: string): string {
 
 <!-- Talk Track -->
 <div class="mb-16">
-  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">Talk Track</p>
+  <p class="label-mono text-[#a3a3a3] mb-3">Talk Track</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-2">
     {speakingData.talkTrack.title}
   </h2>
@@ -52,10 +52,10 @@ function highlightPlaceholders(text: string): string {
         <!-- DM Mono overline: dot + label + timing -->
         <div class="flex items-center gap-3 mb-4">
           <span class="w-[5px] h-[5px] rounded-full bg-[#fbbf24] flex-shrink-0" aria-hidden="true"></span>
-          <span class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#a3a3a3]">
+          <span class="label-mono-tight text-[#a3a3a3]">
             {section.label}
           </span>
-          <span class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#fbbf24]">
+          <span class="label-mono-tight text-[#fbbf24]">
             {section.timing}
           </span>
         </div>
@@ -74,7 +74,7 @@ function highlightPlaceholders(text: string): string {
 
 <!-- Rebuttals — sidebar + panel -->
 <div class="mb-16">
-  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">Rebuttals</p>
+  <p class="label-mono text-[#a3a3a3] mb-3">Rebuttals</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-2">
     If They Push Back
   </h2>
@@ -85,7 +85,7 @@ function highlightPlaceholders(text: string): string {
   <div class="rebuttal-layout md:grid md:grid-cols-[280px_1fr] bg-[rgba(255,255,255,0.07)]" style="gap:1px">
     <!-- Claims sidebar -->
     <div class="bg-[#111111]">
-      <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
+      <div class="label-mono text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
         Claims
       </div>
       {speakingData.rebuttals.map((r, i) => (
@@ -104,7 +104,7 @@ function highlightPlaceholders(text: string): string {
     <div class="bg-[#111111] p-8 md:p-10">
       {speakingData.rebuttals.map((r, i) => (
         <div class:list={['rebuttal-panel', i !== 0 && 'hidden']} data-rebuttal-panel={i}>
-          <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#a3a3a3] mb-2">Rebuttal {String(i + 1).padStart(2, '0')}</p>
+          <p class="label-mono-tight text-[#a3a3a3] mb-2">Rebuttal {String(i + 1).padStart(2, '0')}</p>
           <h3 class="text-[#e8e8e8] font-bold text-lg mb-4">&ldquo;{r.claim}&rdquo;</h3>
           <p class="text-[#a3a3a3] text-base leading-[1.7]">{r.response}</p>
         </div>

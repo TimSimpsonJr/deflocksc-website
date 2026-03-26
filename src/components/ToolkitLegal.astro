@@ -13,7 +13,7 @@ const stateCoords: Record<string, [number, number]> = {
 
 <!-- Section 1: 4th Amendment Primer — sidebar + panel -->
 <div class="mb-16">
-  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">Constitutional Rights</p>
+  <p class="label-mono text-[#a3a3a3] mb-3">Constitutional Rights</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-4">
     {fourthAmendment.title}
   </h2>
@@ -24,7 +24,7 @@ const stateCoords: Record<string, [number, number]> = {
   <div class="legal-layout md:grid md:grid-cols-[280px_1fr] bg-[rgba(255,255,255,0.07)]" style="gap:1px">
     <!-- Key points sidebar -->
     <div class="bg-[#111111]">
-      <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
+      <div class="label-mono text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
         Key Points
       </div>
       {fourthAmendment.keyPoints.map((kp, i) => (
@@ -43,7 +43,7 @@ const stateCoords: Record<string, [number, number]> = {
     <div class="bg-[#111111] p-8 md:p-10">
       {fourthAmendment.keyPoints.map((kp, i) => (
         <div class:list={['legal-panel', i !== 0 && 'hidden']} data-legal-panel={i}>
-          <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#a3a3a3] mb-2">Point {String(i + 1).padStart(2, '0')}</p>
+          <p class="label-mono-tight text-[#a3a3a3] mb-2">Point {String(i + 1).padStart(2, '0')}</p>
           <h3 class="text-[#e8e8e8] font-bold text-lg mb-4">{kp.point}</h3>
           <p class="text-[#a3a3a3] text-base leading-[1.7]">{kp.detail}</p>
         </div>
@@ -58,7 +58,7 @@ const stateCoords: Record<string, [number, number]> = {
 
 <!-- Section 2: Legal Landscape — Dotted US Map -->
 <div class="mb-16">
-  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">State Comparison</p>
+  <p class="label-mono text-[#a3a3a3] mb-3">State Comparison</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-6">
     How Other States Compare
   </h2>
@@ -113,7 +113,7 @@ const stateCoords: Record<string, [number, number]> = {
 
     <!-- Popout tooltip -->
     <div id="sm-popout" class="absolute bg-[#1a1a1a] border border-[rgba(255,255,255,0.12)] rounded-md px-4 py-3 pointer-events-none opacity-0 transition-opacity duration-200 z-10 max-w-[300px]" style="box-shadow:0 8px 32px rgba(0,0,0,0.5)">
-      <div id="sm-pop-state" class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#fbbf24] mb-1.5"></div>
+      <div id="sm-pop-state" class="label-mono-tight text-[#fbbf24] mb-1.5"></div>
       <div id="sm-pop-law" class="text-[12px] text-[#a3a3a3] leading-[1.55]"></div>
     </div>
 
@@ -122,7 +122,7 @@ const stateCoords: Record<string, [number, number]> = {
 
 <!-- Section 3: SC Bill Tracker — 1px-gap grid, no container box -->
 <div class="mb-16">
-  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">Legislation</p>
+  <p class="label-mono text-[#a3a3a3] mb-3">Legislation</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-6">
     SC Bill Tracker
   </h2>
@@ -139,7 +139,7 @@ const stateCoords: Record<string, [number, number]> = {
         <div class="text-[#e8e8e8] font-bold text-[2rem] tracking-[-0.03em] leading-none">{bill.bill}</div>
         <div class="text-[#a0a0a0] text-[15px] leading-[1.5] flex-1">{bill.title}</div>
         <div class="text-[#a0a0a0] text-sm mt-1">See what this bill would change &rarr;&#xFE0E;</div>
-        <div class="border-t border-[rgba(255,255,255,0.07)] pt-4 mt-auto font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.1em] flex items-center gap-2">
+        <div class="border-t border-[rgba(255,255,255,0.07)] pt-4 mt-auto label-mono-compact flex items-center gap-2">
           <span class="w-[5px] h-[5px] rounded-full bg-[#fbbf24] flex-shrink-0" aria-hidden="true"></span>
           <span class="text-[#fbbf24]">{bill.status}</span>
           {bill.committee && <span class="text-[#a3a3a3] ml-auto">{bill.committee}</span>}
@@ -160,7 +160,7 @@ const stateCoords: Record<string, [number, number]> = {
     <!-- Fixed header -->
     <div class="flex-shrink-0 px-6 md:px-8 pt-6 pb-5">
       <!-- Status badge -->
-      <div class="flex items-center gap-2 mb-4 font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.1em]">
+      <div class="flex items-center gap-2 mb-4 label-mono-compact">
         <span class="w-[5px] h-[5px] rounded-full bg-[#fbbf24] flex-shrink-0" aria-hidden="true"></span>
         <span id="tk-modal-bill-status" class="text-[#fbbf24]"></span>
       </div>
@@ -177,7 +177,7 @@ const stateCoords: Record<string, [number, number]> = {
     <div class="overflow-y-auto flex-1 min-h-0 px-6 md:px-8 py-2">
       <!-- Last action (hidden when absent) -->
       <div id="tk-modal-last-action-row" class="mb-5">
-        <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.1em] text-[#a3a3a3] mb-1">Last Action</div>
+        <div class="label-mono-compact text-[#a3a3a3] mb-1">Last Action</div>
         <span id="tk-modal-bill-last-action" class="text-[#b0b0b0] text-base"></span>
       </div>
 
@@ -196,7 +196,7 @@ const stateCoords: Record<string, [number, number]> = {
 
 <!-- Section 4: Bill Gaps — sidebar + panel -->
 <div class="mb-12">
-  <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] mb-3">Analysis</p>
+  <p class="label-mono text-[#a3a3a3] mb-3">Analysis</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-3">
     What's Missing from the Pending Bills
   </h2>
@@ -209,7 +209,7 @@ const stateCoords: Record<string, [number, number]> = {
 
   <!-- Gap list (sidebar) -->
   <div class="bg-[#111111]">
-    <div class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.18em] text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
+    <div class="label-mono text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
       Gaps
     </div>
     {billGaps.map((g: any, i: number) => (
@@ -228,7 +228,7 @@ const stateCoords: Record<string, [number, number]> = {
   <div class="bg-[#111111] p-8 md:p-10 flex flex-col justify-center min-h-[320px]">
     {billGaps.map((g: any, i: number) => (
       <div class:list={['gap-panel', i !== 0 && 'hidden']} data-gap-panel={i}>
-        <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.15em] text-[#a3a3a3] mb-2">Gap {String(i + 1).padStart(2, '0')}</p>
+        <p class="label-mono-tight text-[#a3a3a3] mb-2">Gap {String(i + 1).padStart(2, '0')}</p>
         <h3 class="text-[#e8e8e8] font-bold text-lg mb-4">{g.gap}</h3>
         <p class="text-[#a3a3a3] text-base leading-[1.7]">{g.detail}</p>
       </div>
