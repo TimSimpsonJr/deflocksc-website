@@ -11,7 +11,7 @@ tags:
   - sc
   - patents
 draft: false
-featuredImage: /uploads/blog/TheTimtastic_identification_system_minimalist_vector_illustra_df54727a-1b67-4766-8137-da4dadf880f4_0.png
+featuredImage: /uploads/blog/flock-safety-patent-racial-classification.png
 ---
 
 Flock Safety's [discrimination FAQ](https://www.flocksafety.com/blog/are-flock-products-discriminatory/) says their system "targets only vehicles linked to crime, not individuals or protected characteristics." Their product page says the cameras don't use facial recognition. Their reps tell city councils the same thing.
