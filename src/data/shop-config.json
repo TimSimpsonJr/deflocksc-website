@@ -1,10 +1,23 @@
 {
-  "batchTarget": 1000,
+  "batchTarget": 1200,
   "batchNumber": 1,
-  "batchStartRevenue": 0,
+  "batchStartProfit": 0,
+  "productOrder": [
+    "Campaign Sponsorship",
+    "Big Brother Is Watching You Tee - Men's",
+    "Big Brother Is Watching You Tee - Women's",
+    "Big Brother Is Watching You Poster"
+  ],
+  "tierLabels": {
+    "25": "Cover the basics",
+    "35": "Support the cause",
+    "50": "Go all in",
+    "100": "Sponsor 25 signs",
+    "200": "Sponsor 50 signs"
+  },
   "campaignHeadline": "Fund the Signs",
-  "campaignBlurb": "Every dollar you spend here goes toward putting \"Big Brother Is Watching You\" signs in front of Flock cameras across Upstate South Carolina.",
+  "campaignBlurb": "Every dollar of profit goes toward putting \"Big Brother Is Watching You\" signs in front of Flock cameras across Upstate South Carolina.",
   "transparencyNote": "Proceeds fund sign production, placement, and ongoing advocacy against warrantless license plate surveillance.",
-  "shippingNote": "T-shirts and posters ship in 5\u201310 business days via Printify. Yard signs ship in batches once we hit the next funding milestone.",
-  "returnsNote": "Returns accepted for defective items only. Contact us for self-fulfilled items."
+  "shippingNote": "T-shirts ship in 1-3 business days via NinjaPOD. Posters ship in 2-5 business days via Printify. Yard signs are local pickup only.",
+  "returnsNote": "Returns accepted for defective items only. Contact DeflockSC@proton.me for any issues."
 }

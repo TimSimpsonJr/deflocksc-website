@@ -1,5 +1,6 @@
 // netlify/functions/shop-progress.ts
-// Returns total shop revenue from Shopify Admin API for the progress bar
+// Returns total shop profit from Shopify Admin API for the progress bar
+// Profit = revenue - cost of goods (from variant inventoryItem.unitCost)
 
 import type { Context } from "@netlify/functions";
 
@@ -17,6 +18,20 @@ const ORDERS_QUERY = `
               amount
             }
           }
+          lineItems(first: 50) {
+            edges {
+              node {
+                quantity
+                variant {
+                  inventoryItem {
+                    unitCost {
+                      amount
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
       pageInfo {
@@ -26,8 +41,9 @@ const ORDERS_QUERY = `
   }
 `;
 
-async function fetchAllOrderTotals(): Promise<number> {
+async function fetchAllOrderProfits(): Promise<{ totalRevenue: number; totalCost: number }> {
   let totalRevenue = 0;
+  let totalCost = 0;
   let cursor: string | null = null;
   let hasNextPage = true;
 
@@ -57,6 +73,14 @@ async function fetchAllOrderTotals(): Promise<number> {
     const edges = json.data.orders.edges;
     for (const edge of edges) {
       totalRevenue += parseFloat(edge.node.totalPriceSet.shopMoney.amount);
+
+      for (const lineItem of edge.node.lineItems.edges) {
+        const unitCost = lineItem.node.variant?.inventoryItem?.unitCost?.amount;
+        const quantity = lineItem.node.quantity;
+        if (unitCost) {
+          totalCost += parseFloat(unitCost) * quantity;
+        }
+      }
     }
 
     hasNextPage = json.data.orders.pageInfo.hasNextPage;
@@ -65,7 +89,7 @@ async function fetchAllOrderTotals(): Promise<number> {
     }
   }
 
-  return totalRevenue;
+  return { totalRevenue, totalCost };
 }
 
 export default async (req: Request, context: Context) => {
@@ -77,8 +101,9 @@ export default async (req: Request, context: Context) => {
   }
 
   try {
-    const totalRevenue = await fetchAllOrderTotals();
-    return new Response(JSON.stringify({ totalRevenue: Math.round(totalRevenue * 100) / 100 }), {
+    const { totalRevenue, totalCost } = await fetchAllOrderProfits();
+    const totalProfit = Math.round((totalRevenue - totalCost) * 100) / 100;
+    return new Response(JSON.stringify({ totalProfit, totalRevenue }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
@@ -87,7 +112,7 @@ export default async (req: Request, context: Context) => {
     });
   } catch (err: any) {
     console.error('shop-progress error:', err);
-    return new Response(JSON.stringify({ error: 'Failed to fetch revenue data' }), {
+    return new Response(JSON.stringify({ error: 'Failed to fetch progress data' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
