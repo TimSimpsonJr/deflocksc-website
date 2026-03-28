@@ -150,6 +150,7 @@ const storefrontToken = import.meta.env.SHOPIFY_STOREFRONT_TOKEN;
           >
             Add to Cart{hasUniformPrice && !hasTiers ? ` — $${allVariantPrices[0]}` : ''}<span data-cart-price></span>
           </button>
+          <p id="cart-status" class="sr-only" aria-live="polite" aria-atomic="true"></p>
         </div>
       </div>
     </div>

@@ -113,12 +113,16 @@ document.querySelectorAll<HTMLElement>('.product-card').forEach(card => {
     const variantId = getSelectedVariantId(card);
     if (!variantId) {
       console.error('[shop] No matching variant found for selected options');
+      const statusEl = document.getElementById('cart-status');
+      if (statusEl) statusEl.textContent = 'Unable to find that combination. Please select a different size or tier.';
       return;
     }
 
     addBtn.disabled = true;
     const originalText = addBtn.textContent;
     addBtn.textContent = 'Redirecting to checkout...';
+    const statusEl = document.getElementById('cart-status');
+    if (statusEl) statusEl.textContent = 'Creating checkout, please wait...';
 
     try {
       const client = await getClient();
@@ -132,6 +136,8 @@ document.querySelectorAll<HTMLElement>('.product-card').forEach(card => {
       console.error('[shop] Checkout error:', err instanceof Error ? err.message : err);
       addBtn.disabled = false;
       addBtn.textContent = originalText;
+      const statusEl = document.getElementById('cart-status');
+      if (statusEl) statusEl.textContent = 'Checkout failed. Please try again.';
     }
   });
 });
