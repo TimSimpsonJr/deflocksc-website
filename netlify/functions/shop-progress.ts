@@ -110,7 +110,7 @@ export default async (req: Request, context: Context) => {
         'Cache-Control': 'public, max-age=300',
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('shop-progress error:', err);
     return new Response(JSON.stringify({ error: 'Failed to fetch progress data' }), {
       status: 500,

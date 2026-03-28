@@ -3,14 +3,14 @@
 
 import type { ShopifyProduct } from './shopify';
 
-export interface Tier {
+interface Tier {
   price: number;
   label: string;
   variants: ShopifyProduct['variants'];
   handle: string;
 }
 
-export interface ProductGroup {
+interface ProductGroup {
   baseName: string;
   slug: string;
   description: string;

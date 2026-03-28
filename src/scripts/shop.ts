@@ -1,5 +1,5 @@
 // src/scripts/shop.ts
-// Client-side logic: option selectors, Shopify Buy Button SDK cart, progress bar
+// Client-side logic: option selectors, Shopify checkout, progress bar
 
 // ── Data island ──
 const dataEl = document.getElementById('shop-data');
@@ -128,8 +128,8 @@ document.querySelectorAll<HTMLElement>('.product-card').forEach(card => {
         [{ variantId, quantity: 1 }]
       );
       window.location.href = updatedCheckout.webUrl;
-    } catch (err: any) {
-      console.error('[shop] Checkout error:', err);
+    } catch (err: unknown) {
+      console.error('[shop] Checkout error:', err instanceof Error ? err.message : err);
       addBtn.disabled = false;
       addBtn.textContent = originalText;
     }
