@@ -17,3 +17,20 @@ lighthouse*.json
 # Generated from open-civics npm packages (see scripts/sync-open-civics.mjs)
 public/districts/
 src/data/local-councils.json
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Service credentials
+credentials.json
+service-account.json
+
+# SSH keys
+id_rsa
+id_ecdsa
+id_ed25519

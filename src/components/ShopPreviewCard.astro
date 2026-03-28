@@ -1,0 +1,30 @@
+---
+interface Props {
+  title: string;
+  image: { url: string; altText: string | null; width: number; height: number } | null;
+  priceRange: string;
+  slug: string;
+}
+
+const { title, image, priceRange, slug } = Astro.props;
+---
+
+<a href={`/shop/${slug}`} aria-label={`View ${title} — ${priceRange}`} class="product-card bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] flex flex-col group hover:border-[rgba(255,255,255,0.15)] transition-colors">
+  {image && (
+    <div class="aspect-square overflow-hidden bg-[#111111]">
+      <img
+        src={image.url}
+        alt={image.altText ?? title}
+        width={image.width}
+        height={image.height}
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        loading="lazy"
+      />
+    </div>
+  )}
+
+  <div class="p-6 flex flex-col flex-1 gap-2">
+    <h2 class="text-[#e8e8e8] font-bold text-lg tracking-[-0.01em]">{title}</h2>
+    <p class="text-[#a3a3a3] text-sm font-bold">{priceRange}</p>
+  </div>
+</a>

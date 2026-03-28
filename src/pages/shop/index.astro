@@ -1,0 +1,141 @@
+---
+import Base from '../../layouts/Base.astro';
+import ShopPreviewCard from '../../components/ShopPreviewCard.astro';
+import { getProducts } from '../../lib/shopify';
+import { groupProducts, formatPriceRange } from '../../lib/shop-utils';
+import shopConfig from '../../data/shop-config.json';
+
+let products: Awaited<ReturnType<typeof getProducts>> = [];
+try {
+  products = await getProducts();
+} catch (err) {
+  console.error('Failed to fetch Shopify products:', err);
+}
+
+const tierLabels = (shopConfig as any).tierLabels as Record<string, string>;
+const productOrder = (shopConfig as any).productOrder as string[] | undefined;
+const productGroups = groupProducts(products, tierLabels, productOrder);
+---
+
+<Base
+  title="Shop — DeflockSC"
+  description="Buy merch and yard signs to fund the DeflockSC signage campaign. Every dollar puts a 'Big Brother Is Watching' sign in front of a Flock camera."
+>
+  <section class="bg-[#111111] min-h-screen">
+    <div class="max-w-6xl mx-auto px-6 md:px-12 pt-16 pb-8">
+      <p data-reveal="left" class="label-mono-heading mb-4">Support the campaign</p>
+      <h1 data-reveal="left" data-reveal-delay="1" class="text-[#e8e8e8] font-bold text-[clamp(2rem,4vw,3.5rem)] tracking-[-0.03em] leading-[1.05] mb-6">
+        {shopConfig.campaignHeadline}
+      </h1>
+      <p data-reveal="up" data-reveal-delay="2" class="text-[#d4d4d4] text-lg leading-relaxed max-w-2xl mb-3">
+        {shopConfig.campaignBlurb}
+      </p>
+      <p data-reveal="up" data-reveal-delay="3" class="text-[#a3a3a3] text-base leading-relaxed max-w-2xl">
+        {shopConfig.transparencyNote}
+      </p>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 md:px-12 pb-12">
+      <div
+        data-reveal="up"
+        id="progress-bar-container"
+        class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] p-6"
+      >
+        <div class="flex items-center justify-between mb-3">
+          <p class="label-mono-compact text-[#737373]">
+            Batch <span id="progress-batch">{shopConfig.batchNumber}</span> — Profit toward signs
+          </p>
+          <p class="text-[#e8e8e8] font-bold text-sm">
+            <span id="progress-raised" class="text-[#dc2626]">$0</span>
+            <span class="text-[#737373]"> / </span>
+            <span id="progress-goal">${shopConfig.batchTarget.toLocaleString()}</span>
+          </p>
+        </div>
+        <div class="w-full h-3 bg-[#0d0d0d] rounded-full overflow-hidden">
+          <div
+            id="progress-fill"
+            class="h-full bg-[#dc2626] rounded-full transition-[width] duration-1000 ease-out"
+            style="width: 0%"
+            role="progressbar"
+            aria-valuenow={0}
+            aria-valuemin={0}
+            aria-valuemax={shopConfig.batchTarget}
+            aria-label="Fundraising progress"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 md:px-12 pb-12">
+      {productGroups.length > 0 ? (
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {productGroups.map((group) => (
+            <ShopPreviewCard
+              title={group.baseName}
+              image={group.image}
+              priceRange={formatPriceRange(group)}
+              slug={group.slug}
+            />
+          ))}
+        </div>
+      ) : (
+        <p class="text-[#737373] text-center py-12">Products coming soon.</p>
+      )}
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 md:px-12 pb-20">
+      <div class="border-t border-[rgba(255,255,255,0.07)] pt-8 grid md:grid-cols-2 gap-6 text-sm text-[#737373]">
+        <div>
+          <p class="label-mono-compact text-[#a3a3a3] mb-2">Shipping</p>
+          <p>{shopConfig.shippingNote}</p>
+        </div>
+        <div>
+          <p class="label-mono-compact text-[#a3a3a3] mb-2">Returns</p>
+          <p>{shopConfig.returnsNote}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script
+    id="shop-data"
+    type="application/json"
+    set:html={JSON.stringify({
+      batchTarget: shopConfig.batchTarget,
+      batchNumber: shopConfig.batchNumber,
+      batchStartProfit: shopConfig.batchStartProfit,
+    })}
+  />
+
+  <script>
+    // Progress bar only (no cart SDK needed on index page)
+    async function loadProgress() {
+      const raisedEl = document.getElementById('progress-raised');
+      const fillEl = document.getElementById('progress-fill');
+      if (!raisedEl || !fillEl) return;
+
+      const dataEl = document.getElementById('shop-data');
+      if (!dataEl) return;
+      const config = JSON.parse(dataEl.textContent!);
+
+      try {
+        const res = await fetch('/.netlify/functions/shop-progress');
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const totalProfit = data.totalProfit ?? 0;
+        const batchProgress = totalProfit - config.batchStartProfit;
+        const clamped = Math.max(0, Math.min(batchProgress, config.batchTarget));
+        const pct = (clamped / config.batchTarget) * 100;
+
+        raisedEl.textContent = `$${Math.round(clamped).toLocaleString()}`;
+        fillEl.style.width = `${pct}%`;
+        fillEl.setAttribute('aria-valuenow', String(Math.round(clamped)));
+      } catch {
+        // Silently degrade
+      }
+    }
+
+    loadProgress();
+  </script>
+</Base>
