@@ -78,12 +78,12 @@ function getSelectedVariantId(card: HTMLElement): string | null {
   return match?.id ?? null;
 }
 
-// ── Shopify Buy Button SDK (cart only) ──
-let shopifyUI: any = null;
+// ── Shopify JS Buy SDK (direct checkout, no cart widget) ──
+let shopifyClient: any = null;
 
 function loadShopifySDK(): Promise<void> {
   return new Promise((resolve, reject) => {
-    if ((window as any).ShopifyBuy?.UI) { resolve(); return; }
+    if ((window as any).ShopifyBuy) { resolve(); return; }
 
     const script = document.createElement('script');
     script.src = 'https://sdks.shopifycdn.com/buy-button/latest/buy-button-storefront.min.js';
@@ -94,68 +94,45 @@ function loadShopifySDK(): Promise<void> {
   });
 }
 
-async function initShopifyCart() {
+async function getClient() {
+  if (shopifyClient) return shopifyClient;
   await loadShopifySDK();
-
-  const client = (window as any).ShopifyBuy.buildClient({
+  shopifyClient = (window as any).ShopifyBuy.buildClient({
     domain: config.shopDomain,
     storefrontAccessToken: config.storefrontToken,
   });
-
-  shopifyUI = await (window as any).ShopifyBuy.UI.onReady(client);
-
-  shopifyUI.createComponent('cart', {
-    options: {
-      cart: {
-        styles: {
-          button: { 'background-color': '#dc2626', 'border-radius': '0' },
-          title: { color: '#e8e8e8' },
-          header: { color: '#e8e8e8' },
-          lineItems: { color: '#e8e8e8' },
-          subtotalText: { color: '#a3a3a3' },
-          subtotal: { color: '#e8e8e8' },
-          notice: { color: '#a3a3a3' },
-          currency: { color: '#a3a3a3' },
-          close: { color: '#a3a3a3', ':hover': { color: '#e8e8e8' } },
-          empty: { color: '#a3a3a3' },
-          cartScroll: { 'background-color': '#1a1a1a' },
-          footer: { 'background-color': '#1a1a1a' },
-        },
-        text: { total: 'Subtotal', button: 'Checkout' },
-        popup: false,
-      },
-      toggle: {
-        styles: {
-          toggle: {
-            'background-color': '#dc2626',
-            ':hover': { 'background-color': '#b91c1c' },
-            'top': '80px',
-          },
-          count: { 'font-size': '12px' },
-        },
-      },
-    },
-  });
+  return shopifyClient;
 }
 
-// ── Add to Cart handlers ──
+// ── Buy Now handlers (direct to Shopify checkout) ──
 document.querySelectorAll<HTMLElement>('.product-card').forEach(card => {
   const addBtn = card.querySelector<HTMLButtonElement>('[data-add-to-cart]');
   if (!addBtn) return;
 
   addBtn.addEventListener('click', async () => {
-    if (!shopifyUI) return;
-
     const variantId = getSelectedVariantId(card);
     if (!variantId) {
-      console.error('No matching variant found for selected options');
+      console.error('[shop] No matching variant found for selected options');
       return;
     }
 
-    const cart = shopifyUI.cart;
-    await cart.model.addVariants({ id: variantId, quantity: 1 });
-    cart.view.render();
-    shopifyUI.toggles[0]?.view.render();
+    addBtn.disabled = true;
+    const originalText = addBtn.textContent;
+    addBtn.textContent = 'Redirecting to checkout...';
+
+    try {
+      const client = await getClient();
+      const checkout = await client.checkout.create();
+      const updatedCheckout = await client.checkout.addLineItems(
+        checkout.id,
+        [{ variantId, quantity: 1 }]
+      );
+      window.location.href = updatedCheckout.webUrl;
+    } catch (err: any) {
+      console.error('[shop] Checkout error:', err);
+      addBtn.disabled = false;
+      addBtn.textContent = originalText;
+    }
   });
 });
 
@@ -184,5 +161,4 @@ async function loadProgress() {
 }
 
 // ── Init ──
-initShopifyCart();
 loadProgress();

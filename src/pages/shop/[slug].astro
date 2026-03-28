@@ -20,7 +20,15 @@ export async function getStaticPaths() {
 const { group } = Astro.props;
 const { baseName, description, descriptionHtml, image, images, options, tiers, hasTiers } = group;
 
-const sizeOption = options.find((o: any) => o.name.toLowerCase() === 'size');
+const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL'];
+const rawSizeOption = options.find((o: any) => o.name.toLowerCase() === 'size');
+const sizeOption = rawSizeOption
+  ? { ...rawSizeOption, values: [...rawSizeOption.values].sort((a: string, b: string) => {
+      const ai = SIZE_ORDER.indexOf(a);
+      const bi = SIZE_ORDER.indexOf(b);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    })}
+  : null;
 const { min: minPrice, max: maxPrice } = getPriceRange(group);
 
 const allTierVariants = tiers.map((t: any) => ({
@@ -64,7 +72,7 @@ const storefrontToken = import.meta.env.SHOPIFY_STOREFRONT_TOKEN;
         </div>
 
         {/* Product details */}
-        <div class="flex flex-col gap-6">
+        <div class="product-card flex flex-col gap-6">
           <div>
             <h1 class="text-[#e8e8e8] font-bold text-2xl md:text-3xl tracking-[-0.02em] leading-tight mb-2">
               {baseName}
