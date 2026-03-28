@@ -1,8 +1,9 @@
 ---
-import Base from '../layouts/Base.astro';
-import ProductCard from '../components/ProductCard.astro';
-import { getProducts } from '../lib/shopify';
-import shopConfig from '../data/shop-config.json';
+import Base from '../../layouts/Base.astro';
+import ShopPreviewCard from '../../components/ShopPreviewCard.astro';
+import { getProducts } from '../../lib/shopify';
+import { groupProducts, formatPriceRange } from '../../lib/shop-utils';
+import shopConfig from '../../data/shop-config.json';
 
 let products: Awaited<ReturnType<typeof getProducts>> = [];
 try {
@@ -11,8 +12,9 @@ try {
   console.error('Failed to fetch Shopify products:', err);
 }
 
-const shopDomain = import.meta.env.SHOPIFY_STORE_DOMAIN;
-const storefrontToken = import.meta.env.SHOPIFY_STOREFRONT_TOKEN;
+const tierLabels = (shopConfig as any).tierLabels as Record<string, string>;
+const productOrder = (shopConfig as any).productOrder as string[] | undefined;
+const productGroups = groupProducts(products, tierLabels, productOrder);
 ---
 
 <Base
@@ -41,7 +43,7 @@ const storefrontToken = import.meta.env.SHOPIFY_STOREFRONT_TOKEN;
       >
         <div class="flex items-center justify-between mb-3">
           <p class="label-mono-compact text-[#737373]">
-            Batch <span id="progress-batch">{shopConfig.batchNumber}</span> Progress
+            Batch <span id="progress-batch">{shopConfig.batchNumber}</span> — Profit toward signs
           </p>
           <p class="text-[#e8e8e8] font-bold text-sm">
             <span id="progress-raised" class="text-[#dc2626]">$0</span>
@@ -65,16 +67,14 @@ const storefrontToken = import.meta.env.SHOPIFY_STOREFRONT_TOKEN;
     </div>
 
     <div class="max-w-6xl mx-auto px-6 md:px-12 pb-12">
-      {products.length > 0 ? (
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <ProductCard
-              title={product.title}
-              description={product.description}
-              image={product.featuredImage}
-              variants={product.variants}
-              options={product.options}
-              handle={product.handle}
+      {productGroups.length > 0 ? (
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {productGroups.map((group) => (
+            <ShopPreviewCard
+              title={group.baseName}
+              image={group.image}
+              priceRange={formatPriceRange(group)}
+              slug={group.slug}
             />
           ))}
         </div>
@@ -97,41 +97,45 @@ const storefrontToken = import.meta.env.SHOPIFY_STOREFRONT_TOKEN;
     </div>
   </section>
 
-  {products.map(product => {
-    const prices = product.variants.map(v => parseFloat(v.price.amount));
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    return (
-      <script type="application/ld+json" set:html={JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Product",
-        "name": product.title,
-        "description": product.description,
-        "image": product.featuredImage?.url,
-        "offers": {
-          "@type": "AggregateOffer",
-          "lowPrice": minPrice.toFixed(2),
-          "highPrice": maxPrice.toFixed(2),
-          "priceCurrency": "USD",
-          "availability": product.variants.some(v => v.availableForSale)
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock"
-        }
-      })} />
-    );
-  })}
-
   <script
     id="shop-data"
     type="application/json"
     set:html={JSON.stringify({
-      shopDomain,
-      storefrontToken,
       batchTarget: shopConfig.batchTarget,
       batchNumber: shopConfig.batchNumber,
-      batchStartRevenue: shopConfig.batchStartRevenue,
+      batchStartProfit: shopConfig.batchStartProfit,
     })}
   />
 
-  <script src="../scripts/shop.ts"></script>
+  <script>
+    // Progress bar only (no cart SDK needed on index page)
+    async function loadProgress() {
+      const raisedEl = document.getElementById('progress-raised');
+      const fillEl = document.getElementById('progress-fill');
+      if (!raisedEl || !fillEl) return;
+
+      const dataEl = document.getElementById('shop-data');
+      if (!dataEl) return;
+      const config = JSON.parse(dataEl.textContent!);
+
+      try {
+        const res = await fetch('/.netlify/functions/shop-progress');
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const totalProfit = data.totalProfit ?? 0;
+        const batchProgress = totalProfit - config.batchStartProfit;
+        const clamped = Math.max(0, Math.min(batchProgress, config.batchTarget));
+        const pct = (clamped / config.batchTarget) * 100;
+
+        raisedEl.textContent = `$${Math.round(clamped).toLocaleString()}`;
+        fillEl.style.width = `${pct}%`;
+        fillEl.setAttribute('aria-valuenow', String(Math.round(clamped)));
+      } catch {
+        // Silently degrade
+      }
+    }
+
+    loadProgress();
+  </script>
 </Base>

@@ -1,0 +1,173 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getProducts } from '../../lib/shopify';
+import { groupProducts, getPriceRange } from '../../lib/shop-utils';
+import shopConfig from '../../data/shop-config.json';
+
+const tierLabels = (shopConfig as any).tierLabels as Record<string, string>;
+
+export async function getStaticPaths() {
+  const products = await getProducts();
+  const tierLabels = (await import('../../data/shop-config.json')).default.tierLabels as Record<string, string>;
+  const groups = groupProducts(products, tierLabels);
+
+  return groups.map(group => ({
+    params: { slug: group.slug },
+    props: { group },
+  }));
+}
+
+const { group } = Astro.props;
+const { baseName, description, descriptionHtml, image, images, options, tiers, hasTiers } = group;
+
+const sizeOption = options.find((o: any) => o.name.toLowerCase() === 'size');
+const { min: minPrice, max: maxPrice } = getPriceRange(group);
+
+const allTierVariants = tiers.map((t: any) => ({
+  price: t.price,
+  label: t.label,
+  handle: t.handle,
+  variants: t.variants,
+}));
+
+const allVariantPrices = tiers.flatMap((t: any) => t.variants.map((v: any) => parseFloat(v.price.amount)));
+const hasUniformPrice = new Set(allVariantPrices).size === 1;
+
+const shopDomain = import.meta.env.SHOPIFY_STORE_DOMAIN;
+const storefrontToken = import.meta.env.SHOPIFY_STOREFRONT_TOKEN;
+---
+
+<Base
+  title={`${baseName} — DeflockSC`}
+  description={description}
+>
+  <section class="bg-[#111111] min-h-screen">
+    <div class="max-w-5xl mx-auto px-6 md:px-12 pt-16 pb-20">
+      <a href="/shop" class="text-[#737373] hover:text-[#a3a3a3] text-xs font-bold uppercase tracking-[0.1em] transition-colors mb-8 inline-block">
+        &larr; Back to shop
+      </a>
+
+      <div class="grid md:grid-cols-2 gap-10">
+        {/* Product image */}
+        <div>
+          {image && (
+            <div class="aspect-square overflow-hidden bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)]">
+              <img
+                src={image.url}
+                alt={image.altText ?? baseName}
+                width={image.width}
+                height={image.height}
+                class="w-full h-full object-cover"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Product details */}
+        <div class="flex flex-col gap-6">
+          <div>
+            <h1 class="text-[#e8e8e8] font-bold text-2xl md:text-3xl tracking-[-0.02em] leading-tight mb-2">
+              {baseName}
+            </h1>
+            <p class="text-[#dc2626] font-bold text-lg">
+              {minPrice === maxPrice ? `$${minPrice}` : `$${minPrice} – $${maxPrice}`}
+            </p>
+          </div>
+
+          <div class="text-[#a3a3a3] text-sm leading-relaxed product-description" set:html={descriptionHtml} />
+
+          {sizeOption && (
+            <div>
+              <p class="label-mono-compact text-[#737373] mb-2">Size</p>
+              <div class="flex flex-wrap gap-2" role="radiogroup" aria-label={`${baseName} size`}>
+                {sizeOption.values.map((size: string, i: number) => (
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={i === 0 ? 'true' : 'false'}
+                    data-option="size"
+                    data-value={size}
+                    class:list={[
+                      'option-btn px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] border transition-colors cursor-pointer',
+                      i === 0
+                        ? 'border-[#dc2626] text-white bg-[rgba(220,38,38,0.15)]'
+                        : 'border-[rgba(255,255,255,0.12)] text-[#a3a3a3] hover:text-white hover:border-[rgba(255,255,255,0.25)] bg-transparent'
+                    ]}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {hasTiers && (
+            <div>
+              <p class="label-mono-compact text-[#737373] mb-1">Pay what you want</p>
+              <p class="text-[#737373] text-xs mb-3">The base price covers production. Everything above that goes straight to funding signs.</p>
+              <div class="flex flex-wrap gap-2" role="radiogroup" aria-label={`${baseName} price`}>
+                {tiers.map((tier: any, i: number) => (
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={i === 0 ? 'true' : 'false'}
+                    data-option="tier"
+                    data-tier-index={i}
+                    data-value={`$${tier.price}`}
+                    class:list={[
+                      'option-btn px-4 py-2 text-xs font-bold tracking-[0.04em] border transition-colors cursor-pointer',
+                      i === 0
+                        ? 'border-[#dc2626] text-white bg-[rgba(220,38,38,0.15)]'
+                        : 'border-[rgba(255,255,255,0.12)] text-[#a3a3a3] hover:text-white hover:border-[rgba(255,255,255,0.25)] bg-transparent'
+                    ]}
+                  >
+                    <span class="font-bold">${tier.price}</span>
+                    {tier.label && <span class="text-[#737373] ml-1">{tier.label}</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
+            data-add-to-cart
+            data-tiers={JSON.stringify(allTierVariants)}
+            data-show-price={!hasTiers && !hasUniformPrice ? 'dynamic' : undefined}
+            class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.08em] px-6 py-4 transition-colors cursor-pointer"
+          >
+            Add to Cart{hasUniformPrice && !hasTiers ? ` — $${allVariantPrices[0]}` : ''}<span data-cart-price></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": baseName,
+    "description": description,
+    "image": image?.url,
+    "offers": {
+      "@type": "AggregateOffer",
+      "lowPrice": minPrice.toFixed(2),
+      "highPrice": maxPrice.toFixed(2),
+      "priceCurrency": "USD",
+      "availability": tiers.flatMap((t: any) => t.variants).some((v: any) => v.availableForSale)
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock"
+    }
+  })} />
+
+  <script
+    id="shop-data"
+    type="application/json"
+    set:html={JSON.stringify({
+      shopDomain,
+      storefrontToken,
+    })}
+  />
+
+  <script src="../../scripts/shop.ts"></script>
+</Base>

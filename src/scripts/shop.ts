@@ -6,7 +6,31 @@ const dataEl = document.getElementById('shop-data');
 if (!dataEl) throw new Error('Missing #shop-data');
 const config = JSON.parse(dataEl.textContent!);
 
-// ── Option selectors (size + price button rows) ──
+// ── Update button price for dynamic-price products ──
+function updateButtonPrice(card: HTMLElement) {
+  const addBtn = card.querySelector<HTMLButtonElement>('[data-add-to-cart]');
+  if (!addBtn || addBtn.dataset.showPrice !== 'dynamic') return;
+
+  const priceSpan = addBtn.querySelector<HTMLElement>('[data-cart-price]');
+  if (!priceSpan) return;
+
+  const tiers = JSON.parse(addBtn.dataset.tiers!);
+  const sizeBtn = card.querySelector<HTMLButtonElement>('[data-option="size"][aria-checked="true"]');
+  const selectedSize = sizeBtn?.dataset.value;
+
+  if (selectedSize && tiers[0]?.variants) {
+    const match = tiers[0].variants.find((v: any) =>
+      v.selectedOptions.some((opt: any) =>
+        opt.name.toLowerCase() === 'size' && opt.value === selectedSize
+      )
+    );
+    if (match) {
+      priceSpan.textContent = ` — $${parseFloat(match.price.amount)}`;
+    }
+  }
+}
+
+// ── Option selectors (size + tier button rows) ──
 document.querySelectorAll<HTMLElement>('.product-card').forEach(card => {
   card.querySelectorAll<HTMLElement>('[role="radiogroup"]').forEach(group => {
     const buttons = group.querySelectorAll<HTMLButtonElement>('[role="radio"]');
@@ -20,26 +44,36 @@ document.querySelectorAll<HTMLElement>('.product-card').forEach(card => {
         btn.setAttribute('aria-checked', 'true');
         btn.classList.add('border-[#dc2626]', 'text-white', 'bg-[rgba(220,38,38,0.15)]');
         btn.classList.remove('border-[rgba(255,255,255,0.12)]', 'text-[#a3a3a3]', 'bg-transparent');
+        updateButtonPrice(card);
       });
     });
   });
+
+  // Set initial price for dynamic-price products
+  updateButtonPrice(card);
 });
 
 // ── Resolve selected variant from button state ──
 function getSelectedVariantId(card: HTMLElement): string | null {
-  const variants = JSON.parse(card.querySelector<HTMLElement>('[data-add-to-cart]')!.dataset.variants!);
+  const tiers = JSON.parse(card.querySelector<HTMLElement>('[data-add-to-cart]')!.dataset.tiers!);
 
-  const selected: Record<string, string> = {};
-  card.querySelectorAll<HTMLButtonElement>('[role="radio"][aria-checked="true"]').forEach(btn => {
-    const optionName = btn.dataset.option!;
-    selected[optionName] = btn.dataset.value!;
+  // Get selected tier index
+  const tierBtn = card.querySelector<HTMLButtonElement>('[data-option="tier"][aria-checked="true"]');
+  const tierIndex = tierBtn ? parseInt(tierBtn.dataset.tierIndex!) : 0;
+  const tier = tiers[tierIndex];
+  if (!tier) return null;
+
+  // Get selected size (if applicable)
+  const sizeBtn = card.querySelector<HTMLButtonElement>('[data-option="size"][aria-checked="true"]');
+  const selectedSize = sizeBtn?.dataset.value;
+
+  // Find matching variant in the selected tier
+  const match = tier.variants.find((v: any) => {
+    if (!selectedSize) return true;
+    return v.selectedOptions.some((opt: any) =>
+      opt.name.toLowerCase() === 'size' && opt.value === selectedSize
+    );
   });
-
-  const match = variants.find((v: any) =>
-    v.selectedOptions.every((opt: any) =>
-      selected[opt.name.toLowerCase()] === opt.value
-    )
-  );
 
   return match?.id ?? null;
 }
@@ -136,8 +170,8 @@ async function loadProgress() {
     if (!res.ok) return;
 
     const data = await res.json();
-    const totalRevenue = data.totalRevenue ?? 0;
-    const batchProgress = totalRevenue - config.batchStartRevenue;
+    const totalProfit = data.totalProfit ?? 0;
+    const batchProgress = totalProfit - config.batchStartProfit;
     const clamped = Math.max(0, Math.min(batchProgress, config.batchTarget));
     const pct = (clamped / config.batchTarget) * 100;
 
