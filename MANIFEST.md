@@ -4,7 +4,7 @@
 
 Astro 5 + Tailwind CSS 4 advocacy site against ALPR surveillance in South Carolina.
 MapLibre GL JS for camera map. Self-hosted fonts (Instrument Sans Variable, DM Mono via @fontsource).
-Rep data from `open-civics` / `open-civics-boundaries` npm packages. Deployed on Netlify (auto-deploy from master).
+Rep data from `open-civics` / `open-civics-boundaries` npm packages. Shopify Storefront API for merch shop. Deployed on Netlify (auto-deploy from master).
 
 ## Structure
 
@@ -24,6 +24,7 @@ src/
     CitizenToolkit.astro        # Homepage toolkit preview cards → links to /toolkit/*
     TakeAction.astro            # CTA section, opens ActionModal
     ActionModal.astro           # Rep lookup: geolocation, address, or manual dropdown
+    ShopPreviewCard.astro       # Product preview card for shop grid (image, title, price range)
     Footer.astro                # 3-column: About, Blog, Resources
     ToolkitFoia.astro           # FOIA agency finder + letter templates with auto-fill
     ToolkitSpeaking.astro       # Public comment guide: talk track, tips, rebuttals
@@ -32,6 +33,9 @@ src/
   pages/
     index.astro                 # Homepage — assembles all section components
     404.astro                   # Branded error page
+    shop/
+      index.astro               # Shop landing: campaign header, progress bar, product grid
+      [slug].astro              # Product detail: size/tier selectors, direct checkout
     toolkit/
       index.astro               # Toolkit hub — card grid linking to 4 subpages + hash redirects
       foia.astro                # FOIA templates subpage
@@ -47,6 +51,8 @@ src/
     district-matcher.ts         # Boundary loading, district matching, Census geocoder (fetch)
     geo-utils.ts                # Point-in-polygon, bounding box geometry
     og-image.ts                 # Satori SVG-to-PNG for OG cards
+    shop-utils.ts               # Product grouping: maps Shopify variants into PWYW tiers
+    shopify.ts                  # Shopify Storefront API GraphQL client
   scripts/
     action-modal/               # ActionModal client-side logic (extracted)
       index.ts                  #   Entry point, wires up modal events
@@ -60,11 +66,13 @@ src/
     carousel.ts                 # Auto-advance, dot/arrow nav, keyboard a11y
     case-studies.ts             # Case study card animations, overlay focus traps
     foia-finder.ts              # Agency finder: location lookup, browse/filter, auto-fill
+    shop.ts                     # Shop client-side: option selectors, Shopify SDK checkout, progress bar
     toolkit-legal.ts            # State comparison map, bill gap analysis interactivity
   data/
     bills.json                  # SC legislature bills (populated by scraper)
     action-letters.json         # 85 locally tailored letter templates (all 46 counties)
     registry.json               # Jurisdiction metadata for district matching
+    shop-config.json            # Campaign config (batch target, headlines, tier labels, product order)
     foia-contacts.json          # 64 curated FOIA contact records (agencies + custodians)
     toolkit-foia.json           # 4 FOIA request templates
     toolkit-speaking.json       # Public comment tips, talk track, rebuttals
@@ -76,6 +84,10 @@ src/
     blog/                       # 8 Markdown blog posts (Astro content collections)
   content.config.ts             # Content collection definitions (glob loader)
   umami.d.ts                    # Type declarations for Umami analytics
+
+netlify/
+  functions/
+    shop-progress.ts            # Netlify Function: fetches profit from Shopify Admin API for progress bar
 
 public/
   robots.txt                    # Search engine crawl directives + sitemap reference
@@ -132,3 +144,7 @@ docs/
 - **publish.py ← Obsidian vault** — pulls blog posts tagged `publish: deflocksc`, auto commits + pushes
 - **dependabot.yml** — watches open-civics packages, opens PRs when new versions are published
 - **netlify.toml + _headers** — both set security headers; _headers has CSP, netlify.toml has the rest (keep in sync)
+- **shop-utils.ts groups products from shopify.ts** — maps Shopify variants into PWYW tiers displayed by shop pages
+- **shop.ts loads Shopify Buy Button SDK** — direct checkout flow (no cart widget)
+- **shop-progress.ts (Netlify Function)** — fetches order profit from Shopify Admin API for progress bar
+- **shop-config.json → shop pages** — controls product order, tier labels, batch fundraising target
