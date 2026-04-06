@@ -138,7 +138,7 @@ Flock's national data-sharing architecture means that once Greenville's plate re
 
 ## What's already gone wrong
 
-In Greenville, a Flock camera misread a rental car's license plate and flagged it as stolen. Two sisters were pulled over at gunpoint. Police handcuffed them both and put them in the back of a squad car. The car wasn't stolen. It had been improperly reported. The sisters are suing Greenville PD.
+In Greenville, a Flock camera misread a rental car's license plate and flagged it as stolen. Two sisters were [pulled over at gunpoint](https://www.postandcourier.com/greenville/news/license-plate-readers-rental-car-lawsuit-stolen-south-carolina-greenville-alpr/article_0a0c8da4-cb47-11ee-b853-ef14200492d2.html). Police handcuffed them both and put them in the back of a squad car. The car wasn't stolen. It had been improperly reported. The sisters are suing Greenville PD.
 
 That's the most visible harm. It's not the only one.
 

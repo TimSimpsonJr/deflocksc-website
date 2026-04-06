@@ -120,7 +120,7 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
         [&>h3]:text-[#e8e8e8] [&>h3]:font-bold [&>h3]:text-xl [&>h3]:mt-10 [&>h3]:mb-3
         [&>ul]:text-[#b0b0b0] [&>ul]:space-y-2 [&>ul]:mb-7 [&>ul>li]:pl-2 [&>ul>li]:leading-[1.7]
         [&>ol]:text-[#b0b0b0] [&>ol]:space-y-2 [&>ol]:mb-7
-        [&>blockquote]:border-l-3 [&>blockquote]:border-[#dc2626] [&>blockquote]:pl-6 [&>blockquote]:text-[#868686] [&>blockquote]:italic [&>blockquote]:my-8 [&>blockquote]:leading-[1.7]
+        [&>blockquote]:border-l [&>blockquote]:border-[rgba(255,255,255,0.15)] [&>blockquote]:pl-6 [&>blockquote]:text-[#868686] [&>blockquote]:italic [&>blockquote]:my-8 [&>blockquote]:leading-[1.7]
         [&_a]:text-[#fbbf24] [&_a]:hover:text-[#fcd34d] [&_a]:focus-visible:text-[#fcd34d] [&_a]:transition-colors
         [&_strong]:text-[#e8e8e8]
         [&_code]:bg-[rgba(255,255,255,0.07)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-sm
@@ -150,7 +150,7 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
               <li>
                 <a
                   href={`#${h.slug}`}
-                  class={`toc-link block text-[13px] leading-relaxed text-[#737373] hover:text-[#a0a0a0] transition-colors border-l-2 border-transparent ${h.depth === 3 ? 'pl-6' : 'pl-3'}`}
+                  class={`toc-link block text-[14px] leading-relaxed text-[#858585] hover:text-[#a0a0a0] transition-colors border-l-2 border-transparent ${h.depth === 3 ? 'pl-6' : 'pl-3'}`}
                   data-slug={h.slug}
                 >{h.text}</a>
               </li>
@@ -306,14 +306,14 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
     scroll-margin-top: 5rem;
   }
 
-  /* Tables */
-  .blog-post .prose table {
+  /* Tables — exclude .not-prose custom tables so inline Tailwind classes apply */
+  .blog-post .prose table:not(.not-prose table) {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
     line-height: 1.5;
   }
-  .blog-post .prose th {
+  .blog-post .prose :not(.not-prose) > table th {
     text-align: left;
     font-weight: 600;
     color: #e5e5e5;
@@ -321,29 +321,52 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
     border-bottom: 2px solid rgba(255,255,255,0.12);
     white-space: nowrap;
   }
-  .blog-post .prose td {
+  .blog-post .prose :not(.not-prose) > table td {
     padding: 8px 14px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
     color: #a3a3a3;
   }
-  .blog-post .prose tr:last-child td {
+  .blog-post .prose :not(.not-prose) > table tr:last-child td {
     border-bottom: none;
   }
-  .blog-post .prose td:first-child {
+  .blog-post .prose :not(.not-prose) > table td:first-child {
     color: #d4d4d4;
     font-weight: 500;
   }
   @media (max-width: 640px) {
-    .blog-post .prose table {
+    .blog-post .prose :not(.not-prose) > table {
       display: block;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
-    .blog-post .prose th,
-    .blog-post .prose td {
+    .blog-post .prose :not(.not-prose) > table th,
+    .blog-post .prose :not(.not-prose) > table td {
       padding: 8px 10px;
       font-size: 13px;
     }
+  }
+
+  /* External link indicator — targets href starting with http (not internal /) */
+  .blog-post .prose a[href^="http"]::after {
+    content: "\2009\2197";
+    font-size: 0.75em;
+    vertical-align: super;
+    opacity: 0.5;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  /* Pull quote system — prominent quote + smaller attribution */
+  .blog-post .prose blockquote .quote {
+    font-size: 1.25em;
+    line-height: 1.5;
+    font-weight: 600;
+    color: #e8e8e8;
+  }
+  .blog-post .prose blockquote .attribution {
+    font-size: 14px;
+    font-style: normal;
+    color: #737373;
   }
 
   /* Red bold for damning emphasis points */
