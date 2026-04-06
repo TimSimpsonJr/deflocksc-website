@@ -19,12 +19,10 @@ const allPosts = (await getCollection('blog')).filter((p) => !p.data.draft);
 const readTime = estimateReadTime(post.body ?? '');
 const relatedPosts = findRelatedPosts(post.id, post.data.tags ?? [], allPosts);
 
-// OG image priority: manual override > featured image > auto-generated
+// OG image priority: manual override > auto-generated > site default
 const ogImage = post.data.ogImage
   ? post.data.ogImage
-  : post.data.featuredImage
-    ? post.data.featuredImage
-    : `/blog/${post.id}/og.png`;
+  : `/blog/${post.id}/og.png`;
 
 // Filter headings to h2 and h3 for TOC
 const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
