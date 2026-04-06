@@ -18,7 +18,7 @@ const productGroups = groupProducts(products, tierLabels, productOrder);
 ---
 
 <Base
-  title="Shop — DeflockSC"
+  title="Support — DeflockSC"
   description="Buy merch and yard signs to fund the DeflockSC signage campaign. Every dollar puts a 'Big Brother Is Watching' sign in front of a Flock camera."
 >
   <section class="bg-[#111111] min-h-screen">
@@ -35,6 +35,8 @@ const productGroups = groupProducts(products, tierLabels, productOrder);
       </p>
     </div>
 
+    <!-- Campaign progress bar — hidden until campaign launches -->
+    <!--
     <div class="max-w-6xl mx-auto px-6 md:px-12 pb-12">
       <div
         data-reveal="up"
@@ -43,7 +45,7 @@ const productGroups = groupProducts(products, tierLabels, productOrder);
       >
         <div class="flex items-center justify-between mb-3">
           <p class="label-mono-compact text-[#737373]">
-            Batch <span id="progress-batch">{shopConfig.batchNumber}</span> — Profit toward signs
+            Batch <span id="progress-batch">{shopConfig.batchNumber}</span> — Proceeds toward signs
           </p>
           <p class="text-[#e8e8e8] font-bold text-sm">
             <span id="progress-raised" class="text-[#dc2626]">$0</span>
@@ -65,6 +67,7 @@ const productGroups = groupProducts(products, tierLabels, productOrder);
         </div>
       </div>
     </div>
+    -->
 
     <div class="max-w-6xl mx-auto px-6 md:px-12 pb-12">
       {productGroups.length > 0 ? (
