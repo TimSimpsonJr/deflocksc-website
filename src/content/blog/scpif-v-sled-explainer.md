@@ -1,6 +1,6 @@
 ---
 title: "Inside the Lawsuit to Shut Down SLED's Unauthorized Surveillance Database"
-subtitle: "SLED admitted to 430 million plate scans in court filings. 99.8% had nothing to do with crime."
+subtitle: "SLED's plate surveillance database has no legislative authorization and no audit trail. A lawsuit and four bills are racing to decide its future."
 date: 2026-04-06T00:00:00.000Z
 summary: "Court filings show 430 million plate scans, a 35% error rate, and 2,000 users with no audit trail. A lawsuit wants to shut it down."
 tags:
@@ -14,15 +14,13 @@ featuredImage: /blog/scpif-v-sled-lawsuit-explainer.png
 featuredImageAlt: "South Carolina statehouse silhouette against red sky, representing the SCPIF v. SLED surveillance lawsuit"
 ---
 
-*SLED runs a statewide license plate surveillance database with no legislative authorization, no audit trail, and a documented history of abuse. A lawsuit and four bills are racing to decide its future.*
-
 In 2013, a SLED officer logged into South Carolina's license plate reader database and searched for his own vehicle. He found an image of his plate. Then he altered the record to show someone else's. His access was revoked. When the [Post & Courier later filed a public records request](https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html) for any recent database misconduct, SLED refused to hand over a single document.
 
 That same database has been used to stalk a domestic partner through a false "missing person" report that triggered license plate alerts on their vehicle, turning a law enforcement tool into a personal tracking system. [State Rep. Todd Rutherford documented the case himself.](https://www.postandcourier.com/news/sc-lawmaker-wants-restrictions-on-police-using-automatic-license-plate/article_4c143334-7c8f-11e9-bfad-fb9ab937f2b6.html)
 
 And then there's Spartanburg County Sheriff Chuck Wright, who oversaw Flock Safety camera deployment across his county before [pleading guilty to federal charges](https://www.postandcourier.com/spartanburg/news/spartanburg-sheriff-chuck-wright-fbi-investigation-career-controversies/article_aa5d54be-7354-4507-be0c-dfdc456bdc57.html): conspiracy to commit theft from federal programs, conspiracy to commit wire fraud, and obtaining controlled substances through fraud. He faces up to 30 years.
 
-A database containing <strong class="red">430 million records</strong> of where South Carolinians drive. <strong class="red">Over 2,000 users</strong> have credentials to search it. The officer who tampered with records had credentials. The person who stalked their partner had credentials. Chuck Wright had credentials.
+This database contains <strong class="red">430 million records</strong> of where South Carolinians drive. <strong class="red">Over 2,000 users</strong> currently have credentials to search it. The officer who tampered with records had credentials. The person who stalked their partner had credentials. Chuck Wright had credentials. All with little to no oversight.
 
 ## What SLED built (and who said they could)
 
@@ -38,9 +36,9 @@ SLED admitted the following in [court filings](https://static1.squarespace.com/s
 
 South Carolina has about 5.2 million residents. That works out to roughly **83 location records per person** in the state.
 
-Court filings document a **35-37% misread rate**: transposed characters, misidentified letters, partial plates matched to the wrong vehicle. One in three scans is wrong. In Greenville, a Flock camera [misread a rental car's plate and flagged it as stolen](/blog/greenville-flock-contracts#whats-already-gone-wrong). Two sisters were pulled over at gunpoint, handcuffed, and put in the back of a squad car. The car wasn't stolen.
+Court filings document a <strong class="red">35-37% misread rate</strong>: transposed characters, misidentified letters, partial plates matched to the wrong vehicle. One in three scans is wrong. In Greenville, a Flock camera [misread a rental car's plate and flagged it as stolen](/blog/greenville-flock-contracts#whats-already-gone-wrong). Two sisters were pulled over at gunpoint, handcuffed, and put in the back of a squad car. The car wasn't stolen.
 
-The cameras weren't exactly installed by the book, either. In February 2024, [SCDOT Secretary Christy Hall revealed](https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html) that more than **200 Flock Safety cameras** had been installed on state roads without permits. Hall's response: she paused all new camera permits and noted that the legislature had never put any public policy in place regarding the technology. Flock's spokesman said their teams just "move very quickly."
+The cameras weren't installed by the book, either. In February 2024, [SCDOT Secretary Christy Hall revealed](https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html) that more than **200 Flock Safety cameras** had been installed on state roads without permits. Hall paused all new camera permits and noted that the legislature had never put any public policy in place regarding the technology. Flock's spokesman said their teams just "move very quickly."
 
 ## The lawsuit
 
@@ -53,7 +51,7 @@ Their argument has three layers.
     <div class="text-[32px] font-bold text-[#dc2626] leading-none shrink-0 w-9 text-center">1</div>
     <div>
       <p class="text-[#e8e8e8] font-bold text-base mb-1.5">SLED has no statutory authority</p>
-      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">SLED's authorizing statutes say "criminal." A database where 99.8% of entries have zero connection to crime doesn't qualify. SLED can't point to a single statute that authorizes a statewide vehicle surveillance database.</p>
+      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">SLED's authorizing statutes say "criminal." A database where 99.8% of entries have zero connection to crime doesn't qualify. SLED can't point to a SINGLE statute that authorizes a statewide vehicle surveillance database.</p>
     </div>
   </div>
   <div class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6 flex gap-5 items-start">
@@ -72,32 +70,35 @@ Their argument has three layers.
   </div>
 </div>
 
-The case deliberately avoids the Fourth Amendment, because [federal courts have spent years fighting about whether license plate cameras violate the Constitution](/blog/the-4th-amendment-loophole) and the results are all over the map. The SC plaintiffs sidestepped that mess. They're arguing on state law, which means federal precedent can't overrule them.
+The case deliberately avoids the Fourth Amendment, because [federal courts have spent years fighting about whether license plate cameras violate the Constitution](/blog/the-4th-amendment-loophole) and the results are all over the map. The SC plaintiffs sidestepped that mess entirely. They're arguing on state law, which means federal precedent can't overrule them.
 
-If the court agrees, SLED's database goes dark until the legislature writes a new law with actual limits.
+If the court agrees, SLED's database goes dark until the legislature writes a new law with actual, real limits.
 
 ## What happens when there are no limits
 
-In Milwaukee, a police officer used Flock to look up the license plate of someone he was dating. **120 times**. He also searched the plate of that person's ex 55 times. [Criminal charges were filed in February 2026.](https://wislawjournal.com/2026/02/26/milwaukee-officer-charged-in-flock-camera-misuse/)
+In Milwaukee, a police officer used Flock to look up the license plate of someone he was dating. **120 times**. He also searched the plate of that person's ex 55 times. [The Milwaukee County DA charged him in February 2026.](https://wislawjournal.com/2026/02/26/milwaukee-officer-charged-in-flock-camera-misuse/)
 
-And it's not just individual officers. A [Houston HIDTA bulletin](https://www.404media.co/police-told-to-be-as-vague-as-permissible-about-why-they-use-flock/), forwarded by the FBI to its intelligence community, instructed Flock users to enter search reasons "as vague as permissible." The bulletin also told officers to exclude agencies that comply with public records laws from their data-sharing networks and to limit searches to avoid jurisdictions that release audit logs. The FBI was coaching local cops to hide what they were doing with the system.
+That officer had access to a single city's camera network. SLED's database spans the entire state, with 156 times the retention window and no audit trail that's ever been made public.
+
+A [Houston HIDTA bulletin](https://www.404media.co/police-told-to-be-as-vague-as-permissible-about-why-they-use-flock/), forwarded by the FBI to its intelligence community, instructed Flock users to enter search reasons "as vague as permissible." The bulletin also told officers to exclude agencies that comply with public records laws from their data-sharing networks and to limit searches to avoid jurisdictions that release audit logs.
 
 > <span class="quote">"Enter search reasons as vague as permissible."</span>
 >
 > <span class="attribution">FBI intelligence bulletin forwarded to law enforcement nationwide. <a href="https://www.404media.co/police-told-to-be-as-vague-as-permissible-about-why-they-use-flock/">Reported by 404 Media.</a></span>
 
+That's a federal agency coaching officers to evade transparency. SLED's own policy has no public audit mechanism. If officers in South Carolina are following the same playbook, there's no way to tell.
 
-## The cases that could change everything for SC
+## The legal ground shifting under SLED
 
-The SC lawsuit isn't happening in isolation. Two federal cases, both working their way through appellate courts right now, could reshape the legal ground under SLED's feet.
+The SC lawsuit isn't happening in isolation. Two federal cases working through appellate courts right now could reshape the legal ground under SLED's database.
 
-[*Schmidt v. City of Norfolk*](https://ij.org/case/norfolk-virginia-camera-surveillance/) could set the precedent. The Institute for Justice sued Norfolk, Virginia over its 176 Flock cameras. Norfolk's police chief admitted it would be hard to drive anywhere in the city without passing one. In January 2026, [a federal judge sided with Norfolk](https://valawyersweekly.com/2026/02/16/norfolk-license-plate-reader-fourth-amendment-dismissal/), ruling the cameras didn't capture enough data to reconstruct detailed movements. But the judge also warned that the analysis "could conceivably tip the other way" as camera networks grow. And IJ won on standing: ordinary residents can challenge ALPR systems without being individually targeted. IJ is now appealing to the Fourth Circuit.
+[*Schmidt v. City of Norfolk*](https://ij.org/case/norfolk-virginia-camera-surveillance/) could set the precedent. The Institute for Justice sued Norfolk, Virginia over its 176 Flock cameras. Norfolk's police chief admitted it would be hard to drive anywhere in the city without passing one. In January 2026, [a federal judge sided with Norfolk](https://valawyersweekly.com/2026/02/16/norfolk-license-plate-reader-fourth-amendment-dismissal/), ruling the cameras didn't capture enough data to reconstruct detailed movements. But the judge also warned that the analysis "could conceivably tip the other way" as camera networks grow. IJ won on standing. Ordinary residents can challenge ALPR systems without being individually targeted. Now, IJ is appealing to the Fourth Circuit.
 
 That circuit covers Virginia, the Carolinas, Maryland, and West Virginia. **A Fourth Circuit ruling on ALPR surveillance would be binding law in South Carolina.**
 
 The Fourth Circuit already has its own precedent pointing toward privacy. In 2021, the full court ruled that Baltimore's aerial surveillance program (planes continuously photographing the city) was an unconstitutional search. Norfolk's ground-level camera network captures more detailed data, on more people, with better precision than Baltimore's planes ever did.
 
-And then there's the Supreme Court. In [*Carpenter v. United States* (2018)](https://www.oyez.org/cases/2017/16-402), the Court ruled 5-4 that government access to 7 days of cell phone location data is a Fourth Amendment search requiring a warrant. SLED keeps **3 years** of vehicle location data. The vehicle data is more precise (exact GPS coordinates, not approximate cell tower range). The retention period is **156 times longer**.
+And then there's the Supreme Court. In [*Carpenter v. United States* (2018)](https://www.oyez.org/cases/2017/16-402), the Court ruled 5-4 that government access to 7 days of cell phone location data is a Fourth Amendment search requiring a warrant. SLED keeps **3 years** of vehicle location data. That vehicle data is more precise (exact GPS coordinates, not approximate cell tower range), and the retention period is **156 times longer**.
 
 <div class="not-prose my-8 grid grid-cols-2 gap-px bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.07)] overflow-hidden">
   <div class="bg-[#1a1a1a] px-6 py-6">
@@ -142,7 +143,7 @@ And then there's the Supreme Court. In [*Carpenter v. United States* (2018)](htt
 
 ## Four bills, one that actually fixes it
 
-Four bills in the 2025-2026 SC session attempt to regulate license plate cameras. Only one, H.4675, goes for the throat. We wrote [a deep dive on it](/blog/h4675-strongest-alpr-bill-in-sc); here's the comparison.
+Four bills in the 2025-2026 SC session attempt to regulate license plate cameras. Only one goes for the throat. We wrote [a deep dive on H.4675](/blog/h4675-strongest-alpr-bill-in-sc), and  here's the comparison.
 
 [**H.4675**](https://www.scstatehouse.gov/sess126_2025-2026/bills/4675.htm), the Community Data Protection and Responsible Surveillance Act, is sponsored by 4 Freedom Caucus Republicans: Reps. Kilmartin, Chumley, Edgerton, and Magnuson. It would ban third-party cloud storage of camera data (which makes Flock's entire business model illegal in SC), prohibit AI-based vehicle tracking, set a **21-day retention limit**, require warrants for data access, explicitly block immigration enforcement use, and let residents sue for violations. If it passed, every existing Flock contract in the state would be void.
 
@@ -240,6 +241,7 @@ The people who tampered with records, stalked their partners, and pled guilty to
 - [SCPIF v. SLED case docket, Civil Rights Litigation Clearinghouse](https://clearinghouse.net/case/45661/)
 - [Policing Project: SCPIF v. SLED](https://www.policingproject.org/scpif-v-sled)
 - [Post & Courier: "A company installed license plate cameras without permission. SC agency wants clear rules" (Mar. 2024)](https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html)
+- [Post & Courier: SC lawmaker wants restrictions on police using automatic license plate readers (May 2019)](https://www.postandcourier.com/news/sc-lawmaker-wants-restrictions-on-police-using-automatic-license-plate/article_4c143334-7c8f-11e9-bfad-fb9ab937f2b6.html)
 - [Post & Courier: Spartanburg Sheriff Chuck Wright federal charges](https://www.postandcourier.com/spartanburg/news/spartanburg-sheriff-chuck-wright-fbi-investigation-career-controversies/article_aa5d54be-7354-4507-be0c-dfdc456bdc57.html)
 - [Wisconsin Law Journal: Milwaukee officer charged in Flock camera misuse (Feb. 2026)](https://wislawjournal.com/2026/02/26/milwaukee-officer-charged-in-flock-camera-misuse/)
 - [404 Media: Police told to be "as vague as permissible" about Flock searches](https://www.404media.co/police-told-to-be-as-vague-as-permissible-about-why-they-use-flock/)

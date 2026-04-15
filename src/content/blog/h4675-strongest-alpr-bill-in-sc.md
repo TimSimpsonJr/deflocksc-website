@@ -12,105 +12,111 @@ featuredImage: /blog/sc-alpr-bill-h4675-legislation.png
 featuredImageAlt: "SC license plate camera bill H4675: legal documents and gavel illustration"
 ---
 
-South Carolina has [4 bills](/blog/sc-has-no-license-plate-camera-law) that would regulate license plate cameras. Three of them set rules for what police can do with camera data. H4675 sets rules for what Flock Safety can do with it.
+It's rare to see Freedom Caucus Republicans and a Democratic civil rights lawyer pulling in the same direction. License plate cameras that spy on every car in South Carolina and send the data to a private company's servers out of state turned out to be that thing.
 
-Flock Safety is the private company behind most ALPR cameras in South Carolina. They store every plate scan on their own cloud servers.
+Four bills to regulate ALPR cameras are sitting in committee. Three would put limits on how police use the data. H4675 goes after the system that collects it.
 
-They also pipe data into a national network that lets any participating agency query any other agency's cameras. And they've been caught giving federal agencies direct access without telling the local departments that actually own the cameras.
+Flock Safety is the private company behind most ALPR cameras in South Carolina. They store every plate scan on their own cloud servers, pipe the data into a national network that lets any participating agency query any other agency's cameras, and have been caught giving federal agencies direct access without telling the local departments that actually own the cameras.
 
-South Carolina has <strong class="red">zero laws</strong> governing any of it. No retention limits, no access controls, no penalties for misuse.
-
-Flock operates in a complete regulatory vacuum. If you're new to this, read the [full breakdown of that vacuum](/blog/sc-has-no-license-plate-camera-law).
-
-Here's what makes H4675 different from the other 3 bills: if it passed, <strong class="red">every existing Flock contract in the state would be void</strong>.
+South Carolina has [zero laws](/blog/sc-has-no-license-plate-camera-law) governing any of it. If H4675 passed, <strong class="red">every existing Flock contract in the state would be void</strong>.
 
 ## What H4675 actually does
 
 The bill has 7 core provisions. Here's what each one means in practice.
 
-**1. Cloud storage ban.** All ALPR data must live on servers owned by South Carolina government entities, physically located in the state. Any contract that violates this is void as against public policy.
+<div class="not-prose my-8 flex flex-col gap-3">
+  <div class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6 flex gap-5 items-start">
+    <div class="text-[32px] font-bold text-[#dc2626] leading-none shrink-0 w-9 text-center">1</div>
+    <div>
+      <p class="text-[#e8e8e8] font-bold text-base mb-1.5">Cloud storage ban</p>
+      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">All ALPR data must live on servers owned by South Carolina government entities, physically located in the state. Any contract that violates this is void as against public policy. Flock stores everything on their own cloud infrastructure, so this provision alone would kill every Flock contract in SC.</p>
+    </div>
+  </div>
+  <div class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6 flex gap-5 items-start">
+    <div class="text-[32px] font-bold text-[#dc2626] leading-none shrink-0 w-9 text-center">2</div>
+    <div>
+      <p class="text-[#e8e8e8] font-bold text-base mb-1.5">AI vehicle tracking ban</p>
+      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">Flock's "Vehicle Fingerprint" technology identifies cars by body damage, decals, roof racks, and paint patterns. H4675 limits cameras to license plate analysis plus time, date, and location.</p>
+    </div>
+  </div>
+  <div class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6 flex gap-5 items-start">
+    <div class="text-[32px] font-bold text-[#dc2626] leading-none shrink-0 w-9 text-center">3</div>
+    <div>
+      <p class="text-[#e8e8e8] font-bold text-base mb-1.5">21-day retention limit</p>
+      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">SLED currently retains 422 million+ plate reads for 3 years. The other 3 bills would set a 90-day limit. H4675 sets 21 days, and extended retention requires a court order.</p>
+    </div>
+  </div>
+  <div class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6 flex gap-5 items-start">
+    <div class="text-[32px] font-bold text-[#dc2626] leading-none shrink-0 w-9 text-center">4</div>
+    <div>
+      <p class="text-[#e8e8e8] font-bold text-base mb-1.5">Warrant requirement</p>
+      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">Officers can't access historical data without supervisory approval and a search warrant. Emergency access is allowed for imminent threats, but it has to be documented within 24 hours and reviewed by a judge. If the judge finds the access unjustified, the data gets deleted and can't be used. (For more on why warrants matter, see <a href="/blog/the-4th-amendment-loophole" class="text-[#fbbf24] hover:text-[#fcd34d]">the 4th Amendment loophole</a> that plate cameras exploit.)</p>
+    </div>
+  </div>
+  <div class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6 flex gap-5 items-start">
+    <div class="text-[32px] font-bold text-[#dc2626] leading-none shrink-0 w-9 text-center">5</div>
+    <div>
+      <p class="text-[#e8e8e8] font-bold text-base mb-1.5">Immigration enforcement ban</p>
+      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">ALPR data can't be used for immigration checks, civil enforcement, traffic enforcement, or code enforcement.</p>
+    </div>
+  </div>
+  <div class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6 flex gap-5 items-start">
+    <div class="text-[32px] font-bold text-[#dc2626] leading-none shrink-0 w-9 text-center">6</div>
+    <div>
+      <p class="text-[#e8e8e8] font-bold text-base mb-1.5">Civil remedies</p>
+      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">If your plate data is accessed without a warrant, you can sue directly for injunctive relief, damages, and attorney's fees. You don't have to wait for a prosecutor to act.</p>
+    </div>
+  </div>
+  <div class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6 flex gap-5 items-start">
+    <div class="text-[32px] font-bold text-[#dc2626] leading-none shrink-0 w-9 text-center">7</div>
+    <div>
+      <p class="text-[#e8e8e8] font-bold text-base mb-1.5">Quarterly audits and transparency reports</p>
+      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">Independent audits by the SC Inspector General every quarter, plus annual transparency reports detailing total scans, alerts, investigations, and vendor contracts. Unauthorized access is a misdemeanor (1 year, $5,000 fine), and illegally obtained data is inadmissible in court.</p>
+    </div>
+  </div>
+</div>
 
-Flock stores everything on their own cloud infrastructure. This provision alone would kill every Flock contract in SC.
-
-**2. AI vehicle tracking ban.** Flock's "Vehicle Fingerprint" technology identifies cars by body damage, decals, roof racks, paint patterns. H4675 limits cameras to license plate analysis plus time, date, and location. Nothing else.
-
-**3. 21-day retention limit.** SLED currently retains 422 million+ plate reads for 3 years. The other 3 bills would set a 90-day limit. H4675 sets 21 days, and extended retention requires a court order.
-
-**4. Warrant requirement.** Officers can't access historical data directly. Supervisory approval plus a search warrant are required.
-
-Emergency access is allowed for imminent threats, but it has to be documented within 24 hours and reviewed by a judge. If the judge finds the access unjustified, the data gets deleted and can't be used. (For more on why warrants matter here, see [the 4th Amendment loophole](/blog/the-4th-amendment-loophole) that plate cameras exploit.)
-
-**5. Immigration enforcement ban.** ALPR data can't be used for immigration checks, civil enforcement, traffic enforcement, or code enforcement.
-
-**6. Civil remedies.** SC residents can pursue injunctive relief, damages, and attorney's fees for unlawful data access. You don't have to wait for a prosecutor to act. You can sue directly.
-
-**7. Quarterly audits and transparency reports.** Independent audits by the SC Inspector General every quarter, plus annual transparency reports detailing total scans, alerts, investigations, and vendor contracts.
-
-Misdemeanor penalties (1 year, $5,000 fine) for unauthorized access. Illegally obtained data is inadmissible.
-
-H4675 is sponsored by 4 Freedom Caucus Republicans: Kilmartin, Chumley, Edgerton, and Magnuson. Rep. Todd Rutherford (D) has his own ALPR bill (H3155) sitting in the same committee. A Freedom Caucus libertarian and a Democratic civil liberties advocate don't agree on much, but they both concluded that mass plate surveillance needs limits.
+H4675 is sponsored by 4 Freedom Caucus Republicans: Kilmartin, Chumley, Edgerton, and Magnuson. Rep. Todd Rutherford (D) has his own ALPR bill (H3155) sitting in the same committee. They don't agree on much, but they both concluded that mass plate surveillance needs limits.
 
 ## The federal access problem
 
-Local agencies sign Flock contracts thinking the cameras are for local crime-solving. But Flock runs a national network where any agency can query any other agency's data.
+Local agencies sign Flock contracts thinking the cameras are for local crime-solving. But Flock runs a national network where ANY agency can query any other agency's data. Once a city plugs in, its plate scans become searchable by thousands of departments it's never heard of, including federal ones.
 
-Once a city plugs in, its plate scans become searchable by thousands of departments it's never heard of. Including federal ones.
+The [University of Washington Center for Human Rights](https://jsis.washington.edu/humanrights/2025/10/21/leaving-the-door-wide-open/) investigated how federal agencies get into these local networks and documented 3 distinct access modes. They called them the front door, the back door, and the side door. All 3 were happening simultaneously.
 
-The problem is structural. If CBP can search the network, so can every other federal entity with access.
+**The front door** is explicit: a local agency voluntarily shares data with a federal partner. That's what Flock's marketing materials describe. But the [Virginia Center for Investigative Journalism](https://www.whro.org/virginia-center-for-investigative-journalism/2025-09-24/vcij-flock-surveillance-ice-immigration-enforcement) found roughly 3,000 searches by Feds through the Flock network in Virginia alone over 12 months, many from local agencies that never intended their cameras to serve that purpose.
 
-No local authorization required. No notification sent. The system is built to make this easy, and there's nothing stopping it.
+**The back door** bypasses authorization entirely. In August 2025, [9NEWS reported](https://www.9news.com/article/news/local/flock-federal-immigration-agents-access-tracking-data/73-a8aee742-56d4-4a57-b5bb-0373286dfef8) that Flock had given federal agents a secret account to send access invitations to local departments across the country. None of those departments knew it was happening. Flock's CEO had publicly denied having any federal contracts just 20 days earlier. That same month, an [Illinois Secretary of State audit](https://www.ilsos.gov/news/2025/august-25-2025-giannoulias-audit-finds-license-plate-reader-company-in-violation-of-state-law.html) found that federal agents had accessed plate data from 12 local agencies in violation of state law.
 
-In August 2025, 9NEWS reported that Flock had given federal agents a secret account to send access invitations to local departments across the country. None of those departments knew it was happening. Flock's CEO had publicly denied having any federal contracts just 20 days earlier.
+**The side door** is subtler: a local officer runs searches on behalf of a federal agent, using their own credentials. No federal account needed, and no audit trail that distinguishes the request from a routine local search. In June 2025, Homeland Security agents emailed law enforcement listservs in Western Washington asking officers to run Flock searches for them, and officers from multiple jurisdictions did so. [404 Media documented](https://www.404media.co/ice-taps-into-nationwide-ai-enabled-camera-network-data-shows/) roughly 4,000 immigration-related searches conducted this way nationally by mid-2025.
 
-That same month, an Illinois Secretary of State audit found that federal agents had accessed plate data from 12 local agencies in violation of state law.
+The problem is structural. If the network allows ANY of these access modes, no local policy can stop them. Three of SC's 4 bills only regulate state and local agencies and say NOTHING about federal access. However, H4675 does though. Its cloud ban makes the national network structurally impossible in SC (data can't leave state-owned servers), and its immigration enforcement ban closes the policy gap. The other 3 bills set rules for how agencies use the data. H4675 goes after the plumbing that moves it.
 
-In October 2025, the University of Washington Center for Human Rights documented 3 distinct access modes: a "front door" where agencies explicitly authorize sharing, a "back door" where data gets accessed from agencies that never authorized sharing, and a "side door" where a local officer runs searches on behalf of a federal agent.
-
-All 3 were happening.
-
-Also in October 2025, the Virginia Center for Investigative Journalism reported roughly 3,000 immigration-related searches on the Flock network over a 12-month period in Virginia alone.
-
-Three of SC's 4 bills don't touch any of this. They regulate state and local agencies but say nothing about federal access.
-
-H4675 does. Its cloud ban makes the national network structurally impossible in SC (data can't leave state-owned servers). Its immigration enforcement ban closes the policy gap.
-
-You can compare all 4 bills side by side on our [toolkit page](/toolkit/legal).
-
-The other 3 bills set rules for how agencies use the data. H4675 goes after the plumbing that moves it.
+Compare all 4 bills side by side on the [toolkit page](/toolkit/legal).
 
 ## Where it could be stronger
 
 The bill's biggest obstacle has nothing to do with what's in it. H4675 has been sitting in the House Judiciary Committee since January 2026 with no hearing scheduled. A bill can't pass if nobody puts it on the agenda.
 
-There's also a practical question. The cloud storage ban requires state-owned servers, and that's a real cost for smaller agencies.
+There's also a practical question. The cloud storage ban requires state-owned servers, and that's a real cost for smaller agencies. But 21-day retention means far less data to store than the current 3-year regime, and states like Montana and New Hampshire both manage local storage requirements without issues.
 
-But 21-day retention means far less data to store than the current 3-year regime. Montana and New Hampshire both manage local storage requirements without issues.
-
-H4675 only has 4 sponsors so far. That's not enough to move it on its own.
-
-These are normal legislative obstacles, not fatal flaws. The point is getting the bill into committee for refinement, where its provisions can be folded into whatever bill does advance.
+H4675 only has 4 sponsors so far, which isn't enough to move it on its own. These are normal legislative obstacles, not fatal flaws. The point is getting the bill into committee for refinement, where its provisions can be folded into whatever bill does advance.
 
 ## Why it needs a hearing now
 
-SLED's centralized ALPR database holds 422 million+ plate reads from 2019 to 2022. Over 100 million per year, retained for 3 years, accessible to 2,000+ user accounts across 99+ agencies.
+SLED's centralized ALPR database holds 422 million+ plate reads from 2019 to 2022, over 100 million per year, retained for 3 years, and accessible to 2,000+ user accounts across 99+ agencies. No statute authorizes any of it. Every day without legislation is another day of unregulated mass data collection.
 
-No statute authorizes any of it. Every day without legislation is another day of unregulated mass data collection.
-
-Flock rewrote its Terms of Service twice in 3 months (December 2025 and February 2026), making 147 documented changes. Key changes included deleting data ownership language and granting Flock a perpetual license to use customer data.
-
-If a city's contract auto-incorporates Flock's updated terms, it may already be bound by provisions it never actually agreed to.
+Flock rewrote its Terms of Service twice in 3 months (December 2025 and February 2026), making 147 documented changes. Key changes included deleting data ownership language and granting Flock a perpetual license to use customer data. If a city's contract auto-incorporates Flock's updated terms, it may already be bound by provisions it never actually agreed to.
 
 Cities across the country are pulling back. Denver canceled its Flock contract in February 2026 (Flock's own showcase city), and Evanston, Mountain View, Lynnwood, Santa Cruz, and Staunton have all done the same.
 
-SC has its own track record. In 2024, a North Charleston police lieutenant [used the city's surveillance cameras to follow his wife](https://www.live5news.com/2024/06/24/north-charleston-police-officer-demoted-using-cameras-track-wife/) because he suspected she was having an affair. He pulled up live video feeds for days, tracked her movements, and confronted her in a Target parking lot. He was demoted. Not fired.
+SC has its own track record. In 2024, a North Charleston police lieutenant [used the city's surveillance cameras to follow his wife](https://www.live5news.com/2024/06/24/north-charleston-police-officer-demoted-using-cameras-track-wife/) because he suspected she was having an affair. He pulled up live video feeds for days, tracked her movements, and confronted her in a Target parking lot. He was demoted, not fired.
 
 In 2013, a SLED officer looked up his own vehicle in the ALPR database and changed the record to show someone else's plate. His access was revoked, but when the Post and Courier filed a FOIA for any misconduct cases since, SLED refused to hand over a single document.
 
-<strong class="red">Two documented abuse cases in SC. Zero laws broken, because there aren't any to break.</strong>
+<strong class="red">At least two documented abuse cases in SC. ZERO laws broken, because there aren't any to break.</strong>
 
-Both H4675 and H3155 sit in the same committee. The strongest provisions from H4675 should be folded into whatever bill advances.
-
-Even if H4675 doesn't pass as written, its ideas can survive in a stronger compromise. But none of that happens without a hearing.
+Both H4675 and H3155 sit in the same committee. The strongest provisions from H4675 should be folded into whatever bill advances. Even if H4675 doesn't pass as written, its ideas can survive in a stronger compromise. But none of that happens without a hearing.
 
 ## Contact your rep
 
@@ -136,3 +142,4 @@ For a step-by-step playbook (FOIA requests, council meeting prep, outreach mater
 - [VCIJ: Virginia surveillance network tapped 3,000 times](https://www.whro.org/virginia-center-for-investigative-journalism/2025-09-24/vcij-flock-surveillance-ice-immigration-enforcement), Oct 2025
 - [Post and Courier: SC license plate camera investigation](https://www.postandcourier.com/news/alpr-cameras-south-carolina-flock-safety-license-plate-readers/article_787a262a-dbd2-11ee-a901-634acead588b.html), David Ferrara, Mar 2024
 - [Post and Courier: Greenville ALPR coverage](https://www.postandcourier.com/greenville/news/greenville-adding-more-cameras-to-read-license-plates-raising-questions-of-oversight-privacy/article_4cf2761a-4157-11eb-98b9-9b7e9434164e.html), Eric Connor, Dec 2020
+- [Live5News: North Charleston police officer demoted for using cameras to track wife (Jun 2024)](https://www.live5news.com/2024/06/24/north-charleston-police-officer-demoted-using-cameras-track-wife/)
