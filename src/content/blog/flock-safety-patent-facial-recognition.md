@@ -18,7 +18,7 @@ Flock Safety's [discrimination FAQ](https://www.flocksafety.com/blog/are-flock-p
 
 However, [Patent US11416545B1](https://patents.google.com/patent/US11416545B1/en), granted to Flock Group Inc. in August 2022, describes a system that classifies people by race, gender, estimated height and weight, clothing, and facial recognition data points. It describes neural networks trained to do this automatically. It describes searching archived footage by those characteristics across multiple camera locations.
 
-Flock operates over 1,000 cameras in South Carolina. Those cameras feed SLED's statewide database: 422 million license plate reads, 3-year retention, 2,000+ users across 99+ agencies. Zero state laws govern what analysis Flock can run on that data.
+Flock operates over 1,000 cameras in South Carolina. Those cameras feed [SLED's statewide database](/blog/scpif-v-sled-explainer), which holds 422 million plate reads with 3-year retention, accessible to 2,000+ users across 99+ agencies. Zero state laws govern what analysis Flock can run on that data.
 
 ## What the patent actually says
 
@@ -26,7 +26,7 @@ Patent US11416545B1 was filed on October 4, 2020 and granted on August 16, 2022.
 
 The patent describes what it calls "object-based queries" of video surveillance content. That means searching recorded footage not just by license plates, but by the physical characteristics of people captured on camera.
 
-Here's the patent's own language describing what its neural networks classify:
+The primary claims use this language.
 
 > A neural network may be trained to detect characteristics and features of an object, such as race, gender, ethnicity, height, weight, and clothing.
 
@@ -36,11 +36,13 @@ The system goes further. It describes tracking individuals across multiple camer
 
 <strong class="red">The patent describes searching archived surveillance footage by race, gender, height, weight, and clothing, then tracking those people across cameras.</strong>
 
-The filing also describes what it calls "facial recognition data points" as part of the system's classification toolkit. Not full facial recognition in the consumer sense, but biometric feature extraction from faces captured on camera, fed into the same neural networks that classify race and gender.
+The filing also describes what it calls "facial recognition data points" as part of the system's classification toolkit. These are biometric measurements taken from faces captured on camera, fed into the same neural networks that classify race and gender.
 
 Patents are filed under penalty of perjury. A sworn technical description of what Flock built, submitted to the US government so they could protect it as their intellectual property.
 
-Every Flock camera in South Carolina is hardware that could run this software. The patent doesn't describe a different device. It describes what these cameras are designed to do.
+Patent law requires sworn accuracy. The FAQ is written to sell cameras. The patent is written to stake a legal claim, and lying in it can void the protection. When the marketing page says "we don't identify race" and the patent says "neural networks classify people by race," the patent is the sworn document, and nobody goes to prison for a misleading FAQ.
+
+Every Flock camera in South Carolina is hardware designed to run this software, and the patent says so in writing.
 
 ## What the cameras already do
 
@@ -59,19 +61,19 @@ FreeForm already does some of what the patent describes. Here's how the capabili
 | Facial recognition data points | Yes | No (public) | "We do not use facial recognition" |
 | Cross-camera person tracking | Yes | No (public) | "Point-in-time images only" |
 
-The bottom four rows are the ones that matter. Flock has patented all of them. FreeForm already handles body type and clothing classification. <strong class="red">The gap between what FreeForm does today and what the patent describes is a software update, not a hardware change.</strong>
+Flock has patented all of them. FreeForm already handles body type and clothing classification. <strong class="red">The gap between what FreeForm does today and what the patent describes is one software update away.</strong>
 
-No new cameras. No new contract. No new vote. No notification to the city. Just a push from Flock's servers, and the cameras on your street corner start classifying people by race.
+Flock can push the update without new cameras, new contracts, new votes, or any notification to the city. One server push, and the cameras on your street corner start classifying people by race. Call it the silent switch.
 
 ## What Flock says vs. what Flock filed
 
-Flock holds two contradictory positions at the same time.
+Flock holds two contradictory positions at the same time. Call it the duplicity dynamic.
 
 **Position 1 (marketing):** The [discrimination FAQ](https://www.flocksafety.com/blog/are-flock-products-discriminatory/) says cameras target "only vehicles linked to crime, not individuals or protected characteristics." The FreeForm product page says the system "does not use facial recognition technology."
 
 **Position 2 (patent):** US11416545B1 explicitly describes neural networks that classify people by race, gender, ethnicity, height, and weight. It describes facial recognition data points as an input to those classifiers. It describes searching footage by these characteristics and tracking people across camera locations.
 
-A company doesn't file for patent protection on capabilities it never intends to deploy. Patent prosecution costs tens of thousands of dollars between attorney fees, filing fees, examination, and response drafting. You don't spend that on a hypothetical. You spend it to protect something you've built and plan to use.
+A company doesn't file for patent protection on capabilities it never intends to deploy. Patent prosecution costs tens of thousands of dollars between attorney fees, filing fees, examination, and response drafting. A utility patent of this scope typically runs $15,000 to $50,000 in legal costs alone, plus two to three years of negotiating claim language with patent examiners. Companies spend that kind of resource to protect infrastructure they've built and plan to use.
 
 <strong class="red">Flock told the US Patent Office their system classifies people by physical characteristics. They tell your city council it doesn't.</strong>
 
@@ -85,7 +87,7 @@ We've already broken down Greenville's Flock contract clause by clause in our [G
 
 **Section 2.12** says Flock can push "any upgrades to the system or platform that it deems necessary or useful" without the city's consent, as long as the upgrades don't "materially change any terms or conditions" of the contract.
 
-Read that carefully. Flock decides what's necessary or useful. Flock decides whether the upgrade materially changes the terms. The city doesn't get a veto. The city doesn't even get a notification.
+The city has no veto and no notification right. Flock decides what's necessary or useful. Flock decides whether the upgrade materially changes the terms.
 
 <strong class="red">The contract lets Flock activate patented capabilities, including demographic classification and facial recognition, without council approval, without public notice, without renegotiating.</strong>
 
@@ -93,11 +95,11 @@ Read that carefully. Flock decides what's necessary or useful. Flock decides whe
 
 Greenville's contract is representative of Flock contracts across South Carolina. But some jurisdictions have even less oversight. Florence County [installed Flock cameras on private property](https://wpde.com/news/local/deputies-navigate-obstacles-to-put-up-more-security-cameras-in-florence-county-tj-joye-scdot-crime-flock) after running into obstacles with SCDOT permits. Cameras on private land, operating under a county sheriff's authority, feeding into SLED's statewide database.
 
-Now consider the compound risks. In Greenville, two sisters were [pulled over at gunpoint](/blog/greenville-flock-contracts) after a Flock camera misread their license plate. Flock's cameras "often misidentify plates or provide incorrect information to officers," per [Business Insider](https://www.businessinsider.com/flock-safety-alpr-cameras-misreads-2024). If the system already misreads plates at unknown error rates, what happens when it starts classifying race? Misidentification plus racial classification equals compounded harm. The patent describes exactly that system.
+In Greenville, two sisters were [pulled over at gunpoint](/blog/greenville-flock-contracts) after a Flock camera misread their license plate. Flock's cameras "often misidentify plates or provide incorrect information to officers," per [Business Insider](https://www.businessinsider.com/flock-safety-alpr-cameras-misreads-2024). If the system already misreads plates at unknown error rates, what happens when it starts classifying race? Misidentification plus racial classification equals compounded harm. The patent describes exactly that system.
 
 ## 20 billion scans a month
 
-Flock processes 20 billion license plate scans every month across its national network. Over 100,000 cameras in 49 states. The [ACLU reported](https://www.aclu.org/news/national-security/surveillance-company-flock-now-using-ai-to-report-us-to-police-if-it-thinks-our-movement-patterns-are-suspicious) that Flock uses AI to flag drivers whose movement patterns it considers "suspicious" and alerts police automatically. Not because of a warrant. Not because of a crime. Because an algorithm decided your driving pattern looked wrong.
+Flock processes 20 billion license plate scans every month across its national network. Over 100,000 cameras in 49 states. The [ACLU reported](https://www.aclu.org/news/national-security/surveillance-company-flock-now-using-ai-to-report-us-to-police-if-it-thinks-our-movement-patterns-are-suspicious) that Flock uses AI to flag drivers whose movement patterns it considers "suspicious" and alerts police automatically. An algorithm decides your driving pattern looks wrong, and the police get a flag. No warrant required. No crime alleged.
 
 Flock's word is already compromised. Their CEO [denied federal contracts on camera](/blog/flock-safetys-track-record), then admitted three weeks later to secretly giving Border Patrol access to local police cameras nationwide. If the company lied about who could search your plates, why would you trust them not to activate what they patented?
 
@@ -111,9 +113,9 @@ For a full breakdown of why this matters under the 4th Amendment, see our [Carpe
 
 Of the 4 ALPR bills pending in the SC legislature, only one addresses what analysis Flock can actually run on your data. [H4675](/blog/h4675-strongest-alpr-bill-in-sc) includes an AI vehicle tracking ban that would prohibit the activation of the patented capabilities described in US11416545B1.
 
-The other 3 bills regulate retention periods and access rules. Those matter, but they don't touch classification. A bill that says "delete plate reads after 90 days" doesn't stop Flock from classifying drivers by race during those 90 days. Only H4675 draws that line.
+The other 3 bills regulate retention periods and access rules. Those matter, but they don't touch classification. A bill that says "delete plate reads after 90 days" doesn't stop Flock from classifying drivers by race during those 90 days. Only H4675 prohibits it.
 
-Without H4675 or a local ordinance, there is no legal barrier between the patent and your cameras. No federal law covers it. No state law covers it. No contract clause prevents it. The only thing standing between Flock's patented racial classification system and your city's cameras is Flock's word that they won't turn it on.
+Without H4675 or a local ordinance, there is no legal barrier between the patent and your cameras. No federal law covers it. No state law covers it. No contract clause blocks it. The only thing standing between Flock's patented racial classification system and your city's cameras is Flock's word that they won't turn it on.
 
 For the full picture of SC's regulatory vacuum, see [SC Has No License Plate Camera Law](/blog/sc-has-no-license-plate-camera-law). For a step-by-step playbook on what to do about it, see the [action guide](/blog/how-to-fight-alpr-surveillance-sc).
 
@@ -126,7 +128,7 @@ For the full picture of SC's regulatory vacuum, see [SC Has No License Plate Cam
 - Does your contract allow Flock to push software upgrades without council approval?
 - What happens when a company that patents these capabilities also controls the cameras on our roads?
 
-You don't need to be an expert. You just need to ask. Print the patent number. Bring it to a council meeting. Ask them if they've read it. Our [speaking toolkit](/toolkit/speaking) has tips for making your time at the podium count.
+Anyone can ask these questions. Print the patent number. Bring it to a council meeting. Ask them if they've read it. Our [speaking toolkit](/toolkit/speaking) covers how to use your public comment time without getting dismissed.
 
 **Second, support H4675.** It's the only pending bill that would actually prevent Flock from activating these capabilities in South Carolina. Find your state legislators and tell them to support it. Our [H4675 breakdown](/blog/h4675-strongest-alpr-bill-in-sc) has the full details.
 
