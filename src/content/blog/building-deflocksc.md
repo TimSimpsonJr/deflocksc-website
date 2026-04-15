@@ -14,17 +14,17 @@ Welcome to DeflockSC. If you're reading this, you've probably already poked arou
 
 ## What we're trying to do
 
-DeflockSC has one job: make it easy for SC residents to push back against unregulated license plate surveillance.
+DeflockSC has a single purpose. It makes it easy for SC residents to push back against unregulated license plate surveillance.
 
 We give people the information (where are the cameras, what bills are pending, who represents them) and then strip out the friction between knowing and acting. Find your rep, read a letter we already wrote for you, hit send.
 
-We're not a news outlet, but we will be posting updates here as things develop. When relevant reporting comes out, when bills move (or don't), when local councils take action, we'll cover it. This site is first and foremost a tool, though. It's pointed at specific bills, specific jurisdictions, specific elected officials. If those bills pass or fail, we'll adapt. If other states want to run the same play, the code is open source.
+We'll post updates here as things develop, when relevant reporting comes out, when bills move (or don't), when local councils take action. Above all, though, this is a tool. It's pointed at specific bills, specific jurisdictions, specific elected officials. If those bills pass or fail, we'll adapt. If other states want to run the same play, the code is open source.
 
-The long-term goal is enough constituent pressure to get the [4 pending bills](/#bill-tracker) out of committee and get local councils asking hard questions about their own Flock contracts. Whether that works, we don't know yet. But nobody was going to stumble into emailing their county council member about camera data policies on their own. The path had to be built.
+The long-term goal is enough constituent pressure to get the [4 pending bills](/#bill-tracker) out of committee (especially [H4675](/blog/h4675-strongest-alpr-bill-in-sc), the strongest of them) and get local councils asking hard questions about their own Flock contracts. Whether that works, we don't know yet. But nobody was going to stumble into emailing their county council member about camera data policies on their own. The path had to be built.
 
 ## Why it's built this way
 
-The site has no server, no database, no user accounts. It's just a collection of pre-built pages. Your browser does the work of figuring out your district and matching you to your reps.
+The site is a collection of pre-built pages, with no server, no database, and no user accounts. Your browser does the work of figuring out your district and matching you to your reps.
 
 A site about surveillance shouldn't be collecting data on the people using it. If you share your location, that information never leaves your browser. If you type an address, it gets sent to the US Census Bureau's geocoding service to figure out your census district, but it never touches our servers. District matching happens entirely on your device. The only thing we track is the number of clicks the "Take Action" and "Email Your Rep" buttons get, so we know how the site is actually getting used.
 
@@ -38,7 +38,7 @@ The original plan was to use a Google API that matches addresses to legislative 
 
 We download official boundary maps from the Census Bureau (for state districts) and county GIS portals (for local council districts), shrink them down to a manageable size, and bundle them with the site. When you enter your address or share your location, your browser checks those maps to figure out which districts you're in. You can see the result on the [camera map](/#camera-map).
 
-3 ways to find your district: share your location, type an address, or just pick from dropdowns. We built all 3 because none of them work for everyone.
+You can find your district 3 ways, by sharing your location, typing an address, or picking from dropdowns. We built all 3 paths because none of them work for everyone.
 
 ### Collecting rep data from 30+ government websites
 
@@ -56,7 +56,7 @@ We started with Mapbox for the camera map, but that came with API keys and usage
 
 ### Letters that actually say something
 
-There are 85 template letters on the site now: 2 statewide, 46 county-specific, 36 city-specific, and 1 fallback for jurisdictions we haven't covered yet. Each one is loaded with facts pulled from that jurisdiction's own backyard.
+We've built 85 template letters so far, including 2 statewide, 46 county-specific, 36 city-specific, and 1 fallback for jurisdictions we haven't covered yet. Each one is loaded with facts pulled from that jurisdiction's own backyard.
 
 The Greenville City letter mentions [57 cameras and the incident where 2 sisters were pulled over at gunpoint](/blog/greenville-flock-contracts) after a Flock camera misread their rental car's plate. The Spartanburg letter brings up the former sheriff's federal conviction. The Lancaster letter cites 50 cameras across a county of 100,000 people.
 
@@ -64,7 +64,7 @@ We researched all 46 SC counties, organized the findings with citations, and tur
 
 ### The citizen toolkit
 
-The same research that fed the letters also fed the [citizen toolkit](/toolkit). We kept running into the same question: what do you actually *do* once you know about the cameras?
+The same research that fed the letters also fed the [citizen toolkit](/toolkit). We kept running into the same question. What do you actually *do* once you know about the cameras?
 
 So we built 4 toolkits and bolted them onto the site:
 
@@ -76,10 +76,10 @@ So we built 4 toolkits and bolted them onto the site:
 
 **[Legal resources.](/toolkit/legal)** A plain-language breakdown of your rights around ALPR surveillance, what the law currently says (not much), and what the 4 pending bills would change.
 
-The toolkit came together because we kept finding material that didn't fit in a letter but was too useful to leave on the cutting room floor. It's the same research pipeline, just pointed at a different output.
+The toolkit came together from research that needed a home outside the letter format. It's the same research pipeline, just pointed at a different output.
 
 ## Fork it
 
 The site is open source, and we wrote documentation specifically for people who want to adapt it for their own state. Camera surveillance is a national problem. Flock Safety alone operates in over 5,000 communities. If your state doesn't have oversight legislation, these tools can work for you too.
 
-Code: [github.com/TimSimpsonJr/deflocksc-website](https://github.com/TimSimpsonJr/deflocksc-website)
+Find the code at [github.com/TimSimpsonJr/deflocksc-website](https://github.com/TimSimpsonJr/deflocksc-website).
