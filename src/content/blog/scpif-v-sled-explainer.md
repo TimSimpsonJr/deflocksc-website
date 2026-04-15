@@ -20,7 +20,7 @@ That same database has been used to stalk a domestic partner through a false "mi
 
 And then there's Spartanburg County Sheriff Chuck Wright, who oversaw Flock Safety camera deployment across his county before [pleading guilty to federal charges](https://www.postandcourier.com/spartanburg/news/spartanburg-sheriff-chuck-wright-fbi-investigation-career-controversies/article_aa5d54be-7354-4507-be0c-dfdc456bdc57.html): conspiracy to commit theft from federal programs, conspiracy to commit wire fraud, and obtaining controlled substances through fraud. He faces up to 30 years.
 
-A database containing <strong class="red">430 million records</strong> of where South Carolinians drive. <strong class="red">Over 2,000 users</strong> have credentials to search it. The officer who tampered with records had credentials. The person who stalked their partner had credentials. Chuck Wright had credentials.
+This database contains <strong class="red">430 million records</strong> of where South Carolinians drive. <strong class="red">Over 2,000 users</strong> currently have credentials to search it. The officer who tampered with records had credentials. The person who stalked their partner had credentials. Chuck Wright had credentials. All with little to no oversight.
 
 ## What SLED built (and who said they could)
 
@@ -51,7 +51,7 @@ Their argument has three layers.
     <div class="text-[32px] font-bold text-[#dc2626] leading-none shrink-0 w-9 text-center">1</div>
     <div>
       <p class="text-[#e8e8e8] font-bold text-base mb-1.5">SLED has no statutory authority</p>
-      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">SLED's authorizing statutes say "criminal." A database where 99.8% of entries have zero connection to crime doesn't qualify. SLED can't point to a single statute that authorizes a statewide vehicle surveillance database.</p>
+      <p class="text-[#a0a0a0] text-[15px] leading-relaxed">SLED's authorizing statutes say "criminal." A database where 99.8% of entries have zero connection to crime doesn't qualify. SLED can't point to a SINGLE statute that authorizes a statewide vehicle surveillance database.</p>
     </div>
   </div>
   <div class="bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6 flex gap-5 items-start">
@@ -72,7 +72,7 @@ Their argument has three layers.
 
 The case deliberately avoids the Fourth Amendment, because [federal courts have spent years fighting about whether license plate cameras violate the Constitution](/blog/the-4th-amendment-loophole) and the results are all over the map. The SC plaintiffs sidestepped that mess entirely. They're arguing on state law, which means federal precedent can't overrule them.
 
-If the court agrees, SLED's database goes dark until the legislature writes a new law with actual limits.
+If the court agrees, SLED's database goes dark until the legislature writes a new law with actual, real limits.
 
 ## What happens when there are no limits
 
@@ -92,13 +92,13 @@ That's a federal agency coaching officers to evade transparency. SLED's own poli
 
 The SC lawsuit isn't happening in isolation. Two federal cases working through appellate courts right now could reshape the legal ground under SLED's database.
 
-[*Schmidt v. City of Norfolk*](https://ij.org/case/norfolk-virginia-camera-surveillance/) could set the precedent. The Institute for Justice sued Norfolk, Virginia over its 176 Flock cameras. Norfolk's police chief admitted it would be hard to drive anywhere in the city without passing one. In January 2026, [a federal judge sided with Norfolk](https://valawyersweekly.com/2026/02/16/norfolk-license-plate-reader-fourth-amendment-dismissal/), ruling the cameras didn't capture enough data to reconstruct detailed movements. But the judge also warned that the analysis "could conceivably tip the other way" as camera networks grow. IJ won on standing: ordinary residents can challenge ALPR systems without being individually targeted. IJ is appealing to the Fourth Circuit.
+[*Schmidt v. City of Norfolk*](https://ij.org/case/norfolk-virginia-camera-surveillance/) could set the precedent. The Institute for Justice sued Norfolk, Virginia over its 176 Flock cameras. Norfolk's police chief admitted it would be hard to drive anywhere in the city without passing one. In January 2026, [a federal judge sided with Norfolk](https://valawyersweekly.com/2026/02/16/norfolk-license-plate-reader-fourth-amendment-dismissal/), ruling the cameras didn't capture enough data to reconstruct detailed movements. But the judge also warned that the analysis "could conceivably tip the other way" as camera networks grow. IJ won on standing. Ordinary residents can challenge ALPR systems without being individually targeted. Now, IJ is appealing to the Fourth Circuit.
 
 That circuit covers Virginia, the Carolinas, Maryland, and West Virginia. **A Fourth Circuit ruling on ALPR surveillance would be binding law in South Carolina.**
 
 The Fourth Circuit already has its own precedent pointing toward privacy. In 2021, the full court ruled that Baltimore's aerial surveillance program (planes continuously photographing the city) was an unconstitutional search. Norfolk's ground-level camera network captures more detailed data, on more people, with better precision than Baltimore's planes ever did.
 
-And then there's the Supreme Court. In [*Carpenter v. United States* (2018)](https://www.oyez.org/cases/2017/16-402), the Court ruled 5-4 that government access to 7 days of cell phone location data is a Fourth Amendment search requiring a warrant. SLED keeps **3 years** of vehicle location data. The vehicle data is more precise (exact GPS coordinates, not approximate cell tower range). The retention period is **156 times longer**.
+And then there's the Supreme Court. In [*Carpenter v. United States* (2018)](https://www.oyez.org/cases/2017/16-402), the Court ruled 5-4 that government access to 7 days of cell phone location data is a Fourth Amendment search requiring a warrant. SLED keeps **3 years** of vehicle location data. That vehicle data is more precise (exact GPS coordinates, not approximate cell tower range), and the retention period is **156 times longer**.
 
 <div class="not-prose my-8 grid grid-cols-2 gap-px bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.07)] overflow-hidden">
   <div class="bg-[#1a1a1a] px-6 py-6">
@@ -143,7 +143,7 @@ And then there's the Supreme Court. In [*Carpenter v. United States* (2018)](htt
 
 ## Four bills, one that actually fixes it
 
-Four bills in the 2025-2026 SC session attempt to regulate license plate cameras. Only one goes for the throat. We wrote [a deep dive on H.4675](/blog/h4675-strongest-alpr-bill-in-sc); here's the comparison.
+Four bills in the 2025-2026 SC session attempt to regulate license plate cameras. Only one goes for the throat. We wrote [a deep dive on H.4675](/blog/h4675-strongest-alpr-bill-in-sc), and  here's the comparison.
 
 [**H.4675**](https://www.scstatehouse.gov/sess126_2025-2026/bills/4675.htm), the Community Data Protection and Responsible Surveillance Act, is sponsored by 4 Freedom Caucus Republicans: Reps. Kilmartin, Chumley, Edgerton, and Magnuson. It would ban third-party cloud storage of camera data (which makes Flock's entire business model illegal in SC), prohibit AI-based vehicle tracking, set a **21-day retention limit**, require warrants for data access, explicitly block immigration enforcement use, and let residents sue for violations. If it passed, every existing Flock contract in the state would be void.
 
