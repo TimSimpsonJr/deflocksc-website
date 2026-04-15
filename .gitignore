@@ -10,6 +10,8 @@ __pycache__/
 !.env.example
 .claude/
 public/dev-preview.html
+public/dev-mockups.html
+.obsidian/
 tina/__generated__/
 public/admin/
 lighthouse*.json
