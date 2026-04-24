@@ -81,7 +81,7 @@ src/
   styles/
     global.css                  # Self-hosted font imports, Tailwind base, glow-frame, custom utilities
   content/
-    blog/                       # 8 Markdown blog posts (Astro content collections)
+    blog/                       # 10 Markdown blog posts (8 published + 2 drafts), Astro content collections
   content.config.ts             # Content collection definitions (glob loader)
   umami.d.ts                    # Type declarations for Umami analytics
 
@@ -128,6 +128,8 @@ docs/
   deployment.md                 # Netlify deployment guide
   maintainability.md            # Maintainability evaluation
   plans/                        # Design docs and implementation plans
+  research/                     # Research notes backing site copy (toolkit gap analysis, etc.)
+  handoffs/                     # Session handoff notes for multi-session work (e.g. blog rewrite)
 ```
 
 ## Key Relationships
