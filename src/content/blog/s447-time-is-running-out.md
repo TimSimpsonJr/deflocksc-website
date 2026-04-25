@@ -9,6 +9,8 @@ tags:
   - s447
   - alpr
 draft: false
+featuredImage: /blog/s447-senate-floor-amendments.png
+featuredImageAlt: "Red hourglass with sand running out and pooling at the base on a black background, signaling the closing window to amend S.447"
 ---
 
 In August 2020, Brittney Gilliam drove her 6-year-old daughter, her 17-year-old sister, and two nieces (12 and 14) to get their nails done in Aurora, Colorado. A license plate reader flagged her SUV as a match for a stolen motorcycle with Montana plates. Officers didn't notice that the plate reader had matched a different state and a different kind of vehicle. They pulled the family out of the car at gunpoint, handcuffed Gilliam, her sister, and the 12-year-old, and made the 6-year-old and 14-year-old lie face-down on the pavement with their hands over their heads. The city of Aurora later paid them $1.9 million.
