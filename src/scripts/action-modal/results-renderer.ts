@@ -58,7 +58,16 @@ function animateCount(el: HTMLElement, target: number): void {
   requestAnimationFrame(tick);
 }
 
-export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, number>): void {
+export function renderResults(
+  groups: RepGroup[],
+  cameraCounts?: Record<string, number>,
+  filter?: string | null
+): void {
+  if (filter === 'state-senator') {
+    groups = groups.filter(g =>
+      g.category === 'state' && g.label.toLowerCase().includes('senator')
+    );
+  }
   currentGroups = groups;
   const container = document.getElementById('action-results-list');
   if (!container) return;
