@@ -81,7 +81,7 @@ src/
   styles/
     global.css                  # Self-hosted font imports, Tailwind base, glow-frame, custom utilities
   content/
-    blog/                       # 10 Markdown blog posts (8 published + 2 drafts), Astro content collections
+    blog/                       # 11 Markdown blog posts (9 published + 2 drafts), Astro content collections
   content.config.ts             # Content collection definitions (glob loader)
   umami.d.ts                    # Type declarations for Umami analytics
 
@@ -138,6 +138,7 @@ docs/
 - **ActionModal.astro imports open-civics/sc/state.json** — state legislator data comes directly from npm package
 - **foia-finder.ts imports district-matcher.ts** — reuses geocoder + district matching for agency location lookup
 - **action-modal/ imports district-matcher.ts + geo-utils.ts** — client-side rep lookup, letter rendering, district matching
+- **action-modal honors `data-open-action-filter` on trigger buttons** — when set to `state-senator` (e.g., on the S.447 blog post CTA), the results renderer hides non-senator groups; unfiltered triggers continue to render all groups
 - **camera-map.ts extracted from MapSection** — MapLibre init, layers, popups, cluster handling
 - **carousel.ts extracted from HowItWorks** — auto-advance, navigation, keyboard a11y
 - **toolkit/index.astro hub → toolkit/*.astro subpages** — card grid links + client-side hash redirects for backward compat
