@@ -94,10 +94,9 @@ In statutory interpretation, silence on a practice reads as permission to contin
 
 One provision in S.447 outweighs everything else in that chart. It's buried in subsection (D)(1).
 
-<div class="not-prose my-8 bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6" style="border-top: 2px solid #dc2626;">
-  <p class="text-[#a0a0a0] text-xs uppercase tracking-wider mb-3">S.447, §23-1-235(D)(1)</p>
-  <p class="text-[#e8e8e8] text-base">"...including the operation and maintenance of an automatic license plate reader database by SLED."</p>
-</div>
+> <span class="quote">"...including the operation and maintenance of an automatic license plate reader database by SLED."</span>
+>
+> <span class="attribution">S.447, §23-1-235(D)(1). <a href="https://www.scstatehouse.gov/sess126_2025-2026/prever/447_20260409.htm">Read the April 9 committee version.</a></span>
 
 SLED currently runs an ALPR database containing over 430 million records of where South Carolinians have driven. The database has no statute authorizing its existence. The South Carolina Public Interest Foundation sued SLED in 2023 on that exact ground, and the summary judgment briefing is complete. A ruling could come any time. More on that lawsuit [here](/blog/scpif-v-sled-explainer).
 
