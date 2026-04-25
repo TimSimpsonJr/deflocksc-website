@@ -33,77 +33,71 @@ S.447 says nothing about cloud storage (the core of Flock Safety's business mode
 
 In statutory interpretation, silence on a practice reads as permission to continue it.
 
-<div class="not-prose my-10 overflow-x-auto">
-  <table class="w-full min-w-[640px] border-collapse text-[15px]">
-    <thead>
-      <tr class="border-b border-[rgba(255,255,255,0.15)]">
-        <th class="text-left text-[#e8e8e8] font-bold py-3 pr-4 align-bottom">What's at stake</th>
-        <th class="text-left text-[#e8e8e8] font-bold py-3 px-4 align-bottom">
-          H.4675
-          <div class="text-[#a0a0a0] font-normal text-xs uppercase tracking-wider mt-0.5">Strong regulation</div>
-        </th>
-        <th class="text-left text-[#e8e8e8] font-bold py-3 pl-4 align-bottom">
-          S.447
-          <div class="text-[#a0a0a0] font-normal text-xs uppercase tracking-wider mt-0.5">Bill on the floor</div>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr class="border-b border-[rgba(255,255,255,0.07)]">
-        <td class="text-[#e8e8e8] py-3 pr-4 align-top font-semibold">Data retention</td>
-        <td class="text-[#a0a0a0] py-3 px-4 align-top">21 days, automatic deletion</td>
-        <td class="text-[#dc2626] py-3 pl-4 align-top">90 days, codified as baseline</td>
-      </tr>
-      <tr class="border-b border-[rgba(255,255,255,0.07)]">
-        <td class="text-[#e8e8e8] py-3 pr-4 align-top font-semibold">Cloud storage on private servers</td>
-        <td class="text-[#a0a0a0] py-3 px-4 align-top">Banned; contrary contracts void as against public policy</td>
-        <td class="text-[#dc2626] py-3 pl-4 align-top">Permitted (bill is silent)</td>
-      </tr>
-      <tr class="border-b border-[rgba(255,255,255,0.07)]">
-        <td class="text-[#e8e8e8] py-3 pr-4 align-top font-semibold">AI vehicle-feature recognition</td>
-        <td class="text-[#a0a0a0] py-3 px-4 align-top">Banned; ALPRs limited to plate, time, date, and location</td>
-        <td class="text-[#dc2626] py-3 pl-4 align-top">Permitted (bill is silent)</td>
-      </tr>
-      <tr class="border-b border-[rgba(255,255,255,0.07)]">
-        <td class="text-[#e8e8e8] py-3 pr-4 align-top font-semibold">SLED centralized database</td>
-        <td class="text-[#a0a0a0] py-3 px-4 align-top">Subject to same retention, access, and storage rules as every other agency</td>
-        <td class="text-[#dc2626] py-3 pl-4 align-top">Explicitly authorized (§23-1-235(D)(1))</td>
-      </tr>
-      <tr class="border-b border-[rgba(255,255,255,0.07)]">
-        <td class="text-[#e8e8e8] py-3 pr-4 align-top font-semibold">Federal agency access</td>
-        <td class="text-[#a0a0a0] py-3 px-4 align-top">Blocked; in-state storage required; immigration enforcement explicitly prohibited</td>
-        <td class="text-[#dc2626] py-3 pl-4 align-top">Not addressed</td>
-      </tr>
-      <tr class="border-b border-[rgba(255,255,255,0.07)]">
-        <td class="text-[#e8e8e8] py-3 pr-4 align-top font-semibold">Warrant for historical queries</td>
-        <td class="text-[#a0a0a0] py-3 px-4 align-top">Required; emergency access must reach a judge within 24 hours</td>
-        <td class="text-[#dc2626] py-3 pl-4 align-top">Not required</td>
-      </tr>
-      <tr class="border-b border-[rgba(255,255,255,0.07)]">
-        <td class="text-[#e8e8e8] py-3 pr-4 align-top font-semibold">Independent oversight</td>
-        <td class="text-[#a0a0a0] py-3 px-4 align-top">Quarterly audits by SC Inspector General</td>
-        <td class="text-[#dc2626] py-3 pl-4 align-top">Self-audit by the agency using the system</td>
-      </tr>
-      <tr class="border-b border-[rgba(255,255,255,0.07)]">
-        <td class="text-[#e8e8e8] py-3 pr-4 align-top font-semibold">Private right of action</td>
-        <td class="text-[#a0a0a0] py-3 px-4 align-top">Residents can sue for injunctive relief, damages, and attorney's fees</td>
-        <td class="text-[#dc2626] py-3 pl-4 align-top">None</td>
-      </tr>
-      <tr>
-        <td class="text-[#e8e8e8] py-3 pr-4 align-top font-semibold">Exclusionary rule</td>
-        <td class="text-[#a0a0a0] py-3 px-4 align-top">Data obtained in violation inadmissible in any proceeding</td>
-        <td class="text-[#dc2626] py-3 pl-4 align-top">None</td>
-      </tr>
-    </tbody>
-  </table>
+<div class="not-prose my-8 overflow-x-auto">
+<table class="w-full border-collapse text-sm leading-relaxed">
+  <thead>
+    <tr>
+      <th class="text-left font-semibold text-[#e5e5e5] px-3.5 py-2.5 border-b-2 border-[rgba(255,255,255,0.12)] whitespace-nowrap">What's at stake</th>
+      <th class="text-left font-semibold text-[#fbbf24] px-3.5 py-2.5 border-b-2 border-[#fbbf24] whitespace-nowrap">H.4675</th>
+      <th class="text-left font-semibold text-[#e5e5e5] px-3.5 py-2.5 border-b-2 border-[rgba(255,255,255,0.12)] whitespace-nowrap">S.447</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="text-[#d4d4d4] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Data retention</td>
+      <td class="text-[#e8e8e8] font-medium bg-[rgba(255,255,255,0.03)] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">21 days</td>
+      <td class="text-[#dc2626] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">90 days, codified</td>
+    </tr>
+    <tr>
+      <td class="text-[#d4d4d4] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Cloud storage on private servers</td>
+      <td class="text-[#22c55e] font-medium bg-[rgba(255,255,255,0.03)] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Banned</td>
+      <td class="text-[#dc2626] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Permitted (silent)</td>
+    </tr>
+    <tr>
+      <td class="text-[#d4d4d4] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">AI vehicle-feature recognition</td>
+      <td class="text-[#22c55e] font-medium bg-[rgba(255,255,255,0.03)] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Banned</td>
+      <td class="text-[#dc2626] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Permitted (silent)</td>
+    </tr>
+    <tr>
+      <td class="text-[#d4d4d4] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">SLED centralized database</td>
+      <td class="text-[#e8e8e8] font-medium bg-[rgba(255,255,255,0.03)] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Same rules as every agency</td>
+      <td class="text-[#dc2626] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Explicitly authorized</td>
+    </tr>
+    <tr>
+      <td class="text-[#d4d4d4] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Federal agency access</td>
+      <td class="text-[#22c55e] font-medium bg-[rgba(255,255,255,0.03)] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Blocked</td>
+      <td class="text-[#737373] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Not addressed</td>
+    </tr>
+    <tr>
+      <td class="text-[#d4d4d4] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Warrant for historical queries</td>
+      <td class="text-[#22c55e] font-medium bg-[rgba(255,255,255,0.03)] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Required</td>
+      <td class="text-[#737373] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Not required</td>
+    </tr>
+    <tr>
+      <td class="text-[#d4d4d4] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Independent oversight</td>
+      <td class="text-[#22c55e] font-medium bg-[rgba(255,255,255,0.03)] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Quarterly IG audits</td>
+      <td class="text-[#737373] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Self-audit only</td>
+    </tr>
+    <tr>
+      <td class="text-[#d4d4d4] font-medium px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Private right of action</td>
+      <td class="text-[#22c55e] font-medium bg-[rgba(255,255,255,0.03)] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">Yes</td>
+      <td class="text-[#737373] px-3.5 py-2 border-b border-[rgba(255,255,255,0.06)]">None</td>
+    </tr>
+    <tr>
+      <td class="text-[#d4d4d4] font-medium px-3.5 py-2">Exclusionary rule</td>
+      <td class="text-[#22c55e] font-medium bg-[rgba(255,255,255,0.03)] px-3.5 py-2">Yes</td>
+      <td class="text-[#737373] px-3.5 py-2">None</td>
+    </tr>
+  </tbody>
+</table>
 </div>
 
 One provision in S.447 outweighs everything else in that chart. It's buried in subsection (D)(1).
 
-<blockquote class="not-prose my-8 bg-[#1a1a1a] border-l-4 border-[#dc2626] px-6 py-6">
-  <p class="text-[#e8e8e8] text-base italic">"...including the operation and maintenance of an automatic license plate reader database by SLED."</p>
-  <p class="text-[#a0a0a0] text-sm mt-3">S.447, §23-1-235(D)(1)</p>
-</blockquote>
+<div class="not-prose my-8 bg-[#1a1a1a] border border-[rgba(255,255,255,0.07)] px-6 py-6" style="border-top: 2px solid #dc2626;">
+  <p class="text-[#a0a0a0] text-xs uppercase tracking-wider mb-3">S.447, §23-1-235(D)(1)</p>
+  <p class="text-[#e8e8e8] text-base">"...including the operation and maintenance of an automatic license plate reader database by SLED."</p>
+</div>
 
 SLED currently runs an ALPR database containing over 430 million records of where South Carolinians have driven. The database has no statute authorizing its existence. The South Carolina Public Interest Foundation sued SLED in 2023 on that exact ground, and the summary judgment briefing is complete. A ruling could come any time. More on that lawsuit [here](/blog/scpif-v-sled-explainer).
 
