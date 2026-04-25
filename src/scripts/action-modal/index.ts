@@ -19,14 +19,10 @@ function init(data: ModalData): void {
   initResultsEventDelegation(localCouncils);
   initManualDropdowns(stateLegislators, registry);
 
-  // Per-open filter, set from the triggering button's data-open-action-filter attribute
-  let activeFilter: string | null = null;
-
   // Modal triggers
   document.querySelectorAll('[data-open-action]').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
       e.preventDefault();
-      activeFilter = (btn as HTMLElement).getAttribute('data-open-action-filter');
       openModal(btn as HTMLElement);
     });
   });
@@ -35,7 +31,7 @@ function init(data: ModalData): void {
   function handleMatch(match: DistrictMatch): void {
     const groups = buildGroups(match, actionLetters, stateLegislators, localCouncils);
     showState('results');
-    renderResults(groups, cameraCounts, activeFilter);
+    renderResults(groups, cameraCounts);
     document.getElementById('action-results')?.focus({ preventScroll: true });
     document.getElementById('action-modal')!.scrollTop = 0;
     document.getElementById('action-modal-card')!.scrollTop = 0;

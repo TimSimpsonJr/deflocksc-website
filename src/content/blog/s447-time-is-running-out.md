@@ -184,7 +184,7 @@ The vote could come any day in the next three weeks. If S.447 passes as written,
     <li>Require warrants for historical database searches</li>
     <li>Cut retention from 90 days to 30</li>
   </ul>
-  <button type="button" data-open-action data-open-action-filter="state-senator" class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer">Find Your Senator</button>
+  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer">Find Your Reps</button>
 </div>
 
 If you've never called a senator before, the [action guide](/blog/how-to-fight-alpr-surveillance-sc) has the script.
