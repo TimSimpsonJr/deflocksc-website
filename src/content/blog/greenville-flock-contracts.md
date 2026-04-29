@@ -20,7 +20,7 @@ No elected official has ever voted on any of it. No council resolution. No publi
 
 The first contract was funded with civil asset forfeiture: a process that lets police seize property from people suspected of crimes (often without charging them) and spend the proceeds without going through the city budget. Money taken from residents paid for a system that tracks residents.
 
-We filed a [FOIA request](/toolkit/foia). Ninety-six pages came back. Here's what they say.
+[Eyes Off GSP](https://eyesoffgsp.org/), another local group fighting Flock cameras here in the Upstate, filed a [FOIA request](/toolkit/foia) and shared the response with us. Ninety-six pages came back. Here's what they say.
 
 ## The chief who signed it
 
@@ -169,6 +169,7 @@ The full 96-page FOIA response is below. Every contract, invoice, purchase order
 ## Sources
 
 - City of Greenville FOIA Response, received March 10, 2026 (96 pages: contracts, invoices, RFP, evaluation scoring)
+- [Eyes Off GSP](https://eyesoffgsp.org/), local advocacy group that filed the original FOIA request and shared the response
 - [Post and Courier: Greenville police chief resigns for allegedly giving preferential treatment to businessman (Jan 2020)](https://www.postandcourier.com/news/greenville-police-chief-resigns-for-allegedly-giving-preferential-treatment-to-businessman/article_a0cb6448-2d69-11ea-a670-c73bc32d1ec6.html)
 - [WSPA: SLED file reveals details in investigation of former Chief Miller](https://www.wspa.com/news/sled-file-reveals-details-in-investigation-of-former-greenville-police-chief-ken-miller/)
 - [Post and Courier: Greenville adding more cameras to read license plates (Dec 2020)](https://www.postandcourier.com/greenville/news/greenville-adding-more-cameras-to-read-license-plates-raising-questions-of-oversight-privacy/article_4cf2761a-4157-11eb-98b9-9b7e9434164e.html)
