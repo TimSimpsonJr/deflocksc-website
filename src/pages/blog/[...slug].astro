@@ -84,19 +84,19 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
     {/* Back link */}
     <a href="/blog" class="hidden md:block absolute top-20 left-6 lg:left-10 text-[#fbbf24] hover:text-[#fcd34d] text-sm font-medium transition-colors z-10 [text-shadow:0_1px_8px_rgba(0,0,0,0.8)]">&larr; Back to Blog</a>
 
-    {/* Title + meta overlay */}
-    <div class="absolute bottom-0 left-0 right-0 px-6 lg:px-10 pb-6 md:pb-8">
-      <div class="max-w-[660px] mx-auto lg:mx-0 lg:ml-[calc((100%-660px-240px-2.5rem)/2)]">
-        <div class="flex items-center gap-3 label-mono-compact text-[#a0a0a0] mb-2.5 [text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">
+    {/* Title + meta — flows below image on mobile, overlays image on desktop */}
+    <div class="px-6 lg:px-10 pt-6 pb-6 md:pt-0 md:pb-8 md:absolute md:bottom-0 md:left-0 md:right-0">
+      <div class="max-w-[660px] mx-auto lg:mx-0 lg:ml-[calc((100%-660px-240px-2.5rem)/2)] min-w-0">
+        <div class="flex items-center gap-3 label-mono-compact text-[#a0a0a0] mb-2.5 md:[text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">
           <time datetime={new Date(post.data.date).toISOString()}>
             {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
           </time>
           <span class="text-[rgba(255,255,255,0.25)]">/</span>
           <span>{readTime} min read</span>
         </div>
-        <h1 class="text-3xl md:text-4xl font-bold text-[#e8e8e8] leading-tight tracking-[-0.02em] [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_4px_40px_rgba(0,0,0,0.7)]">{post.data.title}</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-[#e8e8e8] leading-tight tracking-[-0.02em] break-words md:[text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_4px_40px_rgba(0,0,0,0.7)]">{post.data.title}</h1>
         {post.data.subtitle && (
-          <p class="text-lg md:text-xl text-[#a0a0a0] mt-2 font-medium leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">{post.data.subtitle}</p>
+          <p class="text-lg md:text-xl text-[#a0a0a0] mt-2 font-medium leading-snug break-words md:[text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">{post.data.subtitle}</p>
         )}
       </div>
     </div>
