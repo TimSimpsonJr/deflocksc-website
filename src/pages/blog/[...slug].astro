@@ -95,9 +95,6 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
           <span>{readTime} min read</span>
         </div>
         <h1 class="text-3xl md:text-4xl font-bold text-[#e8e8e8] leading-tight tracking-[-0.02em] break-words md:[text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_4px_40px_rgba(0,0,0,0.7)]">{post.data.title}</h1>
-        {post.data.subtitle && (
-          <p class="text-lg md:text-xl text-[#a0a0a0] mt-2 font-medium leading-snug break-words md:[text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">{post.data.subtitle}</p>
-        )}
       </div>
     </div>
   </div>
