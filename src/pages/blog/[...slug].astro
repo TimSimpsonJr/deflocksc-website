@@ -28,6 +28,11 @@ const ogImage = post.data.ogImage
 
 // Filter headings to h2 and h3 for TOC
 const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+// Shrink the title when it's long enough to risk overflowing the hero overlay
+const titleSizeClass = post.data.title.length > 65
+  ? 'text-2xl md:text-3xl'
+  : 'text-3xl md:text-4xl';
 ---
 
 <Base title={`${post.data.title} — DeflockSC`} description={post.data.summary} ogImage={ogImage} ogType="article" publishedDate={new Date(post.data.date).toISOString()}>
@@ -86,7 +91,7 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
     {/* Title + meta overlay */}
     <div class="absolute bottom-0 left-0 right-0 px-6 lg:px-10 pb-6 md:pb-8">
-      <div class="max-w-[660px] mx-auto lg:mx-0 lg:ml-[calc((100%-660px-240px-2.5rem)/2)]">
+      <div class="max-w-[660px] mx-auto lg:mx-0 lg:ml-[calc((100%-660px-240px-2.5rem)/2)] min-w-0">
         <div class="flex items-center gap-3 label-mono-compact text-[#a0a0a0] mb-2.5 [text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">
           <time datetime={new Date(post.data.date).toISOString()}>
             {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
@@ -94,10 +99,7 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
           <span class="text-[rgba(255,255,255,0.25)]">/</span>
           <span>{readTime} min read</span>
         </div>
-        <h1 class="text-3xl md:text-4xl font-bold text-[#e8e8e8] leading-tight tracking-[-0.02em] [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_4px_40px_rgba(0,0,0,0.7)]">{post.data.title}</h1>
-        {post.data.subtitle && (
-          <p class="text-lg md:text-xl text-[#a0a0a0] mt-2 font-medium leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">{post.data.subtitle}</p>
-        )}
+        <h1 class={`${titleSizeClass} font-bold text-[#e8e8e8] leading-tight tracking-[-0.02em] break-words [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_4px_40px_rgba(0,0,0,0.7)]`}>{post.data.title}</h1>
       </div>
     </div>
   </div>
