@@ -378,13 +378,16 @@ export function initResultsEventDelegation(localCouncils: LocalCouncils): void {
         const council = localCouncils[councilKey];
         const seen = new Set<string>();
         for (let di = 0; di < council.members.length; di++) {
-          const titleMatch = council.members[di].title.match(/(?:District|Seat) (\d+)/);
-          if (titleMatch && !seen.has(titleMatch[1])) {
-            seen.add(titleMatch[1]);
+          const m = council.members[di];
+          if (m.seatClass === 'numbered' && m.seatId && !seen.has(m.seatId)) {
+            seen.add(m.seatId);
             const opt = document.createElement('option');
-            opt.value = titleMatch[1];
-            opt.textContent = 'District ' + titleMatch[1];
-            if (titleMatch[1] === String(wdGroup.matchedDistrict)) opt.selected = true;
+            opt.value = m.seatId;
+            const labelWord = m.seatLabel
+              ? m.seatLabel.charAt(0).toUpperCase() + m.seatLabel.slice(1)
+              : 'District';
+            opt.textContent = labelWord + ' ' + m.seatId;
+            if (m.seatId === String(wdGroup.matchedDistrict)) opt.selected = true;
             sel.appendChild(opt);
           }
         }
@@ -395,9 +398,7 @@ export function initResultsEventDelegation(localCouncils: LocalCouncils): void {
         if (!newDistrict) return;
         wdGroup.matchedDistrict = newDistrict;
         for (let r = 0; r < wdGroup.reps.length; r++) {
-          const repTitle = wdGroup.reps[r].office || '';
-          const repDistMatch = repTitle.match(/(?:District|Seat) (\d+)/);
-          wdGroup.reps[r].isMatchedDistrict = !!(repDistMatch && repDistMatch[1] === newDistrict);
+          wdGroup.reps[r].isMatchedDistrict = wdGroup.reps[r].seatId === newDistrict;
         }
         wdGroup.reps.sort((a, b) => (b.isMatchedDistrict ? 1 : 0) - (a.isMatchedDistrict ? 1 : 0));
         renderResults(currentGroups!);
