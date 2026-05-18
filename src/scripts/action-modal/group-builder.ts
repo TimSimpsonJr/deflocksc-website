@@ -20,12 +20,10 @@ function findLocalLetter(actionLetters: ActionLetter[], councilKey: string): Act
 
 function findMatchedMember(council: Council | undefined, districtNum: string | null) {
   if (!council || !council.members || !districtNum) return null;
-  const needleD = 'District ' + districtNum;
-  const needleS = 'Seat ' + districtNum;
   for (let i = 0; i < council.members.length; i++) {
-    const title = council.members[i].title || '';
-    if (title.indexOf(needleD) !== -1 || title.indexOf(needleS) !== -1) {
-      return council.members[i];
+    const m = council.members[i];
+    if (m.seatClass === 'numbered' && m.seatId === districtNum) {
+      return m;
     }
   }
   return null;
@@ -88,20 +86,22 @@ export function buildGroups(
   const cityCouncil = cityKey ? localCouncils[cityKey] : undefined;
 
   const matchedCountyMember = findMatchedMember(countyCouncil, match.countyDistrict);
-  if (matchedCountyMember && matchedCountyMember.name && matchedCountyMember.name !== 'Vacant') {
+  if (matchedCountyMember && matchedCountyMember.name && !matchedCountyMember.vacant) {
     localMatchedReps.push({
       name: matchedCountyMember.name,
       office: matchedCountyMember.title + ' — ' + countyCouncil!.label,
+      seatId: matchedCountyMember.seatId ?? null,
       email: matchedCountyMember.email || '',
       phone: matchedCountyMember.phone || ''
     });
   }
 
   const matchedCityMember = findMatchedMember(cityCouncil, match.cityDistrict);
-  if (matchedCityMember && matchedCityMember.name && matchedCityMember.name !== 'Vacant') {
+  if (matchedCityMember && matchedCityMember.name && !matchedCityMember.vacant) {
     localMatchedReps.push({
       name: matchedCityMember.name,
       office: matchedCityMember.title + ' — ' + cityCouncil!.label,
+      seatId: matchedCityMember.seatId ?? null,
       email: matchedCityMember.email || '',
       phone: matchedCityMember.phone || ''
     });
@@ -129,11 +129,12 @@ export function buildGroups(
       const countyReps: Rep[] = [];
       for (let cm = 0; cm < countyCouncil.members.length; cm++) {
         const member = countyCouncil.members[cm];
-        if (!member.name || member.name === 'Vacant') continue;
+        if (!member.name || member.vacant) continue;
         const isMatched = !!(matchedCountyMember && member.name === matchedCountyMember.name);
         countyReps.push({
           name: member.name, office: member.title, email: member.email || '',
-          phone: member.phone || '', isMatchedDistrict: isMatched
+          phone: member.phone || '', isMatchedDistrict: isMatched,
+          seatId: member.seatId ?? null
         });
       }
       countyReps.sort((a, b) => (b.isMatchedDistrict ? 1 : 0) - (a.isMatchedDistrict ? 1 : 0));
@@ -151,11 +152,12 @@ export function buildGroups(
       const cityReps: Rep[] = [];
       for (let cim = 0; cim < cityCouncil.members.length; cim++) {
         const cmember = cityCouncil.members[cim];
-        if (!cmember.name || cmember.name === 'Vacant') continue;
+        if (!cmember.name || cmember.vacant) continue;
         const isCityMatched = !!(matchedCityMember && cmember.name === matchedCityMember.name);
         cityReps.push({
           name: cmember.name, office: cmember.title, email: cmember.email || '',
-          phone: cmember.phone || '', isMatchedDistrict: isCityMatched
+          phone: cmember.phone || '', isMatchedDistrict: isCityMatched,
+          seatId: cmember.seatId ?? null
         });
       }
       cityReps.sort((a, b) => (b.isMatchedDistrict ? 1 : 0) - (a.isMatchedDistrict ? 1 : 0));

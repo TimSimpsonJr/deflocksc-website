@@ -25,6 +25,14 @@ export interface CouncilMember {
   title: string;
   email?: string;
   phone?: string;
+  office?: 'council-member' | 'mayor' | 'state-senator' | 'state-representative' | 'governor' | 'lt-governor';
+  leadership?: 'chair' | 'vice-chair' | 'mayor-pro-tem' | null;
+  seatClass?: 'numbered' | 'at-large' | 'unknown';
+  seatLabel?: 'district' | 'ward' | 'seat' | null;
+  seatId?: string | null;
+  vacant?: boolean;
+  seatSource?: 'source' | 'parsed-title' | 'inferred-registry' | 'manual';
+  partisan?: boolean;
 }
 
 export interface Council {
@@ -58,6 +66,7 @@ export interface Rep {
   photoUrl?: string;
   website?: string;
   isMatchedDistrict?: boolean;
+  seatId?: string | null;
 }
 
 export interface RepGroup {
