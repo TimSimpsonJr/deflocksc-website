@@ -39,3 +39,6 @@ id_ed25519
 
 # impeccable runtime cache (not committed)
 .impeccable/
+
+# brainstorming visual companion mockups (not committed)
+.superpowers/
