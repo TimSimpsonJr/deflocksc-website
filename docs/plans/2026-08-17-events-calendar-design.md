@@ -320,6 +320,17 @@ Keep `eventId` opaque and non-enumerable. It is the one part that does appear in
 
 **All refusal conditions return one identical response.** Unknown id, past date, tombstoned event, and revoked code produce the same status, the same static body, and the same headers. Perform every lookup before branching so the work is constant-shaped, and record the distinguishing reason in structured function logs only. Otherwise a maintainer who declines the fold prompt after a revoke leaks "this organizer's events were pulled" for up to a week, because the baked page still lists an event that `/go` refuses.
 
+**This endpoint fails CLOSED, without exception.** If a Blobs read throws, times out, returns malformed JSON, or the store factory itself fails, `/go/:eventId` serves the same refusal as an unknown id. It never falls through to the invite. Failing open here would serve a revoked event's Signal link during an outage, which is precisely the failure revocation exists to prevent, and an attacker who can induce store errors would get exactly what the redirect was built to deny.
+
+This is deliberately the opposite of the rate limiter (§8), which fails **open**. The asymmetry is the point and neither should be "harmonised" with the other:
+
+| | On store failure | Why |
+|---|---|---|
+| Rate limiter | Allow the request | Failing closed would kill legitimate submissions during a Blobs incident. The cost of being wrong is spend, bounded by the native edge rule. |
+| `/go/:eventId` | Refuse | The cost of being wrong is disclosing an invite that was supposed to be dead. Unbounded and unrecoverable. |
+
+The rule generalises: **fail open when the cost of a false negative is money, fail closed when it is disclosure.**
+
 **Every Blobs read on this path uses `consistency: 'strong'`** — both the `events` and `codes` lookups. The default eventual model would resolve a tombstoned event's real invite URL for up to 60 seconds after revocation, which is exactly the window a burned code or an infiltrated group creates. Eventual reads are permitted only on `/api/events`.
 
 **The redirect refuses to resolve** when the event date has passed, when the event is tombstoned, or when the owning code is revoked. This is how "past events stay visible with the link stripped" is enforced: the link was never in the bundle, so there is no client-side filter shipping links it then hides.
