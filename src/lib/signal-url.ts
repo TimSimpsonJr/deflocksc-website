@@ -79,10 +79,16 @@ export function validateSignalUrl(input: unknown): Ok<string> | Err<SignalUrlCod
   // so also inspect the raw authority. By this point host is exactly
   // `signal.group` (never IPv6) and there are no credentials, so any ':'
   // remaining in the authority is a port separator. Isolate the authority the
-  // way the URL parser does: drop the scheme, strip the leading slashes /
-  // backslashes the parser tolerates for special schemes, cut at the first
-  // path/query/fragment delimiter, then drop any userinfo before the '@'.
-  let authority = input.slice(input.indexOf(':') + 1).replace(/^[/\\]+/, '');
+  // way the URL parser does: FIRST strip every ASCII tab and newline, exactly
+  // as the WHATWG parser's initial step does. Skipping this is a real bypass:
+  // `https:\t//signal.group:443/#k` parses (tab removed) to host signal.group
+  // with the default port normalized away, but on the raw string the leading-
+  // slash strip halts at the tab, so the ':443' never reaches the check below.
+  // After removing the control chars: drop the scheme, strip the leading
+  // slashes / backslashes the parser tolerates for special schemes, cut at the
+  // first path/query/fragment delimiter, then drop any userinfo before the '@'.
+  const rawInput = input.replace(/[\t\n\r]/g, '');
+  let authority = rawInput.slice(rawInput.indexOf(':') + 1).replace(/^[/\\]+/, '');
   const authorityEnd = authority.search(/[/\\?#]/);
   if (authorityEnd !== -1) {
     authority = authority.slice(0, authorityEnd);

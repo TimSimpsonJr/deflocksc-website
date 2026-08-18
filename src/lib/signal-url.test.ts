@@ -140,6 +140,32 @@ describe('validateSignalUrl — credentials, port, query, path', () => {
     });
   });
 
+  it('rejects a tab between scheme and slashes that hides an explicit port', () => {
+    // The WHATWG parser strips ASCII tab/newline as its first step, so this
+    // parses to host signal.group with the default port normalized away. A raw-
+    // authority check that does NOT mirror that strip sees only the tab and
+    // never the ':443'. The validator must remove the control chars first.
+    expect(new URL(`https:\t//signal.group:443/#${KEY}`).hostname).toBe('signal.group');
+    expect(validateSignalUrl(`https:\t//signal.group:443/#${KEY}`)).toEqual({
+      ok: false,
+      code: 'has_port',
+    });
+  });
+
+  it('rejects a newline between scheme and slashes that hides an explicit port', () => {
+    expect(validateSignalUrl(`https:\n//signal.group:443/#${KEY}`)).toEqual({
+      ok: false,
+      code: 'has_port',
+    });
+  });
+
+  it('rejects a carriage return between scheme and slashes that hides an explicit port', () => {
+    expect(validateSignalUrl(`https:\r//signal.group:443/#${KEY}`)).toEqual({
+      ok: false,
+      code: 'has_port',
+    });
+  });
+
   it('rejects a query string', () => {
     expect(validateSignalUrl(`https://signal.group/?utm=x#${KEY}`)).toEqual({
       ok: false,
