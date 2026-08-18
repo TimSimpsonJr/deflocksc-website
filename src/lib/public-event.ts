@@ -72,11 +72,25 @@ export const PUBLIC_EVENT_FIELDS: readonly (keyof PublicEvent)[] = [
  * (`{ ...record }`) and must never delete fields from a copy: both of those
  * publish anything added to the store later, which is exactly the failure this
  * function exists to prevent.
+ *
+ * `recurrence` is the one object-valued field and is deep-picked, not copied by
+ * reference. A shallow copy would alias the stored record's recurrence object,
+ * which would publish any property added under it later (the top-level allowlist
+ * cannot see nested fields) and would let a caller mutating the projection
+ * corrupt the stored record in memory.
  */
 export function toPublicEvent(record: StoredEvent): PublicEvent {
   const projected: Partial<PublicEvent> = {};
 
   for (const field of PUBLIC_EVENT_FIELDS) {
+    if (field === 'recurrence') {
+      // Deep-pick so the projected recurrence is a fresh object carrying only
+      // its two allowlisted properties, never an alias of the stored record's.
+      projected.recurrence = record.recurrence
+        ? { freq: record.recurrence.freq, until: record.recurrence.until }
+        : null;
+      continue;
+    }
     // Cast because TypeScript cannot see, inside the loop, that the key and
     // the value type line up. The key itself is statically an allowlisted one.
     (projected as Record<string, unknown>)[field] = record[field];

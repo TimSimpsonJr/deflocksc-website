@@ -166,6 +166,40 @@ describe('toPublicEvent', () => {
     expect(result.recurrence).toEqual({ freq: 'monthly_nth', until: '2027-02-22' });
   });
 
+  it('deep-picks recurrence so a nested extra property is not published', () => {
+    // Simulates a property added under recurrence by a later change: the
+    // top-level allowlist cannot see nested fields, so the projection itself
+    // must strip them.
+    const recordWithNestedExtra = {
+      ...publicRecord,
+      recurrence: {
+        freq: 'monthly_nth',
+        until: '2027-02-22',
+        internalNote: 'SECRET-NESTED',
+      },
+    } as unknown as StoredEvent;
+
+    const result = toPublicEvent(recordWithNestedExtra);
+    expect(result.recurrence).toEqual({ freq: 'monthly_nth', until: '2027-02-22' });
+    expect(Object.prototype.hasOwnProperty.call(result.recurrence, 'internalNote')).toBe(false);
+
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toContain('internalNote');
+    expect(serialized).not.toContain('SECRET-NESTED');
+  });
+
+  it('does not alias the stored recurrence object', () => {
+    const input: StoredEvent = {
+      ...publicRecord,
+      recurrence: { freq: 'weekly', until: '2027-01-01' },
+    };
+    const result = toPublicEvent(input);
+    expect(result.recurrence).not.toBe(input.recurrence);
+    // A caller mutating the projection must not corrupt the stored record.
+    result.recurrence!.until = '1999-01-01';
+    expect(input.recurrence!.until).toBe('2027-01-01');
+  });
+
   it('does not mutate the input record', () => {
     const input: StoredEvent = { ...publicRecord };
     toPublicEvent(input);
