@@ -217,6 +217,41 @@ describe('sanitizeText: hostile corpus', () => {
     expectErr(sanitizeText('Green\uFEFFville', TITLE_LIMITS), 'zero_width');
   });
 
+  // The invisible-format class is the whole Cf category, not an enumerated
+  // handful. Each of these renders identically to "Greenville" and would
+  // otherwise smuggle content past a reviewer and split the dedupe key.
+  it('rejects a soft hyphen (U+00AD)', () => {
+    expectErr(sanitizeText('Green\u00ADville', TITLE_LIMITS), 'zero_width');
+  });
+
+  it('rejects a word joiner (U+2060)', () => {
+    expectErr(sanitizeText('Green\u2060ville', TITLE_LIMITS), 'zero_width');
+  });
+
+  it('rejects an invisible math operator (U+2062 INVISIBLE TIMES)', () => {
+    expectErr(sanitizeText('Green\u2062ville', TITLE_LIMITS), 'zero_width');
+  });
+
+  it('rejects a left-to-right mark (U+200E), which is not a bidi override', () => {
+    expectErr(sanitizeText('Green\u200Eville', TITLE_LIMITS), 'zero_width');
+  });
+
+  it('rejects a right-to-left mark (U+200F)', () => {
+    expectErr(sanitizeText('Green\u200Fville', TITLE_LIMITS), 'zero_width');
+  });
+
+  it('rejects an interlinear annotation anchor (U+FFF9)', () => {
+    expectErr(sanitizeText('Green\uFFF9ville', TITLE_LIMITS), 'zero_width');
+  });
+
+  it('rejects a Unicode tag character (U+E0041), which maps to ASCII "A"', () => {
+    expectErr(sanitizeText('Green\u{E0041}ville', TITLE_LIMITS), 'zero_width');
+  });
+
+  it('rejects a combining grapheme joiner (U+034F), which is Mn, not Cf', () => {
+    expectErr(sanitizeText('Green\u034Fville', TITLE_LIMITS), 'zero_width');
+  });
+
   it('rejects a Zalgo stack', () => {
     expectErr(sanitizeText('a' + '\u0301'.repeat(30) + '!', TITLE_LIMITS), 'combining_run');
   });
@@ -307,6 +342,12 @@ describe('dedupeKey', () => {
     const plain = 'Sign Night';
     const spiked = 'S\u200Bign\u200C Ni\u200Dght\uFEFF';
     expect(dedupeKey(spiked)).toBe(dedupeKey(plain));
+  });
+
+  it('collapses a soft-hyphen-spiked word onto its plain form', () => {
+    // The whole invisible-format class is stripped, not just the zero-width set,
+    // so a title spiked with U+00AD cannot dodge duplicate detection.
+    expect(dedupeKey('Green\u00ADville')).toBe(dedupeKey('Greenville'));
   });
 
   it('collapses two strings differing only by an added space', () => {

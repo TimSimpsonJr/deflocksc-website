@@ -49,9 +49,20 @@ const CONTROL_CHAR = /[\u0000-\u001F\u007F-\u009F]/u;
 // SHAPE: one flat character class, no quantifier. Cannot backtrack.
 const BIDI_CONTROL = /[\u202A-\u202E\u2066-\u2069]/u;
 
+// Invisible formatting characters. The whole Cf (format) category, plus U+034F
+// COMBINING GRAPHEME JOINER, which is category Mn (an allowed combining mark)
+// and so is not in Cf. \p{Cf} subsumes the zero-width set (U+200B-U+200D,
+// U+FEFF) and the bidi controls, and also catches soft hyphen (U+00AD), word
+// joiner (U+2060), the invisible math operators (U+2061-U+2064), LRM/RLM
+// (U+200E/U+200F), interlinear annotation (U+FFF9-U+FFFB), and the entire
+// Unicode tag block (U+E0000-U+E007F) -- all invisible, none removed by NFKC,
+// each able to defeat the duplicate detection below or smuggle ASCII-mapped
+// content past a reviewer. Bidi controls are Cf too, but BIDI_CONTROL is tested
+// first so they keep their own 'bidi_control' code; everything else here is
+// reported under 'zero_width', the representative name for the class.
 // SHAPE: one flat character class, no quantifier. Cannot backtrack.
-const ZERO_WIDTH = /[\u200B\u200C\u200D\uFEFF]/u;
-const ZERO_WIDTH_GLOBAL = /[\u200B\u200C\u200D\uFEFF]/gu;
+const INVISIBLE_FORMAT = /[\p{Cf}\u034F]/u;
+const INVISIBLE_FORMAT_GLOBAL = /[\p{Cf}\u034F]/gu;
 
 // Unassigned code points and private use areas.
 // SHAPE: one flat character class of two property escapes, no quantifier.
@@ -113,7 +124,7 @@ export function sanitizeText(
   //    usually be used to smuggle something past it.
   if (CONTROL_CHAR.test(collapsed)) return err('control_char');
   if (BIDI_CONTROL.test(collapsed)) return err('bidi_control');
-  if (ZERO_WIDTH.test(collapsed)) return err('zero_width');
+  if (INVISIBLE_FORMAT.test(collapsed)) return err('zero_width');
   if (UNASSIGNED_OR_PRIVATE.test(collapsed)) return err('unassigned_or_private');
 
   // 7. Content-quality tier: the worst case if these are wrong is an ugly
@@ -126,13 +137,14 @@ export function sanitizeText(
 }
 
 // Duplicate detection runs on the normalized string, never the raw body: one
-// added space or zero-width character would otherwise defeat it. Zero-width
-// characters cannot reach here through sanitizeText, but this function is also
-// called on values read back out of storage, so it strips them defensively.
+// added space or invisible formatting character would otherwise defeat it.
+// Such characters cannot reach here through sanitizeText, but this function is
+// also called on values read back out of storage, so it strips the whole
+// invisible-format class defensively.
 export function dedupeKey(sanitized: string): string {
   return sanitized
     .normalize('NFKC')
-    .replace(ZERO_WIDTH_GLOBAL, '')
+    .replace(INVISIBLE_FORMAT_GLOBAL, '')
     .replace(HORIZONTAL_SPACE_RUN, ' ')
     .trim()
     .toLowerCase();

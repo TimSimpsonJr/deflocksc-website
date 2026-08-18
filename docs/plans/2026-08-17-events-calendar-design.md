@@ -154,15 +154,15 @@ The submit pipeline runs **body cap → rate limit → validate → verify code*
 | Class | Code points | Why |
 |---|---|---|
 | C0 / C1 controls | `U+0000–U+001F`, `U+007F–U+009F` | No legitimate use in a title |
-| Bidi overrides and isolates | `U+202A–U+202E`, `U+2066–U+2069` | Trojan Source: the rendered order differs from the stored order, so moderation and display disagree |
-| Zero-width and BOM | `U+200B`, `U+200C`, `U+200D`, `U+FEFF` | Invisible; defeats the duplicate detection below and hides content from a reviewer |
+| Bidi overrides and isolates | `U+202A–U+202E`, `U+2066–U+2069` | Trojan Source: the rendered order differs from the stored order, so moderation and display disagree. These are also `Cf`, but they are checked first so they keep a distinct code |
+| Invisible formatting | the entire `Cf` (format) category — subsumes zero-width `U+200B–U+200D` and BOM `U+FEFF`, and also soft hyphen `U+00AD`, word joiner `U+2060`, invisible operators `U+2061–U+2064`, LRM/RLM `U+200E`/`U+200F`, interlinear annotation `U+FFF9–U+FFFB`, and the whole tag block `U+E0000–U+E007F` — **plus `U+034F`** (a combining mark, category `Mn`, so not in `Cf`) | Invisible; defeats the duplicate detection below and hides content from a reviewer. NFKC removes none of them, and the tag block maps to ASCII, so a title can smuggle hidden characters into the published JSON. Reject the whole property class, not an enumerated handful |
 | Unassigned and private use | `U+E000–U+F8FF`, planes 15–16, unassigned | Renders as tofu or as something only the attacker's font knows |
 
 **Cap combining marks.** At most 2 consecutive marks in category `Mn`/`Mc`/`Me` per base character. Without this, one Zalgo title stacks diacritics vertically through the entire calendar. This is the layout-destroying attack, and CSS alone cannot fully contain it.
 
 **Restrict to Latin and Common scripts.** This blocks homoglyph impersonation (Cyrillic `а` reading as Latin `a`, so a title can appear to name a city or organizer it does not) without shipping a full confusables table. **This is a deliberate exclusion and should be a conscious one:** it permits Spanish, which is the realistic second language for SC organizing, and rejects titles in Korean, Arabic, or Chinese. If that becomes wrong, replace the script restriction with UTS #39 confusable skeleton matching rather than simply widening it.
 
-**No emoji in either field.** Allowing them means allowing ZWJ and variation selectors, which reopens the zero-width class above for the sake of decoration on a public listing.
+**No emoji in either field.** Allowing them means allowing ZWJ and variation selectors, which reopens the invisible-formatting class above for the sake of decoration on a public listing.
 
 **Validate on the way in and again at render.** Same rule as the Signal URL: the committed JSON lives in a repo a later bad commit can edit, and the build must not trust it.
 
