@@ -234,6 +234,26 @@ describe('honeypot', () => {
     expect(body.ok).toBe(true);
     expect(blobs.eventsSetJSON).toHaveBeenCalledTimes(1);
   });
+
+  it('drops a bot whose `website` is a non-string truthy value, with no write', async () => {
+    // Real browsers send an empty string, so a number/object/array/boolean is
+    // always a bot. Each must trip the honeypot exactly like a non-empty string:
+    // the fake { ok, id } 201, no write, and the code store + limiter untouched.
+    blobs.codesGet.mockResolvedValue(LIVE_CODE);
+    const botValues: unknown[] = [123, { evil: true }, [1], true];
+
+    for (const website of botValues) {
+      const res = await handler(makeRequest(JSON.stringify({ ...validPayload(), website })).req, ctx);
+      const body = (await res.json()) as { ok: boolean; id: string };
+      expect(res.status).toBe(201);
+      expect(body.ok).toBe(true);
+      expect(body.id).toMatch(/^[a-z2-7]{8}$/);
+    }
+
+    expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+    expect(blobs.codesGet).not.toHaveBeenCalled();
+    expect(limiter.consume).not.toHaveBeenCalled();
+  });
 });
 
 describe('code verification', () => {
@@ -252,6 +272,45 @@ describe('code verification', () => {
     expect(revokedRes.headers.get('content-type')).toBe(unknownRes.headers.get('content-type'));
     expect(revokedRes.headers.get('cache-control')).toBe(unknownRes.headers.get('cache-control'));
     expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+  });
+
+  it('fails closed on a malformed code record, refusing it like an unknown code', async () => {
+    // The codes store is written by a separate admin/issuance path. A record
+    // that is not a plain object carrying a string `pseudonym` and
+    // revoked===false is corrupt (partial write, manual seed, schema drift), not
+    // a valid organizer. It must be refused — never written with an undefined
+    // organizer — and the refusal must be indistinguishable from an unknown code.
+    const malformed: unknown[] = [
+      42,
+      'str',
+      [1],
+      {},
+      { issuedAt: '2026-08-01T00:00:00Z', revoked: false }, // no pseudonym
+      { pseudonym: 5, revoked: false }, // non-string pseudonym
+      { pseudonym: 'handle-jay' }, // missing revoked -> not === false
+    ];
+
+    for (const record of malformed) {
+      blobs.codesGet.mockResolvedValue(record);
+      const res = await handler(makeRequest(JSON.stringify(validPayload())).req, ctx);
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({ error: 'invalid_code' });
+    }
+
+    expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+  });
+
+  it('still accepts a well-formed live code record and writes the event', async () => {
+    // The fail-closed guard must not reject a genuine record: string pseudonym,
+    // revoked===false. The organizer attribution comes from that pseudonym.
+    blobs.codesGet.mockResolvedValue(LIVE_CODE);
+
+    const res = await handler(makeRequest(JSON.stringify(validPayload())).req, ctx);
+
+    expect(res.status).toBe(201);
+    expect(blobs.eventsSetJSON).toHaveBeenCalledTimes(1);
+    const [, record] = blobs.eventsSetJSON.mock.calls[0] as [string, Record<string, unknown>];
+    expect(record.organizer).toBe('handle-jay');
   });
 });
 

@@ -17,12 +17,6 @@ const DAILY_SUBMIT_LIMIT = 20;
 /** RFC 4648 base32, lowercased. Matches the `/^[a-z2-7]{8}$/` id check in /go/:eventId. */
 const BASE32_ALPHABET = 'abcdefghijklmnopqrstuvwxyz234567';
 
-interface CodeRecord {
-  pseudonym: string;
-  issuedAt: string;
-  revoked: boolean;
-}
-
 function json(status: number, payload: unknown): Response {
   return new Response(JSON.stringify(payload), {
     status,
@@ -169,12 +163,14 @@ export default async (req: Request, context: Context): Promise<Response> => {
   }
 
   // 3b. Honeypot (design §6), acted on BEFORE the .strict() schema — which
-  //     would otherwise reject `website` as an unrecognized key. A non-empty
-  //     `website` is a bot: return the SAME { ok, id } success shape with a
-  //     throwaway id and write nothing, so the bot never learns it was caught,
-  //     and never reach the rate limiter or the code store. Then strip the key
-  //     so a real (empty) submission validates.
-  if (typeof parsed.website === 'string' && parsed.website.length > 0) {
+  //     would otherwise reject `website` as an unrecognized key. ANY present,
+  //     non-empty `website` is a bot, whatever its type: a real browser sends an
+  //     empty string, so a number/object/array value is never a human. Return
+  //     the SAME { ok, id } success shape with a throwaway id and write nothing,
+  //     so the bot never learns it was caught, and never reach the rate limiter
+  //     or the code store. Only the empty-string/absent (and defensively null)
+  //     paths proceed; then strip the key so a real submission validates.
+  if ('website' in parsed && parsed.website !== '' && parsed.website != null) {
     return json(201, { ok: true, id: generateEventId() });
   }
   delete parsed.website;
@@ -199,15 +195,29 @@ export default async (req: Request, context: Context): Promise<Response> => {
   //    comparison loop and no timing signal. codesStore() is opened with
   //    consistency: 'strong' — eventual reads keep a revoked code alive ~60s.
   const digest = digestCode(submission.codeNormalized, pepper);
-  let codeRecord: CodeRecord | null;
+  let codeRecord: unknown;
   try {
-    codeRecord = (await codesStore().get(digest, { type: 'json' })) as CodeRecord | null;
+    codeRecord = await codesStore().get(digest, { type: 'json' });
   } catch {
+    // Static line (no request data), matching rate-limit.ts's convention, so a
+    // codes-store outage is visible in function logs instead of a silent 503.
+    console.warn('submit-event: codes store read failed; returning 503');
     return json(503, { error: 'unavailable' });
   }
-  if (!codeRecord || codeRecord.revoked) {
+  // Fail closed on a malformed record. This endpoint never writes the codes
+  // store, so anything that is not a plain object carrying a string `pseudonym`
+  // and `revoked === false` is corrupt (partial write, manual seed, schema
+  // drift), not a valid organizer. Refuse it exactly as an unknown code — a
+  // truthy-but-shapeless record must never fall open to an `undefined`
+  // organizer. Mirrors the dedupe loop's typeof-object defense below.
+  if (
+    !isPlainObject(codeRecord) ||
+    typeof codeRecord.pseudonym !== 'string' ||
+    codeRecord.revoked !== false
+  ) {
     return rejectCode();
   }
+  const organizer = codeRecord.pseudonym;
 
   // 6b. Dedupe (design §6). The real spam shape here is one Signal link posted
   //     for many cities, so check TWO things against every LIVE event: the
@@ -269,7 +279,7 @@ export default async (req: Request, context: Context): Promise<Response> => {
     address: submission.address,
     hasSignalGroup: submission.signalUrl !== null,
     recurrence: submission.recurrence,
-    organizer: codeRecord.pseudonym,
+    organizer,
     createdAt: new Date().toISOString(),
     signalUrl: submission.signalUrl,
     codeDigest: digest,
@@ -279,6 +289,10 @@ export default async (req: Request, context: Context): Promise<Response> => {
   try {
     await eventsStore().setJSON(id, record);
   } catch (error) {
+    // Static line (no request data), matching rate-limit.ts's convention, so an
+    // events-store write outage is visible in function logs instead of a silent
+    // 503. The caught value is never logged: it can embed request-derived text.
+    console.warn('submit-event: events store write failed; returning 503');
     if (error instanceof ContextRefusedError) {
       return json(503, { error: 'unavailable' });
     }
