@@ -101,6 +101,17 @@ describe('digestCode', () => {
     expect(digest).toMatch(/^[0-9a-f]{64}$/);
   });
 
+  it('pins the exact digest for a known code and pepper', () => {
+    // Known-answer test. The relative properties below (format, stability,
+    // sensitivity to code and pepper) all survive a semantics-changing edit
+    // that keeps 64-hex output -- e.g. swapping key and message in the HMAC,
+    // or changing the input encoding. Only an absolute vector catches that,
+    // and the module warns the failure would be silent: codes stop validating.
+    expect(digestCode(CANONICAL, PEPPER)).toBe(
+      '02bb91051960a64f9a01801b662a358881e1ab6e402fb0136e7ca9e9fcd6bf7d',
+    );
+  });
+
   it('is stable across calls', () => {
     expect(digestCode(CANONICAL, PEPPER)).toBe(digestCode(CANONICAL, PEPPER));
   });
