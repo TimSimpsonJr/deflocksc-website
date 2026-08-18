@@ -179,6 +179,8 @@ git commit -m "feat(events): add Ok/Err result helpers for event validators"
 
 ---
 
+---
+
 ### Task 2: Text sanitizer
 
 **Files:**
@@ -754,6 +756,8 @@ the offending string."
 
 ---
 
+---
+
 ### Task 3: Signal group URL validator
 
 **Files:**
@@ -1148,6 +1152,8 @@ which the parser normalizes to javascript: and a scheme denylist would miss."
 
 ---
 
+---
+
 ### Task 4: Organizer code normalization, digesting, and generation
 
 **Files:**
@@ -1439,6 +1445,8 @@ git commit -m "feat: add organizer code normalization, digesting, and generation
 
 ---
 
+---
+
 ### Task 5: City allowlist and city-to-county derivation
 
 **Files:**
@@ -1714,6 +1722,8 @@ git commit -m "feat: add city allowlist and city-to-county derivation"
 
 ---
 
+---
+
 ### Task 6: JSON island escaping
 
 **Files:**
@@ -1966,6 +1976,8 @@ Expected: PASS — 12 tests
 git add src/lib/json-island.ts src/lib/json-island.test.ts
 git commit -m "feat(events): add toJsonIsland for safe data-island embedding"
 ```
+
+---
 
 ---
 
@@ -2288,6 +2300,8 @@ explicit allowlist, so signalUrl, codeDigest, revoked, and any field
 added to the Blobs store later are denied by construction rather than
 by remembering to delete them."
 ```
+
+---
 
 ---
 
@@ -2795,6 +2809,8 @@ All paths are relative to the repo root, `the repo root`.
 
 ---
 
+---
+
 ### Task 9: Rate limiter on Blobs
 
 Design reference: §8 (Rate limiting), §16.1 (`POST /api/submit-event` row). This task builds the in-function daily budget counter that sits behind Netlify's native edge rule. It is the second stage of the submit pipeline (`body cap → rate limit → validate → verify code`), so it must be cheap and it must never block a legitimate submission because Blobs had a bad day.
@@ -3101,7 +3117,7 @@ All commands below run from the repo root.
    * @returns 64-char lowercase hex digest.
    */
   export function hashSubject(ip: string, salt: string): string {
-    return createHash('sha256').update(`${salt} ${ip}`, 'utf8').digest('hex');
+    return createHash('sha256').update(`${salt}\x00${ip}`, 'utf8').digest('hex');
   }
 
   export interface RateLimitVerdict {
@@ -3217,6 +3233,8 @@ All commands below run from the repo root.
   remains the security boundary. hashSubject salts and SHA-256s the client
   IP so no raw address reaches a key or value."
   ```
+
+---
 
 ---
 
@@ -3656,6 +3674,8 @@ No other file changes. This module has no imports — it does not depend on Task
 
 ---
 
+---
+
 ### Task 11: Submission schema
 
 **Files:**
@@ -3665,7 +3685,7 @@ No other file changes. This module has no imports — it does not depend on Task
 - Create: `src/lib/event-schema.test.ts`
 - Create: `src/lib/event-schema.ts`
 
-This task builds the single validator that every submission passes through. It is the fourth stage of the submit pipeline (`body cap → rate limit → validate → verify code`), so by the time it runs the body is already known to be under 8192 bytes. It imports, and never reimplements, `sanitizeText`, `validateSignalUrl`, `normalizeCode`, `countyForCity` and `isKnownCity` from Tasks 2–6, and imports the title/description/address caps (`TITLE_LIMITS`, `DESCRIPTION_LIMITS`, `ADDRESS_LIMITS`) from `sanitize-text.ts` rather than retyping them.
+This task builds the single validator that every submission passes through. It is the fourth stage of the submit pipeline (`body cap → rate limit → validate → verify code`), so by the time it runs the body is already known to be under 8192 bytes. It imports, and never reimplements, `sanitizeText`, `validateSignalUrl`, `normalizeCode`, `countyForCity` and `isKnownCity` from Tasks 2–6, and imports the title/description/address caps (`TITLE_LIMITS`, `DESCRIPTION_LIMITS`, `ADDRESS_LIMITS`) from `sanitize-text.ts` rather than retyping them. It also exports `publicEventSchema`, the `.strict()` validator for the stored/public event shape (the 13 `PublicEvent` fields) that `src/pages/events.astro` uses to re-validate the baked `events.json` — one shared schema, so the page keeps no local copy that can drift.
 
 ---
 
@@ -3721,7 +3741,7 @@ This task builds the single validator that every submission passes through. It i
 
   ```ts
   import { describe, it, expect } from 'vitest';
-  import { validateSubmission, type FieldError } from './event-schema.js';
+  import { validateSubmission, publicEventSchema, type FieldError } from './event-schema.js';
 
   // --- fixtures ---------------------------------------------------------------
 
@@ -3951,6 +3971,46 @@ This task builds the single validator that every submission passes through. It i
       const result = validateSubmission([]);
       expect(result.ok).toBe(false);
       expect(hasError(result, '_body', 'not_an_object')).toBe(true);
+    });
+  });
+
+  // --- publicEventSchema (the stored/public shape) ----------------------------
+
+  // Distinct from a *submission*: a stored PublicEvent carries `id` and
+  // `createdAt` and has no `organizerCode`. This is the exact shape of
+  // src/data/events.json, which src/pages/events.astro re-validates at build.
+  function publicEventRecord(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+    return {
+      id: 'k7m29qxb',
+      type: 'public',
+      title: 'Richland County Council meeting',
+      description: 'Council votes on the Flock contract renewal.',
+      date: '2026-09-01',
+      time: '18:30',
+      city: 'columbia',
+      county: 'richland',
+      address: '1737 Main Street, Columbia',
+      hasSignalGroup: false,
+      recurrence: null,
+      organizer: 'handle-jay',
+      createdAt: '2026-08-17T14:22:00Z',
+      ...overrides,
+    };
+  }
+
+  describe('publicEventSchema — the stored/public shape', () => {
+    it('accepts a valid PublicEvent record', () => {
+      expect(publicEventSchema.safeParse(publicEventRecord()).success).toBe(true);
+    });
+
+    it('rejects a record carrying a server-only key via .strict()', () => {
+      // signalUrl, codeDigest and revoked live on StoredEvent, never on the
+      // published shape. `.strict()` makes a baked record that smuggles one fail
+      // the build rather than flow to the client.
+      for (const key of ['signalUrl', 'codeDigest', 'revoked']) {
+        const parsed = publicEventSchema.safeParse(publicEventRecord({ [key]: 'x' }));
+        expect(parsed.success, `${key} must be rejected`).toBe(false);
+      }
     });
   });
   ```
@@ -4195,6 +4255,46 @@ This task builds the single validator that every submission passes through. It i
       }
     });
 
+  /**
+   * The stored/public event shape: exactly the 13 PublicEvent fields, and no
+   * more. `src/pages/events.astro` re-validates the git-baked src/data/events.json
+   * against this at build time, so a later bad commit that adds a server-only
+   * field (signalUrl, codeDigest, revoked) is rejected by `.strict()` and fails
+   * the build rather than reaching a rendered card or the data island.
+   *
+   * This is the ONE schema for that shape — the page keeps no local copy that can
+   * drift from it. It is deliberately separate from submissionSchema above:
+   * a submission has `organizerCode` and no `id`/`createdAt`; a stored record is
+   * the mirror image. The per-field text caps are the same imported constants, so
+   * the two schemas cannot disagree on a limit.
+   */
+  export const publicEventSchema = z
+    .object({
+      id: z.string(),
+      type: z.enum(['meetup', 'public']),
+      title: sanitizedField(TITLE_LIMITS),
+      description: sanitizedField(DESCRIPTION_LIMITS).nullable(),
+      date: z.string().regex(ISO_DATE_RE, 'bad_format').refine(isRealIsoDate, 'not_a_real_date'),
+      time: z.string().regex(TIME_RE, 'bad_format'),
+      city: z.string(),
+      county: z.string(),
+      address: sanitizedField(ADDRESS_LIMITS).nullable(),
+      hasSignalGroup: z.boolean(),
+      recurrence: z
+        .object({
+          freq: z.enum(['weekly', 'monthly_nth']),
+          until: z
+            .string()
+            .regex(ISO_DATE_RE, 'bad_format')
+            .refine(isRealIsoDate, 'not_a_real_date'),
+        })
+        .strict()
+        .nullable(),
+      organizer: z.string(),
+      createdAt: z.string(),
+    })
+    .strict();
+
   function invalid(errors: FieldError[]): Err<'invalid'> & { errors: FieldError[] } {
     return { ...err('invalid'), errors };
   }
@@ -4278,10 +4378,10 @@ This task builds the single validator that every submission passes through. It i
   Expected result:
 
   ```
-   ✓ src/lib/event-schema.test.ts (16 tests)
+   ✓ src/lib/event-schema.test.ts (18 tests)
 
    Test Files  1 passed (1)
-        Tests  16 passed (16)
+        Tests  18 passed (18)
   ```
 
   Then run the full suite to confirm nothing else regressed:
@@ -4315,9 +4415,16 @@ This task builds the single validator that every submission passes through. It i
   validateSubmission checks Object.hasOwn(raw, '__proto__') explicitly before
   parsing.
 
+  Also exports publicEventSchema, the strict validator for the stored/public
+  event shape (the 13 PublicEvent fields, no organizerCode). src/pages/events.astro
+  imports it to re-validate the git-baked events.json at build time, so there is
+  one shared schema for that shape and no local page copy that can drift.
+
   zod is pinned exactly (no caret) to 4.4.3, published 2026-05-04, to satisfy
   the machine-wide 30-day minimum release age gate."
   ```
+
+---
 
 ---
 
@@ -4857,7 +4964,7 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
    * space or zero-width character cannot slip a duplicate past the check.
    */
   function semanticKey(parts: { type: string; date: string; city: string; title: string }): string {
-    return [parts.type, parts.date, parts.city, dedupeKey(parts.title)].join(' ');
+    return [parts.type, parts.date, parts.city, dedupeKey(parts.title)].join('\x00');
   }
 
   export default async (req: Request, context: Context): Promise<Response> => {
@@ -5072,6 +5179,8 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
   git add netlify/functions/submit-event.ts tests/functions/submit-event.test.ts package.json package-lock.json
   git commit -m "feat(events): add POST /api/submit-event with body cap, rate limit, code verification, honeypot and dedupe"
   ```
+
+---
 
 ---
 
@@ -5615,6 +5724,8 @@ functions live under `tests/functions/`. Vitest's default `include` glob
 
 ---
 
+---
+
 ### Task 14: go redirect function
 
 The Signal invite URL exists in exactly one place a visitor can reach: the body of this function's success response. It is never in the page bundle, never in git, never in a `Location` header (Netlify function logs retain headers and paths; response bodies appear in no documented log schema). Everything about this task is about not leaking: not the invite, not which of the refusal conditions fired, and not the attacker-supplied `eventId`.
@@ -5635,7 +5746,7 @@ The Signal invite URL exists in exactly one place a visitor can reach: the body 
   `node -e "const p=require('./package.json');console.log(p.devDependencies['@netlify/functions'], p.dependencies['@netlify/blobs'])"`
   Expected: two version strings, neither `undefined`.
 
-**The `intake` seam (contract #8).** The literal id `intake` is not an event. It resolves the operator's vetting-page Signal link, stored under the key `intake` in the `links` store, written by the CLI's `set-intake`. This function reads it with `linksStore().get('intake', { type: 'json' })` — a JSON string URL — and re-validates it with `validateSignalUrl` before emitting, exactly as it does for an event's stored `signalUrl`. It is special-cased BEFORE the 8-char id regex.
+**The `intake` seam (contract #8).** The literal id `intake` is not an event. It resolves the operator's vetting-page Signal link, stored under the key `intake` in the `links` store, written by the CLI's `set-intake`. The stored value is a JSON record `{ url }` (Task 16 writes it with `linksStore().setJSON('intake', { url })`); this function reads it with `linksStore().get('intake', { type: 'json' })`, then re-validates `record.url` with `validateSignalUrl` before emitting, exactly as it does for an event's stored `signalUrl`. Both sides agree the shape is `{ url }`. It is special-cased BEFORE the 8-char id regex.
 
 **Why the test lives in `tests/functions/` and not beside the function.** Netlify treats every file directly inside `netlify/functions/` as a deployable function. A colocated `go.test.ts` would be published as a function named `go.test` with no default export. Function tests go in `tests/functions/`, which vitest's default `include` glob (`**/*.{test,spec}.?(c|m)[jt]s?(x)`) already picks up with no config change.
 
@@ -5956,7 +6067,8 @@ describe('stored-record hardening: a truthy-but-empty record is not live', () =>
 
 describe('/go/intake — the operator vetting-page link', () => {
   it('resolves to the stored intake link when one is set', async () => {
-    mocks.linksGet.mockResolvedValueOnce(SIGNAL_URL);
+    // The stored shape is a JSON record { url }, written by the CLI's set-intake.
+    mocks.linksGet.mockResolvedValueOnce({ url: SIGNAL_URL });
     const res = await go(req, ctx('intake'));
     const body = await res.text();
 
@@ -5967,6 +6079,15 @@ describe('/go/intake — the operator vetting-page link', () => {
     // The intake path never touches the event or code stores.
     expect(mocks.eventsGet).not.toHaveBeenCalled();
     expect(mocks.codesGet).not.toHaveBeenCalled();
+  });
+
+  it('refuses when the stored intake record is malformed (no url field)', async () => {
+    // A record missing its `url` — or any non-{ url } shape — is invalid, not a
+    // link. It must refuse exactly as an unset link does, never throw.
+    mocks.linksGet.mockResolvedValueOnce({});
+    const res = await go(req, ctx('intake'));
+    expect(res.status).toBe(404);
+    expect(await res.text()).not.toContain('signal.group');
   });
 
   it('refuses identically to an unknown id when no intake link is set', async () => {
@@ -5983,7 +6104,7 @@ describe('/go/intake — the operator vetting-page link', () => {
   });
 
   it('refuses when the stored intake link fails re-validation', async () => {
-    mocks.linksGet.mockResolvedValueOnce('https://evil.example/#CjQKIExhbXBzaGFkZQ');
+    mocks.linksGet.mockResolvedValueOnce({ url: 'https://evil.example/#CjQKIExhbXBzaGFkZQ' });
     const res = await go(req, ctx('intake'));
     expect(res.status).toBe(404);
     expect(await res.text()).not.toContain('evil.example');
@@ -6173,8 +6294,10 @@ export default async (_req: Request, context: Context): Promise<Response> => {
   const eventId = context.params?.eventId;
 
   // Special-case the sole non-event target BEFORE the id regex. The intake link
-  // is stored under `intake` in the links store and re-validated exactly like a
-  // stored event invite. Absent or invalid → the same refusal as any other.
+  // is stored under `intake` in the links store as a JSON record `{ url }` (the
+  // CLI's set-intake writes it with setJSON), and its url is re-validated exactly
+  // like a stored event invite. Absent, malformed, or invalid → the same refusal
+  // as any other.
   if (eventId === 'intake') {
     let stored: unknown;
     try {
@@ -6182,7 +6305,10 @@ export default async (_req: Request, context: Context): Promise<Response> => {
     } catch {
       return refuse('store_error');
     }
-    const intake = validateSignalUrl(stored);
+    // The stored shape is { url }. A missing record, a non-object, or a bad url
+    // all fall through validateSignalUrl to the identical refusal.
+    const storedUrl = isRecord(stored) ? stored.url : undefined;
+    const intake = validateSignalUrl(storedUrl);
     if (!intake.ok) return refuse('intake_unset');
     return succeed(intake.value);
   }
@@ -6247,10 +6373,10 @@ npm test -- tests/functions/go.test.ts
 Expected:
 
 ```
- ✓ tests/functions/go.test.ts (22 tests)
+ ✓ tests/functions/go.test.ts (23 tests)
 
 Test Files  1 passed (1)
-     Tests  22 passed (22)
+     Tests  23 passed (23)
 ```
 
 If the byte-identical test fails, the diff will name the branch that differs — usually because a branch returned a different status or skipped `refuse()`. Every refusal must go through `refuse()`; never construct a `Response` inline.
@@ -6284,6 +6410,8 @@ is not live), and the stored signalUrl is re-validated with validateSignalUrl
 at render. The literal /go/intake is special-cased before the id regex to
 resolve the operator vetting-page link from the links store."
 ```
+
+---
 
 ---
 
@@ -7387,6 +7515,8 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
   ```
 
   A `PublicEvent[]` satisfies the guard's parameter type (it carries `id`, `date`, and `recurrence`), so a hand-edited or fold-stalled `events.json` holding an event more than 30 days past its final date fails the deploy (design §10) instead of rotting silently. The weekly fold prunes expired records with the same `EXPIRY_HORIZON_DAYS` horizon, so this guard fires only on neglect. This is a documented seam, not a change to `events.astro` in this task; confirm the events-page task carries the call.
+
+---
 
 ---
 
@@ -8943,12 +9073,18 @@ All must succeed. If `require.resolve` throws, the Blobs task is not done. If `e
   import { createInterface } from 'node:readline/promises';
   import { stderr, stdin, stdout } from 'node:process';
 
-  import { getStore, type Store } from '@netlify/blobs';
+  import { type Store } from '@netlify/blobs';
 
   import * as cli from '../src/lib/organizer-cli.js';
   import { digestCode, generateCode, normalizeCode } from '../src/lib/organizer-code.js';
   import { validateSignalUrl } from '../src/lib/signal-url.js';
-  import { ContextRefusedError, codesStore, eventsStore, metaStore } from '../src/lib/blob-stores.js';
+  import {
+    ContextRefusedError,
+    codesStore,
+    eventsStore,
+    linksStore,
+    metaStore,
+  } from '../src/lib/blob-stores.js';
 
   const PROJECT_ROOT = process.cwd();
   const WORDLIST_TXT = join(PROJECT_ROOT, cli.WORDLIST_TXT_REL);
@@ -8959,17 +9095,6 @@ All must succeed. If `require.resolve` throws, the Blobs task is not done. If `e
   function fail(message: string): never {
     stderr.write(`organizer-codes: ${message}\n`);
     process.exit(1);
-  }
-
-  /**
-   * The `links` store holds the /go/intake target. It has no dedicated factory in
-   * blob-stores.ts — /go/intake reads it with getStore('links') at request time
-   * (design §9), and this CLI, the sanctioned production writer, matches that name
-   * and consistency here. Strong consistency so a just-set link is readable on the
-   * next request.
-   */
-  function linksStore(): Store {
-    return getStore({ name: 'links', consistency: 'strong' });
   }
 
   function readWordlist(): string[] {
@@ -9148,7 +9273,10 @@ All must succeed. If `require.resolve` throws, the Blobs task is not done. If `e
   async function runSetIntake(command: { signalUrl: string }): Promise<void> {
     const validated = validateSignalUrl(command.signalUrl);
     if (!validated.ok) fail(cli.formatBadIntakeUrl(validated.code));
-    await linksStore().set('intake', validated.value);
+    // Stored as a JSON record { url }, using the normalized href. The /go/intake
+    // reader (Task 14) reads it with { type: 'json' } and validates record.url,
+    // so both sides agree on the { url } shape.
+    await linksStore().setJSON('intake', { url: validated.value });
     stdout.write(cli.formatIntakeUpdated());
   }
 
@@ -9454,6 +9582,8 @@ All must succeed. If `require.resolve` throws, the Blobs task is not done. If `e
   ```
   cd /c/Users/tim/workspace/deflocksc-website && git add scripts/organizer-codes.ts src/lib/blob-stores.ts package.json .env.example && git commit -m "feat(events): organizer-codes CLI shell over the pure CLI module"
   ```
+
+---
 
 ---
 
@@ -9920,6 +10050,8 @@ Every line prints `-> 0 matches`. The working Census source is the TIGERweb **In
   resolve rather than silently omitting it. A vitest guard asserts every
   registry place slug has a centroid inside the SC bounding box."
   ```
+
+---
 
 ---
 
@@ -11204,6 +11336,8 @@ Every line prints `-> 0 matches`. The working Census source is the TIGERweb **In
   Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
   '@
   ```
+
+---
 
 ---
 
@@ -12757,59 +12891,22 @@ Three things this task does **not** do, on purpose:
   import EventsMap from '../components/EventsMap.astro';
   import registry from '../data/registry.json';
   import bakedEventsRaw from '../data/events.json';
-  import { z } from 'zod';
   import { toPublicEvent, type PublicEvent, type StoredEvent } from '../lib/public-event.js';
+  import { publicEventSchema } from '../lib/event-schema.js';
   import { expandAll, splitByToday, addMonths } from '../lib/events-view.js';
-  import { sanitizeText, TITLE_LIMITS, DESCRIPTION_LIMITS, ADDRESS_LIMITS } from '../lib/sanitize-text.js';
   import { toJsonIsland } from '../lib/json-island.js';
 
-  // The committed events.json is validated at build time with a strict schema and
-  // then projected through toPublicEvent() before it is rendered or serialized into
-  // the data island. The file lives in a repo a later bad commit can edit, so the
-  // build must never trust it (design §5/§6): a record carrying a server-only field
-  // (signalUrl, codeDigest, revoked) is rejected by `.strict()` and fails the build,
-  // and even a record that slipped through could not reach the client, because every
-  // field is picked by the allowlist projection, never spread. Per-field caps are
-  // imported from sanitize-text.ts, never retyped.
-  const ISO_DATE_RE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
-  const TIME_RE = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
-
-  function sanitizedField(caps: { maxBytes: number; maxGraphemes: number }) {
-    return z.unknown().transform((value, ctx) => {
-      const result = sanitizeText(value, caps);
-      if (!result.ok) {
-        // result.code is a snake_case machine code; the offending string is never echoed.
-        ctx.addIssue({ code: 'custom', message: result.code });
-        return z.NEVER;
-      }
-      return result.value;
-    });
-  }
-
-  const publicEventSchema = z
-    .object({
-      id: z.string(),
-      type: z.enum(['meetup', 'public']),
-      title: sanitizedField(TITLE_LIMITS),
-      description: sanitizedField(DESCRIPTION_LIMITS).nullable(),
-      date: z.string().regex(ISO_DATE_RE, 'bad_format'),
-      time: z.string().regex(TIME_RE, 'bad_format'),
-      city: z.string(),
-      county: z.string(),
-      address: sanitizedField(ADDRESS_LIMITS).nullable(),
-      hasSignalGroup: z.boolean(),
-      recurrence: z
-        .object({
-          freq: z.enum(['weekly', 'monthly_nth']),
-          until: z.string().regex(ISO_DATE_RE, 'bad_format'),
-        })
-        .strict()
-        .nullable(),
-      organizer: z.string(),
-      createdAt: z.string(),
-    })
-    .strict();
-
+  // The committed events.json is validated at build time with the shared strict
+  // schema — publicEventSchema, imported from event-schema.js — and then projected
+  // through toPublicEvent() before it is rendered or serialized into the data
+  // island. That schema is the single source of truth for the stored/public shape,
+  // so this page keeps no local copy that can drift from the real one. The file
+  // lives in a repo a later bad commit can edit, so the build must never trust it
+  // (design §5/§6): a record carrying a server-only field (signalUrl, codeDigest,
+  // revoked) is rejected by the schema's `.strict()` and fails the build, and even
+  // a record that slipped through could not reach the client, because every field
+  // is picked by the allowlist projection, never spread. The per-field caps live
+  // inside the shared schema (imported from sanitize-text.ts there), never retyped.
   const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index) => {
     const parsed = publicEventSchema.safeParse(raw);
     if (!parsed.success) {
@@ -12928,7 +13025,10 @@ Three things this task does **not** do, on purpose:
           Phone Number to Nobody. Use a name you don't mind strangers keeping.
         </p>
         <p class="intake-actions">
-          <a id="intake-confirm" class="event-signal" href="/go/intake" rel="noreferrer">I've done that, open Signal</a>
+          <!-- No href: /go/intake is set on window.location at click time by
+               events-page.ts, so the path never appears in the static HTML and a
+               scraper that never clicks never sees it. -->
+          <button id="intake-confirm" type="button" class="event-signal event-signal-btn">I've done that, open Signal</button>
           <button id="intake-cancel" type="button" class="event-signal event-signal-btn">Cancel</button>
         </p>
       </div>
@@ -13468,6 +13568,12 @@ Three things this task does **not** do, on purpose:
     dialog.hidden = false;
     document.getElementById('intake-confirm')?.focus();
   });
+  // The confirm control carries no href in the markup. Navigation to /go/intake is
+  // injected here, at click time, so the path is absent from view-source and a
+  // scraper that never clicks the button never harvests the intake redirect.
+  document.getElementById('intake-confirm')?.addEventListener('click', () => {
+    window.location.href = '/go/intake';
+  });
   document.getElementById('intake-cancel')?.addEventListener('click', () => {
     if (dialog) dialog.hidden = true;
     document.getElementById('intake-open')?.focus();
@@ -13510,7 +13616,7 @@ Three things this task does **not** do, on purpose:
 
   Open `http://127.0.0.1:4321/events` in Chrome. Open DevTools, switch on the device toolbar, and set the viewport to **1280 x 800** (Responsive). Reload with the Network tab open and the filter cleared.
 
-  Expected, all nine:
+  Expected, all ten:
 
   1. Two columns. The map fills the left column; the event list fills the right column.
   2. Scrolling the page moves the list while the map stays pinned below the tab strip (`position: sticky`).
@@ -13521,6 +13627,7 @@ Three things this task does **not** do, on purpose:
   7. In the Network tab, `sc-counties.json` appears with status 200 and a size around 79 KB (~15 KB transferred with compression).
   8. Click the map's `+` control four times, from the initial zoom of about 6.3 up past 8. The county fills, county outlines, and number badges fade to nothing and red city dots with white city-name labels fade in.
   9. Click a city dot. A dark popup opens showing the city name, an event count, and the amber line `Exact location shared in the group.`
+  10. View source (Ctrl+U) and search the raw HTML for `/go/intake` — **zero matches**; the intake path is never in the static markup. Then open an event's intake dialog and click **I've done that, open Signal**: the browser navigates to `/go/intake` (set on `window.location` at click time). A scraper that never clicks the confirm button never sees the path.
 
   Then confirm the two maps coexist, which is the whole point of splitting the map into a shared core (`map/core.ts`) in the earlier map-extraction task: open `http://127.0.0.1:4321/` in a second tab, scroll to the camera map, and go back to the `/events` tab. Both maps must still render and pan independently, and neither console shows an error.
 
@@ -13583,6 +13690,8 @@ Three things this task does **not** do, on purpose:
   git add src/pages/events.astro src/components/EventsList.astro src/components/EventsMonth.astro src/components/EventsMap.astro src/scripts/events-page.ts src/scripts/map/layers/events.ts lighthouserc.json
   git commit -m "feat(events): public calendar page with list, month, and map views"
   ```
+
+---
 
 ---
 
@@ -14207,40 +14316,36 @@ No new component, no new route, no `astro.config.mjs` change.
   import EventsMap from '../components/EventsMap.astro';
   import registry from '../data/registry.json';
   import bakedEventsRaw from '../data/events.json';
-  import type { PublicEvent } from '../lib/public-event.js';
+  import { toPublicEvent, type PublicEvent, type StoredEvent } from '../lib/public-event.js';
+  import { publicEventSchema } from '../lib/event-schema.js';
   import {
     expandAll,
     splitByToday,
     addMonths,
     countyOptions,
   } from '../lib/events-view.js';
-  import { sanitizeText } from '../lib/sanitize-text.js';
   import { toJsonIsland } from '../lib/json-island.js';
 
-  const bakedEvents = bakedEventsRaw as unknown as PublicEvent[];
-
-  // Re-validate the committed JSON (design §6). The file lives in a repo a later bad
-  // commit can edit, and the build must not trust it. The thrown message names the
-  // field and the code but never echoes the offending string.
-  for (const e of bakedEvents) {
-    const checks: Array<[string, unknown, { maxBytes: number; maxGraphemes: number }]> = [
-      ['title', e.title, { maxBytes: 1024, maxGraphemes: 80 }],
-    ];
-    if (e.description !== null && e.description !== undefined) {
-      checks.push(['description', e.description, { maxBytes: 3072, maxGraphemes: 300 }]);
+  // Baked events.json is validated with the shared strict publicEventSchema and
+  // projected through toPublicEvent — IDENTICAL to the events-page task that created
+  // this file. This task must NOT weaken that back to a cast plus a partial field
+  // check: publicEventSchema's `.strict()` is what rejects a hand-edited record
+  // carrying a server-only field (signalUrl, codeDigest, revoked) and fails the build,
+  // and toPublicEvent is the allowlist projection that stops any such field reaching
+  // the data island (design §5/§6). The per-field caps live inside the shared schema,
+  // never retyped here.
+  const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index) => {
+    const parsed = publicEventSchema.safeParse(raw);
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      const at = issue.path.length > 0 ? issue.path.join('.') : '_record';
+      const detail = issue.code === 'unrecognized_keys' ? 'unexpected_field' : issue.message;
+      throw new Error(
+        `src/data/events.json: record ${index} at "${at}" failed strict validation (${detail})`,
+      );
     }
-    if (e.address !== null && e.address !== undefined) {
-      checks.push(['address', e.address, { maxBytes: 512, maxGraphemes: 120 }]);
-    }
-    for (const [field, value, caps] of checks) {
-      const result = sanitizeText(value, caps);
-      if (!result.ok) {
-        throw new Error(
-          `src/data/events.json: event ${e.id} field "${field}" failed sanitization (${result.code})`,
-        );
-      }
-    }
-  }
+    return toPublicEvent(parsed.data as unknown as StoredEvent);
+  });
 
   const today = new Date().toISOString().slice(0, 10);
   const horizonEnd = addMonths(today, 12);
@@ -15085,6 +15190,8 @@ No new component, no new route, no `astro.config.mjs` change.
   git add src/scripts/events-page.ts src/scripts/map/layers/events.ts
   git commit -m "feat(events): client-side county and type filtering wired to the map"
   ```
+
+---
 
 ---
 
@@ -16173,6 +16280,8 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
 
 ---
 
+---
+
 ### Task 22: Analytics exclusion
 
 Design §14 requires excluding `/events/*` from the Umami beacon: "a record of interest in a specific event is exactly what a subpoena would want." Proxying the beacon through `deflocksc.org` (the `/u/*` rewrites in `netlify.toml`) hides it from ad blockers, not from Umami — so not loading the script on `/events` at all is the only real control.
@@ -16354,6 +16463,8 @@ Design §14 requires excluding `/events/*` from the Umami beacon: "a record of i
   dist/ output that /events carries no beacon while the homepage and
   /toolkit still do."
   ```
+
+---
 
 ---
 
@@ -16651,7 +16762,9 @@ Expected: both paths listed. If `src/pages/events.astro` is missing, run the pag
 
   Netlify Functions do not run under `astro dev`, so `/api/events`, `/api/submit-event`, and `/go/:eventId` would 404 against the Astro dev server. Mirror the existing `/api/geocode` proxy pattern, pointing at a locally-running Netlify functions server instead of an upstream API.
 
-  The submit-form task already changed `integrations` from `[sitemap()]` to `[sitemap({ filter })]` so `/events/submit` stays out of the sitemap. **Keep that filter exactly as it is** — this task only adds the `vite.server.proxy` block; dropping the filter would put the noindex submit page back in the sitemap. Replace the whole file with exactly this content:
+  The submit-form task (Task 21) already changed `integrations` from `[sitemap()]` to `[sitemap({ filter })]` so `/events/submit` stays out of the sitemap. This task adds only two things: the `FUNCTIONS_SERVER` const and the three `vite.server.proxy` entries for `/api/events`, `/api/submit-event`, and `/go/:eventId`. It must not disturb that filter.
+
+  **Do not blind-replace the file.** The block below is what `astro.config.mjs` should read exactly once this task is done, and it **retains Task 21's `sitemap({ filter })` call**. Before you save, confirm the `filter:` line is present in the block below and in your file — if your working copy's `sitemap(...)` call differs from the one shown (a later task widened the filter, say), reconcile so the file keeps *both* the existing filter and the new proxies, rather than overwriting either. The safest edit is targeted: add the `FUNCTIONS_SERVER` const above `export default defineConfig`, and add the three new proxy entries immediately after the existing `/api/geocode` entry inside `vite.server.proxy`, leaving the `integrations` array and the tailwind plugin untouched.
 
   ```js
   // @ts-check
@@ -16712,6 +16825,14 @@ Expected: both paths listed. If `src/pages/events.astro` is missing, run the pag
     }
   });
   ```
+
+  **Guard — confirm Task 21's filter survived the edit.** After saving, run:
+
+  ```bash
+  cd /c/Users/tim/workspace/deflocksc-website && grep -n "events/submit" astro.config.mjs
+  ```
+
+  Expected: one line, the `filter: (page) => !page.includes('/events/submit')` inside the `sitemap({ ... })` call. If it prints nothing, you overwrote Task 21's filter — restore it before committing, because without it the noindex submit page goes back into the sitemap.
 
 - [ ] **Step 9: Manually verify the dev proxies**
 
