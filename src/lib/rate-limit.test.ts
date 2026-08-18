@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // vi.mock is hoisted above imports, so the fake store and the mocked factory
 // must be hoisted with it.
@@ -20,6 +20,10 @@ const TODAY = '2026-08-18';
 const SUBJECT = 'a'.repeat(64);
 const KEY = `rl/${TODAY}/${SUBJECT}`;
 
+// Every degraded path logs a static warning; spy so the assertions can read it
+// and the suite output stays quiet.
+let warnSpy: ReturnType<typeof vi.spyOn>;
+
 beforeEach(() => {
   fakeStore.getWithMetadata.mockReset();
   fakeStore.setJSON.mockReset();
@@ -27,6 +31,11 @@ beforeEach(() => {
   // returning the fake store; the factory-throw test overrides this.
   rateLimitStore.mockReset();
   rateLimitStore.mockReturnValue(fakeStore);
+  warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  warnSpy.mockRestore();
 });
 
 describe('hashSubject', () => {
@@ -198,6 +207,30 @@ describe('consume', () => {
     expect(verdict).toEqual({ allowed: true, used: 0, limit: 5 });
     expect(fakeStore.getWithMetadata).not.toHaveBeenCalled();
     expect(fakeStore.setJSON).not.toHaveBeenCalled();
+  });
+
+  it('logs a static warning carrying no request data when retries are exhausted', async () => {
+    fakeStore.getWithMetadata.mockResolvedValue({ data: { count: 2 }, etag: 'etag-v2' });
+    fakeStore.setJSON.mockResolvedValue({ modified: false });
+
+    await consume(SUBJECT, 5, TODAY);
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const message = warnSpy.mock.calls[0].join(' ');
+    expect(message).toContain('rate-limit');
+    expect(message).not.toContain(SUBJECT);
+  });
+
+  it('logs a static warning that omits the subject and caught error on a store failure', async () => {
+    fakeStore.getWithMetadata.mockRejectedValue(new Error('blobs unavailable'));
+
+    await consume(SUBJECT, 5, TODAY);
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const message = warnSpy.mock.calls[0].join(' ');
+    expect(message).toContain('rate-limit');
+    expect(message).not.toContain(SUBJECT);
+    expect(message).not.toContain('blobs unavailable');
   });
 
   it('treats a corrupt or missing count as zero', async () => {

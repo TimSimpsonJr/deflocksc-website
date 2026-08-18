@@ -103,13 +103,19 @@ export async function consume(
       }
     }
 
-    // Retry budget exhausted under contention. Fail open.
+    // Retry budget exhausted under contention. Fail open, but not silently: a
+    // static line (no request data) makes persistent contention visible in
+    // function logs instead of degrading the spend shield invisibly.
+    console.warn('rate-limit: optimistic-concurrency retries exhausted; failing open');
     return { allowed: true, used: lastSeen, limit };
   } catch {
     // Store factory or method threw, refused by the non-production context guard, or
     // malformed. Deliberately swallowed: the error must not reach the caller as a
     // 500, and the caught value is never logged because it can embed
-    // request-derived strings.
+    // request-derived strings. A static line still fires so a permanent
+    // misconfiguration (missing site id, Blobs auth rot) surfaces in function logs
+    // instead of disabling the spend shield invisibly forever.
+    console.warn('rate-limit: store unavailable; failing open');
     return { allowed: true, used: 0, limit };
   }
 }

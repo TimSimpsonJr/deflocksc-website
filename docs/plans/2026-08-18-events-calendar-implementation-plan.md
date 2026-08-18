@@ -2823,7 +2823,7 @@ Design reference: §8 (Rate limiting), §16.1 (`POST /api/submit-event` row). Th
 
 Two non-negotiables from the design, both of which the tests pin down:
 
-- **Fail open.** Any thrown error from the store, and any exhaustion of the retry budget, returns `allowed: true`. Fail-closed would let a Blobs incident silently kill every submission with no signal. The entropy in the organizer code (41.4 bits) is the security boundary; this counter is a spend shield.
+- **Fail open, but not silently.** Any thrown error from the store, and any exhaustion of the retry budget, returns `allowed: true`. Fail-closed would let a Blobs incident silently kill every submission with no signal. Each degraded path also emits a single static `console.warn` (no request-derived data, never the caught error value) so a permanent misconfiguration surfaces in function logs instead of disabling the spend shield invisibly. The entropy in the organizer code (41.4 bits) is the security boundary; this counter is a spend shield.
 - **Never store a raw IP.** `hashSubject()` salts and SHA-256s the address before it becomes a key segment. A plaintext IP submission log is exactly the artifact this site criticizes.
 
 **Depends on:** Task 8 (`src/lib/blob-stores.ts`, which exports `rateLimitStore()` and adds `@netlify/blobs` to `package.json`). Do not start this task until Task 8 is committed — the test mocks `./blob-stores.js` by path and the implementation imports it.
@@ -2842,7 +2842,7 @@ All commands below run from the repo root.
   Create `src/lib/rate-limit.test.ts` with exactly this content. Note the `vi.hoisted` block: `vi.mock` is hoisted above the `import` statements by Vitest, so the fake store AND the mocked `rateLimitStore` factory must be created inside `vi.hoisted` or the factory hits a temporal-dead-zone error at import time. `rateLimitStore` is a `vi.fn` so a test can make the factory call itself throw (distinct from the store method throwing).
 
   ```ts
-  import { describe, it, expect, vi, beforeEach } from 'vitest';
+  import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
   // vi.mock is hoisted above imports, so the fake store and the mocked factory
   // must be hoisted with it.
@@ -2864,6 +2864,10 @@ All commands below run from the repo root.
   const SUBJECT = 'a'.repeat(64);
   const KEY = `rl/${TODAY}/${SUBJECT}`;
 
+  // Every degraded path logs a static warning; spy so the assertions can read it
+  // and the suite output stays quiet.
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     fakeStore.getWithMetadata.mockReset();
     fakeStore.setJSON.mockReset();
@@ -2871,6 +2875,11 @@ All commands below run from the repo root.
     // returning the fake store; the factory-throw test overrides this.
     rateLimitStore.mockReset();
     rateLimitStore.mockReturnValue(fakeStore);
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
   });
 
   describe('hashSubject', () => {
@@ -3044,6 +3053,30 @@ All commands below run from the repo root.
       expect(fakeStore.setJSON).not.toHaveBeenCalled();
     });
 
+    it('logs a static warning carrying no request data when retries are exhausted', async () => {
+      fakeStore.getWithMetadata.mockResolvedValue({ data: { count: 2 }, etag: 'etag-v2' });
+      fakeStore.setJSON.mockResolvedValue({ modified: false });
+
+      await consume(SUBJECT, 5, TODAY);
+
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      const message = warnSpy.mock.calls[0].join(' ');
+      expect(message).toContain('rate-limit');
+      expect(message).not.toContain(SUBJECT);
+    });
+
+    it('logs a static warning that omits the subject and caught error on a store failure', async () => {
+      fakeStore.getWithMetadata.mockRejectedValue(new Error('blobs unavailable'));
+
+      await consume(SUBJECT, 5, TODAY);
+
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      const message = warnSpy.mock.calls[0].join(' ');
+      expect(message).toContain('rate-limit');
+      expect(message).not.toContain(SUBJECT);
+      expect(message).not.toContain('blobs unavailable');
+    });
+
     it('treats a corrupt or missing count as zero', async () => {
       fakeStore.getWithMetadata.mockResolvedValue({ data: { count: 'lots' }, etag: 'etag-x' });
       fakeStore.setJSON.mockResolvedValue({ modified: true });
@@ -3198,13 +3231,19 @@ All commands below run from the repo root.
         }
       }
 
-      // Retry budget exhausted under contention. Fail open.
+      // Retry budget exhausted under contention. Fail open, but not silently: a
+      // static line (no request data) makes persistent contention visible in
+      // function logs instead of degrading the spend shield invisibly.
+      console.warn('rate-limit: optimistic-concurrency retries exhausted; failing open');
       return { allowed: true, used: lastSeen, limit };
     } catch {
       // Store factory or method threw, refused by the non-production context guard, or
       // malformed. Deliberately swallowed: the error must not reach the caller as a
       // 500, and the caught value is never logged because it can embed
-      // request-derived strings.
+      // request-derived strings. A static line still fires so a permanent
+      // misconfiguration (missing site id, Blobs auth rot) surfaces in function logs
+      // instead of disabling the spend shield invisibly forever.
+      console.warn('rate-limit: store unavailable; failing open');
       return { allowed: true, used: 0, limit };
     }
   }
@@ -3216,7 +3255,7 @@ All commands below run from the repo root.
   npx vitest run src/lib/rate-limit.test.ts
   ```
 
-  Expected: `Test Files  1 passed (1)` and `Tests  21 passed (21)`, exit code 0.
+  Expected: `Test Files  1 passed (1)` and `Tests  23 passed (23)`, exit code 0.
 
 - [ ] **Step 5: Run the full suite for regressions**
 
