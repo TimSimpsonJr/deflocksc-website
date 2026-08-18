@@ -82,6 +82,35 @@ function futureDate(): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** A date 30 days in the past, ISO `YYYY-MM-DD`, UTC. */
+function pastDate(): string {
+  const d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * A Request whose body is exactly the given bytes, so a test can deliver raw
+ * (possibly invalid-UTF-8) input the `makeRequest` string encoder cannot.
+ */
+function makeByteRequest(bytes: Uint8Array): Request {
+  return {
+    method: 'POST',
+    headers: {
+      get(name: string): string | null {
+        return name.toLowerCase() === 'content-length' ? String(bytes.byteLength) : null;
+      },
+    },
+    get body(): ReadableStream<Uint8Array> {
+      return new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(bytes);
+          controller.close();
+        },
+      });
+    },
+  } as unknown as Request;
+}
+
 function validPayload(): Record<string, unknown> {
   return {
     type: 'meetup',
@@ -346,5 +375,151 @@ describe('dedupe', () => {
 
     expect(res.status).toBe(201);
     expect(blobs.eventsSetJSON).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores a PAST event sharing the Signal URL and writes the new one', async () => {
+    // Signal invite links are stable per group. A finished event that reused the
+    // same link must NOT silently block the organizer's next, future-dated
+    // submission — only current/future events are genuine duplicates.
+    blobs.codesGet.mockResolvedValue(LIVE_CODE);
+    const payload = validPayload();
+    blobs.eventsList.mockResolvedValue({ blobs: [{ key: 'past1' }], directories: [] });
+    blobs.eventsGet.mockResolvedValue({
+      id: 'past1',
+      type: payload.type,
+      title: payload.title,
+      date: pastDate(),
+      city: payload.city,
+      county: 'somewhere',
+      signalUrl: payload.signalUrl,
+      recurrence: null,
+      revoked: false,
+    });
+
+    const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
+
+    expect(res.status).toBe(201);
+    expect(blobs.eventsSetJSON).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores a past recurring series whose recurrence.until has elapsed', async () => {
+    // lastRelevantDate uses recurrence.until, not date. A series that started in
+    // the past and whose until has also elapsed is finished, so it must not block.
+    blobs.codesGet.mockResolvedValue(LIVE_CODE);
+    const payload = validPayload();
+    blobs.eventsList.mockResolvedValue({ blobs: [{ key: 'series1' }], directories: [] });
+    blobs.eventsGet.mockResolvedValue({
+      id: 'series1',
+      type: payload.type,
+      title: payload.title,
+      date: pastDate(),
+      city: payload.city,
+      county: 'somewhere',
+      signalUrl: payload.signalUrl,
+      recurrence: { freq: 'weekly', until: pastDate() },
+      revoked: false,
+    });
+
+    const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
+
+    expect(res.status).toBe(201);
+    expect(blobs.eventsSetJSON).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('fail directions', () => {
+  it('returns 429 with no code lookup and no write when the limiter denies', async () => {
+    blobs.codesGet.mockResolvedValue(LIVE_CODE);
+    limiter.consume.mockResolvedValue({ allowed: false, used: 21, limit: 20 });
+
+    const res = await handler(makeRequest(JSON.stringify(validPayload())).req, ctx);
+
+    expect(res.status).toBe(429);
+    expect(await res.json()).toEqual({ error: 'rate_limited' });
+    expect(blobs.codesGet).not.toHaveBeenCalled();
+    expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+  });
+
+  it('fails closed with 503 when ORGANIZER_CODE_PEPPER is missing', async () => {
+    delete process.env.ORGANIZER_CODE_PEPPER;
+
+    const res = await handler(makeRequest(JSON.stringify(validPayload())).req, ctx);
+
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: 'unavailable' });
+    // The secrets gate is first, before the body is read or the limiter consulted.
+    expect(limiter.consume).not.toHaveBeenCalled();
+    expect(blobs.codesGet).not.toHaveBeenCalled();
+    expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+  });
+
+  it('fails closed with 503 when RATE_LIMIT_IP_SALT is missing', async () => {
+    delete process.env.RATE_LIMIT_IP_SALT;
+
+    const res = await handler(makeRequest(JSON.stringify(validPayload())).req, ctx);
+
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: 'unavailable' });
+    expect(limiter.consume).not.toHaveBeenCalled();
+    expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+  });
+
+  it('fails closed with 503 when the code-store read throws', async () => {
+    blobs.codesGet.mockRejectedValue(new Error('blobs unavailable'));
+
+    const res = await handler(makeRequest(JSON.stringify(validPayload())).req, ctx);
+
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: 'unavailable' });
+    expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 with the errors array on a validation failure', async () => {
+    blobs.codesGet.mockResolvedValue(LIVE_CODE);
+    // `type` outside the enum fails the schema; validation is stage 5, before the
+    // code store is ever consulted at stage 6.
+    const payload = { ...validPayload(), type: 'party' };
+
+    const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
+    const body = (await res.json()) as { error: string; errors: unknown[] };
+
+    expect(res.status).toBe(400);
+    expect(body.error).toBe('invalid');
+    expect(Array.isArray(body.errors)).toBe(true);
+    expect(body.errors.length).toBeGreaterThan(0);
+    expect(blobs.codesGet).not.toHaveBeenCalled();
+    expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+  });
+
+  it('fails OPEN and writes when the dedupe list read throws', async () => {
+    // Dedupe is best-effort: a Blobs read fault must not silently kill a
+    // legitimate submission, so the handler falls through to the write.
+    blobs.codesGet.mockResolvedValue(LIVE_CODE);
+    blobs.eventsList.mockRejectedValue(new Error('blobs list failed'));
+
+    const res = await handler(makeRequest(JSON.stringify(validPayload())).req, ctx);
+
+    expect(res.status).toBe(201);
+    expect(blobs.eventsSetJSON).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 503 when the write throws', async () => {
+    blobs.codesGet.mockResolvedValue(LIVE_CODE);
+    blobs.eventsSetJSON.mockRejectedValue(new Error('write failed'));
+
+    const res = await handler(makeRequest(JSON.stringify(validPayload())).req, ctx);
+
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: 'unavailable' });
+  });
+
+  it('rejects an invalid-UTF-8 body with 400 and no write', async () => {
+    // 0xFF is not a valid standalone UTF-8 byte; the fatal TextDecoder throws and
+    // the handler maps that to invalid_json rather than crashing.
+    const res = await handler(makeByteRequest(new Uint8Array([0x7b, 0xff, 0x7d])), ctx);
+
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: 'invalid_json' });
+    expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
   });
 });

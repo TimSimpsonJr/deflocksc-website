@@ -113,6 +113,17 @@ function semanticKey(parts: { type: string; date: string; city: string; title: s
   return [parts.type, parts.date, parts.city, dedupeKey(parts.title)].join('\x00');
 }
 
+/**
+ * The last calendar day a stored event still matters on: the end of the series
+ * when there is one, otherwise the single date. Same rule the read-path
+ * retention guard uses. Past this day every occurrence is behind us, so the
+ * record is finished and cannot be a genuine duplicate of a new submission.
+ */
+function lastRelevantDate(record: StoredEvent): string {
+  const until = record.recurrence?.until;
+  return typeof until === 'string' && until.length > 0 ? until : record.date;
+}
+
 export default async (req: Request, context: Context): Promise<Response> => {
   // 0. Fail closed on missing secrets. Both are production-context-only,
   //    Functions-scoped Netlify variables; a deploy preview lands here.
@@ -211,11 +222,20 @@ export default async (req: Request, context: Context): Promise<Response> => {
     city: submission.city,
     title: submission.title,
   });
+  const today = utcToday();
   try {
     const { blobs: liveKeys } = await eventsStore().list();
     for (const entry of liveKeys) {
       const existing = (await eventsStore().get(entry.key, { type: 'json' })) as StoredEvent | null;
       if (!existing || typeof existing !== 'object' || existing.revoked) continue;
+      // Past events do not participate in dedupe. Signal invite links are stable
+      // per group, so an organizer posting their NEXT event with the same link —
+      // once a prior event has passed or its recurrence window has ended — must
+      // not be silently dropped. Only current/future events can be a genuine
+      // duplicate of a new submission; the spam shape §6 guards against is one
+      // link fanned across many cities at once, which is concurrent and
+      // future-dated. ISO YYYY-MM-DD strings compare chronologically as strings.
+      if (lastRelevantDate(existing) < today) continue;
       const sameSemantics =
         semanticKey({
           type: existing.type,
