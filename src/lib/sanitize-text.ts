@@ -49,20 +49,28 @@ const CONTROL_CHAR = /[\u0000-\u001F\u007F-\u009F]/u;
 // SHAPE: one flat character class, no quantifier. Cannot backtrack.
 const BIDI_CONTROL = /[\u202A-\u202E\u2066-\u2069]/u;
 
-// Invisible formatting characters. The whole Cf (format) category, plus U+034F
-// COMBINING GRAPHEME JOINER, which is category Mn (an allowed combining mark)
-// and so is not in Cf. \p{Cf} subsumes the zero-width set (U+200B-U+200D,
-// U+FEFF) and the bidi controls, and also catches soft hyphen (U+00AD), word
-// joiner (U+2060), the invisible math operators (U+2061-U+2064), LRM/RLM
-// (U+200E/U+200F), interlinear annotation (U+FFF9-U+FFFB), and the entire
-// Unicode tag block (U+E0000-U+E007F) -- all invisible, none removed by NFKC,
-// each able to defeat the duplicate detection below or smuggle ASCII-mapped
-// content past a reviewer. Bidi controls are Cf too, but BIDI_CONTROL is tested
-// first so they keep their own 'bidi_control' code; everything else here is
-// reported under 'zero_width', the representative name for the class.
+// Invisible formatting characters. The whole Cf (format) category, plus two
+// additions from category Mn (which Cf does not include): U+034F COMBINING
+// GRAPHEME JOINER, and the astral variation selectors U+E0100-U+E01EF
+// (VS17-256, 240 code points). \p{Cf} subsumes the zero-width set
+// (U+200B-U+200D, U+FEFF) and the bidi controls, and also catches soft hyphen
+// (U+00AD), word joiner (U+2060), the invisible math operators (U+2061-U+2064),
+// LRM/RLM (U+200E/U+200F), interlinear annotation (U+FFF9-U+FFFB), and the
+// ASSIGNED Unicode tag characters (U+E0001 and U+E0020-U+E007F). The rest of
+// the tag block -- U+E0000 and U+E0002-U+E001F -- is unassigned (Cn), so it
+// falls to the UNASSIGNED_OR_PRIVATE check below under 'unassigned_or_private',
+// not here. The astral variation selectors are Mn, not Cf, and are the astral
+// siblings of the BMP variation selectors U+FE00-FE0F; category alone does not
+// catch them, so they are listed explicitly. All of these are invisible, none
+// removed by NFKC, each able to defeat the duplicate detection below or smuggle
+// ASCII-mapped content past a reviewer. Bidi controls are Cf too, but
+// BIDI_CONTROL is tested first so they keep their own 'bidi_control' code;
+// everything else here is reported under 'zero_width', the representative name
+// for the class. The \u{...} astral escapes are valid in the class because the
+// /u flag is set.
 // SHAPE: one flat character class, no quantifier. Cannot backtrack.
-const INVISIBLE_FORMAT = /[\p{Cf}\u034F]/u;
-const INVISIBLE_FORMAT_GLOBAL = /[\p{Cf}\u034F]/gu;
+const INVISIBLE_FORMAT = /[\p{Cf}\u034F\u{E0100}-\u{E01EF}]/u;
+const INVISIBLE_FORMAT_GLOBAL = /[\p{Cf}\u034F\u{E0100}-\u{E01EF}]/gu;
 
 // Unassigned code points and private use areas.
 // SHAPE: one flat character class of two property escapes, no quantifier.
@@ -110,6 +118,11 @@ export function sanitizeText(
   const normalized = input.normalize('NFKC');
 
   // 3. Trim, then collapse internal horizontal-space runs to a single space.
+  //    trim() strips the ECMAScript WhiteSpace set, which includes U+FEFF, so a
+  //    leading or trailing BOM is silently removed and accepted here while an
+  //    interior one still falls to the zero-width reject below. That asymmetry
+  //    is deliberate: an edge BOM is a harmless encoding artifact, an interior
+  //    one is a spike. Both outcomes are pinned by tests.
   const collapsed = normalized.trim().replace(HORIZONTAL_SPACE_RUN, ' ');
 
   if (collapsed.length === 0) return err('empty');

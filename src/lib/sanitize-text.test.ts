@@ -217,6 +217,14 @@ describe('sanitizeText: hostile corpus', () => {
     expectErr(sanitizeText('Green\uFEFFville', TITLE_LIMITS), 'zero_width');
   });
 
+  it('trims a leading or trailing byte order mark, so it is accepted with the BOM gone', () => {
+    // U+FEFF is in the ECMAScript WhiteSpace set, so trim() strips it at the
+    // edges before the zero-width check runs. This is the deliberate asymmetry
+    // with the interior-BOM rejection above, pinned here so it cannot regress.
+    expectOk(sanitizeText('\uFEFFSign night', TITLE_LIMITS), 'Sign night');
+    expectOk(sanitizeText('Sign night\uFEFF', TITLE_LIMITS), 'Sign night');
+  });
+
   // The invisible-format class is the whole Cf category, not an enumerated
   // handful. Each of these renders identically to "Greenville" and would
   // otherwise smuggle content past a reviewer and split the dedupe key.
@@ -246,6 +254,29 @@ describe('sanitizeText: hostile corpus', () => {
 
   it('rejects a Unicode tag character (U+E0041), which maps to ASCII "A"', () => {
     expectErr(sanitizeText('Green\u{E0041}ville', TITLE_LIMITS), 'zero_width');
+  });
+
+  // Astral variation selectors VS17-256 (U+E0100-U+E01EF) are 240 invisible
+  // code points of category Mn, not Cf, so \p{Cf} does not catch them and the
+  // BMP-only FE00-FE0F arm of the EMOJI class does not either. They survive
+  // NFKC, render as nothing, and would otherwise split the dedupe key. Sample
+  // the first, a middle, and the last of the range.
+  it('rejects the first astral variation selector (U+E0100, VS17)', () => {
+    expectErr(sanitizeText('Green\u{E0100}ville', TITLE_LIMITS), 'zero_width');
+  });
+
+  it('rejects a mid-range astral variation selector (U+E0170)', () => {
+    expectErr(sanitizeText('Green\u{E0170}ville', TITLE_LIMITS), 'zero_width');
+  });
+
+  it('rejects the last astral variation selector (U+E01EF, VS256)', () => {
+    expectErr(sanitizeText('Green\u{E01EF}ville', TITLE_LIMITS), 'zero_width');
+  });
+
+  it('rejects two consecutive astral variation selectors (not the combining-run cap)', () => {
+    // These are Mn but must be caught by the invisible-format reject, not by
+    // the combining-run cap of two: a run of two would otherwise slip through.
+    expectErr(sanitizeText('Green\u{E0100}\u{E0101}ville', TITLE_LIMITS), 'zero_width');
   });
 
   it('rejects a combining grapheme joiner (U+034F), which is Mn, not Cf', () => {
@@ -348,6 +379,12 @@ describe('dedupeKey', () => {
     // The whole invisible-format class is stripped, not just the zero-width set,
     // so a title spiked with U+00AD cannot dodge duplicate detection.
     expect(dedupeKey('Green\u00ADville')).toBe(dedupeKey('Greenville'));
+  });
+
+  it('collapses an astral-variation-selector-spiked word onto its plain form', () => {
+    // U+E0100 is category Mn, not Cf, and survives NFKC, so without the explicit
+    // range in INVISIBLE_FORMAT_GLOBAL it would split the dedupe key.
+    expect(dedupeKey('Green\u{E0100}ville')).toBe(dedupeKey('Greenville'));
   });
 
   it('collapses two strings differing only by an added space', () => {
