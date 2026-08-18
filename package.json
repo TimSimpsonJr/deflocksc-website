@@ -37,6 +37,7 @@
     "better-sqlite3": "^12.6.2"
   },
   "devDependencies": {
+    "@netlify/functions": "^6.0.0",
     "pdf-lib": "^1.17.1",
     "qrcode": "^1.5.4",
     "vitest": "^4.0.18"
