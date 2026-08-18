@@ -122,7 +122,7 @@ Single Zod schema, shared between the function and the build-time check. Zod is 
 | `type` | enum |
 | `title` | 1–80 grapheme clusters after NFKC; full rules under Text sanitization below |
 | `description` | `public` only, 1–300 grapheme clusters, same sanitization; rejected outright for `meetup` |
-| `date` | ISO date, must be in the future, at most 12 months out |
+| `date` | ISO date, **today or later** (same-day posting is a real last-minute-meetup case; `/go` only refuses once the date is *past*), at most 12 months out |
 | `time` | `HH:MM`, 24h |
 | `city` | enum from the allowlist (`registry.json` places) |
 | `county` | **derived from `city`, never submitted.** A place maps to one primary county; the form does not ask for it, and a submitted `county` is rejected rather than trusted |
@@ -364,7 +364,7 @@ Add a build-time guard that fails the build on any event more than 30 days past 
 
 **City centroids.** There is no city coordinate source anywhere in the repo. `registry.json` has 46 counties and 50 places with no geometry, and `public/districts/` holds only 2 city polygons and is regenerated from the `open-civics-boundaries` npm package on every `prebuild`, so it cannot be hand-extended.
 
-Add `scripts/build-city-centroids.py`, in the same shape as `build-camera-counts.py`, geocoding every allowlisted place once through the existing `/api/geocode` Census proxy and committing `src/data/city-centroids.json`. Because `city` is an enum, every event is guaranteed a centroid with no runtime geocoding and no missing-coordinate case.
+Add `scripts/build-city-centroids.py`, in the same shape as `build-camera-counts.py`, resolving every allowlisted place once to a centroid and committing `src/data/city-centroids.json`. **Source: the Census TIGERweb Places layer, not the `/api/geocode` proxy.** The proxy returns zero matches for a bare city name (it geocodes street addresses), whereas TIGERweb's Places layer returns an authoritative polygon per incorporated place whose centroid is the pin. Both are Census products. Because `city` is an enum, every event is guaranteed a centroid with no runtime geocoding and no missing-coordinate case; the build fails loudly on any slug TIGERweb cannot resolve rather than silently omitting it.
 
 **No coordinate jitter.** Random offsets are reversible: average them across a recurring meetup at one venue and the true point falls out. The answer to not wanting a venue coordinate is to never collect one.
 

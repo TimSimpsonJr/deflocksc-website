@@ -135,7 +135,7 @@ Expected: FAIL — the module does not exist yet, so vitest cannot resolve the i
 
 ```
 Error: Failed to load url ./text-result.js (resolved id: ./text-result.js)
-in the repo rootsrc/lib/text-result.test.ts.
+in src/lib/text-result.test.ts.
 Does the file exist?
 ```
 
@@ -174,6 +174,8 @@ Expected: PASS — 6 tests across 3 describe blocks, 0 failures.
 git add src/lib/text-result.ts src/lib/text-result.test.ts
 git commit -m "feat(events): add Ok/Err result helpers for event validators"
 ```
+
+---
 
 ---
 
@@ -565,7 +567,7 @@ Expected: FAIL — the suite does not even collect, because the module under tes
 
 ```
 FAIL  src/lib/sanitize-text.test.ts [ src/lib/sanitize-text.test.ts ]
-Error: Cannot find module './sanitize-text.js' imported from 'the repo rootsrc/lib/sanitize-text.test.ts'
+Error: Cannot find module './sanitize-text.js' imported from 'src/lib/sanitize-text.test.ts'
  ❯ src/lib/sanitize-text.test.ts:2:1
 
  Test Files  1 failed (1)
@@ -750,6 +752,8 @@ the offending string."
 
 ---
 
+---
+
 ### Task 3: Signal group URL validator
 
 **Files:**
@@ -872,8 +876,30 @@ describe('validateSignalUrl — credentials, port, query, path', () => {
     });
   });
 
-  it('rejects an explicit port', () => {
+  it('rejects an explicit non-default port', () => {
     expect(validateSignalUrl(`https://signal.group:8443/#${KEY}`)).toEqual({
+      ok: false,
+      code: 'has_port',
+    });
+  });
+
+  it('rejects an explicit default port :443 that WHATWG URL normalizes away', () => {
+    // new URL('https://signal.group:443/').port === '' — the parser drops the
+    // scheme's own default port. Checking u.port alone would let this through,
+    // so the validator also inspects the raw authority. The design forbids ANY
+    // explicit port, default or not.
+    expect(new URL(`https://signal.group:443/#${KEY}`).port).toBe('');
+    expect(validateSignalUrl(`https://signal.group:443/#${KEY}`)).toEqual({
+      ok: false,
+      code: 'has_port',
+    });
+  });
+
+  it('rejects the :80 port on an https URL', () => {
+    // Non-default for https, so u.port is '80'; still an explicit port and still
+    // forbidden. Pinned alongside :443 so both the normalized and un-normalized
+    // port paths are covered.
+    expect(validateSignalUrl(`https://signal.group:80/#${KEY}`)).toEqual({
       ok: false,
       code: 'has_port',
     });
@@ -1052,9 +1078,25 @@ export function validateSignalUrl(input: unknown): Ok<string> | Err<SignalUrlCod
     return err('has_credentials');
   }
 
-  // `u.port` is '' for the scheme's default port, so this rejects only an
-  // explicitly non-default port.
-  if (u.port !== '') {
+  // WHATWG URL normalizes an explicit DEFAULT port (:443 for https, :80 for
+  // http) to an empty `u.port`, so `u.port` alone would wave through
+  // `signal.group:443`. The design forbids ANY explicit port, default or not,
+  // so also inspect the raw authority. By this point host is exactly
+  // `signal.group` (never IPv6) and there are no credentials, so any ':'
+  // remaining in the authority is a port separator. Isolate the authority the
+  // way the URL parser does: drop the scheme, strip the leading slashes /
+  // backslashes the parser tolerates for special schemes, cut at the first
+  // path/query/fragment delimiter, then drop any userinfo before the '@'.
+  let authority = input.slice(input.indexOf(':') + 1).replace(/^[/\\]+/, '');
+  const authorityEnd = authority.search(/[/\\?#]/);
+  if (authorityEnd !== -1) {
+    authority = authority.slice(0, authorityEnd);
+  }
+  const at = authority.lastIndexOf('@');
+  if (at !== -1) {
+    authority = authority.slice(at + 1);
+  }
+  if (u.port !== '' || authority.includes(':')) {
     return err('has_port');
   }
 
@@ -1082,7 +1124,7 @@ export function validateSignalUrl(input: unknown): Ok<string> | Err<SignalUrlCod
 
 Run: `npx vitest run src/lib/signal-url.test.ts`
 
-Expected: PASS — 29 tests
+Expected: PASS — 31 tests
 
 - [ ] **Step 5: Commit**
 
@@ -1095,9 +1137,14 @@ credentials, port, query, path, and fragment. Returns a Result rather than
 throwing. Preserves the fragment on success, since Signal carries the invite
 key there and a stripped fragment is a dead link.
 
+Rejects ANY explicit port, including a default port (:443) that the URL
+parser normalizes to an empty u.port, by inspecting the raw authority.
+
 Covers the hostile corpus from the design doc, including java<TAB>script:,
 which the parser normalizes to javascript: and a scheme denylist would miss."
 ```
+
+---
 
 ---
 
@@ -1390,6 +1437,8 @@ git commit -m "feat: add organizer code normalization, digesting, and generation
 
 ---
 
+---
+
 ### Task 5: City allowlist and city-to-county derivation
 
 **Files:**
@@ -1552,7 +1601,7 @@ Expected: FAIL — the module does not exist yet, so every test in the file erro
 
 ```
 Error: Failed to load url ./jurisdictions.js (resolved id: ./jurisdictions.js)
-in the repo rootsrc/lib/jurisdictions.test.ts.
+in src/lib/jurisdictions.test.ts.
 Does the file exist?
 ```
 
@@ -1660,6 +1709,8 @@ Expected: PASS — 23 tests
 git add src/lib/jurisdictions.ts src/lib/jurisdictions.test.ts
 git commit -m "feat: add city allowlist and city-to-county derivation"
 ```
+
+---
 
 ---
 
@@ -1915,6 +1966,8 @@ Expected: PASS — 12 tests
 git add src/lib/json-island.ts src/lib/json-island.test.ts
 git commit -m "feat(events): add toJsonIsland for safe data-island embedding"
 ```
+
+---
 
 ---
 
@@ -2238,6 +2291,8 @@ by remembering to delete them."
 
 ---
 
+---
+
 ### Task 8: Blobs store factory
 
 Every Netlify Blobs handle in this codebase is created here and nowhere else. The module enforces two rules centrally so no call site has to remember them:
@@ -2245,7 +2300,7 @@ Every Netlify Blobs handle in this codebase is created here and nowhere else. Th
 1. `getStore`, never the deploy-scoped variant. A deploy-scoped store is discarded on the next deploy, so every stored event would silently vanish on the next push.
 2. Site-wide stores are shared across production, branch, and deploy-preview deploys. A preview deploy's functions would otherwise be able to write to and delete from the real `codes` store, which has no backup. So every handle is wrapped: `set`, `setJSON`, `delete`, and `deleteAll` throw `ContextRefusedError` unless `process.env.CONTEXT === 'production'`. Reads pass through untouched.
 
-`codes` and `events` are opened with `{ consistency: 'strong' }` — the default eventual model lets a revoked code keep working, and a tombstoned event keep resolving its Signal invite, for up to 60 seconds.
+`codes`, `events`, and `links` are opened with `{ consistency: 'strong' }` — the default eventual model lets a revoked code keep working, a tombstoned event keep resolving its Signal invite, and a freshly set (or cleared) intake link lag, for up to 60 seconds.
 
 **Files:**
 - Modify: `package.json` (add `@netlify/blobs` to `dependencies`)
@@ -2321,6 +2376,7 @@ All paths are relative to the repo root, `the repo root`.
     ContextRefusedError,
     codesStore,
     eventsStore,
+    linksStore,
     metaStore,
     rateLimitStore,
   } from './blob-stores.js';
@@ -2378,6 +2434,11 @@ All paths are relative to the repo root, `the repo root`.
     it('opens the meta store without a consistency override', () => {
       metaStore();
       expect(getStoreMock).toHaveBeenCalledWith({ name: 'meta' });
+    });
+
+    it('opens the links store with strong consistency', () => {
+      linksStore();
+      expect(getStoreMock).toHaveBeenCalledWith({ name: 'links', consistency: 'strong' });
     });
 
     it('never imports or calls the deploy-scoped store helper', () => {
@@ -2529,6 +2590,24 @@ All paths are relative to the repo root, `the repo root`.
       expect(fake.deleteAll).toHaveBeenCalled();
     });
   });
+
+  describe('links store', () => {
+    it('refuses writes outside production', () => {
+      process.env.CONTEXT = 'deploy-preview';
+      const store = linksStore();
+      expect(() => store.setJSON('intake', 'https://signal.group/#x')).toThrow(
+        ContextRefusedError,
+      );
+      expect(fake.setJSON).not.toHaveBeenCalled();
+    });
+
+    it('passes writes through in production', async () => {
+      process.env.CONTEXT = 'production';
+      const store = linksStore();
+      await store.setJSON('intake', 'https://signal.group/#x');
+      expect(fake.setJSON).toHaveBeenCalledWith('intake', 'https://signal.group/#x');
+    });
+  });
   ```
 
 - [ ] **Step 3: Run the test and watch it fail**
@@ -2545,7 +2624,7 @@ All paths are relative to the repo root, `the repo root`.
   ⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
 
    FAIL  src/lib/blob-stores.test.ts [ src/lib/blob-stores.test.ts ]
-  Error: Cannot find module './blob-stores.js' imported from 'the repo rootsrc/lib/blob-stores.test.ts'
+  Error: Cannot find module './blob-stores.js' imported from 'src/lib/blob-stores.test.ts'
 
    Test Files  1 failed (1)
         Tests  no tests
@@ -2581,9 +2660,10 @@ All paths are relative to the repo root, `the repo root`.
    * The refusal is a synchronous throw rather than a rejected promise, so a call
    * site that forgets to await still fails loudly.
    *
-   * `codes` and `events` open with `consistency: 'strong'`. Under the default
-   * eventual model a revoked code keeps validating, and a tombstoned event keeps
-   * resolving its Signal invite, for up to 60 seconds.
+   * `codes`, `events`, and `links` open with `consistency: 'strong'`. Under the
+   * default eventual model a revoked code keeps validating, a tombstoned event
+   * keeps resolving its Signal invite, and a just-set intake link stays stale,
+   * for up to 60 seconds.
    *
    * One sanctioned bypass: the maintainer CLI (`scripts/organizer-codes.mjs`)
    * writes to the real production store from a developer machine, where CONTEXT
@@ -2662,6 +2742,19 @@ All paths are relative to the repo root, `the repo root`.
   export function metaStore(): Store {
     return readOnlyOutsideProduction(getStore({ name: 'meta' }), 'meta');
   }
+
+  /**
+   * Redirect targets for the /go function, currently a single `intake` key
+   * holding the operator's vetting-page Signal link (set via the CLI's
+   * `set-intake`). Strong consistency so a freshly set — or cleared — intake
+   * link resolves immediately rather than lagging by up to 60 seconds.
+   */
+  export function linksStore(): Store {
+    return readOnlyOutsideProduction(
+      getStore({ name: 'links', consistency: 'strong' }),
+      'links',
+    );
+  }
   ```
 
 - [ ] **Step 5: Run the test and watch it pass**
@@ -2673,10 +2766,10 @@ All paths are relative to the repo root, `the repo root`.
   Expected output:
 
   ```
-   ✓ src/lib/blob-stores.test.ts (31 tests)
+   ✓ src/lib/blob-stores.test.ts (34 tests)
 
    Test Files  1 passed (1)
-        Tests  31 passed (31)
+        Tests  34 passed (34)
   ```
 
 - [ ] **Step 6: Run the full suite for regressions**
@@ -2685,14 +2778,9 @@ All paths are relative to the repo root, `the repo root`.
   npm test
   ```
 
-  Expected output — the pre-task baseline is 6 files / 80 tests, so:
+  This task adds exactly one test file (`src/lib/blob-stores.test.ts`, 34 tests) and modifies no other test, so the full-suite totals must be the previous task's cumulative totals plus one file and plus 34 tests, with `0 failed`.
 
-  ```
-   Test Files  7 passed (7)
-        Tests  111 passed (111)
-  ```
-
-  Note that the suite also picks up a test file under `.claude/worktrees/`; that is pre-existing and counted in the 80.
+  Assert that delta, not a fabricated absolute: per the seam contract, the absolute `Test Files` / `Tests` baselines in earlier drafts of this plan were computed against the pre-plan repo and are unreliable, so do not gate on a specific total here. Confirm only that (a) the file count rose by exactly one, (b) the test count rose by exactly 34, and (c) nothing that previously passed now fails. The three pre-plan `src/lib/*.test.ts` files (`blog-utils`, `district-matcher`, `geo-utils`) are also collected; they are pre-existing and untouched by this task.
 
 - [ ] **Step 7: Commit**
 
@@ -2702,6 +2790,8 @@ All paths are relative to the repo root, `the repo root`.
   ```
 
   Stage those four paths explicitly. `npm install` may have touched nothing else, but an unrelated working-tree file swept in by `git add -A` would muddy a commit whose whole point is a security boundary.
+
+---
 
 ---
 
@@ -2718,30 +2808,32 @@ Two non-negotiables from the design, both of which the tests pin down:
 
 **Files:**
 
-- Create: `the repo rootsrc\lib\rate-limit.test.ts`
-- Create: `the repo rootsrc\lib\rate-limit.ts`
+- Create: `src/lib/rate-limit.test.ts`
+- Create: `src/lib/rate-limit.ts`
 
-All commands below run from the repo root, `the repo root`.
+All commands below run from the repo root.
 
 ---
 
 - [ ] **Step 1: Write the failing test file**
 
-  Create `src/lib/rate-limit.test.ts` with exactly this content. Note the `vi.hoisted` block: `vi.mock` is hoisted above the `import` statements by Vitest, so the fake store must be created inside `vi.hoisted` or the factory hits a temporal-dead-zone error at import time.
+  Create `src/lib/rate-limit.test.ts` with exactly this content. Note the `vi.hoisted` block: `vi.mock` is hoisted above the `import` statements by Vitest, so the fake store AND the mocked `rateLimitStore` factory must be created inside `vi.hoisted` or the factory hits a temporal-dead-zone error at import time. `rateLimitStore` is a `vi.fn` so a test can make the factory call itself throw (distinct from the store method throwing).
 
   ```ts
   import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-  // vi.mock is hoisted above imports, so the fake store must be hoisted with it.
-  const { fakeStore } = vi.hoisted(() => ({
-    fakeStore: {
+  // vi.mock is hoisted above imports, so the fake store and the mocked factory
+  // must be hoisted with it.
+  const { fakeStore, rateLimitStore } = vi.hoisted(() => {
+    const fakeStore = {
       getWithMetadata: vi.fn(),
       setJSON: vi.fn(),
-    },
-  }));
+    };
+    return { fakeStore, rateLimitStore: vi.fn(() => fakeStore) };
+  });
 
   vi.mock('./blob-stores.js', () => ({
-    rateLimitStore: () => fakeStore,
+    rateLimitStore,
   }));
 
   import { consume, hashSubject } from './rate-limit.js';
@@ -2753,6 +2845,10 @@ All commands below run from the repo root, `the repo root`.
   beforeEach(() => {
     fakeStore.getWithMetadata.mockReset();
     fakeStore.setJSON.mockReset();
+    // mockReset clears the implementation too, so restore the default of
+    // returning the fake store; the factory-throw test overrides this.
+    rateLimitStore.mockReset();
+    rateLimitStore.mockReturnValue(fakeStore);
   });
 
   describe('hashSubject', () => {
@@ -2898,15 +2994,32 @@ All commands below run from the repo root, `the repo root`.
       expect(verdict).toEqual({ allowed: true, used: 0, limit: 5 });
     });
 
-    it('fails open when the store factory itself throws', async () => {
-      // rateLimitStore() throwing (missing site id, refused context) must not 500 the caller.
+    it('fails open when getWithMetadata throws synchronously', async () => {
+      // A synchronous throw from the store method (as opposed to a rejected
+      // promise) must still be swallowed. This is the case the old test
+      // mislabelled as the factory throwing — kept here under its true name.
       fakeStore.getWithMetadata.mockImplementation(() => {
+        throw new Error('read exploded');
+      });
+
+      const verdict = await consume(SUBJECT, 5, TODAY);
+
+      expect(verdict).toEqual({ allowed: true, used: 0, limit: 5 });
+    });
+
+    it('fails open when the store factory itself throws', async () => {
+      // rateLimitStore() throwing (missing site id, refused context) must not
+      // 500 the caller. This genuinely makes the factory throw, so the store
+      // methods are never reached.
+      rateLimitStore.mockImplementation(() => {
         throw new Error('no store');
       });
 
       const verdict = await consume(SUBJECT, 5, TODAY);
 
       expect(verdict).toEqual({ allowed: true, used: 0, limit: 5 });
+      expect(fakeStore.getWithMetadata).not.toHaveBeenCalled();
+      expect(fakeStore.setJSON).not.toHaveBeenCalled();
     });
 
     it('treats a corrupt or missing count as zero', async () => {
@@ -2966,7 +3079,9 @@ All commands below run from the repo root, `the repo root`.
    *
    * This is a spend shield, not a security boundary. The security boundary is the
    * 41.4-bit organizer code (see design §7). Consequently every failure path here
-   * FAILS OPEN: a Blobs incident must not silently kill submissions.
+   * FAILS OPEN: a Blobs incident must not silently kill submissions. That includes
+   * the `rateLimitStore()` factory throwing (missing site id, refused context) —
+   * it is called inside the try below precisely so a factory throw fails open too.
    *
    * Netlify ships an `onlyIfMatch` CAS API while also documenting that Blobs has no
    * concurrency-control mechanism (design §8, open item 5). Atomicity is therefore
@@ -2986,7 +3101,7 @@ All commands below run from the repo root, `the repo root`.
    * @returns 64-char lowercase hex digest.
    */
   export function hashSubject(ip: string, salt: string): string {
-    return createHash('sha256').update(`${salt}\u0000${ip}`, 'utf8').digest('hex');
+    return createHash('sha256').update(`${salt} ${ip}`, 'utf8').digest('hex');
   }
 
   export interface RateLimitVerdict {
@@ -3028,6 +3143,7 @@ All commands below run from the repo root, `the repo root`.
     let lastSeen = 0;
 
     try {
+      // Inside the try so a throwing factory fails open just like a throwing method.
       const store = rateLimitStore();
 
       for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
@@ -3063,9 +3179,10 @@ All commands below run from the repo root, `the repo root`.
       // Retry budget exhausted under contention. Fail open.
       return { allowed: true, used: lastSeen, limit };
     } catch {
-      // Store unavailable, refused by the non-production context guard, or malformed.
-      // Deliberately swallowed: the error must not reach the caller as a 500, and the
-      // caught value is never logged because it can embed request-derived strings.
+      // Store factory or method threw, refused by the non-production context guard, or
+      // malformed. Deliberately swallowed: the error must not reach the caller as a
+      // 500, and the caught value is never logged because it can embed
+      // request-derived strings.
       return { allowed: true, used: 0, limit };
     }
   }
@@ -3077,7 +3194,7 @@ All commands below run from the repo root, `the repo root`.
   npx vitest run src/lib/rate-limit.test.ts
   ```
 
-  Expected: `Test Files  1 passed (1)` and `Tests  19 passed (19)`, exit code 0.
+  Expected: `Test Files  1 passed (1)` and `Tests  21 passed (21)`, exit code 0.
 
 - [ ] **Step 5: Run the full suite for regressions**
 
@@ -3095,10 +3212,13 @@ All commands below run from the repo root, `the repo root`.
 
   Token bucket keyed rl/<day>/<hashed-subject>, with optimistic concurrency
   via getWithMetadata + onlyIfMatch and a 3-attempt retry budget. Every
-  failure path fails open so a Blobs incident cannot kill submissions; the
-  organizer code entropy remains the security boundary. hashSubject salts
-  and SHA-256s the client IP so no raw address reaches a key or value."
+  failure path fails open so a Blobs incident cannot kill submissions,
+  including the store factory itself throwing; the organizer code entropy
+  remains the security boundary. hashSubject salts and SHA-256s the client
+  IP so no raw address reaches a key or value."
   ```
+
+---
 
 ---
 
@@ -3108,8 +3228,8 @@ Expand a stored recurrence rule into the list of calendar dates it covers. Recur
 
 **Files:**
 
-- Create: `the repo rootsrc\lib\recurrence.test.ts`
-- Create: `the repo rootsrc\lib\recurrence.ts`
+- Create: `src\lib\recurrence.test.ts`
+- Create: `src\lib\recurrence.ts`
 
 No other file changes. This module has no imports — it does not depend on Tasks 1-7 and nothing in Tasks 1-7 depends on it yet.
 
@@ -3129,7 +3249,7 @@ No other file changes. This module has no imports — it does not depend on Task
 
 - [ ] **Step 1: Write the failing test file**
 
-  Create `the repo rootsrc\lib\recurrence.test.ts` with exactly this content:
+  Create `src\lib\recurrence.test.ts` with exactly this content:
 
   ```ts
   // The suite deliberately runs in a timezone that is NOT UTC and that observes
@@ -3311,7 +3431,7 @@ No other file changes. This module has no imports — it does not depend on Task
   Expected: the run fails at import resolution, before any assertion executes. The output contains a line of the form:
 
   ```
-  Error: Failed to load url ./recurrence.js (resolved id: ./recurrence.js) in the repo rootsrc/lib/recurrence.test.ts. Does the file exist?
+  Error: Failed to load url ./recurrence.js (resolved id: ./recurrence.js) in src/lib/recurrence.test.ts. Does the file exist?
   ```
 
   and the summary reads `Test Files  1 failed (1)` with `Tests  no tests`. Exit code is non-zero.
@@ -3320,7 +3440,7 @@ No other file changes. This module has no imports — it does not depend on Task
 
 - [ ] **Step 3: Implement the module**
 
-  Create `the repo rootsrc\lib\recurrence.ts` with exactly this content:
+  Create `src\lib\recurrence.ts` with exactly this content:
 
   ```ts
   /**
@@ -3534,16 +3654,18 @@ No other file changes. This module has no imports — it does not depend on Task
 
 ---
 
+---
+
 ### Task 11: Submission schema
 
 **Files:**
 
-- Modify: `the repo rootpackage.json` (add the `zod` dependency)
-- Modify: `the repo rootpackage-lock.json` (regenerated by npm — do not hand-edit)
-- Create: `the repo rootsrc\lib\event-schema.test.ts`
-- Create: `the repo rootsrc\lib\event-schema.ts`
+- Modify: `package.json` (add the `zod` dependency)
+- Modify: `package-lock.json` (regenerated by npm — do not hand-edit)
+- Create: `src/lib/event-schema.test.ts`
+- Create: `src/lib/event-schema.ts`
 
-This task builds the single validator that every submission passes through. It is the fourth stage of the submit pipeline (`body cap → rate limit → validate → verify code`), so by the time it runs the body is already known to be under 8192 bytes. It imports, and never reimplements, `sanitizeText`, `validateSignalUrl`, `normalizeCode`, `countyForCity` and `isKnownCity` from Tasks 2–6.
+This task builds the single validator that every submission passes through. It is the fourth stage of the submit pipeline (`body cap → rate limit → validate → verify code`), so by the time it runs the body is already known to be under 8192 bytes. It imports, and never reimplements, `sanitizeText`, `validateSignalUrl`, `normalizeCode`, `countyForCity` and `isKnownCity` from Tasks 2–6, and imports the title/description/address caps (`TITLE_LIMITS`, `DESCRIPTION_LIMITS`, `ADDRESS_LIMITS`) from `sanitize-text.ts` rather than retyping them.
 
 ---
 
@@ -3556,8 +3678,7 @@ This task builds the single validator that every submission passes through. It i
   Verify the publish date before installing:
 
   ```bash
-  cd "the repo root"
-  npm view zod time --json | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s)['4.4.3']))"
+    npm view zod time --json | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s)['4.4.3']))"
   ```
 
   Expected output, exactly:
@@ -3596,7 +3717,7 @@ This task builds the single validator that every submission passes through. It i
 
 - [ ] **Step 2: Write the failing test file**
 
-  Create `the repo rootsrc\lib\event-schema.test.ts` with exactly this content:
+  Create `src/lib/event-schema.test.ts` with exactly this content:
 
   ```ts
   import { describe, it, expect } from 'vitest';
@@ -3842,15 +3963,14 @@ This task builds the single validator that every submission passes through. It i
 - [ ] **Step 3: Run the test and confirm it fails for the right reason**
 
   ```bash
-  cd "the repo root"
-  npx vitest run src/lib/event-schema.test.ts
+    npx vitest run src/lib/event-schema.test.ts
   ```
 
   Expected failure — the module does not exist yet, so no test executes:
 
   ```
    FAIL  src/lib/event-schema.test.ts [ src/lib/event-schema.test.ts ]
-  Error: Cannot find module './event-schema.js' imported from 'the repo rootsrc/lib/event-schema.test.ts'
+  Error: Cannot find module './event-schema.js' imported from 'src/lib/event-schema.test.ts'
 
    Test Files  1 failed (1)
         Tests  no tests
@@ -3862,12 +3982,18 @@ This task builds the single validator that every submission passes through. It i
 
 - [ ] **Step 4: Implement the schema**
 
-  Create `the repo rootsrc\lib\event-schema.ts` with exactly this content:
+  Create `src/lib/event-schema.ts` with exactly this content:
 
   ```ts
   import { z } from 'zod';
   import { ok, err, type Ok, type Err } from './text-result.js';
-  import { sanitizeText } from './sanitize-text.js';
+  import {
+    sanitizeText,
+    TITLE_LIMITS,
+    DESCRIPTION_LIMITS,
+    ADDRESS_LIMITS,
+    type SanitizeOptions,
+  } from './sanitize-text.js';
   import { validateSignalUrl } from './signal-url.js';
   import { normalizeCode } from './organizer-code.js';
   import { isKnownCity, countyForCity } from './jurisdictions.js';
@@ -3881,14 +4007,11 @@ This task builds the single validator that every submission passes through. It i
    * asked to do, not the request size.
    */
 
-  // Caps: raw UTF-8 bytes are checked before NFKC (normalization can expand
-  // input up to 18x), grapheme clusters after it.
-  const TITLE_MAX_BYTES = 1024;
-  const TITLE_MAX_GRAPHEMES = 80;
-  const DESCRIPTION_MAX_BYTES = 3072;
-  const DESCRIPTION_MAX_GRAPHEMES = 300;
-  const ADDRESS_MAX_BYTES = 512;
-  const ADDRESS_MAX_GRAPHEMES = 120;
+  // The title, description and address caps live in sanitize-text.ts and are
+  // imported (TITLE_LIMITS, DESCRIPTION_LIMITS, ADDRESS_LIMITS), never retyped
+  // here — a cap that drifts between call sites is how a limit silently widens.
+  // Each is { maxBytes, maxGraphemes }: raw UTF-8 bytes are checked before NFKC
+  // (normalization can expand input up to 18x), grapheme clusters after it.
   const ORGANIZER_CODE_MAX_BYTES = 128;
 
   const MAX_MONTHS_AHEAD = 12;
@@ -3951,9 +4074,9 @@ This task builds the single validator that every submission passes through. It i
 
   // --- field schemas that delegate to the shared primitives -------------------
 
-  function sanitizedField(maxBytes: number, maxGraphemes: number) {
+  function sanitizedField(limits: SanitizeOptions) {
     return z.unknown().transform((value, ctx) => {
-      const result = sanitizeText(value, { maxBytes, maxGraphemes });
+      const result = sanitizeText(value, limits);
       if (!result.ok) {
         ctx.addIssue({ code: 'custom', message: result.code });
         return z.NEVER;
@@ -4016,12 +4139,12 @@ This task builds the single validator that every submission passes through. It i
   const submissionSchema = z
     .object({
       type: z.enum(['meetup', 'public']),
-      title: sanitizedField(TITLE_MAX_BYTES, TITLE_MAX_GRAPHEMES),
-      description: sanitizedField(DESCRIPTION_MAX_BYTES, DESCRIPTION_MAX_GRAPHEMES).optional(),
+      title: sanitizedField(TITLE_LIMITS),
+      description: sanitizedField(DESCRIPTION_LIMITS).optional(),
       date: z.string().regex(ISO_DATE_RE, 'bad_format').refine(isRealIsoDate, 'not_a_real_date'),
       time: z.string().regex(TIME_RE, 'bad_format'),
       city: z.string().refine(isKnownCity, 'unknown_city'),
-      address: sanitizedField(ADDRESS_MAX_BYTES, ADDRESS_MAX_GRAPHEMES).optional(),
+      address: sanitizedField(ADDRESS_LIMITS).optional(),
       signalUrl: signalUrlField.optional(),
       recurrence: recurrenceField.nullable().optional(),
       organizerCode: organizerCodeField,
@@ -4045,8 +4168,9 @@ This task builds the single validator that every submission passes through. It i
         ctx.addIssue({ code: 'custom', path: ['address'], message: 'required_for_public' });
       }
 
-      // Same-day events are allowed: organizers post morning-of. /go/:id refuses
-      // to resolve a Signal link once the date has actually passed.
+      // Same-day events are allowed (amended design §6): organizers post
+      // morning-of. /go/:id refuses to resolve a Signal link once the date has
+      // actually passed.
       const today = todayIso();
       if (value.date < today) {
         ctx.addIssue({ code: 'custom', path: ['date'], message: 'date_in_past' });
@@ -4141,15 +4265,14 @@ This task builds the single validator that every submission passes through. It i
   }
   ```
 
-  **Note for Task 12 (the submit function) and the form task:** because the schema is `.strict()`, the honeypot field described in the design (§6) will be rejected as an unrecognized key if it is posted alongside the real fields. The function must read and delete the honeypot from the parsed body **before** calling `validateSubmission`. Do not add the honeypot to this schema — keeping the accepted key set identical to the stored field set is what makes the mass-assignment guard readable.
+  **Note for Task 12 (the submit function) and the form task:** because the schema is `.strict()`, the honeypot field described in the design (§6) will be rejected as an unrecognized key if it is posted alongside the real fields. The function must read and act on the honeypot, then delete it from the parsed body, **before** calling `validateSubmission`. Do not add the honeypot to this schema — keeping the accepted key set identical to the stored field set is what makes the mass-assignment guard readable.
 
 ---
 
 - [ ] **Step 5: Run the test and confirm it passes**
 
   ```bash
-  cd "the repo root"
-  npx vitest run src/lib/event-schema.test.ts
+    npx vitest run src/lib/event-schema.test.ts
   ```
 
   Expected result:
@@ -4174,13 +4297,14 @@ This task builds the single validator that every submission passes through. It i
 - [ ] **Step 6: Commit**
 
   ```bash
-  cd "the repo root"
-  git add package.json package-lock.json src/lib/event-schema.ts src/lib/event-schema.test.ts
+    git add package.json package-lock.json src/lib/event-schema.ts src/lib/event-schema.test.ts
   git commit -m "feat(events): add strict submission schema with derived county
 
   Adds src/lib/event-schema.ts, the single validator for POST /api/submit-event.
   Composes sanitizeText, validateSignalUrl, normalizeCode and countyForCity
-  behind one zod schema.
+  behind one zod schema. The title/description/address caps are imported from
+  sanitize-text.ts (TITLE_LIMITS, DESCRIPTION_LIMITS, ADDRESS_LIMITS), never
+  retyped.
 
   The object is .strict(), which rejects unknown keys rather than stripping
   them. That is what stops mass assignment of the server-owned fields id,
@@ -4197,17 +4321,19 @@ This task builds the single validator that every submission passes through. It i
 
 ---
 
+---
+
 ### Task 12: submit-event function
 
-Adds the only write path into Blobs: `POST /api/submit-event`. Everything it needs — `blob-stores.ts`, `rate-limit.ts`, `event-schema.ts`, `organizer-code.ts`, `public-event.ts` — was built in Tasks 1–11. Import them; do not redefine them.
+Adds the only write path into Blobs: `POST /api/submit-event`. Everything it needs — `blob-stores.ts`, `rate-limit.ts`, `event-schema.ts`, `organizer-code.ts`, `public-event.ts`, and `dedupeKey` from `sanitize-text.ts` — was built in Tasks 1–11. Import them; do not redefine them.
 
-Pipeline order is fixed by the design (§6) and the tests enforce it: **config check → Content-Length cap → counting-reader body cap → JSON plain-object check → rate limit → validate → verify code → write**. The cheap bounded checks come before any normalization, segmentation, or Blobs I/O.
+Pipeline order is fixed by the design (§6) and the tests enforce it: **config check → Content-Length cap → counting-reader body cap → JSON plain-object check → honeypot drop → rate limit → validate → verify code → dedupe → write**. The cheap bounded checks come before any normalization, segmentation, or Blobs I/O.
 
 **Files:**
 
-- Create: `the repo roottests\functions\submit-event.test.ts`
-- Create: `the repo rootnetlify\functions\submit-event.ts`
-- Modify: `the repo rootpackage.json` (add `@netlify/functions` devDependency)
+- Create: `tests/functions/submit-event.test.ts`
+- Create: `netlify/functions/submit-event.ts`
+- Modify: `package.json` (add `@netlify/functions` devDependency)
 
 > **Why the test lives in `tests/functions/` and not beside the source.** Netlify bundles *every* top-level file in `netlify/functions/` as a deployable function. A `netlify/functions/submit-event.test.ts` would ship to production as a function named `submit-event.test`. Function tests go in `tests/functions/`, which vitest's default `include` glob (`**/*.{test,spec}.?(c|m)[jt]s?(x)`) already picks up with no config change. `src/lib/*.test.ts` stays colocated as before.
 
@@ -4241,7 +4367,7 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
 
 - [ ] **Step 2: Write the failing test**
 
-  Create `the repo roottests\functions\submit-event.test.ts` with exactly this content:
+  Create `tests/functions/submit-event.test.ts` with exactly this content:
 
   ```ts
   import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -4256,13 +4382,15 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
     return {
       ContextRefusedError,
       eventsSetJSON: vi.fn(async (_key: string, _value: unknown) => {}),
+      eventsList: vi.fn(async () => ({ blobs: [] as { key: string }[], directories: [] as string[] })),
+      eventsGet: vi.fn(async (_key: string, _opts?: unknown) => null as unknown),
       codesGet: vi.fn(async (_key: string, _opts?: unknown) => null as unknown),
     };
   });
 
   vi.mock('../../src/lib/blob-stores.js', () => ({
     ContextRefusedError: blobs.ContextRefusedError,
-    eventsStore: () => ({ setJSON: blobs.eventsSetJSON }),
+    eventsStore: () => ({ setJSON: blobs.eventsSetJSON, list: blobs.eventsList, get: blobs.eventsGet }),
     codesStore: () => ({ get: blobs.codesGet }),
     rateLimitStore: () => ({}),
     metaStore: () => ({}),
@@ -4348,6 +4476,8 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
     limiter.consume.mockResolvedValue({ allowed: true, used: 1, limit: 20 });
     blobs.codesGet.mockResolvedValue(null);
     blobs.eventsSetJSON.mockResolvedValue(undefined);
+    blobs.eventsList.mockResolvedValue({ blobs: [], directories: [] });
+    blobs.eventsGet.mockResolvedValue(null);
   });
 
   // --- Tests -----------------------------------------------------------------
@@ -4411,6 +4541,39 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
     });
   });
 
+  describe('honeypot', () => {
+    it('drops a bot that filled `website`, returning the success shape with no write', async () => {
+      // A bot that fills the honeypot gets a byte-plausible 201 and is never told
+      // it was caught. Nothing is written, and the code store is never consulted.
+      blobs.codesGet.mockResolvedValue(LIVE_CODE);
+      const payload = { ...validPayload(), website: 'http://spam.example' };
+
+      const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
+      const body = (await res.json()) as { ok: boolean; id: string };
+
+      expect(res.status).toBe(201);
+      expect(body.ok).toBe(true);
+      expect(body.id).toMatch(/^[a-z2-7]{8}$/);
+      expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+      expect(blobs.codesGet).not.toHaveBeenCalled();
+      expect(limiter.consume).not.toHaveBeenCalled();
+    });
+
+    it('proceeds normally when the honeypot is present but empty', async () => {
+      // An empty `website` is what a real browser sends. It must be stripped
+      // before the .strict() schema runs, then the submission proceeds.
+      blobs.codesGet.mockResolvedValue(LIVE_CODE);
+      const payload = { ...validPayload(), website: '' };
+
+      const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
+      const body = (await res.json()) as { ok: boolean; id: string };
+
+      expect(res.status).toBe(201);
+      expect(body.ok).toBe(true);
+      expect(blobs.eventsSetJSON).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('code verification', () => {
     it('rejects an unknown code with a response byte-identical to a revoked code', async () => {
       blobs.codesGet.mockResolvedValue(null);
@@ -4431,20 +4594,24 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
   });
 
   describe('successful submission', () => {
-    it('writes the record and returns only an id', async () => {
+    it('writes the record under the bare id and returns { ok, id }', async () => {
       blobs.codesGet.mockResolvedValue(LIVE_CODE);
       const payload = validPayload();
 
       const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
-      const body = (await res.json()) as { id: string };
+      const body = (await res.json()) as { ok: boolean; id: string };
 
       expect(res.status).toBe(201);
-      expect(Object.keys(body)).toEqual(['id']);
+      // The success body carries exactly `ok` and `id`, nothing else.
+      expect(Object.keys(body).sort()).toEqual(['id', 'ok']);
+      expect(body.ok).toBe(true);
       expect(body.id).toMatch(/^[a-z2-7]{8}$/);
 
       expect(blobs.eventsSetJSON).toHaveBeenCalledTimes(1);
       const [key, record] = blobs.eventsSetJSON.mock.calls[0] as [string, Record<string, unknown>];
-      expect(key).toBe(`events/${body.id}`);
+      // The blob key is the BARE id — the store is already named `events`, so an
+      // `events/<id>` key would double-namespace it.
+      expect(key).toBe(body.id);
       expect(record.id).toBe(body.id);
       expect(record.type).toBe('meetup');
       expect(record.title).toBe('Thursday group');
@@ -4475,6 +4642,84 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
       expect(raw).not.toContain(second.id);
     });
   });
+
+  describe('dedupe', () => {
+    it('silently succeeds without writing when the semantic tuple matches a live event', async () => {
+      blobs.codesGet.mockResolvedValue(LIVE_CODE);
+      const payload = validPayload();
+      blobs.eventsList.mockResolvedValue({ blobs: [{ key: 'existing1' }], directories: [] });
+      // Same type + date + city + normalized title; a DIFFERENT Signal URL, so the
+      // match is specifically on the semantic tuple.
+      blobs.eventsGet.mockResolvedValue({
+        id: 'existing1',
+        type: payload.type,
+        title: '  Thursday   group ',
+        date: payload.date,
+        city: payload.city,
+        county: 'somewhere',
+        signalUrl: 'https://signal.group/#DifferentLink',
+        recurrence: null,
+        revoked: false,
+      });
+
+      const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
+      const body = (await res.json()) as { ok: boolean; id: string };
+
+      expect(res.status).toBe(201);
+      expect(body.ok).toBe(true);
+      expect(body.id).toMatch(/^[a-z2-7]{8}$/);
+      expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+    });
+
+    it('silently succeeds without writing when the Signal URL matches a live event', async () => {
+      blobs.codesGet.mockResolvedValue(LIVE_CODE);
+      const payload = validPayload();
+      blobs.eventsList.mockResolvedValue({ blobs: [{ key: 'existing2' }], directories: [] });
+      // Everything else differs; only the Signal link is shared. This is the real
+      // spam shape: one link reposted across many cities.
+      blobs.eventsGet.mockResolvedValue({
+        id: 'existing2',
+        type: 'meetup',
+        title: 'A completely unrelated title',
+        date: futureDate(),
+        city: allCitySlugs()[1] ?? allCitySlugs()[0],
+        county: 'somewhere',
+        signalUrl: payload.signalUrl,
+        recurrence: null,
+        revoked: false,
+      });
+
+      const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
+      const body = (await res.json()) as { ok: boolean; id: string };
+
+      expect(res.status).toBe(201);
+      expect(body.ok).toBe(true);
+      expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+    });
+
+    it('ignores a revoked live event when deduping and writes the new one', async () => {
+      blobs.codesGet.mockResolvedValue(LIVE_CODE);
+      const payload = validPayload();
+      blobs.eventsList.mockResolvedValue({ blobs: [{ key: 'revoked1' }], directories: [] });
+      // A revoked event is not a live match on either axis.
+      blobs.eventsGet.mockResolvedValue({
+        id: 'revoked1',
+        type: payload.type,
+        title: 'Thursday group',
+        date: payload.date,
+        city: payload.city,
+        county: 'somewhere',
+        signalUrl: payload.signalUrl,
+        recurrence: null,
+        revoked: true,
+      });
+
+      const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
+
+      expect(res.status).toBe(201);
+      expect(blobs.eventsSetJSON).toHaveBeenCalledTimes(1);
+    });
+  });
   ```
 
 - [ ] **Step 3: Run the test and confirm it fails for the right reason**
@@ -4497,7 +4742,7 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
 
 - [ ] **Step 4: Implement the function**
 
-  Create `the repo rootnetlify\functions\submit-event.ts` with exactly this content:
+  Create `netlify/functions/submit-event.ts` with exactly this content:
 
   ```ts
   import type { Config, Context } from '@netlify/functions';
@@ -4507,6 +4752,7 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
   import { consume, hashSubject } from '../../src/lib/rate-limit.js';
   import { validateSubmission } from '../../src/lib/event-schema.js';
   import { digestCode } from '../../src/lib/organizer-code.js';
+  import { dedupeKey } from '../../src/lib/sanitize-text.js';
   import type { StoredEvent } from '../../src/lib/public-event.js';
 
   /** Hard body cap, design §6. Bounds every downstream normalization and regex. */
@@ -4605,6 +4851,15 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
     return new Date().toISOString().slice(0, 10);
   }
 
+  /**
+   * Collapse a submission to its normalized semantic tuple. dedupeKey() folds
+   * the title the same way on both the incoming and the stored side, so an added
+   * space or zero-width character cannot slip a duplicate past the check.
+   */
+  function semanticKey(parts: { type: string; date: string; city: string; title: string }): string {
+    return [parts.type, parts.date, parts.city, dedupeKey(parts.title)].join(' ');
+  }
+
   export default async (req: Request, context: Context): Promise<Response> => {
     // 0. Fail closed on missing secrets. Both are production-context-only,
     //    Functions-scoped Netlify variables; a deploy preview lands here.
@@ -4649,6 +4904,17 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
       return json(400, { error: 'invalid_json' });
     }
 
+    // 3b. Honeypot (design §6), acted on BEFORE the .strict() schema — which
+    //     would otherwise reject `website` as an unrecognized key. A non-empty
+    //     `website` is a bot: return the SAME { ok, id } success shape with a
+    //     throwaway id and write nothing, so the bot never learns it was caught,
+    //     and never reach the rate limiter or the code store. Then strip the key
+    //     so a real (empty) submission validates.
+    if (typeof parsed.website === 'string' && parsed.website.length > 0) {
+      return json(201, { ok: true, id: generateEventId() });
+    }
+    delete parsed.website;
+
     // 4. Rate limit. The IP is hashed and never stored raw. Fails open on a
     //    Blobs error so an incident cannot silently kill submissions.
     const subject = hashSubject(context.ip ?? 'unknown', ipSalt);
@@ -4679,7 +4945,44 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
       return rejectCode();
     }
 
-    // 7. Write. The id and every key segment are server-generated.
+    // 6b. Dedupe (design §6). The real spam shape here is one Signal link posted
+    //     for many cities, so check TWO things against every LIVE event: the
+    //     normalized semantic tuple, and the Signal URL on its own. A match is a
+    //     silent success with a throwaway id and no write — never a
+    //     distinguishable rejection a spammer could probe. Best-effort: a Blobs
+    //     read error here must not kill a legitimate submission, so it falls
+    //     through to the write.
+    const incomingKey = semanticKey({
+      type: submission.type,
+      date: submission.date,
+      city: submission.city,
+      title: submission.title,
+    });
+    try {
+      const { blobs: liveKeys } = await eventsStore().list();
+      for (const entry of liveKeys) {
+        const existing = (await eventsStore().get(entry.key, { type: 'json' })) as StoredEvent | null;
+        if (!existing || typeof existing !== 'object' || existing.revoked) continue;
+        const sameSemantics =
+          semanticKey({
+            type: existing.type,
+            date: existing.date,
+            city: existing.city,
+            title: existing.title,
+          }) === incomingKey;
+        const sameSignal =
+          submission.signalUrl !== null && existing.signalUrl === submission.signalUrl;
+        if (sameSemantics || sameSignal) {
+          return json(201, { ok: true, id: generateEventId() });
+        }
+      }
+    } catch {
+      // Dedupe is best-effort; a Blobs read error falls through to the write.
+    }
+
+    // 7. Write. The id and the blob key are server-generated. The key is the
+    //    BARE id: the store is already named `events`, so an `events/<id>` key
+    //    would double-namespace it and every reader looks it up bare.
     const id = generateEventId();
     const record: StoredEvent = {
       id,
@@ -4701,7 +5004,7 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
     };
 
     try {
-      await eventsStore().setJSON(`events/${id}`, record);
+      await eventsStore().setJSON(id, record);
     } catch (error) {
       if (error instanceof ContextRefusedError) {
         return json(503, { error: 'unavailable' });
@@ -4709,7 +5012,7 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
       return json(503, { error: 'unavailable' });
     }
 
-    return json(201, { id });
+    return json(201, { ok: true, id });
   };
 
   export const config: Config = {
@@ -4726,10 +5029,11 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
   };
   ```
 
-  Two notes for the implementer:
+  Three notes for the implementer:
 
   - `organizer` comes from the **code record's** `pseudonym`, never from the request. There is no submittable pseudonym field, so an organizer cannot post under someone else's handle.
   - `signalUrl` and `codeDigest` are written to Blobs and are *not* in the response. They are stripped again on the read path by `toPublicEvent()` (Task 7). Do not add them to the 201 body "for convenience."
+  - The success body is exactly `{ ok: true, id }`. The honeypot drop and both dedupe no-ops return that identical shape (with a throwaway id) so a bot or a duplicate submitter cannot distinguish a real write from a silent discard.
 
 - [ ] **Step 5: Run the test and confirm it passes**
 
@@ -4740,10 +5044,10 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
   Expected:
 
   ```
-   ✓ tests/functions/submit-event.test.ts (8 tests)
+   ✓ tests/functions/submit-event.test.ts (13 tests)
 
    Test Files  1 passed (1)
-        Tests  8 passed (8)
+        Tests  13 passed (13)
   ```
 
   Then run the whole suite to confirm nothing regressed:
@@ -4766,8 +5070,10 @@ Pipeline order is fixed by the design (§6) and the tests enforce it: **config c
 
   ```
   git add netlify/functions/submit-event.ts tests/functions/submit-event.test.ts package.json package-lock.json
-  git commit -m "feat(events): add POST /api/submit-event with body cap, rate limit, and code verification"
+  git commit -m "feat(events): add POST /api/submit-event with body cap, rate limit, code verification, honeypot and dedupe"
   ```
+
+---
 
 ---
 
@@ -5307,9 +5613,11 @@ functions live under `tests/functions/`. Vitest's default `include` glob
 
 ---
 
+---
+
 ### Task 14: go redirect function
 
-The Signal invite URL exists in exactly one place a visitor can reach: the body of this function's success response. It is never in the page bundle, never in git, never in a `Location` header (Netlify function logs retain headers and paths; response bodies appear in no documented log schema). Everything about this task is about not leaking: not the invite, not which of the five refusal conditions fired, and not the attacker-supplied `eventId`.
+The Signal invite URL exists in exactly one place a visitor can reach: the body of this function's success response. It is never in the page bundle, never in git, never in a `Location` header (Netlify function logs retain headers and paths; response bodies appear in no documented log schema). Everything about this task is about not leaking: not the invite, not which of the refusal conditions fired, and not the attacker-supplied `eventId`.
 
 **This endpoint fails closed, without exception.** A store read that throws, times out, or returns malformed JSON serves the same refusal as an unknown id — never the invite. This is the deliberate opposite of the rate limiter, which fails open: there, a false negative merely lets one extra request through; here, a false negative would disclose an invite that was meant to be dead. When in doubt, the function must refuse. Any future edit that turns a store failure into a success (or into a distinguishable response) is a regression, and the byte-identical store-failure tests below exist to catch exactly that.
 
@@ -5321,11 +5629,13 @@ The Signal invite URL exists in exactly one place a visitor can reach: the body 
 
 **Preconditions from earlier tasks** (verify before starting; do not create these here):
 
-- `src/lib/blob-stores.ts` exports `eventsStore()` and `codesStore()`, both opened with `{ consistency: 'strong' }` (Task 8).
-- `src/lib/public-event.ts` exports the `StoredEvent` interface (Task 7).
+- `src/lib/blob-stores.ts` exports `eventsStore()`, `codesStore()`, and `linksStore()`, all opened with `{ consistency: 'strong' }` (Task 8).
+- `src/lib/signal-url.ts` exports `validateSignalUrl(input: unknown)`, returning `{ ok: true, value }` on success (Task 3). This function is both the submit-time and the render-time gate for a Signal invite.
 - `@netlify/functions` and `@netlify/blobs` are installed. Confirm with:
   `node -e "const p=require('./package.json');console.log(p.devDependencies['@netlify/functions'], p.dependencies['@netlify/blobs'])"`
   Expected: two version strings, neither `undefined`.
+
+**The `intake` seam (contract #8).** The literal id `intake` is not an event. It resolves the operator's vetting-page Signal link, stored under the key `intake` in the `links` store, written by the CLI's `set-intake`. This function reads it with `linksStore().get('intake', { type: 'json' })` — a JSON string URL — and re-validates it with `validateSignalUrl` before emitting, exactly as it does for an event's stored `signalUrl`. It is special-cased BEFORE the 8-char id regex.
 
 **Why the test lives in `tests/functions/` and not beside the function.** Netlify treats every file directly inside `netlify/functions/` as a deployable function. A colocated `go.test.ts` would be published as a function named `go.test` with no default export. Function tests go in `tests/functions/`, which vitest's default `include` glob (`**/*.{test,spec}.?(c|m)[jt]s?(x)`) already picks up with no config change.
 
@@ -5343,11 +5653,13 @@ import type { Context } from '@netlify/functions';
 const mocks = vi.hoisted(() => ({
   eventsGet: vi.fn(),
   codesGet: vi.fn(),
+  linksGet: vi.fn(),
 }));
 
 vi.mock('../../src/lib/blob-stores.js', () => ({
   eventsStore: () => ({ get: mocks.eventsGet }),
   codesStore: () => ({ get: mocks.codesGet }),
+  linksStore: () => ({ get: mocks.linksGet }),
 }));
 
 import go, { config } from '../../netlify/functions/go.js';
@@ -5400,6 +5712,7 @@ const req = new Request('https://deflocksc.org/go/k7m29qxb');
 beforeEach(() => {
   mocks.eventsGet.mockReset();
   mocks.codesGet.mockReset();
+  mocks.linksGet.mockReset();
   // A live event today is 2026-09-01; the fixture event is 2026-09-10.
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date('2026-09-01T12:00:00Z'));
@@ -5590,24 +5903,90 @@ describe('success response', () => {
     expect(mocks.codesGet).toHaveBeenCalledWith(LIVE_DIGEST, { type: 'json' });
   });
 
-  it('escapes a stored URL containing a double quote so it cannot break out of the attribute', async () => {
+  it('refuses a stored signal url that fails re-validation instead of escaping it', async () => {
+    // A tampered store slips an attribute-breakout attempt into the stored URL.
+    // Re-validation — not HTML-escaping — is what stops it: validateSignalUrl
+    // rejects the fragment, so the invite is refused outright rather than served
+    // escaped. (design §196: re-validate at render.)
     const hostile = 'https://signal.group/#a"><script>alert(1)</scr' + 'ipt>';
     mocks.eventsGet.mockResolvedValueOnce(liveEvent({ signalUrl: hostile }));
     const res = await go(req, ctx(VALID_ID));
     const body = await res.text();
 
-    expect(body).not.toContain('<script>alert(1)');
-    expect(body).toContain('&quot;');
-    expect(body).toContain('&lt;');
-    // The href attribute is still one intact attribute: nothing after the
-    // escaped quote is parsed as markup.
-    expect(body).toContain('href="https://signal.group/#a&quot;&gt;&lt;script&gt;');
+    expect(res.status).toBe(404);
+    expect(body).not.toContain('<script>');
+    expect(body).not.toContain('alert(1)');
+    expect(body).not.toContain('signal.group');
   });
 
   it('refuses when the stored record has no signal url', async () => {
     mocks.eventsGet.mockResolvedValueOnce(liveEvent({ signalUrl: null }));
     const res = await go(req, ctx(VALID_ID));
     expect(res.status).toBe(404);
+  });
+});
+
+describe('stored-record hardening: a truthy-but-empty record is not live', () => {
+  it('refuses identically when the code record is an empty object', async () => {
+    // Baseline: the unknown-id refusal.
+    mocks.eventsGet.mockResolvedValueOnce(null);
+    mocks.codesGet.mockResolvedValueOnce(null);
+    const unknown = await go(req, ctx(VALID_ID));
+
+    // A live event, but the owning code record is a truthy but empty {}. Its
+    // `revoked` is absent, not false, so it must NOT count as a live code —
+    // otherwise a corrupted or partially written record leaks the invite.
+    mocks.eventsGet.mockResolvedValueOnce(liveEvent());
+    mocks.codesGet.mockResolvedValueOnce({});
+    const emptyCode = await go(req, ctx(VALID_ID));
+
+    expect(emptyCode.status).toBe(404);
+    expect(await emptyCode.text()).not.toContain('signal.group');
+    expect(await fingerprint(emptyCode)).toBe(await fingerprint(unknown));
+  });
+
+  it('refuses when the event record is an empty object', async () => {
+    mocks.eventsGet.mockResolvedValueOnce({});
+    mocks.codesGet.mockResolvedValueOnce({ pseudonym: 'handle-jay', revoked: false });
+    const res = await go(req, ctx(VALID_ID));
+    expect(res.status).toBe(404);
+    expect(await res.text()).not.toContain('signal.group');
+  });
+});
+
+describe('/go/intake — the operator vetting-page link', () => {
+  it('resolves to the stored intake link when one is set', async () => {
+    mocks.linksGet.mockResolvedValueOnce(SIGNAL_URL);
+    const res = await go(req, ctx('intake'));
+    const body = await res.text();
+
+    expect(res.status).toBe(200);
+    expect(body).toContain(`content="0;url=${SIGNAL_URL}"`);
+    expect(body).toContain(`href="${SIGNAL_URL}"`);
+    expect(mocks.linksGet).toHaveBeenCalledWith('intake', { type: 'json' });
+    // The intake path never touches the event or code stores.
+    expect(mocks.eventsGet).not.toHaveBeenCalled();
+    expect(mocks.codesGet).not.toHaveBeenCalled();
+  });
+
+  it('refuses identically to an unknown id when no intake link is set', async () => {
+    // Baseline: the unknown-id refusal.
+    mocks.eventsGet.mockResolvedValueOnce(null);
+    mocks.codesGet.mockResolvedValueOnce(null);
+    const unknown = await go(req, ctx(VALID_ID));
+
+    mocks.linksGet.mockResolvedValueOnce(null);
+    const absent = await go(req, ctx('intake'));
+
+    expect(absent.status).toBe(404);
+    expect(await fingerprint(absent)).toBe(await fingerprint(unknown));
+  });
+
+  it('refuses when the stored intake link fails re-validation', async () => {
+    mocks.linksGet.mockResolvedValueOnce('https://evil.example/#CjQKIExhbXBzaGFkZQ');
+    const res = await go(req, ctx('intake'));
+    expect(res.status).toBe(404);
+    expect(await res.text()).not.toContain('evil.example');
   });
 });
 ```
@@ -5634,23 +6013,24 @@ Create `netlify/functions/go.ts` with exactly this content:
 
 ```ts
 import type { Config, Context } from '@netlify/functions';
-import { eventsStore, codesStore } from '../../src/lib/blob-stores.js';
-import type { StoredEvent } from '../../src/lib/public-event.js';
+import { eventsStore, codesStore, linksStore } from '../../src/lib/blob-stores.js';
+import { validateSignalUrl } from '../../src/lib/signal-url.js';
 
 /**
  * GET /go/:eventId — resolve an opaque event id to its Signal invite.
  *
- * Three rules drive everything below.
+ * Four rules drive everything below.
  *
  * 1. The invite is delivered in the response BODY, never a Location header.
  *    Netlify function logs cannot be disabled and are readable by any team
  *    member; response bodies appear in no documented log schema, headers do.
  *
  * 2. Every refusal — malformed id, unknown event, tombstoned event, revoked
- *    owning code, past event, store failure — returns ONE byte-identical
- *    response: same status, same headers, same body. Otherwise a maintainer
- *    who declines the fold prompt after a revoke leaks "this organizer was
- *    pulled" for up to a week, because the baked page still lists the event.
+ *    owning code, past event, a stored invite that no longer validates, or a
+ *    store failure — returns ONE byte-identical response: same status, same
+ *    headers, same body. Otherwise a maintainer who declines the fold prompt
+ *    after a revoke leaks "this organizer was pulled" for up to a week, because
+ *    the baked page still lists the event.
  *
  * 3. `context.params.eventId` is NEVER interpolated into the body, a header,
  *    an ETag, or a cache tag. "No event found for <id>" is reflected XSS on
@@ -5658,7 +6038,19 @@ import type { StoredEvent } from '../../src/lib/public-event.js';
  *    and no stored value — and the site CSP still carries 'unsafe-inline', so
  *    nothing catches it downstream.
  *
- * Both blob reads are strongly consistent (the stores are opened that way in
+ * 4. Nothing read from the store is trusted on shape alone. Both the event and
+ *    its owning code record are shape-checked — a truthy but empty {} is NOT a
+ *    live record: `revoked` must be explicitly false, not merely absent — and
+ *    the stored signalUrl is re-validated with validateSignalUrl at render time
+ *    (design §196). HTML-escaping is a backstop, not validation.
+ *
+ * The literal id `intake` is special-cased BEFORE the id regex: it resolves the
+ * operator's vetting-page Signal link from the `links` store (key `intake`,
+ * written by the CLI's set-intake). The events page points a click — never
+ * static markup — at /go/intake, so a non-clicking scraper never sees even that
+ * path. It refuses identically when the link is unset or fails re-validation.
+ *
+ * Every blob read is strongly consistent (the stores are opened that way in
  * src/lib/blob-stores.ts). Eventual reads would resolve a tombstoned event's
  * real invite for up to 60 seconds after revocation, which is exactly the
  * window a burned code creates.
@@ -5708,13 +6100,8 @@ type RefusalReason =
   | 'code_revoked'
   | 'event_passed'
   | 'no_signal_url'
+  | 'intake_unset'
   | 'store_error';
-
-interface CodeRecord {
-  pseudonym?: string;
-  issuedAt?: string;
-  revoked?: boolean;
-}
 
 /**
  * The distinguishing reason goes to structured logs only. The id is
@@ -5726,7 +6113,12 @@ function refuse(reason: RefusalReason): Response {
   return new Response(REFUSAL_BODY, { status: 404, headers: HEADERS });
 }
 
-/** HTML attribute escaping. Lossless; applied to the stored URL only. */
+/** Narrow an unknown store read to a plain object before touching its fields. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+/** HTML attribute escaping. Lossless; a backstop applied to the stored URL. */
 function escapeAttr(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -5739,12 +6131,16 @@ function escapeAttr(value: string): string {
 /**
  * Last date on which this event still resolves. A recurring series stays live
  * until `recurrence.until`; a one-off until its own date. ISO dates compare
- * correctly as strings.
+ * correctly as strings. A missing or non-string date yields '' — earlier than
+ * any real day — so a corrupt record fails closed as "passed".
  */
-function lastActiveDate(record: StoredEvent): string {
-  const until = record.recurrence?.until;
-  if (typeof until === 'string' && until > record.date) return until;
-  return record.date;
+function lastActiveDate(record: Record<string, unknown>): string {
+  const date = typeof record.date === 'string' ? record.date : '';
+  const recurrence = record.recurrence;
+  const until =
+    isRecord(recurrence) && typeof recurrence.until === 'string' ? recurrence.until : undefined;
+  if (until !== undefined && until > date) return until;
+  return date;
 }
 
 /** Today in UTC as YYYY-MM-DD. An event resolves through the whole of its day. */
@@ -5774,38 +6170,60 @@ function succeed(signalUrl: string): Response {
 }
 
 export default async (_req: Request, context: Context): Promise<Response> => {
+  const eventId = context.params?.eventId;
+
+  // Special-case the sole non-event target BEFORE the id regex. The intake link
+  // is stored under `intake` in the links store and re-validated exactly like a
+  // stored event invite. Absent or invalid → the same refusal as any other.
+  if (eventId === 'intake') {
+    let stored: unknown;
+    try {
+      stored = await linksStore().get('intake', { type: 'json' });
+    } catch {
+      return refuse('store_error');
+    }
+    const intake = validateSignalUrl(stored);
+    if (!intake.ok) return refuse('intake_unset');
+    return succeed(intake.value);
+  }
+
   // Validate the parameter BEFORE any lookup. A malformed id never becomes a
   // blob key and never reaches the store.
-  const eventId = context.params?.eventId;
   if (typeof eventId !== 'string' || !ID_PATTERN.test(eventId)) {
     return refuse('malformed_id');
   }
 
   // Both reads happen before any branching, so the refusal branches do the
-  // same amount of work as each other.
-  let record: StoredEvent | null;
-  let code: CodeRecord | null;
+  // same amount of work as each other. They are read as `unknown`: what comes
+  // back from the store is shape-checked below, never trusted by its cast.
+  let record: unknown;
+  let code: unknown;
   try {
-    record = (await eventsStore().get(eventId, { type: 'json' })) as StoredEvent | null;
+    record = await eventsStore().get(eventId, { type: 'json' });
     const digest =
-      record && typeof record.codeDigest === 'string' ? record.codeDigest : ABSENT_CODE_DIGEST;
-    code = (await codesStore().get(digest, { type: 'json' })) as CodeRecord | null;
+      isRecord(record) && typeof record.codeDigest === 'string'
+        ? record.codeDigest
+        : ABSENT_CODE_DIGEST;
+    code = await codesStore().get(digest, { type: 'json' });
   } catch {
     return refuse('store_error');
   }
 
-  if (!record) return refuse('unknown_event');
-  if (record.revoked) return refuse('event_revoked');
-  if (!code) return refuse('code_missing');
-  if (code.revoked) return refuse('code_revoked');
+  // Shape-check BOTH records. `revoked` must be explicitly false: a truthy but
+  // empty {} (revoked absent) is corrupt, not live.
+  if (!isRecord(record)) return refuse('unknown_event');
+  if (record.revoked !== false) return refuse('event_revoked');
+  if (!isRecord(code)) return refuse('code_missing');
+  if (code.revoked !== false) return refuse('code_revoked');
   if (lastActiveDate(record) < todayIso()) return refuse('event_passed');
 
-  const signalUrl = record.signalUrl;
-  if (typeof signalUrl !== 'string' || signalUrl.length === 0) {
-    return refuse('no_signal_url');
-  }
+  // Re-validate the stored invite at render (design §196). Only validateSignalUrl
+  // guarantees a real signal.group URL; escapeAttr in succeed() is a backstop,
+  // never the primary defense.
+  const invite = validateSignalUrl(record.signalUrl);
+  if (!invite.ok) return refuse('no_signal_url');
 
-  return succeed(signalUrl);
+  return succeed(invite.value);
 };
 
 export const config: Config = {
@@ -5814,10 +6232,11 @@ export const config: Config = {
 };
 ```
 
-Two details that are easy to get wrong and that the tests pin:
+Details that are easy to get wrong and that the tests pin:
 
 - `config.path` **replaces** the default `/.netlify/functions/go` URL rather than adding to it, so there is no second unprettified entry point to forget about.
 - `rel="noreferrer"` on the anchor does not cover the meta-refresh navigation. The document-level `<meta name="referrer" content="no-referrer">` is what stops `signal.group` from receiving `https://deflocksc.org/` as the referrer, and the `Referrer-Policy` header backs it up.
+- The stored `signalUrl` (and the intake link) is re-validated with `validateSignalUrl` before it is emitted. Because that validator only returns clean `signal.group` URLs, `escapeAttr` never has HTML-special characters to escape in practice — it stays as defense-in-depth, not as the thing standing between a tampered store and an attribute breakout.
 
 - [ ] **Step 4: Run the test again and watch it pass**
 
@@ -5828,10 +6247,10 @@ npm test -- tests/functions/go.test.ts
 Expected:
 
 ```
- ✓ tests/functions/go.test.ts (18 tests)
+ ✓ tests/functions/go.test.ts (22 tests)
 
 Test Files  1 passed (1)
-     Tests  18 passed (18)
+     Tests  22 passed (22)
 ```
 
 If the byte-identical test fails, the diff will name the branch that differs — usually because a branch returned a different status or skipped `refuse()`. Every refusal must go through `refuse()`; never construct a `Response` inline.
@@ -5854,31 +6273,55 @@ Resolves an opaque event id to its Signal invite via a 200 + meta-refresh,
 keeping the invite out of the Location header and out of function logs.
 
 Every refusal condition (malformed id, unknown event, tombstoned event,
-revoked owning code, past event, store failure) returns one byte-identical
-response, so declining the post-revoke fold does not leak which organizer
-was pulled. The requested eventId is validated against /^[a-z2-7]{8}\$/
-before any lookup and is never interpolated into the body, a header, an
-ETag, or a cache tag."
+revoked owning code, past event, an invite that fails re-validation, store
+failure) returns one byte-identical response, so declining the post-revoke
+fold does not leak which organizer was pulled. The requested eventId is
+validated against /^[a-z2-7]{8}\$/ before any lookup and is never
+interpolated into the body, a header, an ETag, or a cache tag.
+
+Both stored records are shape-checked before they are trusted (a truthy {}
+is not live), and the stored signalUrl is re-validated with validateSignalUrl
+at render. The literal /go/intake is special-cased before the id regex to
+resolve the operator vetting-page link from the links store."
 ```
+
+---
 
 ---
 
 ### Task 15: scheduled fold
 
-Weekly job that reads the Blobs `events` store, projects every record through `toPublicEvent()`, sorts for a stable diff, and commits `src/data/events.json` to the public repo through the GitHub contents API. The commit message is a constant plus a server-computed integer — **no submitted text ever reaches a commit message** (§6 of the design: an event title containing `#123` or `@someone` would close issues or fire mentions from the repo owner's identity).
+Weekly job that reads the Blobs `events` store, projects every record through `toPublicEvent()`, drops tombstoned and expired records, sorts for a stable diff, and commits `src/data/events.json` to the public repo through the GitHub contents API. The commit message is a constant plus a server-computed integer — **no submitted text ever reaches a commit message** (§6 of the design: an event title containing `#123` or `@someone` would close issues or fire mentions from the repo owner's identity).
+
+This task also seeds an empty `src/data/events.json` (so the events-page task's import and build guard have a file), adds the build-time expiry guard (§10), and creates the manual `fold-events.yml` workflow that the organizer-codes CLI dispatches for a fast takedown.
 
 All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify function is a thin shell that reads env vars, reads the store, and calls into that module.
 
 **Files:**
 
-- Create: `the repo rootsrc\lib\fold-events.ts`
-- Create: `the repo rootsrc\lib\fold-events.test.ts`
-- Create: `the repo rootnetlify\functions\fold-events.ts`
-- Create: `the repo rootnetlify\functions\fold-events.test.ts`
+- Create: `src/data/events.json` (seed, exactly `[]`)
+- Create: `src/lib/fold-events.ts`
+- Create: `src/lib/fold-events.test.ts`
+- Create: `netlify/functions/fold-events.ts`
+- Create: `tests/functions/fold-events.test.ts`
+- Create: `.github/workflows/fold-events.yml`
 
 ---
 
-- [ ] **Step 1: Preflight — confirm the Task 1-7 modules and the Netlify packages are present**
+- [ ] **Step 1: Seed `src/data/events.json` as an empty array**
+
+  The scheduled fold rewrites this file, and the events-page task imports it and runs a build-time schema guard against it. Neither can land before the file exists, so commit the empty seed here — the earliest task that touches it — as exactly a top-level array:
+
+  ```bash
+  printf '[]\n' > src/data/events.json
+  node -e "const e=require('./src/data/events.json'); if(!Array.isArray(e)||e.length!==0){process.exit(1)}; console.log('seed ok: top-level array, length', e.length)"
+  git add src/data/events.json
+  git commit -m "chore(events): seed empty events.json overlay bake"
+  ```
+
+  Expected: `seed ok: top-level array, length 0`. The file is exactly `[]` followed by a newline, matching the two-space-plus-trailing-newline serialization the fold produces for a non-empty file.
+
+- [ ] **Step 2: Preflight — confirm the Task 1-7 modules and the Netlify packages are present**
 
   Run from the repo root:
 
@@ -5893,7 +6336,7 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
 
   `@netlify/functions` is only ever imported `import type` in this task, so it is erased at runtime and the tests never load it.
 
-- [ ] **Step 2: Write the failing test for `src/lib/fold-events.ts`**
+- [ ] **Step 3: Write the failing test for `src/lib/fold-events.ts`**
 
   Create `src/lib/fold-events.test.ts` with exactly this content:
 
@@ -5901,11 +6344,15 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
   import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
   import {
     EVENTS_FILE_PATH,
+    EXPIRY_HORIZON_DAYS,
     buildCommitMessage,
     foldStoredEvents,
     serializeEventsFile,
     countAdded,
     commitEventsJson,
+    isExpired,
+    pruneExpired,
+    assertEventsFresh,
   } from './fold-events.js';
   import type { StoredEvent } from './public-event.js';
 
@@ -5915,6 +6362,9 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
     branch: 'master',
     token: 'ghp_test_token',
   };
+
+  /** Fixed reference clock so the expiry checks never become time-bombs. */
+  const NOW = new Date('2026-08-18T12:00:00Z');
 
   function storedEvent(overrides: Partial<StoredEvent> = {}): StoredEvent {
     return {
@@ -6032,6 +6482,68 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
       const b = storedEvent({ id: 'bbbbbbbb', date: '2026-09-03' });
       expect(serializeEventsFile(foldStoredEvents([a, b])))
         .toBe(serializeEventsFile(foldStoredEvents([b, a])));
+    });
+  });
+
+  describe('isExpired', () => {
+    it('exposes the single 30-day horizon', () => {
+      expect(EXPIRY_HORIZON_DAYS).toBe(30);
+    });
+
+    it('flags an event whose date is more than 30 days before now', () => {
+      expect(isExpired({ date: '2026-06-01', recurrence: null }, NOW)).toBe(true);
+    });
+
+    it('keeps an event only a few days past', () => {
+      expect(isExpired({ date: '2026-08-10', recurrence: null }, NOW)).toBe(false);
+    });
+
+    it('keeps a future event', () => {
+      expect(isExpired({ date: '2026-12-01', recurrence: null }, NOW)).toBe(false);
+    });
+
+    it('measures a recurring event from recurrence.until, not its start date', () => {
+      // Start long past, but the series is still running: not expired.
+      expect(
+        isExpired({ date: '2026-01-01', recurrence: { freq: 'weekly', until: '2026-12-01' } }, NOW),
+      ).toBe(false);
+      // Series ended more than 30 days ago: expired.
+      expect(
+        isExpired({ date: '2026-01-01', recurrence: { freq: 'weekly', until: '2026-06-01' } }, NOW),
+      ).toBe(true);
+    });
+  });
+
+  describe('pruneExpired', () => {
+    it('drops expired events and keeps the rest', () => {
+      const kept = { id: 'aaaaaaaa', date: '2026-09-01', recurrence: null };
+      const gone = { id: 'bbbbbbbb', date: '2026-06-01', recurrence: null };
+      expect(pruneExpired([kept, gone], NOW)).toEqual([kept]);
+    });
+
+    it('preserves the order of the events it keeps', () => {
+      const a = { id: 'aaaaaaaa', date: '2026-09-03', recurrence: null };
+      const b = { id: 'bbbbbbbb', date: '2026-09-01', recurrence: null };
+      expect(pruneExpired([a, b], NOW).map((e) => e.id)).toEqual(['aaaaaaaa', 'bbbbbbbb']);
+    });
+  });
+
+  describe('assertEventsFresh', () => {
+    it('throws naming the stale event ids', () => {
+      const events = [
+        { id: 'aaaaaaaa', date: '2026-09-01', recurrence: null },
+        { id: 'staleone', date: '2026-06-01', recurrence: null },
+      ];
+      expect(() => assertEventsFresh(events, NOW)).toThrow(/staleone/);
+    });
+
+    it('passes when every event is within the horizon', () => {
+      const events = [{ id: 'aaaaaaaa', date: '2026-09-01', recurrence: null }];
+      expect(() => assertEventsFresh(events, NOW)).not.toThrow();
+    });
+
+    it('passes on an empty array', () => {
+      expect(() => assertEventsFresh([], NOW)).not.toThrow();
     });
   });
 
@@ -6205,7 +6717,7 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
   });
   ```
 
-- [ ] **Step 3: Run the test and confirm it fails for the right reason**
+- [ ] **Step 4: Run the test and confirm it fails for the right reason**
 
   ```bash
   npm test -- src/lib/fold-events.test.ts
@@ -6215,13 +6727,13 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
 
   ```
   Error: Failed to load url ./fold-events.js (resolved id: ./fold-events.js) in
-  the repo rootsrc/lib/fold-events.test.ts.
+  src/lib/fold-events.test.ts.
   Does the file exist?
   ```
 
   Vitest reports `Test Files  1 failed (1)` with `Tests  no tests`. If instead you see a failure about `./public-event.js`, Task 7 has not landed — stop and go back.
 
-- [ ] **Step 4: Implement `src/lib/fold-events.ts`**
+- [ ] **Step 5: Implement `src/lib/fold-events.ts`**
 
   Create `src/lib/fold-events.ts` with exactly this content:
 
@@ -6269,7 +6781,9 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
    * Projects stored records to the public field set, drops tombstones, and sorts
    * by date then id. The sort is what makes the weekly diff stable: the Blobs
    * `list()` order is not guaranteed, and an unsorted file would churn every row
-   * on every fold.
+   * on every fold. Expiry pruning is a separate pass (`pruneExpired`) so the
+   * caller supplies the clock and the projection stays a pure function of its
+   * argument.
    */
   export function foldStoredEvents(records: readonly StoredEvent[]): PublicEvent[] {
     return records
@@ -6282,6 +6796,69 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
         if (a.id > b.id) return 1;
         return 0;
       });
+  }
+
+  // --- expiry (design §10) -----------------------------------------------------
+
+  /** One horizon, used by both the fold's pruning and the build-time guard. */
+  export const EXPIRY_HORIZON_DAYS = 30;
+  const EXPIRY_HORIZON_MS = EXPIRY_HORIZON_DAYS * 24 * 60 * 60 * 1000;
+
+  type EventRecurrence = { readonly freq: 'weekly' | 'monthly_nth'; readonly until: string } | null;
+
+  interface DatedEvent {
+    readonly date: string;
+    readonly recurrence: EventRecurrence;
+  }
+
+  /** The last day an event is active: recurrence.until when it recurs, else its own date. */
+  export function finalDateOf(event: DatedEvent): string {
+    return event.recurrence ? event.recurrence.until : event.date;
+  }
+
+  /**
+   * True when an event's final date is more than EXPIRY_HORIZON_DAYS before `now`.
+   * The horizon is measured from the end of that calendar day in UTC, so an event
+   * is not counted expired on the very day it turns 30 days old. `now` is passed
+   * in rather than read from the clock so both the fold and the build guard are
+   * deterministic. An unparseable date is never treated as expired — the strict
+   * schema guard, not this predicate, is what rejects a malformed date.
+   */
+  export function isExpired(event: DatedEvent, now: Date): boolean {
+    const end = Date.parse(`${finalDateOf(event)}T23:59:59.999Z`);
+    if (Number.isNaN(end)) return false;
+    return now.getTime() - end > EXPIRY_HORIZON_MS;
+  }
+
+  /**
+   * Drop every event past the expiry horizon. The fold applies this so
+   * events.json cannot grow without bound as events age out (single 30-day
+   * horizon, design §10).
+   */
+  export function pruneExpired<T extends DatedEvent>(events: readonly T[], now: Date): T[] {
+    return events.filter((event) => !isExpired(event, now));
+  }
+
+  /**
+   * Build-time expiry guard (design §10). The events-page task calls this in
+   * events.astro frontmatter, after schema-parsing src/data/events.json, so a
+   * neglected calendar fails the deploy instead of rotting silently. The weekly
+   * fold already prunes expired records, so in normal operation nothing here
+   * fires; it catches a hand-edited or fold-stalled file.
+   */
+  export function assertEventsFresh(
+    events: readonly (DatedEvent & { readonly id: string })[],
+    now: Date,
+  ): void {
+    const stale = events.filter((event) => isExpired(event, now));
+    if (stale.length > 0) {
+      const ids = stale.map((event) => event.id).join(', ');
+      throw new Error(
+        `assertEventsFresh: ${stale.length} event(s) are more than ${EXPIRY_HORIZON_DAYS} days ` +
+          `past their final date and were never expired: ${ids}. Run the fold ` +
+          `(.github/workflows/fold-events.yml) or resubmit/expire them.`,
+      );
+    }
   }
 
   /** Two-space JSON with a trailing newline, matching the repo's other data files. */
@@ -6409,24 +6986,24 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
   }
   ```
 
-- [ ] **Step 5: Run the test again and confirm it passes**
+- [ ] **Step 6: Run the test again and confirm it passes**
 
   ```bash
   npm test -- src/lib/fold-events.test.ts
   ```
 
-  Expected: `Test Files  1 passed (1)` and `Tests  16 passed (16)`.
+  Expected: `Test Files  1 passed (1)` and `Tests  27 passed (27)`.
 
-- [ ] **Step 6: Commit the fold library**
+- [ ] **Step 7: Commit the fold library**
 
   ```bash
   git add src/lib/fold-events.ts src/lib/fold-events.test.ts
   git commit -m "feat(events): fold library that commits events.json via the GitHub contents API"
   ```
 
-- [ ] **Step 7: Write the failing test for the scheduled function**
+- [ ] **Step 8: Write the failing test for the scheduled function**
 
-  Create `netlify/functions/fold-events.test.ts` with exactly this content:
+  Create `tests/functions/fold-events.test.ts` with exactly this content. Function tests live under `tests/functions/`, never beside the function in `netlify/functions/`; the relative import reaches back into `netlify/functions/` and `src/lib/`. The clock is frozen so the expiry pruning is deterministic:
 
   ```ts
   import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -6473,6 +7050,8 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
     calls.length = 0;
     listMock.mockReset();
     getMock.mockReset();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-18T12:00:00Z'));
     process.env.GITHUB_FOLD_TOKEN = 'ghp_test_token';
     process.env.GITHUB_FOLD_REPO = 'TimSimpsonJr/deflocksc-website';
     process.env.GITHUB_FOLD_BRANCH = 'master';
@@ -6501,6 +7080,7 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
 
   afterEach(() => {
     globalThis.fetch = originalFetch;
+    vi.useRealTimers();
     delete process.env.GITHUB_FOLD_TOKEN;
     delete process.env.GITHUB_FOLD_REPO;
     delete process.env.GITHUB_FOLD_BRANCH;
@@ -6509,7 +7089,7 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
 
   describe('fold-events scheduled function', () => {
     it('declares the Sunday 04:00 UTC schedule', async () => {
-      const mod = await import('./fold-events.js');
+      const mod = await import('../../netlify/functions/fold-events.js');
       expect(mod.config.schedule).toBe('0 4 * * 0');
     });
 
@@ -6521,13 +7101,13 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
         storedEvent({ id: key, date: key === 'aaaaaaaa' ? '2026-09-03' : '2026-09-01' }),
       );
 
-      const mod = await import('./fold-events.js');
+      const mod = await import('../../netlify/functions/fold-events.js');
       const res = await mod.default(new Request('https://deflocksc.org/'), {} as any);
 
       expect(res.status).toBe(200);
       expect(calls.map((c) => c.method)).toEqual(['GET', 'PUT']);
       expect(calls[0].url).toContain('/contents/src/data/events.json?ref=master');
-      expect(calls[1].url).toEndWith('/contents/src/data/events.json');
+      expect(calls[1].url.endsWith('/contents/src/data/events.json')).toBe(true);
       expect(calls[1].body.message).toBe('chore: fold events (2 added)');
 
       const committed = JSON.parse(
@@ -6537,11 +7117,32 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
       expect(JSON.stringify(committed)).not.toContain('signal.group');
     });
 
+    it('drops an event more than 30 days past its final date before committing', async () => {
+      listMock.mockResolvedValue({
+        blobs: [{ key: 'aaaaaaaa' }, { key: 'oldoldol' }],
+      });
+      getMock.mockImplementation(async (key: string) =>
+        key === 'aaaaaaaa'
+          ? storedEvent({ id: key, date: '2026-09-01' })
+          : storedEvent({ id: key, date: '2026-06-01' }),
+      );
+
+      const mod = await import('../../netlify/functions/fold-events.js');
+      const res = await mod.default(new Request('https://deflocksc.org/'), {} as any);
+
+      expect(res.status).toBe(200);
+      const committed = JSON.parse(
+        Buffer.from(calls[1].body.content, 'base64').toString('utf8'),
+      );
+      expect(committed.map((e: any) => e.id)).toEqual(['aaaaaaaa']);
+      expect(calls[1].body.message).toBe('chore: fold events (1 added)');
+    });
+
     it('fails closed with a 500 when the GitHub credential is missing', async () => {
       delete process.env.GITHUB_FOLD_TOKEN;
       listMock.mockResolvedValue({ blobs: [] });
 
-      const mod = await import('./fold-events.js');
+      const mod = await import('../../netlify/functions/fold-events.js');
       const res = await mod.default(new Request('https://deflocksc.org/'), {} as any);
 
       expect(res.status).toBe(500);
@@ -6556,7 +7157,7 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
         key === 'aaaaaaaa' ? storedEvent({ id: key }) : null,
       );
 
-      const mod = await import('./fold-events.js');
+      const mod = await import('../../netlify/functions/fold-events.js');
       const res = await mod.default(new Request('https://deflocksc.org/'), {} as any);
 
       expect(res.status).toBe(200);
@@ -6565,33 +7166,32 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
   });
   ```
 
-  Note: `toEndWith` is a Vitest built-in matcher (Vitest 4). If your version rejects it, replace that one line with `expect(calls[1].url.endsWith('/contents/src/data/events.json')).toBe(true);`.
-
-- [ ] **Step 8: Run the function test and confirm it fails for the right reason**
+- [ ] **Step 9: Run the function test and confirm it fails for the right reason**
 
   ```bash
-  npm test -- netlify/functions/fold-events.test.ts
+  npm test -- tests/functions/fold-events.test.ts
   ```
 
   Expected failure — the function does not exist yet:
 
   ```
-  Error: Failed to load url ./fold-events.js (resolved id: ./fold-events.js) in
-  the repo rootnetlify/functions/fold-events.test.ts.
+  Error: Failed to load url ../../netlify/functions/fold-events.js
+  (resolved id: .../netlify/functions/fold-events.js) in
+  tests/functions/fold-events.test.ts.
   Does the file exist?
   ```
 
-  All four cases fail with that message; Vitest reports `Tests  4 failed (4)`.
+  All five cases fail with that message; Vitest reports `Tests  5 failed (5)`.
 
-- [ ] **Step 9: Implement `netlify/functions/fold-events.ts`**
+- [ ] **Step 10: Implement `netlify/functions/fold-events.ts`**
 
-  Create `netlify/functions/fold-events.ts` with exactly this content:
+  Create `netlify/functions/fold-events.ts` with exactly this content. It composes the two pure passes — `foldStoredEvents` (projection, tombstone drop, sort) then `pruneExpired` (age-out) — so the committed file carries neither revoked nor expired events:
 
   ```ts
   import type { Config, Context } from '@netlify/functions';
   import { eventsStore } from '../../src/lib/blob-stores.js';
   import type { StoredEvent } from '../../src/lib/public-event.js';
-  import { commitEventsJson, foldStoredEvents } from '../../src/lib/fold-events.js';
+  import { commitEventsJson, foldStoredEvents, pruneExpired } from '../../src/lib/fold-events.js';
   import type { CommitTarget } from '../../src/lib/fold-events.js';
 
   export const config: Config = {
@@ -6639,7 +7239,8 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
   export default async (_req: Request, _context: Context): Promise<Response> => {
     try {
       const target = resolveTarget();
-      const events = foldStoredEvents(await readAllStoredEvents());
+      const now = new Date();
+      const events = pruneExpired(foldStoredEvents(await readAllStoredEvents()), now);
       const result = await commitEventsJson(target, events);
       return Response.json(
         { ok: true, total: events.length, committed: result.committed, added: result.added },
@@ -6653,13 +7254,13 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
   };
   ```
 
-- [ ] **Step 10: Run both test files and confirm they pass**
+- [ ] **Step 11: Run both test files and confirm they pass**
 
   ```bash
-  npm test -- src/lib/fold-events.test.ts netlify/functions/fold-events.test.ts
+  npm test -- src/lib/fold-events.test.ts tests/functions/fold-events.test.ts
   ```
 
-  Expected: `Test Files  2 passed (2)` and `Tests  20 passed (20)`.
+  Expected: `Test Files  2 passed (2)` and `Tests  32 passed (32)`.
 
   Then run the whole suite to confirm nothing regressed:
 
@@ -6669,7 +7270,7 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
 
   Expected: all test files pass, exit code 0.
 
-- [ ] **Step 11: Typecheck**
+- [ ] **Step 12: Typecheck**
 
   ```bash
   npx astro check
@@ -6677,14 +7278,64 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
 
   Expected: `0 errors`. Warnings about unused `_req` / `_context` are not errors; if `astro check` flags them, they are prefixed with `_` and the strict config permits that.
 
-- [ ] **Step 12: Commit the scheduled function**
+- [ ] **Step 13: Commit the scheduled function**
 
   ```bash
-  git add netlify/functions/fold-events.ts netlify/functions/fold-events.test.ts
+  git add netlify/functions/fold-events.ts tests/functions/fold-events.test.ts
   git commit -m "feat(events): weekly scheduled fold of the Blobs overlay into events.json"
   ```
 
-- [ ] **Step 13: Manual verification — the environment variables (not unit-testable)**
+- [ ] **Step 14: Create the manual fold workflow `.github/workflows/fold-events.yml`**
+
+  The scheduled function folds every Sunday. A revocation, though, needs the baked `/events` listing refreshed on demand — the organizer-codes CLI's `--fold` path runs `gh workflow run fold-events.yml` for exactly this. Give it a target.
+
+  This workflow is **manual only** (`workflow_dispatch`) and it is **the one and only place a hook triggers a Netlify deploy**. Design §15 forbids a build hook anywhere near a submission handler (a submission-triggered deploy would let a code-holder burn 1,500 credits a day); this hook is fired by a human, from the Actions UI or `gh`, never from request-handling code.
+
+  Create `.github/workflows/fold-events.yml` with exactly this content:
+
+  ```yaml
+  name: fold-events
+
+  # Manual only. This is the ONE place a hook triggers a Netlify deploy (design
+  # §15 forbids a build hook near any submission handler). It POSTs the Netlify
+  # build hook, starting a production deploy so a freshly folded src/data/events.json
+  # reaches the CDN on demand instead of waiting for the Sunday scheduled fold.
+  # Never call this from request-handling code.
+  on:
+    workflow_dispatch: {}
+
+  permissions:
+    contents: read
+
+  jobs:
+    trigger-fold-deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Trigger the Netlify production build hook
+          env:
+            FOLD_BUILD_HOOK: ${{ secrets.NETLIFY_FOLD_BUILD_HOOK }}
+          run: |
+            if [ -z "${FOLD_BUILD_HOOK}" ]; then
+              echo "NETLIFY_FOLD_BUILD_HOOK is not set. Add the Netlify build hook URL" >&2
+              echo "as a repository secret before dispatching this workflow." >&2
+              exit 1
+            fi
+            curl --fail --silent --show-error -X POST -d '{}' "${FOLD_BUILD_HOOK}"
+  ```
+
+  Provision the secret it reads:
+
+  1. In the Netlify UI: **Site configuration → Build & deploy → Build hooks → Add build hook**, branch `master`, name `fold-events manual`. Copy the URL.
+  2. In GitHub: **Settings → Secrets and variables → Actions → New repository secret**, name `NETLIFY_FOLD_BUILD_HOOK`, value the URL from step 1.
+
+  Commit the workflow (pushing a file under `.github/workflows/` needs the `workflow` OAuth scope: `gh auth refresh --hostname github.com --scopes workflow`):
+
+  ```bash
+  git add .github/workflows/fold-events.yml
+  git commit -m "ci(events): manual fold-events workflow (build-hook deploy, dispatch only)"
+  ```
+
+- [ ] **Step 15: Manual verification — the fold GitHub PAT env vars (not unit-testable)**
 
   In the Netlify UI at **Site configuration → Environment variables**, create three variables. Each must be scoped **Functions only** and set to **Production context only**, leaving deploy-preview and branch-deploy unset so those runtimes hit the fail-closed path in `resolveTarget()`:
 
@@ -6696,7 +7347,18 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
 
   Verify the token scope before saving it — this is the only credential in the system that can write to the repo (design §16.1). Confirm the token page lists exactly one repository and exactly one permission.
 
-- [ ] **Step 14: Manual verification — the deployed function runs and commits**
+- [ ] **Step 16: Manual verification — provision the submit/rate-limit secrets (not unit-testable)**
+
+  The submit function and the rate limiter fail closed without their secrets — a submit with no pepper returns 503, safe but dead — so this is required for the feature to work at all. Mirror the fold-token step above: in the Netlify UI at **Site configuration → Environment variables**, create two more variables, each scoped **Functions only**, set to **Production context only**, and marked **sensitive**:
+
+  | Key | Value | Secret |
+  |---|---|---|
+  | `ORGANIZER_CODE_PEPPER` | 32 random bytes as hex (`node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`); the HMAC pepper for organizer codes | yes |
+  | `RATE_LIMIT_IP_SALT` | 32 random bytes as hex, generated the same way; salts hashed client IPs in the rate limiter | yes |
+
+  `ORGANIZER_CODE_PEPPER` must be **byte-identical** to the value the organizer-codes CLI reads from `.env` — the CLI's pepper canary refuses to issue on drift (design §7). Leaving both unset on deploy-preview and branch-deploy is deliberate: those contexts must not share production's pepper. Record that these two are provisioned so the submit and rate-limit tasks can rely on them.
+
+- [ ] **Step 17: Manual verification — the deployed function runs and commits**
 
   After the branch is deployed to production, invoke the scheduled function once by hand from the Netlify UI: **Project → Logs → Functions → `fold-events` → Test function** (a scheduled function accepts a manual invocation with an empty payload).
 
@@ -6710,17 +7372,31 @@ All the logic that can be tested lives in `src/lib/fold-events.ts`. The Netlify 
      followed by the token's identity on the second line — **not** a hardcoded author.
   3. `git show origin/master --stat -1` lists `src/data/events.json` and no other file.
   4. `git show origin/master:src/data/events.json | grep -c 'signal.group'` prints `0`.
-  5. Netlify starts one deploy whose `deploy_source` is `api`. (Design §18 item 4 flags "does a GitHub-API commit trigger a Netlify build" as unverified — this step is that verification. If no deploy starts, record it in the design doc's open items and add a build-hook call guarded by the fold's own result; do **not** move the build-hook call anywhere near the submit handler.)
+  5. Netlify starts one deploy whose `deploy_source` is `api`. (Design §18 item 4 flags "does a GitHub-API commit trigger a Netlify build" as unverified — this step is that verification. If no deploy starts, record it in the design doc's open items and add a build-hook call guarded by the fold's own `CommitResult` — reuse the `NETLIFY_FOLD_BUILD_HOOK` from Step 14, scoped Functions-only/production-only — and do **not** move the build-hook call anywhere near the submit handler.)
 
   Then invoke it a second time with no new submissions. Expected: the log shows `{"ok":true,...,"committed":false,"added":0}`, `git fetch && git log origin/master -1` shows the **same** commit sha as before, and no second deploy starts. That is the no-op path protecting the 15-credit-per-deploy budget.
+
+- [ ] **Step 18: Wire the build-time expiry guard into the events page (interface note)**
+
+  `assertEventsFresh(events, now)` and `isExpired` are exported from `src/lib/fold-events.ts` and unit-tested above, but a build only fails where the build actually reads `events.json` — the events-page task's `events.astro` frontmatter, which already parses `src/data/events.json` with the shared strict Zod schema (design §5, contract §10). The events-page task MUST, after that schema parse and before rendering, call:
+
+  ```ts
+  import { assertEventsFresh } from '../lib/fold-events.js';
+  // ...after parsing events.json into the validated PublicEvent[] `bakedEvents`:
+  assertEventsFresh(bakedEvents, new Date());
+  ```
+
+  A `PublicEvent[]` satisfies the guard's parameter type (it carries `id`, `date`, and `recurrence`), so a hand-edited or fold-stalled `events.json` holding an event more than 30 days past its final date fails the deploy (design §10) instead of rotting silently. The weekly fold prunes expired records with the same `EXPIRY_HORIZON_DAYS` horizon, so this guard fires only on neglect. This is a documented seam, not a change to `events.astro` in this task; confirm the events-page task carries the call.
 
 ---
 
 ### Task 16: organizer-codes CLI
 
-The maintainer-only CLI that issues, revokes, and lists organizer codes against the **production** Netlify Blobs stores. It is the only writer to the `codes` store, so it fails closed on every missing prerequisite, verifies the pepper canary before any write, and never lets a plaintext code touch a file, a log, or `process.argv`.
+The maintainer-only CLI that issues, revokes, lists organizer codes, and sets the intake Signal link against the **production** Netlify Blobs stores. It is the only writer to the `codes` store, so it fails closed on every missing prerequisite, verifies the pepper canary before any write, and never lets a plaintext code touch a file, a log, or `process.argv`.
 
 **The CLI is split in two, and that split is the only reason it is testable at all:** `src/lib/organizer-cli.ts` holds every decision the CLI makes as a pure function (argument parsing, the canary check, the record shapes, all output formatting) with no I/O, no `process.exit`, and no `console`, so it can be unit tested directly; `scripts/organizer-codes.ts` is a thin shell that reads the environment, wires stdin/stdout, calls into that module, and sets exit codes.
+
+**Subcommands:** `list [--json]`, `issue <pseudonym> [--clip]`, `revoke <pseudonym> [--digest <64-hex>] [--fold|--no-fold]`, and `set-intake <signal-url>`. `set-intake` writes the `/go/intake` target (design §9): it validates the URL with the same `validateSignalUrl` the submit path uses and stores it under the `links` store's `intake` key, which `/go/intake` reads at request time. `list` reports **whether** an intake link is set, never the URL itself.
 
 **How it runs.** Bare `node` cannot execute it. Both facts below were confirmed empirically on Node v22.22.3 (the version pinned in `netlify.toml`):
 
@@ -6731,17 +7407,17 @@ So the `codes` npm script bundles first, then runs. The bundle takes roughly 10 
 
 Bundling also inlines the `src/lib` sources, which is why this task creates no module-resolution hook.
 
-**Prerequisite:** `@netlify/blobs` must already be installed and `src/lib/blob-stores.ts` must already exist (from the Blobs store task). Confirm before starting:
+**Prerequisite:** `@netlify/blobs` must already be installed and `src/lib/blob-stores.ts` must already exist (from the Blobs store task), and `src/lib/signal-url.ts` must exist (from the Signal-URL validator task). Confirm before starting:
 
 ```
-cd /c/Users/tim/workspace/deflocksc-website && node -e "require.resolve('@netlify/blobs')" && ls node_modules/.bin/esbuild
+cd /c/Users/tim/workspace/deflocksc-website && node -e "require.resolve('@netlify/blobs')" && ls node_modules/.bin/esbuild && node -e "require('fs').existsSync('src/lib/signal-url.ts')||process.exit(1)"
 ```
 
-Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `esbuild` is absent, stop and report it rather than adding a dependency.
+All must succeed. If `require.resolve` throws, the Blobs task is not done. If `esbuild` is absent, stop and report it rather than adding a dependency. If `signal-url.ts` is missing, the Signal-URL validator task has not landed.
 
 **Files:**
 
-- Create `src/lib/organizer-cli.ts` — the pure half: argv parsing, the code-in-argv refusal, environment validation, the canary decision, the stored-record shapes, the wordlist parser, and every string the CLI prints
+- Create `src/lib/organizer-cli.ts` — the pure half: argv parsing, the code-in-argv refusal, environment validation, the canary decision, the stored-record shapes, the wordlist parser, the intake-status formatters, and every string the CLI prints
 - Create `src/lib/organizer-cli.test.ts` — colocated unit tests for the pure half
 - Create `src/lib/wordlist-file.test.ts` — checksum + structure guard on the committed wordlist
 - Create `scripts/organizer-codes.ts` — the thin shell: env, stdin/stdout, Blobs calls, exit codes
@@ -6776,7 +7452,10 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
     checkWordlistChecksum,
     decideCanary,
     formatAmbiguousRevoke,
+    formatBadIntakeUrl,
     formatFoldReminder,
+    formatIntakeStatus,
+    formatIntakeUpdated,
     formatIssueBanner,
     formatListTable,
     formatNoCodeFound,
@@ -6896,6 +7575,13 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
       expect(parseCliArgs(['list', '--json'])).toEqual({ ok: true, value: { name: 'list', json: true } });
     });
 
+    it('parses set-intake with a signal url that would otherwise trip the code scan', () => {
+      expect(parseCliArgs(['set-intake', 'https://signal.group/#CjQKIExamplE'])).toEqual({
+        ok: true,
+        value: { name: 'set-intake', signalUrl: 'https://signal.group/#CjQKIExamplE' },
+      });
+    });
+
     it('refuses an organizer code passed as an argument', () => {
       expect(parseCliArgs(['revoke', 'drum-yoga-vivid-clay'])).toEqual({
         ok: false,
@@ -6926,6 +7612,11 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
         ok: false,
         code: 'invalid_digest',
       });
+      expect(parseCliArgs(['set-intake'])).toEqual({ ok: false, code: 'missing_url' });
+      expect(parseCliArgs(['set-intake', 'https://signal.group/#a', 'extra'])).toEqual({
+        ok: false,
+        code: 'extra_argument',
+      });
     });
 
     it('has a message for every argument error code', () => {
@@ -6936,6 +7627,7 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
         'missing_pseudonym',
         'invalid_pseudonym',
         'invalid_digest',
+        'missing_url',
         'unknown_flag',
         'extra_argument',
       ] as const;
@@ -6950,6 +7642,10 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
     it('documents the npm invocation, not a bare node invocation', () => {
       expect(USAGE).toContain('npm run codes -- issue <pseudonym>');
       expect(USAGE).not.toContain('node scripts/organizer-codes');
+    });
+
+    it('documents set-intake', () => {
+      expect(USAGE).toContain('set-intake <signal-url>');
     });
 
     it('states the never-an-argument rule', () => {
@@ -7232,6 +7928,27 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
     });
   });
 
+  describe('intake formatters', () => {
+    it('formatIntakeStatus reports set/not set and never a URL', () => {
+      expect(formatIntakeStatus(true)).toContain('set');
+      expect(formatIntakeStatus(false)).toContain('not set');
+      expect(formatIntakeStatus(true)).not.toContain('signal.group');
+      expect(formatIntakeStatus(true)).not.toContain('http');
+    });
+
+    it('formatIntakeUpdated confirms without echoing the URL', () => {
+      const text = formatIntakeUpdated();
+      expect(text).toContain('Intake link updated');
+      expect(text).not.toContain('signal.group');
+    });
+
+    it('formatBadIntakeUrl names the validation code but not a raw URL', () => {
+      const text = formatBadIntakeUrl('bad_protocol');
+      expect(text).toContain('bad_protocol');
+      expect(text).toContain('signal.group');
+    });
+  });
+
   describe('parseFoldAnswer', () => {
     it('treats only y and yes as consent', () => {
       expect(parseFoldAnswer('y')).toBe(true);
@@ -7348,7 +8065,9 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
    *
    *   1. A plaintext organizer code must never appear in argv (it would land in
    *      shell history), so anything that looks like one is rejected before the
-   *      subcommand is even identified.
+   *      subcommand is even identified. `set-intake` is the one subcommand whose
+   *      argument is a URL rather than a code, so it is handled ahead of that
+   *      scan (a signal.group URL would false-positive it).
    *   2. Missing credentials are a hard failure, never a fallback: a code issued
    *      into a local development store looks like success and fails in
    *      production.
@@ -7380,16 +8099,18 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
   const DICE_RE = /^[1-6]{4}$/;
   const NON_LETTER_RE = /[^a-z]+/;
 
-  export const USAGE = `organizer-codes — issue, revoke, and list DeflockSC organizer codes
+  export const USAGE = `organizer-codes — issue, revoke, list codes and set the intake link
 
   Usage:
     npm run codes -- list [--json]
     npm run codes -- issue <pseudonym> [--clip]
     npm run codes -- revoke <pseudonym> [--digest <64-hex>] [--fold|--no-fold]
+    npm run codes -- set-intake <signal-url>
 
   Arguments:
     <pseudonym>   2-40 chars, lowercase a-z0-9, at most three hyphen-separated
                   segments (for example: handle-jay). Never a real name.
+    <signal-url>  the https://signal.group/#... invite that /go/intake redirects to.
 
   Flags:
     --clip        copy the freshly issued code to the clipboard
@@ -7413,7 +8134,8 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
   export type CliCommand =
     | { name: 'issue'; pseudonym: string; clip: boolean }
     | { name: 'revoke'; pseudonym: string; digest: string | null; fold: FoldMode }
-    | { name: 'list'; json: boolean };
+    | { name: 'list'; json: boolean }
+    | { name: 'set-intake'; signalUrl: string };
 
   export type CliArgCode =
     | 'no_command'
@@ -7422,18 +8144,20 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
     | 'missing_pseudonym'
     | 'invalid_pseudonym'
     | 'invalid_digest'
+    | 'missing_url'
     | 'unknown_flag'
     | 'extra_argument';
 
   export const CLI_ARG_MESSAGES: Record<CliArgCode, string> = {
     no_command: 'no subcommand given.',
-    unknown_command: 'unknown subcommand. Expected issue, revoke, or list.',
+    unknown_command: 'unknown subcommand. Expected issue, revoke, list, or set-intake.',
     looks_like_code:
       'refusing to run: an argument looks like an organizer code. Codes are never passed on the command line — they would land in your shell history. Pass the pseudonym instead.',
     missing_pseudonym: 'missing pseudonym.',
     invalid_pseudonym:
       'invalid pseudonym. Use 2-40 characters, lowercase a-z and 0-9, at most three hyphen-separated segments (for example: handle-jay).',
     invalid_digest: '--digest requires a 64-character lowercase hex value.',
+    missing_url: 'set-intake requires a Signal group URL argument.',
     unknown_flag: 'unknown flag.',
     extra_argument: 'unexpected extra argument.',
   };
@@ -7468,14 +8192,26 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
   }
 
   export function parseCliArgs(argv: readonly string[]): Ok<CliCommand> | Err<CliArgCode> {
-    // First pass, before anything else is inspected: a code in argv is fatal
-    // regardless of which subcommand it was attached to.
+    const name = argv[0];
+    if (name === undefined) return err('no_command');
+
+    // set-intake carries a Signal URL argument, not a secret code. A signal.group
+    // URL has four-plus letter runs and would trip the looksLikeCode scan below,
+    // so it is handled before the scan. The URL itself is validated by
+    // validateSignalUrl in the shell, never here.
+    if (name === 'set-intake') {
+      const rest = argv.slice(1);
+      if (rest.length === 0) return err('missing_url');
+      if (rest.length > 1) return err('extra_argument');
+      return ok({ name: 'set-intake', signalUrl: rest[0] });
+    }
+
+    // A plaintext organizer code in argv is fatal for every other subcommand,
+    // decided before the subcommand itself is validated.
     for (const raw of argv) {
       if (looksLikeCode(raw)) return err('looks_like_code');
     }
 
-    const name = argv[0];
-    if (name === undefined) return err('no_command');
     const rest = argv.slice(1);
 
     if (name === 'issue') {
@@ -7803,6 +8539,32 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
 
   export function formatNoCodeFound(pseudonym: string): string {
     return `no code found for pseudonym "${pseudonym}"`;
+  }
+
+  // --- intake link (design §9) -------------------------------------------------
+
+  /**
+   * Whether the /go/intake redirect currently has a stored target. `list` reports
+   * this so a maintainer can confirm the link is configured. It never prints the
+   * URL itself — the whole point of /go/intake is that the invite is absent from
+   * markup, the search index, and scrollback.
+   */
+  export function formatIntakeStatus(isSet: boolean): string {
+    return `Intake link: ${isSet ? 'set' : 'not set'}\n`;
+  }
+
+  /** Confirmation after set-intake writes links/intake. Never echoes the URL. */
+  export function formatIntakeUpdated(): string {
+    return 'Intake link updated. It is served only through /go/intake and never appears in page markup.\n';
+  }
+
+  /**
+   * Refusal when a set-intake URL fails Signal-link validation. `code` is the
+   * machine-readable SignalUrlCode from validateSignalUrl; the offending URL is
+   * not echoed back.
+   */
+  export function formatBadIntakeUrl(code: string): string {
+    return `refusing to set intake: the URL failed Signal-link validation (${code}). It must be an https://signal.group/#... invite.`;
   }
 
   /** Only an explicit y/yes triggers the fold. Anything else, including EOF, does not. */
@@ -8143,11 +8905,12 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
   ```ts
   #!/usr/bin/env node
   /**
-   * Organizer code CLI: issue / revoke / list.
+   * Organizer code CLI: issue / revoke / list / set-intake.
    *
    *   npm run codes -- list [--json]
    *   npm run codes -- issue <pseudonym> [--clip]
    *   npm run codes -- revoke <pseudonym> [--digest <64-hex>] [--fold|--no-fold]
+   *   npm run codes -- set-intake <signal-url>
    *
    * This is the THIN SHELL. It reads the environment, wires stdin/stdout, talks to
    * Netlify Blobs, and sets exit codes. Every decision — argument parsing, the
@@ -8170,6 +8933,7 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
    *   - never log a plaintext code
    *   - never accept a code as a command-line argument
    *   - never print a code during `list`
+   *   - never print the intake URL during `list`
    *   - never commit anything
    */
   import { createHash, randomInt } from 'node:crypto';
@@ -8179,10 +8943,11 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
   import { createInterface } from 'node:readline/promises';
   import { stderr, stdin, stdout } from 'node:process';
 
-  import type { Store } from '@netlify/blobs';
+  import { getStore, type Store } from '@netlify/blobs';
 
   import * as cli from '../src/lib/organizer-cli.js';
   import { digestCode, generateCode, normalizeCode } from '../src/lib/organizer-code.js';
+  import { validateSignalUrl } from '../src/lib/signal-url.js';
   import { ContextRefusedError, codesStore, eventsStore, metaStore } from '../src/lib/blob-stores.js';
 
   const PROJECT_ROOT = process.cwd();
@@ -8194,6 +8959,17 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
   function fail(message: string): never {
     stderr.write(`organizer-codes: ${message}\n`);
     process.exit(1);
+  }
+
+  /**
+   * The `links` store holds the /go/intake target. It has no dedicated factory in
+   * blob-stores.ts — /go/intake reads it with getStore('links') at request time
+   * (design §9), and this CLI, the sanctioned production writer, matches that name
+   * and consistency here. Strong consistency so a just-set link is readable on the
+   * next request.
+   */
+  function linksStore(): Store {
+    return getStore({ name: 'links', consistency: 'strong' });
   }
 
   function readWordlist(): string[] {
@@ -8369,9 +9145,23 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
     stdout.write(`Fold dispatched. Watch it with: gh run list --workflow ${cli.FOLD_WORKFLOW}\n`);
   }
 
+  async function runSetIntake(command: { signalUrl: string }): Promise<void> {
+    const validated = validateSignalUrl(command.signalUrl);
+    if (!validated.ok) fail(cli.formatBadIntakeUrl(validated.code));
+    await linksStore().set('intake', validated.value);
+    stdout.write(cli.formatIntakeUpdated());
+  }
+
   async function runList(command: { json: boolean }): Promise<void> {
     const rows = await listCodeRows(codesStore());
-    stdout.write(command.json ? cli.toListJson(rows) : `${cli.formatListTable(rows)}\n`);
+    if (command.json) {
+      stdout.write(cli.toListJson(rows));
+      return;
+    }
+    // Whether /go/intake is configured — never the URL itself.
+    const intake = await linksStore().get('intake', { type: 'text' });
+    stdout.write(`${cli.formatListTable(rows)}\n`);
+    stdout.write(cli.formatIntakeStatus(typeof intake === 'string' && intake.length > 0));
   }
   ```
 
@@ -8422,6 +9212,7 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
 
     if (command.name === 'issue') await runIssue(command, env.value.pepper);
     else if (command.name === 'revoke') await runRevoke(command, env.value.pepper);
+    else if (command.name === 'set-intake') await runSetIntake(command);
     else await runList(command);
   }
 
@@ -8491,7 +9282,7 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
   cd /c/Users/tim/workspace/deflocksc-website && npm run codes -- --help; echo "exit=$?"
   ```
 
-  Expected: the usage block prints, ending with `exit=0`.
+  Expected: the usage block prints (including the `set-intake <signal-url>` line), ending with `exit=0`.
 
   **10b — a code passed as an argument is refused before anything else happens:**
 
@@ -8535,7 +9326,15 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
 
   Expected: one line beginning `organizer-codes: NETLIFY_SITE_ID is not set.` and a nonzero `exit=`.
 
-  **10f — confirm bare node still fails, so the npm script is not optional:**
+  **10f — set-intake refuses a bad URL before any store write (needs env, no network write):**
+
+  ```
+  cd /c/Users/tim/workspace/deflocksc-website && ORGANIZER_CODE_PEPPER=deadbeef NETLIFY_AUTH_TOKEN=fake NETLIFY_SITE_ID=fake npm run codes -- set-intake "https://evil.example/#x"; echo "exit=$?"
+  ```
+
+  Expected: one line beginning `organizer-codes: refusing to set intake: the URL failed Signal-link validation (` and a nonzero `exit=`. The refusal is decided by `validateSignalUrl` before the `links` store is touched.
+
+  **10g — confirm bare node still fails, so the npm script is not optional:**
 
   ```
   cd /c/Users/tim/workspace/deflocksc-website && node --experimental-strip-types scripts/organizer-codes.ts --help; echo "exit=$?"
@@ -8569,7 +9368,7 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
   cd /c/Users/tim/workspace/deflocksc-website && npm run codes -- list
   ```
 
-  Expected on an empty store: `No codes issued.`
+  Expected on an empty store: `No codes issued.` followed by `Intake link: not set`.
 
   If you get `MissingBlobsEnvironmentError` or a region complaint, the object built by `buildBlobsContext` does not match the installed `@netlify/blobs` version. Check the version with `node -p "require('@netlify/blobs/package.json').version"` and adjust `buildBlobsContext` in `src/lib/organizer-cli.ts` (updating its unit test alongside) rather than weakening the store factory.
 
@@ -8597,9 +9396,18 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
   cd /c/Users/tim/workspace/deflocksc-website && npm run codes -- list
   ```
 
-  Expected: a table with `PSEUDONYM / ISSUED / REVOKED` headers, one row `test-cli`, today's date, `no`. No four-word string anywhere in the output, and no 64-character hex value.
+  Expected: a table with `PSEUDONYM / ISSUED / REVOKED` headers, one row `test-cli`, today's date, `no`, then `Intake link: not set`. No four-word string anywhere in the output, and no 64-character hex value.
 
-  **11d — confirm the canary now guards a wrong pepper:**
+  **11d — set and confirm the intake link, without leaking it:**
+
+  ```
+  cd /c/Users/tim/workspace/deflocksc-website && npm run codes -- set-intake "https://signal.group/#CjQKIExamplE"
+  cd /c/Users/tim/workspace/deflocksc-website && npm run codes -- list
+  ```
+
+  Expected: the first prints `Intake link updated. ...`; the second now ends with `Intake link: set`. Neither prints the URL. A real intake invite belongs here; the example above is a placeholder — replace it before relying on `/go/intake`.
+
+  **11e — confirm the canary now guards a wrong pepper:**
 
   ```
   cd /c/Users/tim/workspace/deflocksc-website && ORGANIZER_CODE_PEPPER=00000000 npm run codes -- issue test-canary; echo "exit=$?"
@@ -8609,7 +9417,7 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
 
   Expected: `organizer-codes: pepper canary mismatch. ...` and a nonzero `exit=`. No new record is written — re-run `npm run codes -- list` and confirm `test-canary` is absent.
 
-  **11e — revoke, and confirm the cascade and the fold reminder:**
+  **11f — revoke, and confirm the cascade and the fold reminder:**
 
   ```
   cd /c/Users/tim/workspace/deflocksc-website && npm run codes -- revoke test-cli --no-fold
@@ -8625,13 +9433,13 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
 
   Then `npm run codes -- list` shows `test-cli` with `REVOKED` = `yes`.
 
-  **11f — confirm the JSON backup shape:**
+  **11g — confirm the JSON backup shape:**
 
   ```
   cd /c/Users/tim/workspace/deflocksc-website && npm run codes -- list --json
   ```
 
-  Expected: a JSON array whose objects have exactly the keys `digest`, `pseudonym`, `issuedAt`, `revoked` — nothing else.
+  Expected: a JSON array whose objects have exactly the keys `digest`, `pseudonym`, `issuedAt`, `revoked` — nothing else, and no intake line (the `--json` backup is the codes store only).
 
   Leave the revoked `test-cli` record in place, or delete it manually from the Netlify UI. Do not add a delete subcommand: the `codes` store has no backup, and a delete there is the one unrecoverable operation in the system.
 
@@ -8646,6 +9454,8 @@ Both must succeed. If `require.resolve` throws, the Blobs task is not done. If `
   ```
   cd /c/Users/tim/workspace/deflocksc-website && git add scripts/organizer-codes.ts src/lib/blob-stores.ts package.json .env.example && git commit -m "feat(events): organizer-codes CLI shell over the pure CLI module"
   ```
+
+---
 
 ---
 
@@ -9009,7 +9819,7 @@ Every line prints `-> 0 matches`. The working Census source is the TIGERweb **In
   ```
   Registry lists 50 place slugs
   Fetching SC incorporated places from Census TIGERweb...
-  Cached 271 places to the repo rootscripts\.cache\tigerweb-sc-places.json
+  Cached 271 places to scripts\.cache\tigerweb-sc-places.json
     abbeville          Abbeville                [-82.377423, 34.178694]
     aiken              Aiken                    [-81.725859, 33.531495]
     allendale          Allendale                [-81.309164, 33.008047]
@@ -9018,7 +9828,7 @@ Every line prints `-> 0 matches`. The working Census source is the TIGERweb **In
   [ ...44 more slugs, one line each, alphabetical... ]
     winnsboro          Winnsboro                [-81.083617, 34.352353]
 
-  Wrote the repo rootsrc\data\city-centroids.json (50 entries)
+  Wrote src\data\city-centroids.json (50 entries)
   Verified: every place slug in registry.json has a centroid.
   ```
 
@@ -9078,7 +9888,7 @@ Every line prints `-> 0 matches`. The working Census source is the TIGERweb **In
   ```
   Registry lists 50 place slugs
 
-  Verified the repo rootsrc\data\city-centroids.json: 50/50 place slugs have a centroid.
+  Verified src\data\city-centroids.json: 50/50 place slugs have a centroid.
   ```
 
   **Failure is loud** — prove the guard actually fires. Temporarily delete one key from `src/data/city-centroids.json` (for example the `"greenville"` line), then run `python scripts/build-city-centroids.py --check`. Expected: exit code 1 and
@@ -9110,6 +9920,8 @@ Every line prints `-> 0 matches`. The working Census source is the TIGERweb **In
   resolve rather than silently omitting it. A vitest guard asserts every
   registry place slug has a centroid inside the SC bounding box."
   ```
+
+---
 
 ---
 
@@ -10395,13 +11207,15 @@ Every line prints `-> 0 matches`. The working Census source is the TIGERweb **In
 
 ---
 
+---
+
 ### Task 19: events page and components
 
 Builds the public `/events` page: a baked list + month grid rendered from `src/data/events.json` at build time, merged client-side with the `/api/events` overlay, and a MapLibre map that shows a county choropleth statewide and city-centroid pins when zoomed in.
 
 One module that other steps in this task import does not exist yet, so this task creates it before anything imports it:
 
-- `src/lib/events-view.ts` — the pure view-model layer (merge, tombstone suppression, recurrence expansion, formatting). It touches no DOM and no network, so it gets a real failing-test-first cycle under vitest (Steps 2 and 3). The `.astro` components stay thin because all of this logic lives here.
+- `src/lib/events-view.ts` — the pure view-model layer (merge as an add-only overlay, recurrence expansion, formatting). It touches no DOM and no network, so it gets a real failing-test-first cycle under vitest (Steps 2 and 3). The `.astro` components stay thin because all of this logic lives here.
 
 The map itself is **not** rebuilt here. The MapLibre bootstrap already lives in `src/scripts/map/core.ts` (`createMap(opts) -> MapHandle`), extracted by the earlier map-extraction task, and the events map **composes** it: `createMap({ container: 'events-map', ..., interactive: true })` for the instance, then `addEventLayers(handle.map, ...)` from `src/scripts/map/layers/events.ts` for the choropleth and pins — the same core-plus-layer split the camera map uses (`map/core.ts` + `map/layers/cameras.ts`). This task therefore adds one new layer module beside `cameras.ts`; it does not create or touch `map/core.ts`.
 
@@ -10440,7 +11254,7 @@ Three things this task does **not** do, on purpose:
   node -e "for (const f of ['src/lib/public-event.ts','src/lib/recurrence.ts','src/lib/json-island.ts','src/lib/sanitize-text.ts','src/data/events.json','src/data/city-centroids.json','src/scripts/map/core.ts','src/lib/escape-html.ts']) console.log(require('fs').existsSync(f) ? 'OK   ' + f : 'MISS ' + f)"
   ```
 
-  Expected: eight `OK` lines. If any line reads `MISS`, stop — the task that creates that artifact has not landed yet. Do not stub these files. In particular, `src/scripts/map/core.ts` and `src/lib/escape-html.ts` come from the map-extraction task; without them this task cannot compose the shared map core or import the hardened escaper.
+  Expected: eight `OK` lines. If any line reads `MISS`, stop — the task that creates that artifact has not landed yet. Do not stub these files. In particular, `src/scripts/map/core.ts` and `src/lib/escape-html.ts` come from the map-extraction task; without them this task cannot compose the shared map core or import the hardened escaper. `src/data/events.json` is the `[]` seed the scheduled-fold task (Task 15) commits to the repo — it is not created here; the fold later rewrites it in place.
 
   Then confirm the two data files have the shapes this task assumes:
 
@@ -10463,7 +11277,7 @@ Three things this task does **not** do, on purpose:
 
 - [ ] **Step 2: Write the failing test for `src/lib/events-view.ts`**
 
-  `events-view.ts` is the whole reason the components can stay thin: merging, tombstone suppression, recurrence expansion, and date formatting all live here as pure functions, so they are testable without a DOM. Write the test first.
+  `events-view.ts` is the whole reason the components can stay thin: merging (add-only overlay), recurrence expansion, and date formatting all live here as pure functions, so they are testable without a DOM. Write the test first.
 
   Create `src/lib/events-view.test.ts`:
 
@@ -10471,6 +11285,7 @@ Three things this task does **not** do, on purpose:
   import { describe, it, expect } from 'vitest';
   import {
     mergeEvents,
+    parseOverlayEnvelope,
     expandAll,
     splitByToday,
     monthAbbr,
@@ -10513,10 +11328,13 @@ Three things this task does **not** do, on purpose:
       expect(merged[0].title).toBe('baked title');
     });
 
-    it('suppresses a baked event that the overlay omits (tombstone)', () => {
+    it('keeps a baked event the overlay omits (overlay never tombstones)', () => {
       const baked = [ev({ id: 'aaaaaaaa' }), ev({ id: 'bbbbbbbb' })];
       const overlay = [ev({ id: 'aaaaaaaa' })];
-      expect(mergeEvents(baked, overlay).map((e) => e.id)).toEqual(['aaaaaaaa']);
+      // bbbbbbbb is absent from the overlay, but absence is not a tombstone: the
+      // overlay legitimately filters revoked and past events, so a baked id it
+      // omits stays visible. Revocation is handled by the fold rewriting events.json.
+      expect(mergeEvents(baked, overlay).map((e) => e.id)).toEqual(['aaaaaaaa', 'bbbbbbbb']);
     });
 
     it('appends overlay-only events', () => {
@@ -10525,8 +11343,10 @@ Three things this task does **not** do, on purpose:
       expect(mergeEvents(baked, overlay).map((e) => e.id)).toEqual(['cccccccc', 'aaaaaaaa']);
     });
 
-    it('returns an empty set when the overlay is empty', () => {
-      expect(mergeEvents([ev()], [])).toEqual([]);
+    it('shows all baked events when the overlay is empty', () => {
+      const baked = [ev({ id: 'aaaaaaaa' }), ev({ id: 'bbbbbbbb' })];
+      // An empty overlay means "nothing to add", not "delete everything".
+      expect(mergeEvents(baked, []).map((e) => e.id)).toEqual(['aaaaaaaa', 'bbbbbbbb']);
     });
 
     it('sorts by date, then time, then id', () => {
@@ -10539,6 +11359,25 @@ Three things this task does **not** do, on purpose:
       expect(mergeEvents(baked, null).map((e) => e.id)).toEqual([
         'aaaaaaaa', 'bbbbbbbb', 'cccccccc', 'dddddddd',
       ]);
+    });
+  });
+
+  describe('parseOverlayEnvelope', () => {
+    it('returns the events array from the { events } envelope', () => {
+      const events = [ev({ id: 'aaaaaaaa' }), ev({ id: 'bbbbbbbb' })];
+      expect(parseOverlayEnvelope({ events })).toEqual(events);
+    });
+
+    it('returns an empty array for an empty overlay, so the merge shows baked', () => {
+      // { events: [] } is a valid envelope; mergeEvents(baked, []) then keeps baked.
+      expect(parseOverlayEnvelope({ events: [] })).toEqual([]);
+    });
+
+    it('returns null for any body that is not the { events: [...] } envelope', () => {
+      expect(parseOverlayEnvelope(null)).toBeNull();
+      expect(parseOverlayEnvelope([ev()])).toBeNull();
+      expect(parseOverlayEnvelope({ events: 'nope' })).toBeNull();
+      expect(parseOverlayEnvelope({})).toBeNull();
     });
   });
 
@@ -10686,24 +11525,26 @@ Three things this task does **not** do, on purpose:
   /**
    * Merge the git-baked event set with the /api/events overlay.
    *
+   * Overlay ADDS, never removes. Start from the full baked set; the overlay can
+   * only contribute ids the baked set does not already carry.
+   *
    *   overlay === null  -> the fetch failed; render baked only (graceful degradation)
+   *   overlay === []    -> nothing to add; render baked only
    *   id in both        -> the baked record wins (git is the authoritative content)
-   *   baked only        -> suppressed; the overlay omits tombstoned and expired
-   *                        events, so absence from the overlay *is* the tombstone
+   *   baked only        -> kept; the overlay legitimately omits revoked and past
+   *                        events, so its absence is NOT a tombstone. Revocation is
+   *                        enforced by the fold rewriting events.json and by /go
+   *                        refusing the link in the meantime, never by this merge.
    *   overlay only      -> appended (submitted since the last weekly fold)
    */
   export function mergeEvents(
     baked: readonly PublicEvent[],
     overlay: readonly PublicEvent[] | null,
   ): PublicEvent[] {
-    const out: PublicEvent[] = [];
+    const out: PublicEvent[] = [...baked];
 
-    if (overlay === null) {
-      out.push(...baked);
-    } else {
-      const liveIds = new Set(overlay.map((e) => e.id));
+    if (overlay) {
       const bakedIds = new Set(baked.map((e) => e.id));
-      for (const e of baked) if (liveIds.has(e.id)) out.push(e);
       for (const e of overlay) if (!bakedIds.has(e.id)) out.push(e);
     }
 
@@ -10711,6 +11552,26 @@ Three things this task does **not** do, on purpose:
       sortKey(a.date, a.time, a.id) < sortKey(b.date, b.time, b.id) ? -1 : 1,
     );
     return out;
+  }
+
+  /**
+   * Pull the event array out of the /api/events response envelope.
+   *
+   * The endpoint returns `{ events: PublicEvent[] }` (netlify/functions/events.ts),
+   * never a bare array. Any body that is not that envelope — a bare array, null, a
+   * malformed shape — returns null, which mergeEvents() treats as "overlay
+   * unavailable, show baked", the same graceful path as a failed fetch. An empty
+   * `{ events: [] }` returns `[]`, which merges to the baked set unchanged.
+   */
+  export function parseOverlayEnvelope(body: unknown): PublicEvent[] | null {
+    if (
+      body !== null &&
+      typeof body === 'object' &&
+      Array.isArray((body as { events?: unknown }).events)
+    ) {
+      return (body as { events: PublicEvent[] }).events;
+    }
+    return null;
   }
 
   /**
@@ -10827,7 +11688,7 @@ Three things this task does **not** do, on purpose:
   npx vitest run src/lib/events-view.test.ts
   ```
 
-  Expected: `Test Files  1 passed (1)` with all 15 tests passing.
+  Expected: `Test Files  1 passed (1)` with all 18 tests passing.
 
   Commit:
 
@@ -11271,7 +12132,7 @@ Three things this task does **not** do, on purpose:
       <p class="events-empty-lead">Nothing on the calendar right now.</p>
       <p class="events-empty-proof">
         {past.length > 0
-          ? `${past.length} ${past.length === 1 ? 'event has' : 'events have'} run in the last 90 days.`
+          ? `${past.length} ${past.length === 1 ? 'event has' : 'events have'} run in the last 30 days.`
           : 'Be the first to put something on it.'}
       </p>
       <p class="events-empty-actions">
@@ -11896,35 +12757,72 @@ Three things this task does **not** do, on purpose:
   import EventsMap from '../components/EventsMap.astro';
   import registry from '../data/registry.json';
   import bakedEventsRaw from '../data/events.json';
-  import type { PublicEvent } from '../lib/public-event.js';
+  import { z } from 'zod';
+  import { toPublicEvent, type PublicEvent, type StoredEvent } from '../lib/public-event.js';
   import { expandAll, splitByToday, addMonths } from '../lib/events-view.js';
-  import { sanitizeText } from '../lib/sanitize-text.js';
+  import { sanitizeText, TITLE_LIMITS, DESCRIPTION_LIMITS, ADDRESS_LIMITS } from '../lib/sanitize-text.js';
   import { toJsonIsland } from '../lib/json-island.js';
 
-  const bakedEvents = bakedEventsRaw as unknown as PublicEvent[];
+  // The committed events.json is validated at build time with a strict schema and
+  // then projected through toPublicEvent() before it is rendered or serialized into
+  // the data island. The file lives in a repo a later bad commit can edit, so the
+  // build must never trust it (design §5/§6): a record carrying a server-only field
+  // (signalUrl, codeDigest, revoked) is rejected by `.strict()` and fails the build,
+  // and even a record that slipped through could not reach the client, because every
+  // field is picked by the allowlist projection, never spread. Per-field caps are
+  // imported from sanitize-text.ts, never retyped.
+  const ISO_DATE_RE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+  const TIME_RE = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
 
-  // Re-validate the committed JSON at render. The file lives in a repo a later bad
-  // commit can edit, and the build must not trust it (design §6). The thrown message
-  // names the field and the code but never echoes the offending string.
-  for (const e of bakedEvents) {
-    const checks: Array<[string, unknown, { maxBytes: number; maxGraphemes: number }]> = [
-      ['title', e.title, { maxBytes: 1024, maxGraphemes: 80 }],
-    ];
-    if (e.description !== null && e.description !== undefined) {
-      checks.push(['description', e.description, { maxBytes: 3072, maxGraphemes: 300 }]);
-    }
-    if (e.address !== null && e.address !== undefined) {
-      checks.push(['address', e.address, { maxBytes: 512, maxGraphemes: 120 }]);
-    }
-    for (const [field, value, caps] of checks) {
+  function sanitizedField(caps: { maxBytes: number; maxGraphemes: number }) {
+    return z.unknown().transform((value, ctx) => {
       const result = sanitizeText(value, caps);
       if (!result.ok) {
-        throw new Error(
-          `src/data/events.json: event ${e.id} field "${field}" failed sanitization (${result.code})`,
-        );
+        // result.code is a snake_case machine code; the offending string is never echoed.
+        ctx.addIssue({ code: 'custom', message: result.code });
+        return z.NEVER;
       }
-    }
+      return result.value;
+    });
   }
+
+  const publicEventSchema = z
+    .object({
+      id: z.string(),
+      type: z.enum(['meetup', 'public']),
+      title: sanitizedField(TITLE_LIMITS),
+      description: sanitizedField(DESCRIPTION_LIMITS).nullable(),
+      date: z.string().regex(ISO_DATE_RE, 'bad_format'),
+      time: z.string().regex(TIME_RE, 'bad_format'),
+      city: z.string(),
+      county: z.string(),
+      address: sanitizedField(ADDRESS_LIMITS).nullable(),
+      hasSignalGroup: z.boolean(),
+      recurrence: z
+        .object({
+          freq: z.enum(['weekly', 'monthly_nth']),
+          until: z.string().regex(ISO_DATE_RE, 'bad_format'),
+        })
+        .strict()
+        .nullable(),
+      organizer: z.string(),
+      createdAt: z.string(),
+    })
+    .strict();
+
+  const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index) => {
+    const parsed = publicEventSchema.safeParse(raw);
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      const at = issue.path.length > 0 ? issue.path.join('.') : '_record';
+      const detail = issue.code === 'unrecognized_keys' ? 'unexpected_field' : issue.message;
+      throw new Error(
+        `src/data/events.json: record ${index} at "${at}" failed strict validation (${detail})`,
+      );
+    }
+    // Allowlist projection, even after a clean parse: defence in depth (design §5).
+    return toPublicEvent(parsed.data as unknown as StoredEvent);
+  });
 
   // Display names, derived from registry.json at build time and shipped in the data
   // island. registry.json itself is ~50 KB and must never reach the client bundle.
@@ -11940,18 +12838,31 @@ Three things this task does **not** do, on purpose:
 
   const today = new Date().toISOString().slice(0, 10);
   const horizonEnd = addMonths(today, 12);
-  const pastCutoff = (() => {
+
+  // One 30-day retention horizon, matching RETENTION_DAYS in netlify/functions/events.ts
+  // and the build-time expiry guard (design §10). A single window everywhere — the past
+  // list, the shipped island, and the overlay all cut at the same 30 days — so a baked id
+  // the overlay can return is exactly a baked id the island still carries.
+  const RETENTION_DAYS = 30;
+  const retentionCutoff = (() => {
     const d = new Date(`${today}T00:00:00Z`);
-    d.setUTCDate(d.getUTCDate() - 90);
+    d.setUTCDate(d.getUTCDate() - RETENTION_DAYS);
     return d.toISOString().slice(0, 10);
   })();
 
   const allOccurrences = expandAll(bakedEvents, horizonEnd);
   const { upcoming, past } = splitByToday(allOccurrences, today);
-  const recentPast = past.filter((o) => o.date >= pastCutoff);
+  const recentPast = past.filter((o) => o.date >= retentionCutoff);
+
+  // Bounded island: ship only events still inside the retention horizon, not the whole
+  // baked array (design §12). An event's last relevant day is the end of its series, or
+  // its single date. Anything older is neither rendered as a card nor returned by
+  // /api/events, so shipping it would only bloat the page.
+  const lastRelevantDate = (e: PublicEvent): string => e.recurrence?.until ?? e.date;
+  const islandEvents = bakedEvents.filter((e) => lastRelevantDate(e) >= retentionCutoff);
 
   const island = {
-    events: bakedEvents,
+    events: islandEvents,
     cityNames,
     countyNames,
     today,
@@ -12266,9 +13177,11 @@ Three things this task does **not** do, on purpose:
    *
    * The list and month views are server-rendered from src/data/events.json, so the
    * page is complete with JavaScript off. This module only patches that markup:
-   * it removes anything the overlay suppresses and inserts anything submitted since
-   * the last weekly fold. Card markup is therefore written twice — once in
-   * EventsList.astro, once in buildCard() below. Keep the class names in sync.
+   * it inserts anything submitted since the last weekly fold. The overlay only ADDS —
+   * it never tombstones a baked card (a revoked event is removed by the fold rewriting
+   * events.json, and stopped at /go in the meantime). Card markup is therefore written
+   * twice — once in EventsList.astro, once in buildCard() below. Keep the class names
+   * in sync.
    *
    * The map is COMPOSED, not rebuilt: this module calls createMap() from
    * src/scripts/map/core.ts (the shared MapLibre bootstrap) and then addEventLayers()
@@ -12288,6 +13201,7 @@ Three things this task does **not** do, on purpose:
   import type { MapHandle } from './map/core.js';
   import {
     mergeEvents,
+    parseOverlayEnvelope,
     expandAll,
     splitByToday,
     monthAbbr,
@@ -12494,7 +13408,11 @@ Three things this task does **not** do, on purpose:
   function applyMerge(merged: PublicEvent[]) {
     const live = new Set(merged.map((e) => e.id));
 
-    // 1. Remove anything the overlay suppresses (tombstoned, revoked, expired).
+    // 1. Defensive prune: drop any rendered card whose id is not in the merged set.
+    //    Under add-only merge the baked set is always retained (the overlay never
+    //    tombstones), so in practice this removes nothing — a revoked-but-not-yet-
+    //    folded event stays listed here and is stopped at /go instead. It remains as a
+    //    guard against a card with no backing record.
     for (const node of Array.from(document.querySelectorAll<HTMLElement>('[data-event-id]'))) {
       if (!live.has(node.dataset.eventId!)) node.remove();
     }
@@ -12529,8 +13447,10 @@ Three things this task does **not** do, on purpose:
     try {
       const res = await fetch('/api/events', { headers: { accept: 'application/json' } });
       if (!res.ok) throw new Error(`/api/events: ${res.status}`);
-      const overlay = (await res.json()) as PublicEvent[];
-      if (!Array.isArray(overlay)) throw new Error('/api/events: not an array');
+      // The endpoint returns { events: PublicEvent[] } (netlify/functions/events.ts).
+      // parseOverlayEnvelope returns that array, or null for any non-envelope body;
+      // mergeEvents(baked, null) then renders the baked set unchanged.
+      const overlay = parseOverlayEnvelope(await res.json());
       applyMerge(mergeEvents(island.events, overlay));
     } catch (err) {
       // Fail soft: the baked page stays exactly as rendered.
@@ -12666,9 +13586,11 @@ Three things this task does **not** do, on purpose:
 
 ---
 
+---
+
 ### Task 20: County and type filters
 
-Closes design §12's filter chips: county, and event type (meetups / public events). Task 18 shipped `/events` deliberately without them and noted that `src/lib/events-view.ts` "exposes no county filter yet" because the filter interacts with recurrence expansion and with the empty state, and both needed helpers that did not exist yet.
+Closes design §12's filter chips: county, and event type (meetups / public events). The events-page task shipped `/events` deliberately without them and noted that `src/lib/events-view.ts` "exposes no county filter yet" because the filter interacts with recurrence expansion and with the empty state, and both needed helpers that did not exist yet.
 
 **Why the chips are client-rendered, and why that is the honest choice here.** This site prerenders to static HTML (`astro.config.mjs` sets no `output`, `netlify.toml` publishes `dist`). There is no server to read a query string. An earlier draft of this task reached for one prerendered page per filter combination so the chips could be real `<a href>` links that keep working with JavaScript off — a rest-parameter route, a `getStaticPaths()` matrix, `noindex`, sitemap exclusion, a route-collision guard. That is far more machinery than the feature earns. The simpler and equally honest choice: the chips are built by JavaScript and **do not exist in the no-JavaScript DOM at all** — rather than existing and silently doing nothing, which was the real hazard on a static site. Filtering being JS-only matches the rest of deflocksc.org, which already ships client scripts in eleven components (the action modal, the map, the bill tracker, the FAQ, the nav, the toolkit pages); this is the established baseline, not a regression.
 
@@ -12680,7 +13602,7 @@ Three rules that are easy to get wrong, so they are stated once here:
 
 - **The chip row is derived from the events that exist, not from the 46-county registry.** `countyOptions()` counts upcoming occurrences per county, and only counties with at least one get a chip. With a handful of events that is a row of two or three chips, not a wall of 46.
 - **The chip *list* comes from the unfiltered set; only the chip *counts* are faceted.** If selecting Greenville erased every other county's chip, the user would be stranded with no way back out except the browser's back button. A faceted count can drop to 0 and the chip dims, but it stays clickable so the user is never stranded.
-- **The map is county-unfiltered on purpose.** Selecting a county filters the list, but the choropleth keeps drawing every county so the next one is still one click away. The selected county gets an amber outline instead. `events-page.ts` owns the filter state and calls back into `events-map.ts`, so the highlight and the chip cannot disagree — clicking a county on the map sets the filter and the chip reflects it.
+- **The map is county-unfiltered on purpose.** Selecting a county filters the list, but the choropleth keeps drawing every county so the next one is still one click away. The selected county gets an amber outline instead. `events-page.ts` owns the filter state and calls back into `src/scripts/map/layers/events.ts`, so the highlight and the chip cannot disagree — clicking a county on the map sets the filter and the chip reflects it.
 
 Out of scope, on purpose: no city-level filter (city chips would be a wall, and the county chips already narrow enough), and no date-range filter (the Month tab is the date view).
 
@@ -12690,7 +13612,7 @@ Out of scope, on purpose: no city-level filter (city chips would be a wall, and 
 - Modify `src/lib/events-view.test.ts` — cover them
 - Modify `src/components/EventsList.astro` — stable ids for the empty state and the past list, shared empty-state copy
 - Modify `src/pages/events.astro` — stays a single static route; add the empty filter container, the island fields the client needs, and the chip styles
-- Modify `src/scripts/events-map.ts` — county selection layer plus a click callback
+- Modify `src/scripts/map/layers/events.ts` — a county-select callback, a `setSelectedCounty` export, and a county click that reports a selection (the `county-selected` source and `county-highlight` layer already exist from the events-page task)
 - Modify `src/scripts/events-page.ts` — filter state, chip building, hash read/write, `hashchange`, map sync
 
 No new component, no new route, no `astro.config.mjs` change.
@@ -12699,15 +13621,15 @@ No new component, no new route, no `astro.config.mjs` change.
 
 - [ ] **Step 1: Verify preconditions**
 
-  This task extends the modules Task 18 created. It does not redefine either. Run from the repo root (`the repo root`):
+  This task extends the modules the events-page task created. It does not redefine either. Run from the repo root (`the repo root`):
 
   ```bash
-  node -e "['src/lib/events-view.ts','src/lib/events-view.test.ts','src/pages/events.astro','src/components/EventsList.astro','src/components/EventsMonth.astro','src/scripts/events-page.ts','src/scripts/events-map.ts'].forEach(f=>console.log(require('fs').existsSync(f)?'OK   '+f:'MISS '+f))"
+  node -e "['src/lib/events-view.ts','src/lib/events-view.test.ts','src/pages/events.astro','src/components/EventsList.astro','src/components/EventsMonth.astro','src/scripts/events-page.ts','src/scripts/map/layers/events.ts'].forEach(f=>console.log(require('fs').existsSync(f)?'OK   '+f:'MISS '+f))"
   ```
 
-  Expected: seven `OK` lines. Any `MISS` means Task 18 has not landed; stop rather than stubbing.
+  Expected: seven `OK` lines. Any `MISS` means the events-page task has not landed; stop rather than stubbing.
 
-  Confirm the exports this task builds on are the ones Task 18 actually shipped:
+  Confirm the exports this task builds on are the ones the events-page task actually shipped:
 
   ```bash
   node -e "const s=require('fs').readFileSync('src/lib/events-view.ts','utf8'); ['sortKey','mergeEvents','expandAll','splitByToday','monthAbbr','dayOfMonth','formatTime12','addMonths','groupByMonth'].forEach(n=>console.log(s.includes('export function '+n+'(')?'OK   '+n:'MISS '+n))"
@@ -13178,7 +14100,7 @@ No new component, no new route, no `astro.config.mjs` change.
   npx vitest run src/lib/events-view.test.ts
   ```
 
-  Expected: `Test Files  1 passed (1)` and `Tests  49 passed (49)` — Task 18's 15 plus the 34 added here.
+  Expected: `Test Files  1 passed (1)` and `Tests  49 passed (49)` — the events-page task's 15 plus the 34 added here.
 
   Commit:
 
@@ -13267,7 +14189,7 @@ No new component, no new route, no `astro.config.mjs` change.
     </details>
   ```
 
-  Past rows still carry no `data-event-id`, exactly as Task 18 left them: `/go/:id` refuses past events server-side, and keeping the id off keeps the overlay patch pass from touching them. The client rebuilds these rows wholesale on a filter change rather than patching them.
+  Past rows still carry no `data-event-id`, exactly as the events-page task left them: `/go/:id` refuses past events server-side, and keeping the id off keeps the overlay patch pass from touching them. The client rebuilds these rows wholesale on a filter change rather than patching them.
 
 ---
 
@@ -13341,8 +14263,8 @@ No new component, no new route, no `astro.config.mjs` change.
   // The page prerenders the FULL, unfiltered calendar — that is the no-JavaScript
   // invariant. The client narrows it in place; nothing here is filtered.
   const allOccurrences = expandAll(bakedEvents, horizonEnd);
-  const { upcoming, past: allPast } = splitByToday(allOccurrences, today);
-  const past = allPast.filter((o) => o.date >= pastCutoff);
+  const { upcoming, past: recentPast } = splitByToday(allOccurrences, today);
+  const past = recentPast.filter((o) => o.date >= pastCutoff);
 
   // County slugs with at least one upcoming occurrence, busiest first. The client
   // builds one chip per slug — never one per registry county — so the row stays a
@@ -13363,7 +14285,7 @@ No new component, no new route, no `astro.config.mjs` change.
   ---
   ```
 
-  If Task 18's markup embeds the island through a `set:html` call other than `toJsonIsland(island)`, keep that call as it is — the two new keys (`pastCutoff`, `counties`) serialize automatically because they are added to the same `island` object. The rest of the markup — the hero, the List/Month/Map tabs, the intake dialog, and the `<script>import '../scripts/events-page.js';</script>` — is unchanged. Only the two edits below touch the body.
+  This keeps the body's `<EventsList upcoming={upcoming} past={recentPast} .../>` and `<EventsMonth occurrences={upcoming} .../>` calls valid: `upcoming` and `recentPast` are still in scope, and `past` (the 90-day-trimmed set) feeds only the island. If the events-page task's markup embeds the island through a `set:html` call other than `toJsonIsland(island)`, keep that call as it is — the two new keys (`pastCutoff`, `counties`) serialize automatically because they are added to the same `island` object. The rest of the markup — the hero, the List/Month/Map tabs, the intake dialog, and the `<script>import '../scripts/events-page.js';</script>` — is unchanged. Only the two edits below touch the body.
 
   **(b)** Add the empty filter container. It sits above the grid, is empty and `hidden` in the prerendered HTML, and is filled by `events-page.ts` on load — so a no-JavaScript visitor sees no chip row and no dead control, only the complete list below it. Find the grid wrapper (the `<div class="events-grid">` that holds the List/Month panels) and insert immediately before it:
 
@@ -13375,7 +14297,7 @@ No new component, no new route, no `astro.config.mjs` change.
         <div class="events-grid">
   ```
 
-  (If the grid wrapper carries different attributes in Task 18's markup, leave them; insert the `<nav>` on the line above whatever that opening tag is.)
+  (If the grid wrapper carries different attributes in the events-page task's markup, leave them; insert the `<nav>` on the line above whatever that opening tag is.)
 
   **(c)** Add the chip styles. Insert this immediately before the closing `</style>` of the page's `<style is:global>` block, after the intake-dialog rules. The chips are `<button>` elements the client creates, so the rules are global (a scoped rule keys on a `data-astro-*` attribute the runtime-created nodes do not carry):
 
@@ -13454,151 +14376,172 @@ No new component, no new route, no `astro.config.mjs` change.
 
 ---
 
-- [ ] **Step 6: Make the map a filter control in `src/scripts/events-map.ts`**
+- [ ] **Step 6: Make the map a filter control in `src/scripts/map/layers/events.ts`**
 
-  Five edits. The map keeps rendering every county — selecting one must not hide the others, or the next county becomes unreachable — and gains an amber outline on the selected one plus a click callback that hands the slug back to whoever owns the filter state.
+  Five edits to `src/scripts/map/layers/events.ts`. The events-page task already ships the county choropleth, the `county-selected` source, and the amber `county-highlight` line layer that reads from it; this task re-adds none of them. What it adds is composer control of that highlight (`setSelectedCounty`) and a county click that **reports a selection** to whoever owns the filter state instead of easing the map in. The map keeps rendering every county — selecting one must not hide the others, or the next county becomes unreachable — and never zooms on a county click, because easing past z8 fades the choropleth out and the choropleth is doubling as the selection UI.
 
-  **(a)** Extend the module state. Change:
-
-  ```ts
-  let handle: MapHandle | null = null;
-  let styleReady = false;
-  let cityNames: Record<string, string> = {};
-  let pending: Occurrence[] = [];
-  let countyData: GeoJSON.FeatureCollection | null = null;
-  ```
-
-  to:
+  **(a)** Extend `EventLayerData` with the select callback. Change:
 
   ```ts
-  let handle: MapHandle | null = null;
-  let styleReady = false;
-  let cityNames: Record<string, string> = {};
-  let pending: Occurrence[] = [];
-  let countyData: GeoJSON.FeatureCollection | null = null;
-  let selectedCounty: string | null = null;
-  let onCountySelect: ((county: string | null) => void) | null = null;
-
-  /** No county slug is ever the empty string, so this filter value matches nothing. */
-  const NO_COUNTY = '';
-
-  /**
-   * Highlight one county, or none. Safe before the style loads — the value is kept
-   * and applied at the end of initEventsMap(). events-page.ts owns the filter state
-   * and calls this; the map never decides on its own what is selected, which is why
-   * the outline and the chip cannot drift apart.
-   */
-  export function setSelectedCounty(county: string | null): void {
-    selectedCounty = county;
-    if (!handle || !styleReady) return;
-    handle.map.setFilter('county-selected', ['==', ['get', 'county'], county ?? NO_COUNTY]);
+  export interface EventLayerData {
+    /** County outlines, from /districts/sc-counties.json. */
+    counties: GeoJSON.FeatureCollection;
+    /** The occurrences to plot. */
+    events: readonly Occurrence[];
+    /**
+     * City centroids keyed by slug. Each value is either [lng, lat] or
+     * { lng, lat }; both are accepted, so raw src/data/city-centroids.json works.
+     */
+    centroids: Record<string, unknown>;
+    /** Display names per city slug, for the pin labels. */
+    cityNames: Record<string, string>;
   }
   ```
 
-  **(b)** Accept the callback. Change:
+  to:
 
   ```ts
-  export async function initEventsMap(
-    containerId: string,
-    occurrences: Occurrence[],
-    names: Record<string, string>,
-  ): Promise<void> {
-    if (handle) { resizeEventsMap(); return; }
-    cityNames = names;
-    pending = occurrences;
+  export interface EventLayerData {
+    /** County outlines, from /districts/sc-counties.json. */
+    counties: GeoJSON.FeatureCollection;
+    /** The occurrences to plot. */
+    events: readonly Occurrence[];
+    /**
+     * City centroids keyed by slug. Each value is either [lng, lat] or
+     * { lng, lat }; both are accepted, so raw src/data/city-centroids.json works.
+     */
+    centroids: Record<string, unknown>;
+    /** Display names per city slug, for the pin labels. */
+    cityNames: Record<string, string>;
+    /**
+     * Called when a county fill is clicked, with the county slug — or null when the
+     * already-selected county is clicked again (a toggle-off). The layer holds no
+     * filter state; the composer decides and calls setSelectedCounty back, which is
+     * why the amber outline and the filter chip can never drift apart.
+     */
+    onCountySelect?: (county: string | null) => void;
+  }
+  ```
+
+  **(b)** Carry the selection and the callback in the per-map state. Change:
+
+  ```ts
+  interface EventLayerState {
+    counties: GeoJSON.FeatureCollection;
+    centroids: Centroids;
+    cityNames: Record<string, string>;
+    teardown: () => void;
+  }
   ```
 
   to:
 
   ```ts
-  export async function initEventsMap(
-    containerId: string,
-    occurrences: Occurrence[],
-    names: Record<string, string>,
-    onSelect?: (county: string | null) => void,
-  ): Promise<void> {
-    if (handle) { resizeEventsMap(); return; }
-    cityNames = names;
-    pending = occurrences;
-    onCountySelect = onSelect ?? null;
+  interface EventLayerState {
+    counties: GeoJSON.FeatureCollection;
+    centroids: Centroids;
+    cityNames: Record<string, string>;
+    selectedCounty: string | null;
+    onCountySelect: ((county: string | null) => void) | null;
+    teardown: () => void;
+  }
   ```
 
-  **(c)** Add the selection outline between `county-outline` and `county-badge`, so the count badges stay on top of it. Change:
+  **(c)** Add the composer-driven highlight setter. Insert this immediately after `setEventData`:
 
   ```ts
-    map.addLayer({
-      id: 'county-badge',
-  ```
-
-  to:
-
-  ```ts
-    map.addLayer({
-      id: 'county-selected',
-      type: 'line',
-      source: 'sc-counties',
-      filter: ['==', ['get', 'county'], selectedCounty ?? NO_COUNTY],
-      paint: {
-        'line-color': '#fbbf24',
-        'line-width': 2.5,
-        'line-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 9, 0.35],
-      },
+  /**
+   * Highlight one county, or none, by pushing its outline into the `county-selected`
+   * source the events-page task already created. The composer owns the filter state
+   * and calls this; the map never decides on its own what is selected, so the amber
+   * outline always matches the active chip. No-op if the map has no event layers yet.
+   */
+  export function setSelectedCounty(map: maplibregl.Map, county: string | null): void {
+    const state = eventStates.get(map);
+    if (!state) return;
+    state.selectedCounty = county;
+    const source = map.getSource('county-selected') as maplibregl.GeoJSONSource | undefined;
+    if (!source) return;
+    const feature = county
+      ? state.counties.features.find((f) => String(f.properties?.county ?? '') === county)
+      : undefined;
+    source.setData({
+      type: 'FeatureCollection',
+      features: feature ? [{ type: 'Feature', geometry: feature.geometry, properties: {} }] : [],
     });
-
-    map.addLayer({
-      id: 'county-badge',
+  }
   ```
 
-  **(d)** Replace the county click handler. Change:
+  **(d)** Seed the two new state fields in `addEventLayers`. Change:
 
   ```ts
-    map.on('click', 'county-fill', (e) => {
+    const state: EventLayerState = {
+      counties,
+      centroids: normalizeCentroids(data.centroids),
+      cityNames: data.cityNames,
+      teardown: () => {},
+    };
+  ```
+
+  to:
+
+  ```ts
+    const state: EventLayerState = {
+      counties,
+      centroids: normalizeCentroids(data.centroids),
+      cityNames: data.cityNames,
+      selectedCounty: null,
+      onCountySelect: data.onCountySelect ?? null,
+      teardown: () => {},
+    };
+  ```
+
+  **(e)** Replace the county click handler in `bindEventInteractions` so it reports a selection instead of setting the highlight and easing in. Change:
+
+  ```ts
+    // County fill -> highlight the clicked county and ease in past the crossfade.
+    const onCountyClick = (e: maplibregl.MapLayerMouseEvent) => {
+      const f = e.features?.[0];
+      const selected = map.getSource('county-selected') as maplibregl.GeoJSONSource | undefined;
+      selected?.setData({
+        type: 'FeatureCollection',
+        features: f ? [{ type: 'Feature', geometry: f.geometry, properties: {} }] : [],
+      });
       map.easeTo({ center: e.lngLat, zoom: Math.max(map.getZoom() + 2, 8.5) });
-    });
+    };
   ```
 
   to:
 
   ```ts
-    // The choropleth is a filter control, not a zoom shortcut. Clicking a county
-    // selects it; clicking the county that is already selected clears the filter.
-    // Zooming past z8 would fade the choropleth out, which is the one thing that
-    // must not happen while it is doubling as the selection UI.
-    map.on('click', 'county-fill', (e) => {
+    // County fill -> report a selection to the composer. The choropleth is a filter
+    // control, not a zoom shortcut: clicking a county hands its slug to the composer,
+    // which owns the filter state and calls setSelectedCounty back; clicking the
+    // already-selected county clears it. We do NOT ease in past z8 here — that would
+    // fade the choropleth out, and the choropleth is doubling as the selection UI.
+    const onCountyClick = (e: maplibregl.MapLayerMouseEvent) => {
       const slug = String(e.features?.[0]?.properties?.county ?? '');
       if (!slug) return;
-      onCountySelect?.(slug === selectedCounty ? null : slug);
-    });
+      const state = eventStates.get(map);
+      if (!state) return;
+      state.onCountySelect?.(slug === state.selectedCounty ? null : slug);
+    };
   ```
 
-  **(e)** Apply any selection that arrived before the style was ready. Change:
-
-  ```ts
-    styleReady = true;
-    setEventsData(pending);
-  }
-  ```
-
-  to:
-
-  ```ts
-    styleReady = true;
-    setEventsData(pending);
-    setSelectedCounty(selectedCounty);
-  }
-  ```
+  Nothing else in `events.ts` changes: `county-selected`, `county-highlight`, `EVENT_LAYER_IDS`, and `removeEventLayers` already account for the selection source and layer.
 
 ---
 
 - [ ] **Step 7: Wire the filter into `src/scripts/events-page.ts`**
 
-  The module keeps Task 18's structure: the prerendered DOM is correct on arrival and the overlay merge still patches it incrementally. What is new is a filter change — a user action that re-renders the list, the month chips, and the past rows from `allEvents`, then writes the URL hash. There is nothing in the DOM to "unhide," because the page renders one full list and the client narrows it.
+  The module keeps the events-page task's structure: the prerendered DOM is correct on arrival and the overlay merge still patches it incrementally. What is new is a filter change — a user action that re-renders the list, the month chips, and the past rows from `allEvents`, then writes the URL hash. There is nothing in the DOM to "unhide," because the page renders one full list and the client narrows it.
 
   **(a)** Extend the imports. Change:
 
   ```ts
   import type { PublicEvent } from '../lib/public-event.js';
   import type { Occurrence } from '../lib/events-view.js';
+  import type { MapHandle } from './map/core.js';
   import {
     mergeEvents,
     expandAll,
@@ -13615,6 +14558,7 @@ No new component, no new route, no `astro.config.mjs` change.
   ```ts
   import type { PublicEvent } from '../lib/public-event.js';
   import type { Occurrence, EventFilter, EventTypeFilter } from '../lib/events-view.js';
+  import type { MapHandle } from './map/core.js';
   import {
     mergeEvents,
     expandAll,
@@ -13691,24 +14635,33 @@ No new component, no new route, no `astro.config.mjs` change.
   }
   ```
 
-  **(c)** Hand the map the callback and the current selection. Change:
+  **(c)** Draw the filtered occurrences on first paint, register the county-select callback, and set the initial highlight. In `loadMap`, change the `addEventLayers` call. Change:
 
   ```ts
-    mapModule = await import('./events-map.js');
-    await mapModule.initEventsMap('events-map', occurrences, island.cityNames);
+    layer.addEventLayers(handle.map, {
+      counties,
+      events: occurrences,
+      centroids: (centroidsMod as { default: Record<string, unknown> }).default,
+      cityNames: island.cityNames,
+    });
   }
   ```
 
   to:
 
   ```ts
-    mapModule = await import('./events-map.js');
-    await mapModule.initEventsMap('events-map', mapOccurrences(), island.cityNames, (county) => {
-      // The map does not hold filter state; it reports a click and this module
-      // decides. That is what makes the chip and the outline the same thing.
-      pushHash({ ...filter, county: county ?? 'all' });
+    layer.addEventLayers(handle.map, {
+      counties,
+      events: mapOccurrences(),
+      centroids: (centroidsMod as { default: Record<string, unknown> }).default,
+      cityNames: island.cityNames,
+      onCountySelect: (county) => {
+        // The map does not hold filter state; it reports a click and this module
+        // decides. That is what makes the chip and the amber outline the same thing.
+        pushHash({ ...filter, county: county ?? 'all' });
+      },
     });
-    mapModule.setSelectedCounty(filter.county === 'all' ? null : filter.county);
+    layer.setSelectedCounty(handle.map, filter.county === 'all' ? null : filter.county);
   }
   ```
 
@@ -13727,7 +14680,7 @@ No new component, no new route, no `astro.config.mjs` change.
   }
   ```
 
-  **(e)** Replace the tail of `applyMerge` — everything from the `// 3.` comment to the end of the function — so the merge respects the active filter and hands the chrome update to one shared place. Change:
+  **(e)** Rework `applyMerge` so the merge respects the active filter and hands the chrome update to one shared place. Change:
 
   ```ts
     // 2. Insert events submitted since the last fold.
@@ -13742,7 +14695,7 @@ No new component, no new route, no `astro.config.mjs` change.
     const fresh = merged.filter((e) => !bakedIds.has(e.id) && matchesFilter(e, filter));
   ```
 
-  and change:
+  and change the tail of the function — everything from the `// 3.` comment to the closing brace:
 
   ```ts
     // 3. Recompute the occurrence set for the map and the header count.
@@ -13754,7 +14707,7 @@ No new component, no new route, no `astro.config.mjs` change.
     const empty = document.getElementById('events-empty');
     if (empty && list) empty.hidden = list.children.length > 0;
 
-    mapModule?.setEventsData(occurrences);
+    if (mapHandle && eventsLayer) eventsLayer.setEventData(mapHandle.map, occurrences);
   }
   ```
 
@@ -13777,7 +14730,7 @@ No new component, no new route, no `astro.config.mjs` change.
   // list and no dead control. Here we build the chips, filter the list in place,
   // and keep the choice in the URL hash so a filtered view is shareable and the
   // back button works. `el`, `buildCard`, `buildChip`, and `placeLabel` already
-  // exist in this module (Task 18); they are used, not redefined.
+  // exist in this module (the events-page task); they are used, not redefined.
 
   function chipButton(
     key: string,
@@ -13912,8 +14865,10 @@ No new component, no new route, no `astro.config.mjs` change.
     const proof = document.getElementById('events-empty-proof');
     if (proof) proof.textContent = emptyStateProof(pastShown);
 
-    mapModule?.setEventsData(mapOccurrences());
-    mapModule?.setSelectedCounty(filter.county === 'all' ? null : filter.county);
+    if (mapHandle && eventsLayer) {
+      eventsLayer.setEventData(mapHandle.map, mapOccurrences());
+      eventsLayer.setSelectedCounty(mapHandle.map, filter.county === 'all' ? null : filter.county);
+    }
   }
 
   /** Re-render the list, the month chips, and the past rows for a filter, then sync
@@ -14127,25 +15082,27 @@ No new component, no new route, no `astro.config.mjs` change.
   Commit:
 
   ```bash
-  git add src/scripts/events-page.ts src/scripts/events-map.ts
+  git add src/scripts/events-page.ts src/scripts/map/layers/events.ts
   git commit -m "feat(events): client-side county and type filtering wired to the map"
   ```
 
 ---
 
+---
+
 ### Task 21: submit form page
 
-The organizer-facing submission form. It renders six fields for a meetup and reveals two more for a public event, carries the CSS-hidden honeypot, shows the §13 Signal setup checklist at the Signal-link field, and on success shows the `/events#<id>` permalink for the organizer to copy.
+The organizer-facing submission form. It renders six fields for a meetup and reveals two more for a public event, offers a recurrence control, carries the CSS-hidden honeypot, shows the §13 Signal setup checklist at the Signal-link field, and on success shows the `/events#<id>` permalink for the organizer to copy.
 
 This task builds the **client** only. It POSTs JSON to `POST /api/submit-event`; that function is a separate task. Until it exists, the form's failure path is what you verify (Step 11).
 
 **Files:**
 
-- Create: `the repo rootsrc/lib/city-label.ts`
-- Create: `the repo rootsrc/lib/city-label.test.ts`
-- Create: `the repo rootsrc/components/SubmitEventForm.astro`
-- Create: `the repo rootsrc/pages/events/submit.astro`
-- Modify: `the repo rootastro.config.mjs`
+- Create: `src/lib/city-label.ts`
+- Create: `src/lib/city-label.test.ts`
+- Create: `src/components/SubmitEventForm.astro`
+- Create: `src/pages/events/submit.astro`
+- Modify: `astro.config.mjs`
 
 Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all commands from the repo root, `the repo root`.
 
@@ -14202,7 +15159,7 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
 
   ```
    FAIL  src/lib/city-label.test.ts [ src/lib/city-label.test.ts ]
-  Error: Cannot find module './city-label.js' imported from 'the repo rootsrc/lib/city-label.test.ts'
+  Error: Cannot find module './city-label.js' imported from 'src/lib/city-label.test.ts'
 
    Test Files  1 failed (1)
         Tests  no tests
@@ -14328,7 +15285,8 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
         autocomplete="one-time-code" keeps browser autofill from populating it and
         locking out a real organizer. tabindex="-1" and aria-hidden="true" keep it
         out of the tab order and the accessibility tree. Design §6.
-        The submit function drops any submission where `website` is non-empty.
+        The submit function drops any submission where `website` is non-empty, and
+        strips the (empty) key before validation.
       -->
       <div class="hp-field" aria-hidden="true">
         <label for="field-website">Website</label>
@@ -14391,6 +15349,42 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
           <p id="hint-time" class={hintClass}>24-hour clock. Eastern time.</p>
           <p class={errorClass} data-error-for="time" id="error-time" hidden></p>
         </div>
+      </div>
+
+      <!-- Recurrence. The schema (Task 11) accepts recurrence = { freq, until }
+           with freq in ('weekly','monthly_nth'); the UI maps monthly ->
+           monthly_nth. The `until` field is revealed only when the event repeats
+           and its key is omitted from the payload otherwise. -->
+      <div class="mb-6">
+        <label for="field-repeats" class={labelClass}>Repeats</label>
+        <select
+          id="field-repeats"
+          name="repeats"
+          class={inputClass}
+          aria-describedby="hint-repeats"
+        >
+          <option value="none" selected>Does not repeat</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly (same weekday each month)</option>
+        </select>
+        <p id="hint-repeats" class={hintClass}>
+          Leave this on "Does not repeat" for a one-off. Recurring events run up to 6 months out.
+        </p>
+      </div>
+
+      <div id="recurrence-until-field" class="mb-6" hidden>
+        <label for="field-until" class={labelClass}>Repeat until</label>
+        <input
+          id="field-until"
+          name="recurrence.until"
+          type="date"
+          class={inputClass}
+          aria-describedby="hint-until error-until"
+        />
+        <p id="hint-until" class={hintClass}>
+          The last date the event repeats, within 6 months of the start date.
+        </p>
+        <p class={errorClass} data-error-for="recurrence.until" id="error-until" hidden></p>
       </div>
 
       <!-- City -->
@@ -14614,6 +15608,9 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
     const signalInput = document.getElementById('field-signal-url') as HTMLInputElement;
     const signalRequirement = document.getElementById('signal-url-requirement') as HTMLElement;
     const dateInput = document.getElementById('field-date') as HTMLInputElement;
+    const repeatsSelect = document.getElementById('field-repeats') as HTMLSelectElement;
+    const untilField = document.getElementById('recurrence-until-field') as HTMLElement;
+    const untilInput = document.getElementById('field-until') as HTMLInputElement;
     const honeypot = document.getElementById('field-website') as HTMLInputElement;
     const statusEl = document.getElementById('submit-status') as HTMLElement;
     const errorSummary = document.getElementById('error-summary') as HTMLElement;
@@ -14634,6 +15631,7 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
       'city',
       'address',
       'signalUrl',
+      'recurrence.until',
       'organizerCode',
     ];
 
@@ -14649,6 +15647,8 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
       derived_field: 'The server fills this in. Do not submit it.',
       invalid_url: 'Must be a https://signal.group/#... invite link.',
       disallowed_characters: 'Remove unusual characters and try again.',
+      until_not_after_date: 'The repeat-until date must be after the start date.',
+      until_too_far_out: 'Recurring events can run at most 6 months out.',
     };
 
     const TOP_LEVEL_MESSAGES: Record<string, string> = {
@@ -14691,6 +15691,32 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
         : 'Required. Every meetup needs a group.';
     }
 
+    // Keep the `until` bounds pinned to the start date: strictly after it, and no
+    // more than 6 months out. Client-side hint only; the server is authoritative.
+    function syncUntilBounds(): void {
+      const start = dateInput.value;
+      if (!start) {
+        untilInput.removeAttribute('min');
+        untilInput.removeAttribute('max');
+        return;
+      }
+      const parts = start.split('-').map(Number);
+      const y = parts[0];
+      const m = parts[1];
+      const d = parts[2];
+      untilInput.min = isoDate(new Date(y, m - 1, d + 1));
+      untilInput.max = isoDate(new Date(y, m - 1 + 6, d));
+    }
+
+    function applyRepeats(): void {
+      const recurring = repeatsSelect.value !== 'none';
+      untilField.hidden = !recurring;
+      untilInput.required = recurring;
+      // Disabled keeps the hidden `until` out of native validation and focus order.
+      untilInput.disabled = !recurring;
+      if (recurring) syncUntilBounds();
+    }
+
     form.querySelectorAll('input[name="type"]').forEach((radio) => {
       radio.addEventListener('change', () => {
         clearErrors();
@@ -14699,9 +15725,26 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
     });
     applyType();
 
+    repeatsSelect.addEventListener('change', () => {
+      clearErrors();
+      applyRepeats();
+    });
+    dateInput.addEventListener('change', syncUntilBounds);
+    applyRepeats();
+
     function fieldValue(id: string): string {
       const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
       return el ? el.value.trim() : '';
+    }
+
+    // Build the recurrence object the schema accepts, or null when the event does
+    // not repeat. The UI's "monthly" maps to the schema's `monthly_nth`.
+    function buildRecurrence(): { freq: 'weekly' | 'monthly_nth'; until: string } | null {
+      const repeats = repeatsSelect.value;
+      if (repeats === 'none') return null;
+      const until = untilInput.value.trim();
+      if (!until) return null;
+      return { freq: repeats === 'monthly' ? 'monthly_nth' : 'weekly', until };
     }
 
     function clearErrors(): void {
@@ -14785,22 +15828,39 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
 
       const type = currentType();
       const isPublic = type === 'public';
-      const payload = {
+
+      // Build the payload by OMITTING inapplicable keys rather than sending null.
+      // The server schema is .strict(): an `address` or `description` key on a
+      // meetup is itself the error, and an optional field counts as "not
+      // provided" only when its key is absent, never when it is null (design §6).
+      const payload: Record<string, unknown> = {
         type,
         title: fieldValue('field-title'),
         date: fieldValue('field-date'),
         time: fieldValue('field-time'),
         city: fieldValue('field-city'),
-        address: isPublic ? fieldValue('field-address') || null : null,
-        description: isPublic ? fieldValue('field-description') || null : null,
-        signalUrl: fieldValue('field-signal-url') || null,
-        // Recurrence UI is a later task; the field is sent explicitly null so the
-        // schema shape never depends on key absence.
-        recurrence: null,
         organizerCode: fieldValue('field-organizer-code'),
-        // Honeypot. The function reads and drops this before validation.
+        // Honeypot. The function reads and drops this before validation, so it is
+        // always sent (empty for a human) and never omitted.
         website: honeypot.value,
       };
+
+      if (isPublic) {
+        // Address is required for a public event; description is optional and its
+        // key is added only when the organizer actually filled it.
+        payload.address = fieldValue('field-address');
+        const description = fieldValue('field-description');
+        if (description) payload.description = description;
+      }
+
+      // Signal link: required for a meetup, optional for a public event. The key
+      // is omitted entirely when empty.
+      const signalUrl = fieldValue('field-signal-url');
+      if (signalUrl) payload.signalUrl = signalUrl;
+
+      // Recurrence: the key is present only when the event repeats.
+      const recurrence = buildRecurrence();
+      if (recurrence) payload.recurrence = recurrence;
 
       setBusy(true);
 
@@ -14831,7 +15891,7 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
   </script>
   ```
 
-  Note for the implementer: the §13 checklist copy is **frozen and reproduced verbatim** from the design. `&#8250;` is U+203A, the character the design uses for Signal's menu paths. Do not run that block through a copy rewrite. The surrounding page and field copy (hints, buttons, success panel) is placeholder-grade and still owes the copydesk gate the design defers to implementation.
+  Note for the implementer: the §13 checklist copy is **frozen and reproduced verbatim** from the design. `&#8250;` is U+203A, the character the design uses for Signal's menu paths. Do not run that block through a copy rewrite. The surrounding page and field copy (hints, buttons, success panel, the recurrence labels) is placeholder-grade and still owes the copydesk gate the design defers to implementation.
 
 - [ ] **Step 7: Create the page**
 
@@ -14921,16 +15981,16 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
     .map(el => el.name)
   ```
 
-  Expected, with "Organizing meetup" selected (the default):
+  Expected, with "Organizing meetup" selected (the default) and "Does not repeat" — the `until` field is hidden, so it does not appear:
 
   ```
-  ['title', 'date', 'time', 'city', 'signalUrl', 'organizerCode']
+  ['title', 'date', 'time', 'repeats', 'city', 'signalUrl', 'organizerCode']
   ```
 
   Click the "Public event" radio, re-run the same snippet. Expected:
 
   ```
-  ['title', 'date', 'time', 'city', 'address', 'description', 'signalUrl', 'organizerCode']
+  ['title', 'date', 'time', 'repeats', 'city', 'address', 'description', 'signalUrl', 'organizerCode']
   ```
 
   Then confirm the required flags flipped:
@@ -14940,6 +16000,18 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
   ```
 
   Expected with "Public event" selected: `[true, false]`. Switch back to "Organizing meetup" and re-run: `[false, true]`.
+
+  Now the recurrence reveal. The `until` field is hidden until "Repeats" leaves "none":
+
+  ```js
+  const rp = document.getElementById('field-repeats');
+  const before = document.getElementById('recurrence-until-field').hidden;
+  rp.value = 'weekly';
+  rp.dispatchEvent(new Event('change'));
+  [before, document.getElementById('recurrence-until-field').hidden, document.getElementById('field-until').required]
+  ```
+
+  Expected: `[true, false, true]`. Set it back to `none` and re-dispatch; the field hides and `field-until` is no longer required.
 
 - [ ] **Step 10: Manual verification — honeypot and the Signal checklist**
 
@@ -14985,13 +16057,17 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
 
   The submit function does not exist yet, so stub `fetch` in the console before submitting.
 
-  **Success path.** Paste this, then fill in a title, a future date, a time, a city, `https://signal.group/#CjQKIExAMPLEexampleEXAMPLE`, and any organizer code, and click "Publish event":
+  **Success path (and payload omission).** Paste this capturing stub, then fill in a title, a future date, a time, a city, `https://signal.group/#CjQKIExAMPLEexampleEXAMPLE`, and any organizer code, leave "Repeats" on "Does not repeat", and click "Publish event":
 
   ```js
-  window.fetch = async () => new Response(
-    JSON.stringify({ ok: true, id: 'k7m29qxb' }),
-    { status: 200, headers: { 'content-type': 'application/json' } }
-  );
+  window.__sent = null;
+  window.fetch = async (_url, opts) => {
+    window.__sent = JSON.parse(opts.body);
+    return new Response(
+      JSON.stringify({ ok: true, id: 'k7m29qxb' }),
+      { status: 200, headers: { 'content-type': 'application/json' } }
+    );
+  };
   ```
 
   Expected: the form disappears; a green-bordered panel reads "Your event is live."; the readonly input holds `http://127.0.0.1:4321/events#k7m29qxb`; the link below reads `/events#k7m29qxb`. Click "Copy" — the button text changes to `Copied` and reverts to `Copy` after ~3 seconds. Confirm the clipboard:
@@ -15001,6 +16077,15 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
   ```
 
   Expected: `'http://127.0.0.1:4321/events#k7m29qxb'`.
+
+  Then confirm the meetup payload OMITTED the inapplicable keys rather than sending null (design §6, contract #5):
+
+  ```js
+  [('address' in window.__sent), ('description' in window.__sent), ('recurrence' in window.__sent),
+   window.__sent.signalUrl, window.__sent.website]
+  ```
+
+  Expected: `[false, false, false, 'https://signal.group/#CjQKIExAMPLEexampleEXAMPLE', '']`.
 
   **Field-error path.** Reload the page, then paste and submit again:
 
@@ -15075,11 +16160,16 @@ Depends on `src/lib/jurisdictions.ts` (`allCitySlugs`) from Task 5. Run all comm
   git commit -m "feat(events): add organizer submit form page
 
   Six fields for a meetup, address and description revealed for public events.
+  Recurrence control (none/weekly/monthly plus an until date) builds the
+  { freq, until } object the schema accepts, or omits it entirely.
+  Inapplicable fields are omitted from the payload, never sent as null.
   CSS-hidden honeypot with autocomplete=one-time-code, tabindex=-1, aria-hidden.
   Signal setup checklist from design section 13 at the Signal-link field.
   Success state shows the /events#<id> permalink with a copy button.
   Page is noindex and filtered out of the sitemap."
   ```
+
+---
 
 ---
 
@@ -15267,35 +16357,39 @@ Design §14 requires excluding `/events/*` from the Umami beacon: "a record of i
 
 ---
 
+---
+
 ### Task 23: CSP, caching and config
 
 **Files:**
-- Create: `the repo roottests/config-guards.test.ts`
-- Modify: `the repo rootpublic/_headers`
-- Modify: `the repo rootnetlify.toml`
-- Modify: `the repo rootastro.config.mjs`
-- Modify: `the repo rootlighthouserc.json`
-- Verify only, no edit expected: `the repo root.gitignore`
+- Modify: `tests/config-guards.test.ts` — append the config-content guards below the Umami guard the analytics-exclusion task created; do NOT recreate the file
+- Modify: `public/_headers`
+- Modify: `netlify.toml`
+- Modify: `astro.config.mjs` — merge the dev proxies in beside the `sitemap({ filter })` the submit-form task added; do not drop that filter
+- Verify only, no edit expected: `lighthouserc.json` — the events-page task already added `/events`
+- Verify only, no edit expected: `.gitignore`
 
-**Sequencing:** this task adds `/events/` to the Lighthouse CI URL list, and CI hard-fails if that page is not in `dist/`. Run this task only after the `/events` page task has landed on the branch. Confirm before starting:
+**Sequencing:** this task appends to `tests/config-guards.test.ts` (created by the analytics-exclusion task), merges into `astro.config.mjs` (already carrying the submit-form task's sitemap filter), and reads the `/events` entry the events-page task added to `lighthouserc.json`. Run it only after all three have landed on the branch, and after the `/events` page exists (LHCI hard-fails if `dist/events/` is missing). Confirm before starting:
 
 ```bash
-cd /c/Users/tim/workspace/deflocksc-website && ls src/pages/events.astro
+cd /c/Users/tim/workspace/deflocksc-website && ls src/pages/events.astro tests/config-guards.test.ts
 ```
 
-Expected: `src/pages/events.astro`. If that file does not exist, stop and run the page task first.
+Expected: both paths listed. If `src/pages/events.astro` is missing, run the page task first. If `tests/config-guards.test.ts` is missing, the analytics-exclusion task has not landed; run it first, because this task appends to the file it creates.
 
 ---
 
-- [ ] **Step 1: Write the failing config-guard test**
+- [ ] **Step 1: Append the failing config-guard checks**
 
   These are configuration files, not modules, so the test asserts on their contents. It is the regression guard that stops a future edit from silently dropping a CSP directive or attaching `Cache-Control` to `/api/*`.
 
-  Create `the repo roottests/config-guards.test.ts` with exactly this content:
+  Do **not** recreate `tests/config-guards.test.ts`: the analytics-exclusion task already created it with the Umami-beacon guard (which builds the site and reads `dist/`). Append the block below **after** that file's existing `describe('Umami beacon exclusion (design §14)', ...)` block. The file already imports `readFileSync` and vitest's `describe`/`it`/`expect`, so add no new imports — just the parser, the const reads, and the three describes:
 
   ```ts
-  import { describe, it, expect } from 'vitest';
-  import { readFileSync } from 'node:fs';
+  // --- Config-content guards (CSP, caching, lighthouse, gitignore) ---
+  // These read the config files directly rather than dist/, so unlike the Umami
+  // guard above they do not depend on the build. They share the file only so all
+  // config regressions live in one place.
 
   // tests/ sits one directory below the repo root
   const rootUrl = new URL('../', import.meta.url);
@@ -15371,9 +16465,11 @@ Expected: `src/pages/events.astro`. If that file does not exist, stop and run th
   });
 
   describe('repo config', () => {
-    it('audits /events/ in lighthouserc.json', () => {
+    it('audits /events in lighthouserc.json', () => {
       const lhci = JSON.parse(read('lighthouserc.json'));
-      expect(lhci.ci.collect.url).toContain('/events/');
+      // The events-page task added this entry; this guard only stops a later edit
+      // from dropping it. This task does not modify lighthouserc.json.
+      expect(lhci.ci.collect.url).toContain('/events');
     });
 
     it('gitignores .env', () => {
@@ -15389,7 +16485,7 @@ Expected: `src/pages/events.astro`. If that file does not exist, stop and run th
   cd /c/Users/tim/workspace/deflocksc-website && npx vitest run tests/config-guards.test.ts
   ```
 
-  Expected: **3 failed, 6 passed** — the summary line reads `Tests  3 failed | 6 passed (9)`. The three failures, in order:
+  The file now holds the analytics-exclusion task's three Umami guards (which build the site and pass) plus the nine config-content guards appended above, so the run is twelve tests. Expected: **2 failed, 10 passed** — the summary line reads `Tests  2 failed | 10 passed (12)`. The two failures, in order:
 
   1. `public/_headers > adds base-uri, form-action and object-src to the CSP`
      ```
@@ -15400,12 +16496,8 @@ Expected: `src/pages/events.astro`. If that file does not exist, stop and run th
      ```
      AssertionError: expected [ '/*' ] to deeply equal [ '/*', '/_astro/*' ]
      ```
-  3. `repo config > audits /events/ in lighthouserc.json`
-     ```
-     AssertionError: expected [ '/', '/blog/' ] to include '/events/'
-     ```
 
-  If any *other* test fails, stop — the repo is not in the state this task assumes.
+  The lighthouse audit is **not** among the failures: the events-page task already added `/events` to `lighthouserc.json`, so `repo config > audits /events in lighthouserc.json` passes from the start — this task cannot expect that failure. If any *other* test fails, stop — the repo is not in the state this task assumes. (If the Umami guards fail, the analytics-exclusion task has not fully landed; sort that before continuing, since this task shares its file.)
 
 - [ ] **Step 3: Add the three CSP directives to `public/_headers`**
 
@@ -15505,33 +16597,17 @@ Expected: `src/pages/events.astro`. If that file does not exist, stop and run th
 
   (Line numbers may differ by a line or two; the important part is that `Cache-Control` appears as a value under `/_astro/*` only.)
 
-- [ ] **Step 5: Add `/events/` to `lighthouserc.json`**
+- [ ] **Step 5: Confirm `/events` is already audited in `lighthouserc.json`**
 
-  Replace the whole file with exactly this content:
+  The events-page task already added `/events` to the Lighthouse CI URL list, so this task makes **no edit** here — it only confirms the entry is present and that the built page the audit will load exists. Rewriting the file to add a trailing slash would re-diverge from the entry that task committed; leave it as the events-page task shipped it.
 
-  ```json
-  {
-    "ci": {
-      "collect": {
-        "staticDistDir": "./dist",
-        "url": ["/", "/blog/", "/events/"]
-      },
-      "assert": {
-        "assertions": {
-          "categories:accessibility": ["error", { "minScore": 0.85 }],
-          "categories:best-practices": ["error", { "minScore": 0.9 }],
-          "categories:seo": ["error", { "minScore": 0.9 }],
-          "categories:performance": ["warn", { "minScore": 0.8 }]
-        }
-      },
-      "upload": {
-        "target": "temporary-public-storage"
-      }
-    }
-  }
+  ```bash
+  cd /c/Users/tim/workspace/deflocksc-website && node -e "const l=require('./lighthouserc.json'); console.log(l.ci.collect.url)"
   ```
 
-  The trailing slash matters. Astro's default `build.format` is `directory`, so `src/pages/events.astro` becomes `dist/events/index.html`, and the LHCI static server resolves `/events/` against that — the same shape as the existing `/blog/` entry. Confirm the file the audit will load exists after a build (Step 10 covers the build itself):
+  Expected: an array that includes `/events`, e.g. `[ '/', '/blog/', '/events' ]`. If `/events` is absent, the events-page task has not landed; stop and run it first rather than adding the entry here — it owns that file.
+
+  Then confirm the file the audit resolves against exists after a build (Step 10 covers the build itself):
 
   ```bash
   cd /c/Users/tim/workspace/deflocksc-website && ls dist/events/index.html
@@ -15539,7 +16615,7 @@ Expected: `src/pages/events.astro`. If that file does not exist, stop and run th
 
   Expected: `dist/events/index.html`.
 
-  Consequence to know before merging: `.github/workflows/lighthouse.yml` runs `treosh/lighthouse-ci-action@v12` against this config, and CI hard-fails below accessibility 0.85 / best-practices 0.90 / SEO 0.90. `/events` is now inside that gate.
+  Consequence to know before merging: `.github/workflows/lighthouse.yml` runs `treosh/lighthouse-ci-action@v12` against this config, and CI hard-fails below accessibility 0.85 / best-practices 0.90 / SEO 0.90. `/events` is inside that gate.
 
 - [ ] **Step 6: Verify `.env` is already gitignored**
 
@@ -15561,7 +16637,7 @@ Expected: `src/pages/events.astro`. If that file does not exist, stop and run th
   cd /c/Users/tim/workspace/deflocksc-website && npx vitest run tests/config-guards.test.ts
   ```
 
-  Expected: `Tests  9 passed (9)` and `Test Files  1 passed (1)`.
+  Expected: `Tests  12 passed (12)` and `Test Files  1 passed (1)` — the three Umami guards plus the nine config-content guards.
 
   Then confirm nothing else regressed:
 
@@ -15575,7 +16651,7 @@ Expected: `src/pages/events.astro`. If that file does not exist, stop and run th
 
   Netlify Functions do not run under `astro dev`, so `/api/events`, `/api/submit-event`, and `/go/:eventId` would 404 against the Astro dev server. Mirror the existing `/api/geocode` proxy pattern, pointing at a locally-running Netlify functions server instead of an upstream API.
 
-  Replace the whole file with exactly this content:
+  The submit-form task already changed `integrations` from `[sitemap()]` to `[sitemap({ filter })]` so `/events/submit` stays out of the sitemap. **Keep that filter exactly as it is** — this task only adds the `vite.server.proxy` block; dropping the filter would put the noindex submit page back in the sitemap. Replace the whole file with exactly this content:
 
   ```js
   // @ts-check
@@ -15598,7 +16674,13 @@ Expected: `src/pages/events.astro`. If that file does not exist, stop and run th
   // https://astro.build/config
   export default defineConfig({
     site: 'https://deflocksc.org',
-    integrations: [sitemap()],
+    integrations: [
+      sitemap({
+        // The submit form is organizer-code gated and sends robots noindex.
+        // Keep it out of the sitemap so the two signals agree.
+        filter: (page) => !page.includes('/events/submit'),
+      }),
+    ],
     vite: {
       plugins: [tailwindcss()],
       server: {
@@ -15767,7 +16849,7 @@ Expected: `src/pages/events.astro`. If that file does not exist, stop and run th
 - [ ] **Step 12: Commit**
 
   ```bash
-  cd /c/Users/tim/workspace/deflocksc-website && git add public/_headers netlify.toml astro.config.mjs lighthouserc.json tests/config-guards.test.ts && git commit -m "chore: tighten CSP, cache hashed assets, wire events dev proxies
+  cd /c/Users/tim/workspace/deflocksc-website && git add public/_headers netlify.toml astro.config.mjs tests/config-guards.test.ts && git commit -m "chore: tighten CSP, cache hashed assets, wire events dev proxies
 
   Add base-uri 'none', form-action 'self' and object-src 'none' to the CSP in
   public/_headers. None of the three fall back to default-src; without base-uri an
@@ -15779,16 +16861,13 @@ Expected: `src/pages/events.astro`. If that file does not exist, stop and run th
   whose responses set their own Cache-Control.
 
   Proxy /api/events, /api/submit-event and /go/<id> to a local netlify
-  functions:serve under astro dev, in the shape of the existing /api/geocode proxy.
+  functions:serve under astro dev, in the shape of the existing /api/geocode proxy,
+  without disturbing the sitemap filter the submit-form task added.
 
-  Audit /events/ in lighthouserc.json, and add tests/config-guards.test.ts so a
-  future edit cannot silently drop a directive or cache an API response."
+  Append the header, cache, lighthouse and gitignore guards to
+  tests/config-guards.test.ts (created by the analytics-exclusion task) so a future
+  edit cannot silently drop a directive or cache an API response. The events-page
+  task already audits /events in lighthouserc.json; this task only guards it."
   ```
 
-  Verify:
-
-  ```bash
-  cd /c/Users/tim/workspace/deflocksc-website && git status --short && git log --oneline -1
-  ```
-
-  Expected: no staged or modified entries among the five files above, and the new commit at HEAD.
+---
