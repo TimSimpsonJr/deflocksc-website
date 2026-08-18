@@ -88,6 +88,11 @@ function pastDate(): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** Today, ISO `YYYY-MM-DD`, UTC — matches the handler's own utcToday(). */
+function todayDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 /**
  * A Request whose body is exactly the given bytes, so a test can deliver raw
  * (possibly invalid-UTF-8) input the `makeRequest` string encoder cannot.
@@ -424,6 +429,62 @@ describe('dedupe', () => {
 
     expect(res.status).toBe(201);
     expect(blobs.eventsSetJSON).toHaveBeenCalledTimes(1);
+  });
+
+  it('dedupes an ACTIVE recurring series (past start, future until) sharing the Signal URL', async () => {
+    // The distinguishing case for lastRelevantDate's until-branch: the series
+    // STARTED in the past, but recurrence.until is still ahead, so it is live
+    // and MUST still dedupe. Retention keyed off recurrence.until, not date.
+    // A mutant that used `date` alone would treat this finished and let one live
+    // Signal link be fanned across many cities — the exact design-§6 spam shape.
+    // date differs from the incoming (future) submission, so only the Signal URL
+    // axis can fire; that isolates the boundary under test.
+    blobs.codesGet.mockResolvedValue(LIVE_CODE);
+    const payload = validPayload();
+    blobs.eventsList.mockResolvedValue({ blobs: [{ key: 'active-series' }], directories: [] });
+    blobs.eventsGet.mockResolvedValue({
+      id: 'active-series',
+      type: 'meetup',
+      title: 'A completely unrelated title',
+      date: pastDate(),
+      city: allCitySlugs()[1] ?? allCitySlugs()[0],
+      county: 'somewhere',
+      signalUrl: payload.signalUrl,
+      recurrence: { freq: 'weekly', until: futureDate() },
+      revoked: false,
+    });
+
+    const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
+
+    expect(res.status).toBe(201);
+    expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
+  });
+
+  it('dedupes an event whose last relevant day is today (the === today boundary)', async () => {
+    // The skip is `lastRelevantDate < today`, so an event whose last relevant day
+    // IS today is still live and must dedupe — the schema accepts morning-of
+    // submissions. A `<= today` skip would wrongly treat today as finished and
+    // let a same-Signal-URL duplicate through. date differs from the incoming
+    // (future) submission, so only the Signal URL axis fires.
+    blobs.codesGet.mockResolvedValue(LIVE_CODE);
+    const payload = validPayload();
+    blobs.eventsList.mockResolvedValue({ blobs: [{ key: 'today1' }], directories: [] });
+    blobs.eventsGet.mockResolvedValue({
+      id: 'today1',
+      type: 'meetup',
+      title: 'A completely unrelated title',
+      date: todayDate(),
+      city: allCitySlugs()[1] ?? allCitySlugs()[0],
+      county: 'somewhere',
+      signalUrl: payload.signalUrl,
+      recurrence: null,
+      revoked: false,
+    });
+
+    const res = await handler(makeRequest(JSON.stringify(payload)).req, ctx);
+
+    expect(res.status).toBe(201);
+    expect(blobs.eventsSetJSON).not.toHaveBeenCalled();
   });
 });
 
