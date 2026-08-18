@@ -1,0 +1,168 @@
+// The suite deliberately runs in a timezone that is NOT UTC and that observes
+// DST. A local-time implementation of expandOccurrences passes under TZ=UTC
+// and fails here, which is the whole point of the DST block below.
+//
+// ESM hoists the import above this assignment, but recurrence.ts reads no
+// timezone at import time, so the ordering is harmless. Node re-reads
+// process.env.TZ on the next Date operation.
+process.env.TZ = 'America/New_York';
+
+import { describe, it, expect } from 'vitest';
+import { expandOccurrences } from './recurrence.js';
+
+describe('test environment', () => {
+  it('runs in America/New_York so local-time bugs are observable', () => {
+    // 2026-01-15T00:00:00Z is 19:00 on 2026-01-14 in America/New_York (UTC-5).
+    // If this fails, your Node build did not pick up the runtime TZ change --
+    // re-run the suite with the variable set in the shell instead:
+    //   PowerShell: $env:TZ='America/New_York'; npm test
+    //   bash:       TZ=America/New_York npm test
+    const probe = new Date(Date.UTC(2026, 0, 15));
+    expect(probe.getHours()).toBe(19);
+    expect(probe.getDate()).toBe(14);
+  });
+});
+
+describe('expandOccurrences: no recurrence', () => {
+  it('returns just the start date when rec is null', () => {
+    expect(expandOccurrences('2026-08-22', null, '2027-01-31')).toEqual(['2026-08-22']);
+  });
+
+  it('returns nothing when the start date is past the horizon', () => {
+    expect(expandOccurrences('2027-02-01', null, '2027-01-31')).toEqual([]);
+  });
+});
+
+describe('expandOccurrences: weekly', () => {
+  it('steps across a month boundary', () => {
+    expect(
+      expandOccurrences('2026-08-29', { freq: 'weekly', until: '2026-09-26' }, '2027-01-31'),
+    ).toEqual(['2026-08-29', '2026-09-05', '2026-09-12', '2026-09-19', '2026-09-26']);
+  });
+
+  it('treats until as INCLUSIVE: an occurrence landing on until is returned', () => {
+    expect(
+      expandOccurrences('2026-08-22', { freq: 'weekly', until: '2026-09-19' }, '2027-01-31'),
+    ).toEqual(['2026-08-22', '2026-08-29', '2026-09-05', '2026-09-12', '2026-09-19']);
+  });
+
+  it('drops an occurrence one day past until', () => {
+    expect(
+      expandOccurrences('2026-08-22', { freq: 'weekly', until: '2026-09-18' }, '2027-01-31'),
+    ).toEqual(['2026-08-22', '2026-08-29', '2026-09-05', '2026-09-12']);
+  });
+
+  it('clamps on the horizon when the horizon is the tighter bound', () => {
+    expect(
+      expandOccurrences('2026-08-22', { freq: 'weekly', until: '2027-02-20' }, '2026-09-05'),
+    ).toEqual(['2026-08-22', '2026-08-29', '2026-09-05']);
+  });
+
+  it('clamps on until when until is the tighter bound', () => {
+    expect(
+      expandOccurrences('2026-08-22', { freq: 'weekly', until: '2026-09-05' }, '2027-02-20'),
+    ).toEqual(['2026-08-22', '2026-08-29', '2026-09-05']);
+  });
+
+  it('returns nothing when until precedes the start date', () => {
+    expect(
+      expandOccurrences('2026-08-22', { freq: 'weekly', until: '2026-08-01' }, '2027-01-31'),
+    ).toEqual([]);
+  });
+});
+
+describe('expandOccurrences: monthly_nth', () => {
+  it('tracks the 2nd Tuesday as the day-of-month shifts', () => {
+    // August 2026 has four Tuesdays (4, 11, 18, 25); September has five
+    // (1, 8, 15, 22, 29). The 2nd Tuesday therefore moves from the 11th to
+    // the 8th -- a naive "same day number each month" rule gets this wrong.
+    expect(
+      expandOccurrences('2026-08-11', { freq: 'monthly_nth', until: '2026-12-31' }, '2027-01-31'),
+    ).toEqual(['2026-08-11', '2026-09-08', '2026-10-13', '2026-11-10', '2026-12-08']);
+  });
+
+  it('skips months that have no 5th Tuesday rather than sliding to the 4th', () => {
+    // Oct 2026, Nov 2026, Jan 2027 and Feb 2027 have only four Tuesdays.
+    expect(
+      expandOccurrences('2026-09-29', { freq: 'monthly_nth', until: '2027-03-31' }, '2027-12-31'),
+    ).toEqual(['2026-09-29', '2026-12-29', '2027-03-30']);
+  });
+
+  it('returns only the start date when until falls before the next occurrence', () => {
+    // The next 2nd Tuesday is 2026-09-08, one day past until.
+    expect(
+      expandOccurrences('2026-08-11', { freq: 'monthly_nth', until: '2026-09-07' }, '2027-01-31'),
+    ).toEqual(['2026-08-11']);
+  });
+});
+
+describe('expandOccurrences: DST boundaries do not shift the day', () => {
+  it('crosses spring-forward (2026-03-08) without losing or repeating a day', () => {
+    expect(
+      expandOccurrences('2026-03-01', { freq: 'weekly', until: '2026-03-29' }, '2026-12-31'),
+    ).toEqual(['2026-03-01', '2026-03-08', '2026-03-15', '2026-03-22', '2026-03-29']);
+  });
+
+  it('crosses fall-back (2026-11-01) without losing or repeating a day', () => {
+    expect(
+      expandOccurrences('2026-10-25', { freq: 'weekly', until: '2026-11-15' }, '2026-12-31'),
+    ).toEqual(['2026-10-25', '2026-11-01', '2026-11-08', '2026-11-15']);
+  });
+
+  it('lands monthly_nth on the correct weekday across fall-back', () => {
+    expect(
+      expandOccurrences('2026-10-11', { freq: 'monthly_nth', until: '2026-12-31' }, '2027-01-31'),
+    ).toEqual(['2026-10-11', '2026-11-08', '2026-12-13']);
+  });
+});
+
+describe('expandOccurrences: input guards', () => {
+  it('caps a runaway expansion at 400 occurrences', () => {
+    // Validation caps until at 6 months (~27 weekly occurrences); this is the
+    // defence-in-depth stop for a hand-edited or fold-corrupted events.json.
+    const out = expandOccurrences(
+      '2026-01-01',
+      { freq: 'weekly', until: '2046-01-01' },
+      '2046-01-01',
+    );
+    expect(out.length).toBe(400);
+  });
+
+  it('throws RangeError on a start date that is not YYYY-MM-DD', () => {
+    expect(() => expandOccurrences('08/22/2026', null, '2026-12-31')).toThrow(RangeError);
+  });
+
+  it('throws RangeError on a date that matches the shape but is not real', () => {
+    expect(() => expandOccurrences('2026-02-30', null, '2026-12-31')).toThrow(
+      /must be a real calendar date/,
+    );
+  });
+
+  it('throws RangeError on a malformed until', () => {
+    expect(() =>
+      expandOccurrences('2026-08-22', { freq: 'weekly', until: '2026-9-5' }, '2026-12-31'),
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError on an unknown freq', () => {
+    expect(() =>
+      expandOccurrences(
+        '2026-08-22',
+        { freq: 'daily' as unknown as 'weekly', until: '2026-09-05' },
+        '2026-12-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('does not echo the offending value in the error message', () => {
+    const hostile = 'notadate-\u202Eevil';
+    let message = '';
+    try {
+      expandOccurrences(hostile, null, '2026-12-31');
+    } catch (error) {
+      message = (error as Error).message;
+    }
+    expect(message).toBe('startDate must be a YYYY-MM-DD calendar date');
+    expect(message).not.toContain('evil');
+  });
+});
