@@ -1,0 +1,377 @@
+---
+import Base from '../layouts/Base.astro';
+import EventsList from '../components/EventsList.astro';
+import EventsMonth from '../components/EventsMonth.astro';
+import EventsMap from '../components/EventsMap.astro';
+import registry from '../data/registry.json';
+import bakedEventsRaw from '../data/events.json';
+import { toPublicEvent, type PublicEvent, type StoredEvent } from '../lib/public-event.js';
+import { publicEventSchema } from '../lib/event-schema.js';
+import { expandAll, splitByToday, addMonths } from '../lib/events-view.js';
+import { toJsonIsland } from '../lib/json-island.js';
+
+// The committed events.json is validated at build time with the shared strict
+// schema — publicEventSchema, imported from event-schema.js — and then projected
+// through toPublicEvent() before it is rendered or serialized into the data
+// island. That schema is the single source of truth for the stored/public shape,
+// so this page keeps no local copy that can drift from the real one. The file
+// lives in a repo a later bad commit can edit, so the build must never trust it
+// (design §5/§6): a record carrying a server-only field (signalUrl, codeDigest,
+// revoked) is rejected by the schema's `.strict()` and fails the build, and even
+// a record that slipped through could not reach the client, because every field
+// is picked by the allowlist projection, never spread. The per-field caps live
+// inside the shared schema (imported from sanitize-text.ts there), never retyped.
+const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index) => {
+  const parsed = publicEventSchema.safeParse(raw);
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    const at = issue.path.length > 0 ? issue.path.join('.') : '_record';
+    const detail = issue.code === 'unrecognized_keys' ? 'unexpected_field' : issue.message;
+    throw new Error(
+      `src/data/events.json: record ${index} at "${at}" failed strict validation (${detail})`,
+    );
+  }
+  // Allowlist projection, even after a clean parse: defence in depth (design §5).
+  return toPublicEvent(parsed.data as unknown as StoredEvent);
+});
+
+// Display names, derived from registry.json at build time and shipped in the data
+// island. registry.json itself is ~50 KB and must never reach the client bundle.
+const cityNames: Record<string, string> = {};
+const countyNames: Record<string, string> = {};
+for (const j of registry.jurisdictions as Array<Record<string, string>>) {
+  if (j.type === 'place') {
+    cityNames[j.id.split(':')[1]] = j.name.replace(/ (City|Town) Council$/, '');
+  } else if (j.type === 'county') {
+    countyNames[j.county.toLowerCase()] = j.county;
+  }
+}
+
+const today = new Date().toISOString().slice(0, 10);
+const horizonEnd = addMonths(today, 12);
+
+// One 30-day retention horizon, matching RETENTION_DAYS in netlify/functions/events.ts
+// and the build-time expiry guard (design §10). A single window everywhere — the past
+// list, the shipped island, and the overlay all cut at the same 30 days — so a baked id
+// the overlay can return is exactly a baked id the island still carries.
+const RETENTION_DAYS = 30;
+const retentionCutoff = (() => {
+  const d = new Date(`${today}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - RETENTION_DAYS);
+  return d.toISOString().slice(0, 10);
+})();
+
+const allOccurrences = expandAll(bakedEvents, horizonEnd);
+const { upcoming, past } = splitByToday(allOccurrences, today);
+const recentPast = past.filter((o) => o.date >= retentionCutoff);
+
+// Bounded island: ship only events still inside the retention horizon, not the whole
+// baked array (design §12). An event's last relevant day is the end of its series, or
+// its single date. Anything older is neither rendered as a card nor returned by
+// /api/events, so shipping it would only bloat the page.
+const lastRelevantDate = (e: PublicEvent): string => e.recurrence?.until ?? e.date;
+const islandEvents = bakedEvents.filter((e) => lastRelevantDate(e) >= retentionCutoff);
+
+const island = {
+  events: islandEvents,
+  cityNames,
+  countyNames,
+  today,
+  horizonEnd,
+};
+---
+
+<Base
+  title="ALPR Organizing Events in South Carolina | DeflockSC"
+  description="Find DeflockSC meetups, council meetings, and public actions near you in South Carolina. Organizers reach you through a per-event Signal group."
+>
+  <section class="events-hero">
+    <div class="events-hero-inner">
+      <p class="label-mono-heading mb-3">Events</p>
+      <h1 class="events-h1">Find people near you.</h1>
+      <p class="events-lede">
+        Meetups, council meetings, and public actions across South Carolina. Meetup
+        venues are never published here — the address is shared inside the event's
+        Signal group.
+      </p>
+    </div>
+  </section>
+
+  <section class="events-body">
+    <div
+      class="events-tabs"
+      role="tablist"
+      aria-label="Calendar views"
+      id="events-tabs"
+    >
+      <button id="tab-list" role="tab" aria-selected="true" aria-controls="panel-list" class="events-tab is-selected" data-tab="list">List</button>
+      <button id="tab-month" role="tab" aria-selected="false" aria-controls="panel-month" class="events-tab" data-tab="month" tabindex="-1">Month</button>
+      <button id="tab-map" role="tab" aria-selected="false" aria-controls="panel-map" class="events-tab events-tab-map" data-tab="map" tabindex="-1">Map</button>
+    </div>
+
+    <div class="events-grid">
+      <div id="panel-map" role="tabpanel" aria-labelledby="tab-map" tabindex="0" data-panel="map">
+        <EventsMap />
+      </div>
+
+      <div id="panel-list" role="tabpanel" aria-labelledby="tab-list" tabindex="0" data-panel="list" class="is-active">
+        <EventsList upcoming={upcoming} past={recentPast} cityNames={cityNames} countyNames={countyNames} />
+      </div>
+
+      <div id="panel-month" role="tabpanel" aria-labelledby="tab-month" tabindex="0" data-panel="month">
+        <EventsMonth occurrences={upcoming} today={today} cityNames={cityNames} />
+      </div>
+    </div>
+  </section>
+
+  <div id="intake-dialog" class="intake-dialog" hidden>
+    <div class="intake-panel" role="dialog" aria-modal="true" aria-labelledby="intake-heading">
+      <h2 id="intake-heading">Before you join</h2>
+      <p>
+        This group is unvetted, which is the point (it has to be open for strangers to
+        find us) and also the risk: everyone who can read this page can join it,
+        including bad actors or people whose interest in South Carolina organizing is
+        professional (journalists, police, etc.). Please do not share anything in this
+        chat that you wouldn't want published or used against you in court.
+      </p>
+      <p>
+        Two minutes of setup first. Open Signal, set a username, and switch Privacy ›
+        Phone Number to Nobody. Use a name you don't mind strangers keeping.
+      </p>
+      <p class="intake-actions">
+        <!-- No href: /go/intake is set on window.location at click time by
+             events-page.ts, so the path never appears in the static HTML and a
+             scraper that never clicks never sees it. -->
+        <button id="intake-confirm" type="button" class="event-signal event-signal-btn">I've done that, open Signal</button>
+        <button id="intake-cancel" type="button" class="event-signal event-signal-btn">Cancel</button>
+      </p>
+    </div>
+  </div>
+
+  <script type="application/json" id="events-data" set:html={toJsonIsland(island)}></script>
+  <script>
+    import '../scripts/events-page.js';
+  </script>
+</Base>
+
+<style is:global>
+  /* Every rule for event cards, month chips, and tabs is global on purpose.
+     Astro scoped styles stamp a data-astro-* attribute onto template elements;
+     cards that events-page.ts creates at runtime have no such attribute and would
+     render unstyled. Class names here are the contract with that renderer. */
+
+  .events-hero { background: #111111; padding: 7rem 0 3rem; }
+  .events-hero-inner { max-width: 56rem; margin: 0 auto; padding: 0 1.5rem; }
+  .events-h1 {
+    color: #e8e8e8;
+    font-weight: 700;
+    font-size: clamp(1.9rem, 5vw, 3rem);
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+  }
+  .events-lede { color: #a0a0a0; font-size: 1.05rem; max-width: 40rem; }
+
+  .events-body { background: #171717; padding: 0 1.5rem 4rem; }
+
+  /* --- Tabs --- */
+  .events-tabs {
+    display: flex;
+    gap: 0.25rem;
+    max-width: 84rem;
+    margin: 0 auto;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    position: sticky;
+    top: 4rem;
+    background: #171717;
+    z-index: 20;
+  }
+  .events-tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #737373;
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 0.75rem 1.1rem;
+    min-height: 44px;
+    cursor: pointer;
+  }
+  .events-tab.is-selected { color: #e8e8e8; border-color: #dc2626; }
+  .events-tab:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+
+  /* --- Panels: tabbed on mobile, two columns on desktop --- */
+  .events-grid { max-width: 84rem; margin: 0 auto; padding-top: 1.5rem; }
+  [data-panel] { display: none; }
+  [data-panel].is-active { display: block; }
+
+  @media (min-width: 1024px) {
+    .events-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 2rem;
+      align-items: start;
+    }
+    /* Map is always visible on desktop and never a tab. */
+    [data-panel='map'] {
+      display: block;
+      position: sticky;
+      top: 8rem;
+      align-self: start;
+    }
+    .events-tab-map { display: none; }
+  }
+
+  /* --- Event cards --- */
+  .events-count { margin-bottom: 0.75rem; }
+  .events-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .event-card {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    gap: 1rem;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-left: 2px solid #dc2626;
+    padding: 1rem;
+  }
+  .event-date { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+  .event-date-mon {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: #dc2626;
+  }
+  .event-date-day { color: #e8e8e8; font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
+  .event-body { min-width: 0; }
+
+  /* Defence in depth against hostile titles (design §6). The sanitizer rejects
+     bidi overrides, zero-width runs, and stacked combining marks at submit time and
+     again at build; these four rules mean a miss cannot wreck the layout.
+     max-height:4.6em is the fallback for browsers without the `lh` unit. */
+  .event-title {
+    overflow-wrap: anywhere;
+    unicode-bidi: isolate;
+    max-height: 4.6em;
+    max-height: 3lh;
+    overflow: hidden;
+  }
+
+  .event-title {
+    color: #e8e8e8;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin: 0 0 0.35rem;
+  }
+  .event-meta { color: #a3a3a3; font-size: 0.875rem; margin: 0 0 0.35rem; }
+  .event-address { color: #737373; font-size: 0.8125rem; margin: 0 0 0.35rem; }
+  .event-desc { color: #a3a3a3; font-size: 0.875rem; margin: 0 0 0.5rem; overflow-wrap: anywhere; }
+  .event-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin: 0.5rem 0 0; }
+
+  .event-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.55rem;
+    border: 1px solid currentColor;
+  }
+  .event-badge-meetup { color: #fbbf24; }
+  .event-badge-public { color: #4ade80; }
+
+  .event-signal {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.9rem;
+    color: #ffffff;
+    background: #dc2626;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+  }
+  .event-signal:hover { background: #b91c1c; }
+  .event-signal-btn { font-family: inherit; }
+
+  /* --- Empty state and past events --- */
+  .events-empty {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 2rem 1.25rem;
+    text-align: center;
+  }
+  .events-empty[hidden] { display: none; }
+  .events-empty-lead { color: #e8e8e8; font-weight: 700; margin: 0 0 0.5rem; }
+  .events-empty-proof { color: #a3a3a3; font-size: 0.9rem; margin: 0 0 1.25rem; }
+  .events-empty-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin: 0; }
+
+  .events-past { margin-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.07); padding-top: 1rem; }
+  .events-past summary { color: #737373; cursor: pointer; }
+  .events-past-list { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  .event-past-row { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0.75rem; color: #737373; font-size: 0.85rem; }
+  .event-past-date { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; }
+  .event-past-title { color: #a3a3a3; font-size: 0.9rem; font-weight: 600; margin: 0; }
+  .event-past-place { grid-column: 2; }
+
+  /* --- Month grids --- */
+  .events-months { display: flex; flex-direction: column; gap: 2rem; }
+  .month-title { color: #e8e8e8; font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; }
+  .month-dow, .month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+  .month-dow span {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #525252;
+    text-align: center;
+    padding-bottom: 4px;
+  }
+  .month-cell {
+    min-height: 4.25rem;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 3px;
+    min-width: 0;
+  }
+  .month-cell-empty { background: transparent; border-color: transparent; }
+  .month-cell-today { border-color: #dc2626; }
+  .month-daynum { font-family: 'DM Mono', monospace; font-size: 10px; color: #737373; }
+  .month-chips { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+  .month-chip {
+    display: block;
+    background: rgba(220, 38, 38, 0.18);
+    border-left: 2px solid #dc2626;
+    padding: 1px 3px;
+    text-decoration: none;
+    min-width: 0;
+  }
+  .month-chip-title { font-size: 10px; font-weight: 600; color: #e8e8e8; margin: 0; line-height: 1.25; max-height: 2lh; }
+
+  /* --- Intake dialog --- */
+  .intake-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .intake-dialog[hidden] { display: none; }
+  .intake-panel {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    max-width: 32rem;
+    padding: 1.75rem;
+    color: #a3a3a3;
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+  .intake-panel h2 { color: #e8e8e8; font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem; }
+  .intake-panel p { margin: 0 0 1rem; }
+  .intake-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0; }
+</style>

@@ -1,0 +1,75 @@
+---
+import type { Occurrence } from '../lib/events-view.js';
+import {
+  monthLong,
+  daysInMonth,
+  weekdayIndex,
+  isoDate,
+  formatTime12,
+  sortKey,
+} from '../lib/events-view.js';
+
+interface Props {
+  occurrences: Occurrence[];
+  today: string;
+  cityNames: Record<string, string>;
+}
+
+const { occurrences, today, cityNames } = Astro.props;
+
+const byDay = new Map<string, Occurrence[]>();
+for (const o of occurrences) {
+  if (!byDay.has(o.date)) byDay.set(o.date, []);
+  byDay.get(o.date)!.push(o);
+}
+
+const startYear = Number(today.slice(0, 4));
+const startMonth = Number(today.slice(5, 7)) - 1;
+
+const months = [0, 1, 2].map((offset) => {
+  const year = startYear + Math.floor((startMonth + offset) / 12);
+  const month = (startMonth + offset) % 12;
+  const first = isoDate(year, month, 1);
+  const lead = weekdayIndex(first);
+  const total = daysInMonth(year, month);
+  return {
+    label: `${monthLong(year, month)} ${year}`,
+    lead: Array.from({ length: lead }, (_, i) => i),
+    days: Array.from({ length: total }, (_, i) => isoDate(year, month, i + 1)),
+  };
+});
+
+const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+---
+
+<div class="events-months">
+  {months.map((m) => (
+    <section class="month-block" aria-label={m.label}>
+      <h3 class="month-title">{m.label}</h3>
+      <div class="month-dow" aria-hidden="true">
+        {DOW.map((d) => <span>{d}</span>)}
+      </div>
+      <div class="month-grid">
+        {m.lead.map(() => <div class="month-cell month-cell-empty" aria-hidden="true"></div>)}
+        {m.days.map((iso) => (
+          <div class={`month-cell${iso === today ? ' month-cell-today' : ''}`} data-day={iso}>
+            <span class="month-daynum">{Number(iso.slice(8, 10))}</span>
+            <div class="month-chips" data-chips={iso}>
+              {(byDay.get(iso) ?? []).map((o) => (
+                <a
+                  class="month-chip"
+                  href={`#event-${o.event.id}`}
+                  data-event-id={o.event.id}
+                  data-sort={sortKey(o.date, o.event.time, o.event.id)}
+                  title={`${formatTime12(o.event.time)} · ${cityNames[o.event.city] ?? o.event.city}`}
+                >
+                  <span class="event-title month-chip-title">{o.event.title}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  ))}
+</div>

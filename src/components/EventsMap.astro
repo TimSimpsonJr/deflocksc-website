@@ -1,0 +1,159 @@
+---
+---
+
+<div id="events-map-frame" class="events-map-frame">
+  <div class="map-badge" aria-hidden="true">
+    <span class="map-live-dot"></span>
+    SC Events
+  </div>
+  <div
+    id="events-map"
+    role="application"
+    aria-label="Map of DeflockSC events by county and city"
+  ></div>
+  <noscript>
+    <p class="events-map-noscript">
+      The map needs JavaScript. The list and month views below work without it.
+    </p>
+  </noscript>
+  <p class="events-map-attrib">
+    Tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>
+    · <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a>
+    · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
+    · Pins mark a city centre, never a venue.
+  </p>
+</div>
+
+<style>
+  .events-map-frame {
+    position: relative;
+    background: #0d0d0d;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  #events-map {
+    width: 100%;
+    height: 58vh;
+    min-height: 340px;
+    clip-path: inset(0);
+  }
+
+  @media (min-width: 1024px) {
+    #events-map {
+      height: min(68vh, 620px);
+    }
+  }
+
+  .events-map-noscript,
+  .events-map-attrib {
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+    color: #737373;
+    font-size: 11px;
+    line-height: 1.5;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .events-map-attrib a {
+    color: #a3a3a3;
+  }
+
+  .map-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 10;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #e8e8e8;
+    background: rgba(13, 13, 13, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .map-live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #dc2626;
+    flex-shrink: 0;
+    animation: map-dot-blink 2s ease-in-out infinite;
+  }
+
+  @keyframes map-dot-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .map-live-dot { animation: none; }
+  }
+
+  /* MapLibre control + popup chrome, scoped to this container. The shared
+     `.map-dark` class in src/styles/global.css carries the same skin for the
+     camera map; these scoped copies keep #events-map self-contained without
+     depending on that class. */
+  #events-map :global(.maplibregl-ctrl-group) {
+    background: rgba(38, 38, 38, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(64, 64, 64, 0.6);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  #events-map :global(.maplibregl-ctrl-group button) {
+    width: 36px;
+    height: 36px;
+  }
+
+  #events-map :global(.maplibregl-ctrl-group button + button) {
+    border-top: 1px solid #404040;
+  }
+
+  #events-map :global(.maplibregl-ctrl-group button .maplibregl-ctrl-icon) {
+    filter: invert(1) brightness(0.7);
+  }
+
+  #events-map :global(.maplibregl-ctrl-group button:hover .maplibregl-ctrl-icon) {
+    filter: invert(1) brightness(0.9);
+  }
+
+  #events-map :global(.maplibregl-popup-content) {
+    background: #262626;
+    border: 1px solid #404040;
+    border-radius: 0.75rem;
+    padding: 12px 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  #events-map :global(.maplibregl-popup-tip) {
+    border-top-color: #262626;
+  }
+
+  #events-map :global(.maplibregl-popup-close-button) {
+    color: #737373;
+    font-size: 18px;
+    padding: 2px 6px;
+  }
+
+  :global(.events-popup) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  :global(.events-popup strong) { color: #ffffff; font-size: 15px; }
+  :global(.events-popup span)   { color: #a3a3a3; }
+  :global(.events-popup em)     { color: #fbbf24; font-style: normal; font-size: 12px; }
+</style>

@@ -1,0 +1,82 @@
+---
+import type { Occurrence } from '../lib/events-view.js';
+import { monthAbbr, dayOfMonth, formatTime12, sortKey } from '../lib/events-view.js';
+
+interface Props {
+  upcoming: Occurrence[];
+  past: Occurrence[];
+  cityNames: Record<string, string>;
+  countyNames: Record<string, string>;
+}
+
+const { upcoming, past, cityNames, countyNames } = Astro.props;
+
+const place = (o: Occurrence) =>
+  `${cityNames[o.event.city] ?? o.event.city} · ${countyNames[o.event.county] ?? o.event.county} County`;
+---
+
+<div class="events-list-wrap">
+  <p class="events-count label-mono text-[#737373]">
+    <span id="events-count">{upcoming.length}</span> upcoming
+  </p>
+
+  <ul id="events-list" class="events-list" aria-live="polite">
+    {upcoming.map((o) => (
+      <li
+        class="event-card"
+        data-event-id={o.event.id}
+        data-date={o.date}
+        data-sort={sortKey(o.date, o.event.time, o.event.id)}
+      >
+        <div class="event-date" aria-hidden="true">
+          <span class="event-date-mon">{monthAbbr(o.date)}</span>
+          <span class="event-date-day">{dayOfMonth(o.date)}</span>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">{o.event.title}</h3>
+          <p class="event-meta">
+            <span class="sr-only">{o.date} </span>{formatTime12(o.event.time)} · {place(o)}
+          </p>
+          {o.event.address && <p class="event-address">{o.event.address}</p>}
+          {o.event.description && <p class="event-desc">{o.event.description}</p>}
+          <p class="event-actions">
+            <span class={`event-badge ${o.event.type === 'meetup' ? 'event-badge-meetup' : 'event-badge-public'}`}>
+              {o.event.type === 'meetup' ? 'Location in group' : 'Public event'}
+            </span>
+            {o.event.hasSignalGroup && (
+              <a class="event-signal" href={`/go/${o.event.id}`} rel="noreferrer">Join Signal group</a>
+            )}
+          </p>
+        </div>
+      </li>
+    ))}
+  </ul>
+
+  <div id="events-empty" class="events-empty" hidden={upcoming.length > 0}>
+    <p class="events-empty-lead">Nothing on the calendar right now.</p>
+    <p class="events-empty-proof">
+      {past.length > 0
+        ? `${past.length} ${past.length === 1 ? 'event has' : 'events have'} run in the last 30 days.`
+        : 'Be the first to put something on it.'}
+    </p>
+    <p class="events-empty-actions">
+      <a class="event-signal" href="mailto:hello@deflocksc.org">Email us</a>
+      <button id="intake-open" type="button" class="event-signal event-signal-btn">Join the Signal group</button>
+    </p>
+  </div>
+
+  {past.length > 0 && (
+    <details class="events-past">
+      <summary class="label-mono">Past events ({past.length})</summary>
+      <ul class="events-past-list">
+        {past.map((o) => (
+          <li class="event-past-row">
+            <span class="event-past-date">{monthAbbr(o.date)} {dayOfMonth(o.date)}</span>
+            <span class="event-title event-past-title">{o.event.title}</span>
+            <span class="event-past-place">{place(o)}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )}
+</div>
