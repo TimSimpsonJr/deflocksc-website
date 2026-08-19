@@ -41,6 +41,16 @@ describe('Umami beacon exclusion (design §14)', () => {
     expect(html).not.toContain(UMAMI_ATTR);
   });
 
+  it('omits the Umami script from a child route under /events (the submit page)', () => {
+    // The exclusion must hold for every /events/* route, not just the index.
+    // The organizer submit page and any future event-detail page are the most
+    // subpoena-sensitive pages in the design — a regression that narrowed the
+    // gate to the index alone would silently re-enable tracking here.
+    const html = readBuilt('events/submit/index.html');
+    expect(html).not.toContain(UMAMI_SRC);
+    expect(html).not.toContain(UMAMI_ATTR);
+  });
+
   it('keeps the Umami script on the built homepage', () => {
     const html = readBuilt('index.html');
     expect(html).toContain(UMAMI_SRC);
