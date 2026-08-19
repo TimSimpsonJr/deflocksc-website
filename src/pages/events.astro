@@ -218,7 +218,7 @@ const island = {
      render unstyled. Class names here are the contract with that renderer. */
 
   .events-hero { background: #111111; padding: 7rem 0 3rem; }
-  .events-hero-inner { max-width: 56rem; margin: 0 auto; padding: 0 1.5rem; }
+  .events-hero-inner { max-width: 84rem; margin: 0 auto; padding: 0 1.5rem; }
   .events-h1 {
     color: #e8e8e8;
     font-weight: 700;
@@ -324,7 +324,7 @@ const island = {
     margin: 0 0 0.35rem;
   }
   .event-meta { color: #a3a3a3; font-size: 0.875rem; margin: 0 0 0.35rem; }
-  .event-address { color: #737373; font-size: 0.8125rem; margin: 0 0 0.35rem; }
+  .event-address { color: #a3a3a3; font-size: 0.8125rem; margin: 0 0 0.35rem; }
   .event-desc { color: #a3a3a3; font-size: 0.875rem; margin: 0 0 0.5rem; overflow-wrap: anywhere; }
   .event-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin: 0.5rem 0 0; }
 
@@ -349,8 +349,10 @@ const island = {
     padding: 0 0.9rem;
     color: #ffffff;
     background: #dc2626;
-    font-size: 0.8125rem;
+    font-size: 12px;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     text-decoration: none;
     border: none;
     cursor: pointer;
@@ -382,9 +384,9 @@ const island = {
   .events-empty-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin: 0; }
 
   .events-past { margin-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.07); padding-top: 1rem; }
-  .events-past summary { color: #737373; cursor: pointer; }
+  .events-past summary { color: #a3a3a3; cursor: pointer; }
   .events-past-list { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-  .event-past-row { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0.75rem; color: #737373; font-size: 0.85rem; }
+  .event-past-row { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0.75rem; color: #a3a3a3; font-size: 0.85rem; }
   .event-past-date { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; }
   .event-past-title { color: #a3a3a3; font-size: 0.9rem; font-weight: 600; margin: 0; }
   .event-past-place { grid-column: 2; }
@@ -481,7 +483,7 @@ const island = {
   .filter-chip:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
   /* A chip that matches nothing right now still has to be reachable, or filtering
      into a dead end leaves no way back out. Dimmed, not removed. */
-  .filter-chip[data-count='0'] { opacity: 0.45; }
+  .filter-chip[data-count='0'] { opacity: 0.6; }
 
   .filter-chip-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #737373; }
   .filter-chip.is-active .filter-chip-count { color: #fca5a5; }
