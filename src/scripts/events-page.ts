@@ -606,6 +606,12 @@ function syncChrome(): void {
   const clear = document.getElementById('filter-clear');
   if (clear) clear.hidden = filter.county === 'all' && filter.type === 'all';
 
+  // The map's back-to-state control shows only while a county is selected. Toggled
+  // here (not behind the mapHandle guard below) so it is right even before the map
+  // finishes its lazy load: the button is server-rendered and always in the DOM.
+  const mapBack = document.getElementById('events-map-back');
+  if (mapBack) mapBack.hidden = filter.county === 'all';
+
   const list = document.getElementById('events-list');
   const shown = list ? list.children.length : 0;
   const count = document.getElementById('events-count');
@@ -691,6 +697,16 @@ document.getElementById('events-filters')?.addEventListener('click', (e) => {
   if (key === 'clear') pushHash({ county: 'all', type: 'all' });
   else if (key === 'county') pushHash({ ...filter, county: value });
   else pushHash({ ...filter, type: value as EventTypeFilter });
+});
+
+// The map's back-to-state button clears just the county, reusing the exact
+// county->'all' path a choropleth click uses. As a native <button> it fires this
+// on click, Enter, and Space, so keyboard operation needs no extra handler. The
+// pushHash drives syncChrome (which hides this button and rewrites the list) and
+// fitToSelection (which animates back to the full SC view and clears the amber
+// highlight), so no zoom or highlight logic is duplicated here.
+document.getElementById('events-map-back')?.addEventListener('click', () => {
+  pushHash({ ...filter, county: 'all' });
 });
 
 /** Does this hash carry a filter key this page owns? Distinguishes a real filter
