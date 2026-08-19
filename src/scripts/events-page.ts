@@ -23,7 +23,7 @@
  */
 
 import type { PublicEvent } from '../lib/public-event.js';
-import type { Occurrence } from '../lib/events-view.js';
+import type { Occurrence, EventFilter, EventTypeFilter } from '../lib/events-view.js';
 import type { MapHandle } from './map/core.js';
 import {
   mergeEvents,
@@ -34,6 +34,12 @@ import {
   dayOfMonth,
   formatTime12,
   sortKey,
+  matchesFilter,
+  filterEvents,
+  facetCounts,
+  filterHash,
+  parseFilterHash,
+  emptyStateProof,
 } from '../lib/events-view.js';
 
 interface Island {
@@ -42,6 +48,8 @@ interface Island {
   countyNames: Record<string, string>;
   today: string;
   horizonEnd: string;
+  pastCutoff: string;
+  counties: string[];
 }
 
 const islandEl = document.getElementById('events-data');
@@ -49,10 +57,23 @@ if (!islandEl) throw new Error('events-page: #events-data island missing');
 const island: Island = JSON.parse(islandEl.textContent || '{}');
 
 const bakedIds = new Set(island.events.map((e) => e.id));
-let occurrences: Occurrence[] = splitByToday(
-  expandAll(island.events, island.horizonEnd),
-  island.today,
-).upcoming;
+
+/** Every event the page knows about. Baked at build, replaced by the overlay merge. */
+let allEvents: PublicEvent[] = island.events;
+
+/** The active filter, seeded from the URL hash so a shared #county=… link narrows
+ *  on load. The prerendered page is the full list; the client filters over it. */
+let filter: EventFilter = parseFilterHash(location.hash);
+
+function upcomingFor(events: readonly PublicEvent[]): Occurrence[] {
+  return splitByToday(expandAll(events, island.horizonEnd), island.today).upcoming;
+}
+
+/** What the map draws: type-filtered but never county-filtered, so every other
+ *  county stays on the choropleth and stays one click away. */
+function mapOccurrences(): Occurrence[] {
+  return upcomingFor(filterEvents(allEvents, { county: 'all', type: filter.type }));
+}
 
 // --- Tabs ---------------------------------------------------------------
 
@@ -169,10 +190,16 @@ async function loadMap() {
 
     layer.addEventLayers(map, {
       counties,
-      events: occurrences,
+      events: mapOccurrences(),
       centroids: (centroidsMod as { default: Record<string, unknown> }).default,
       cityNames: island.cityNames,
+      onCountySelect: (county) => {
+        // The map does not hold filter state; it reports a click and this module
+        // decides. That is what makes the chip and the amber outline the same thing.
+        pushHash({ ...filter, county: county ?? 'all' });
+      },
     });
+    layer.setSelectedCounty(map, filter.county === 'all' ? null : filter.county);
 
     // Commit only once the map is fully built. A mid-build failure therefore leaves
     // mapHandle null, so the next Map-tab click or desktop media-query change retries
@@ -313,6 +340,17 @@ function buildChip(o: Occurrence): HTMLAnchorElement {
   return a;
 }
 
+function buildPastRow(o: Occurrence): HTMLLIElement {
+  const li = document.createElement('li');
+  li.className = 'event-past-row';
+  li.append(
+    el('span', 'event-past-date', `${monthAbbr(o.date)} ${dayOfMonth(o.date)}`),
+    el('span', 'event-title event-past-title', o.event.title),
+    el('span', 'event-past-place', placeLabel(o.event)),
+  );
+  return li;
+}
+
 function insertSorted(container: Element, node: HTMLElement, key: string) {
   for (const child of Array.from(container.children) as HTMLElement[]) {
     if ((child.dataset.sort ?? '') > key) { container.insertBefore(node, child); return; }
@@ -334,8 +372,9 @@ function applyMerge(merged: PublicEvent[]) {
     if (!live.has(node.dataset.eventId!)) node.remove();
   }
 
-  // 2. Insert events submitted since the last fold.
-  const fresh = merged.filter((e) => !bakedIds.has(e.id));
+  // 2. Insert events submitted since the last fold — but only the ones the active
+  //    filter admits, or a filtered list grows rows it is not supposed to show.
+  const fresh = merged.filter((e) => !bakedIds.has(e.id) && matchesFilter(e, filter));
   const freshOccurrences = splitByToday(
     expandAll(fresh, island.horizonEnd),
     island.today,
@@ -348,17 +387,216 @@ function applyMerge(merged: PublicEvent[]) {
     if (chips) insertSorted(chips, buildChip(o), sortKey(o.date, o.event.time, o.event.id));
   }
 
-  // 3. Recompute the occurrence set for the map and the header count.
-  occurrences = splitByToday(expandAll(merged, island.horizonEnd), island.today).upcoming;
-
-  const count = document.getElementById('events-count');
-  if (count) count.textContent = String(list ? list.children.length : occurrences.length);
-
-  const empty = document.getElementById('events-empty');
-  if (empty && list) empty.hidden = list.children.length > 0;
-
-  if (mapHandle && eventsLayer) eventsLayer.setEventData(mapHandle.map, occurrences);
+  // 3. The merged set is what every later filter change renders from.
+  allEvents = merged;
+  syncChrome();
 }
+
+// --- Filter ---------------------------------------------------------------
+//
+// The chips do not exist without this file: the <nav id="events-filters"> the
+// page ships is empty and hidden, so a no-JavaScript visitor sees the complete
+// list and no dead control. Here we build the chips, filter the list in place,
+// and keep the choice in the URL hash so a filtered view is shareable and the
+// back button works. `el`, `buildCard`, `buildChip`, and `placeLabel` already
+// exist in this module (the events-page task); they are used, not redefined.
+
+function chipButton(
+  key: string,
+  value: string,
+  label: string,
+  count: number,
+): HTMLButtonElement {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'filter-chip';
+  b.dataset.filterKey = key;
+  b.dataset.filterValue = value;
+  b.dataset.count = String(count);
+  b.append(document.createTextNode(label), el('span', 'filter-chip-count', String(count)));
+  return b;
+}
+
+/** Build the two chip rows and the clear button, once, from the counties that
+ *  have events. Counts and active states are set here and then maintained by
+ *  syncChrome(); this only decides which chips exist. */
+function buildFilters(): void {
+  const nav = document.getElementById('events-filters');
+  if (!nav) return;
+  const facets = facetCounts(upcomingFor(allEvents), filter);
+
+  const countyRow = document.createElement('div');
+  countyRow.className = 'filter-row';
+  const countyLegend = document.createElement('span');
+  countyLegend.className = 'filter-legend label-mono';
+  countyLegend.textContent = 'County';
+  countyRow.append(countyLegend, chipButton('county', 'all', 'All counties', facets.countyAll));
+  for (const slug of island.counties) {
+    countyRow.append(
+      chipButton('county', slug, island.countyNames[slug] ?? slug, facets.countyCounts[slug] ?? 0),
+    );
+  }
+
+  const typeRow = document.createElement('div');
+  typeRow.className = 'filter-row';
+  const typeLegend = document.createElement('span');
+  typeLegend.className = 'filter-legend label-mono';
+  typeLegend.textContent = 'Type';
+  typeRow.append(
+    typeLegend,
+    chipButton('type', 'all', 'All types', facets.typeCounts.all),
+    chipButton('type', 'meetup', 'Meetups', facets.typeCounts.meetup),
+    chipButton('type', 'public', 'Public events', facets.typeCounts.public),
+  );
+
+  const clear = document.createElement('button');
+  clear.type = 'button';
+  clear.id = 'filter-clear';
+  clear.className = 'filter-clear';
+  clear.dataset.filterKey = 'clear';
+  clear.textContent = 'Clear';
+  clear.hidden = filter.county === 'all' && filter.type === 'all';
+  typeRow.append(clear);
+
+  nav.replaceChildren(countyRow, typeRow);
+  nav.hidden = false;
+}
+
+/** Chip counts, active states, the clear button, the header count, the past
+ *  block, the empty state, and the map. Shared by the filter path and the overlay
+ *  merge so the two can never disagree. */
+function syncChrome(): void {
+  const facets = facetCounts(upcomingFor(allEvents), filter);
+
+  const countyRow = document
+    .querySelector<HTMLElement>('[data-filter-key="county"]')
+    ?.parentElement;
+
+  // A county the overlay introduced has no first-paint chip. Give it a transient
+  // one so a map selection into that county is always visible in the chip row.
+  if (countyRow && filter.county !== 'all') {
+    const known = countyRow.querySelector(`[data-filter-value="${CSS.escape(filter.county)}"]`);
+    if (!known) {
+      const chip = chipButton(
+        'county',
+        filter.county,
+        island.countyNames[filter.county] ?? filter.county,
+        0,
+      );
+      chip.dataset.transient = '1';
+      countyRow.append(chip);
+    }
+  }
+  for (const stale of document.querySelectorAll<HTMLElement>('[data-transient="1"]')) {
+    if (stale.dataset.filterValue !== filter.county) stale.remove();
+  }
+
+  for (const chip of document.querySelectorAll<HTMLElement>('.filter-chip')) {
+    const key = chip.dataset.filterKey;
+    const value = chip.dataset.filterValue ?? 'all';
+
+    const active = key === 'county' ? filter.county === value : filter.type === value;
+    chip.classList.toggle('is-active', active);
+    if (active) chip.setAttribute('aria-current', 'true');
+    else chip.removeAttribute('aria-current');
+
+    const count =
+      key === 'county'
+        ? value === 'all'
+          ? facets.countyAll
+          : facets.countyCounts[value] ?? 0
+        : facets.typeCounts[value as 'all' | 'meetup' | 'public'] ?? 0;
+    chip.dataset.count = String(count);
+    const badge = chip.querySelector('.filter-chip-count');
+    if (badge) badge.textContent = String(count);
+  }
+
+  const clear = document.getElementById('filter-clear');
+  if (clear) clear.hidden = filter.county === 'all' && filter.type === 'all';
+
+  const list = document.getElementById('events-list');
+  const shown = list ? list.children.length : 0;
+  const count = document.getElementById('events-count');
+  if (count) count.textContent = String(shown);
+
+  const pastList = document.getElementById('events-past-list');
+  const pastShown = pastList ? pastList.children.length : 0;
+  const pastBlock = document.getElementById('events-past');
+  if (pastBlock) pastBlock.hidden = pastShown === 0;
+  const pastCount = document.getElementById('events-past-count');
+  if (pastCount) pastCount.textContent = String(pastShown);
+
+  // One empty state for both cases: a county filtered down to nothing gets the
+  // same lead, the same proof line, and the same two ways in as a calendar that
+  // was empty to begin with.
+  const empty = document.getElementById('events-empty');
+  if (empty) empty.hidden = shown > 0;
+  const proof = document.getElementById('events-empty-proof');
+  if (proof) proof.textContent = emptyStateProof(pastShown);
+
+  if (mapHandle && eventsLayer) {
+    eventsLayer.setEventData(mapHandle.map, mapOccurrences());
+    eventsLayer.setSelectedCounty(mapHandle.map, filter.county === 'all' ? null : filter.county);
+  }
+}
+
+/** Re-render the list, the month chips, and the past rows for a filter, then sync
+ *  the chrome. Pure DOM work — no history side effects, so hashchange can call it. */
+function applyFilter(next: EventFilter): void {
+  filter = next;
+
+  const split = splitByToday(
+    expandAll(filterEvents(allEvents, filter), island.horizonEnd),
+    island.today,
+  );
+  const upcoming = split.upcoming;
+  const past = split.past.filter((o) => o.date >= island.pastCutoff);
+
+  const list = document.getElementById('events-list');
+  if (list) list.replaceChildren(...upcoming.map(buildCard));
+
+  for (const chips of document.querySelectorAll<HTMLElement>('[data-chips]')) {
+    chips.replaceChildren();
+  }
+  for (const o of upcoming) {
+    const chips = document.querySelector(`[data-chips="${CSS.escape(o.date)}"]`);
+    if (chips) chips.append(buildChip(o));
+  }
+
+  const pastList = document.getElementById('events-past-list');
+  if (pastList) pastList.replaceChildren(...past.map(buildPastRow));
+
+  syncChrome();
+}
+
+/** Write the filter to the URL hash and re-render. pushState is deliberately not
+ *  a hashchange, so this never double-fires with the hashchange listener below. */
+function pushHash(next: EventFilter): void {
+  const url = `${location.pathname}${location.search}${filterHash(next)}`;
+  history.pushState({ filter: next }, '', url);
+  applyFilter(next);
+}
+
+document.getElementById('events-filters')?.addEventListener('click', (e) => {
+  const chip = (e.target as HTMLElement).closest<HTMLElement>('[data-filter-key]');
+  if (!chip) return;
+  const key = chip.dataset.filterKey;
+  const value = chip.dataset.filterValue ?? 'all';
+  if (key === 'clear') pushHash({ county: 'all', type: 'all' });
+  else if (key === 'county') pushHash({ ...filter, county: value });
+  else pushHash({ ...filter, type: value as EventTypeFilter });
+});
+
+// Back, forward, and any manual edit of the hash are hash changes; the pushState
+// in pushHash deliberately is not, so this fires once per user navigation and
+// never doubles a re-render.
+window.addEventListener('hashchange', () => applyFilter(parseFilterHash(location.hash)));
+
+// First paint: build the chips, then apply whatever the hash already asked for.
+// On a bare /events this re-renders the identical full list; on a shared
+// #county=… link it narrows immediately.
+buildFilters();
+applyFilter(filter);
 
 async function loadOverlay() {
   try {

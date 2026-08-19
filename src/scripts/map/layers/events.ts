@@ -35,12 +35,21 @@ export interface EventLayerData {
   centroids: Record<string, unknown>;
   /** Display names per city slug, for the pin labels. */
   cityNames: Record<string, string>;
+  /**
+   * Called when a county fill is clicked, with the county slug — or null when the
+   * already-selected county is clicked again (a toggle-off). The layer holds no
+   * filter state; the composer decides and calls setSelectedCounty back, which is
+   * why the amber outline and the filter chip can never drift apart.
+   */
+  onCountySelect?: (county: string | null) => void;
 }
 
 interface EventLayerState {
   counties: GeoJSON.FeatureCollection;
   centroids: Centroids;
   cityNames: Record<string, string>;
+  selectedCounty: string | null;
+  onCountySelect: ((county: string | null) => void) | null;
   teardown: () => void;
 }
 
@@ -137,6 +146,27 @@ export function setEventData(map: maplibregl.Map, occurrences: readonly Occurren
 }
 
 /**
+ * Highlight one county, or none, by pushing its outline into the `county-selected`
+ * source the events-page task already created. The composer owns the filter state
+ * and calls this; the map never decides on its own what is selected, so the amber
+ * outline always matches the active chip. No-op if the map has no event layers yet.
+ */
+export function setSelectedCounty(map: maplibregl.Map, county: string | null): void {
+  const state = eventStates.get(map);
+  if (!state) return;
+  state.selectedCounty = county;
+  const source = map.getSource('county-selected') as maplibregl.GeoJSONSource | undefined;
+  if (!source) return;
+  const feature = county
+    ? state.counties.features.find((f) => String(f.properties?.county ?? '') === county)
+    : undefined;
+  source.setData({
+    type: 'FeatureCollection',
+    features: feature ? [{ type: 'Feature', geometry: feature.geometry, properties: {} }] : [],
+  });
+}
+
+/**
  * Add the events choropleth, city pins, highlight and interactions to a map that
  * map/core.ts already created and whose style has finished loading.
  */
@@ -148,6 +178,8 @@ export function addEventLayers(map: maplibregl.Map, data: EventLayerData): void 
     counties,
     centroids: normalizeCentroids(data.centroids),
     cityNames: data.cityNames,
+    selectedCounty: null,
+    onCountySelect: data.onCountySelect ?? null,
     teardown: () => {},
   };
 
@@ -298,20 +330,21 @@ function bindEventInteractions(map: maplibregl.Map): () => void {
       .addTo(map);
   };
 
-  // County fill -> highlight the clicked county and ease in past the crossfade.
+  // County fill -> report a selection to the composer. The choropleth is a filter
+  // control, not a zoom shortcut: clicking a county hands its slug to the composer,
+  // which owns the filter state and calls setSelectedCounty back; clicking the
+  // already-selected county clears it. We do NOT ease in past z8 here — that would
+  // fade the choropleth out, and the choropleth is doubling as the selection UI.
   const onCountyClick = (e: maplibregl.MapLayerMouseEvent) => {
-    // The choropleth has fully faded out at and above the crossfade zoom; the fill
-    // is still a hit target there, so ignore those clicks (they belong to the city
-    // pins). This also caps the ease-in below to a single step: after one click the
-    // map sits at >= CROSSFADE_ZOOM, so a second click no longer reaches this layer.
+    // At and above the crossfade zoom the choropleth has faded out and the city pins
+    // own clicks (see CROSSFADE_ZOOM); the fill is still a hit target, so ignore
+    // those clicks or a county selection would fire under a city pin.
     if (map.getZoom() >= CROSSFADE_ZOOM) return;
-    const f = e.features?.[0];
-    const selected = map.getSource('county-selected') as maplibregl.GeoJSONSource | undefined;
-    selected?.setData({
-      type: 'FeatureCollection',
-      features: f ? [{ type: 'Feature', geometry: f.geometry, properties: {} }] : [],
-    });
-    map.easeTo({ center: e.lngLat, zoom: Math.max(map.getZoom() + 2, 8.5) });
+    const slug = String(e.features?.[0]?.properties?.county ?? '');
+    if (!slug) return;
+    const state = eventStates.get(map);
+    if (!state) return;
+    state.onCountySelect?.(slug === state.selectedCounty ? null : slug);
   };
 
   const onEnter = () => { map.getCanvas().style.cursor = 'pointer'; };
