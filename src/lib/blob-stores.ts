@@ -26,7 +26,7 @@ import { getStore, type Store } from '@netlify/blobs';
  * keeps resolving its Signal invite, and a just-set intake link stays stale,
  * for up to 60 seconds.
  *
- * One sanctioned bypass: the maintainer CLI (`scripts/organizer-codes.mjs`)
+ * One sanctioned bypass: the maintainer CLI (`scripts/organizer-codes.ts`)
  * writes to the real production store from a developer machine, where CONTEXT
  * is unset. It opts in explicitly by setting `process.env.CONTEXT = 'production'`
  * before calling these factories. That path already requires local possession of
