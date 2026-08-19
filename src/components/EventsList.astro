@@ -1,6 +1,6 @@
 ---
 import type { Occurrence } from '../lib/events-view.js';
-import { monthAbbr, dayOfMonth, formatTime12, sortKey } from '../lib/events-view.js';
+import { monthAbbr, dayOfMonth, formatTime12, sortKey, emptyStateProof } from '../lib/events-view.js';
 
 interface Props {
   upcoming: Occurrence[];
@@ -52,31 +52,31 @@ const place = (o: Occurrence) =>
     ))}
   </ul>
 
+  <!-- One empty state for both cases. A county filtered down to nothing and a
+       calendar that was empty to begin with get the same lead, the same proof
+       line, and the same two ways in — the only thing that differs is the
+       number, and that comes from emptyStateProof() on both render paths. -->
   <div id="events-empty" class="events-empty" hidden={upcoming.length > 0}>
     <p class="events-empty-lead">Nothing on the calendar right now.</p>
-    <p class="events-empty-proof">
-      {past.length > 0
-        ? `${past.length} ${past.length === 1 ? 'event has' : 'events have'} run in the last 30 days.`
-        : 'Be the first to put something on it.'}
-    </p>
+    <p class="events-empty-proof" id="events-empty-proof">{emptyStateProof(past.length)}</p>
     <p class="events-empty-actions">
       <a class="event-signal" href="mailto:hello@deflocksc.org">Email us</a>
       <button id="intake-open" type="button" class="event-signal event-signal-btn">Join the Signal group</button>
     </p>
   </div>
 
-  {past.length > 0 && (
-    <details class="events-past">
-      <summary class="label-mono">Past events ({past.length})</summary>
-      <ul class="events-past-list">
-        {past.map((o) => (
-          <li class="event-past-row">
-            <span class="event-past-date">{monthAbbr(o.date)} {dayOfMonth(o.date)}</span>
-            <span class="event-title event-past-title">{o.event.title}</span>
-            <span class="event-past-place">{place(o)}</span>
-          </li>
-        ))}
-      </ul>
-    </details>
-  )}
+  <details class="events-past" id="events-past" hidden={past.length === 0}>
+    <summary class="label-mono">
+      Past events (<span id="events-past-count">{past.length}</span>)
+    </summary>
+    <ul class="events-past-list" id="events-past-list">
+      {past.map((o) => (
+        <li class="event-past-row">
+          <span class="event-past-date">{monthAbbr(o.date)} {dayOfMonth(o.date)}</span>
+          <span class="event-title event-past-title">{o.event.title}</span>
+          <span class="event-past-place">{place(o)}</span>
+        </li>
+      ))}
+    </ul>
+  </details>
 </div>

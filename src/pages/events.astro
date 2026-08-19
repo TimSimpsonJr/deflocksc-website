@@ -7,20 +7,22 @@ import registry from '../data/registry.json';
 import bakedEventsRaw from '../data/events.json';
 import { toPublicEvent, type PublicEvent, type StoredEvent } from '../lib/public-event.js';
 import { publicEventSchema } from '../lib/event-schema.js';
-import { expandAll, splitByToday, addMonths } from '../lib/events-view.js';
+import {
+  expandAll,
+  splitByToday,
+  addMonths,
+  countyOptions,
+} from '../lib/events-view.js';
 import { toJsonIsland } from '../lib/json-island.js';
 
-// The committed events.json is validated at build time with the shared strict
-// schema — publicEventSchema, imported from event-schema.js — and then projected
-// through toPublicEvent() before it is rendered or serialized into the data
-// island. That schema is the single source of truth for the stored/public shape,
-// so this page keeps no local copy that can drift from the real one. The file
-// lives in a repo a later bad commit can edit, so the build must never trust it
-// (design §5/§6): a record carrying a server-only field (signalUrl, codeDigest,
-// revoked) is rejected by the schema's `.strict()` and fails the build, and even
-// a record that slipped through could not reach the client, because every field
-// is picked by the allowlist projection, never spread. The per-field caps live
-// inside the shared schema (imported from sanitize-text.ts there), never retyped.
+// Baked events.json is validated with the shared strict publicEventSchema and
+// projected through toPublicEvent — IDENTICAL to the events-page task that created
+// this file. This task must NOT weaken that back to a cast plus a partial field
+// check: publicEventSchema's `.strict()` is what rejects a hand-edited record
+// carrying a server-only field (signalUrl, codeDigest, revoked) and fails the build,
+// and toPublicEvent is the allowlist projection that stops any such field reaching
+// the data island (design §5/§6). The per-field caps live inside the shared schema,
+// never retyped here.
 const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index) => {
   const parsed = publicEventSchema.safeParse(raw);
   if (!parsed.success) {
@@ -31,9 +33,14 @@ const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index
       `src/data/events.json: record ${index} at "${at}" failed strict validation (${detail})`,
     );
   }
-  // Allowlist projection, even after a clean parse: defence in depth (design §5).
   return toPublicEvent(parsed.data as unknown as StoredEvent);
 });
+
+const today = new Date().toISOString().slice(0, 10);
+const horizonEnd = addMonths(today, 12);
+const cutoffDate = new Date(`${today}T00:00:00Z`);
+cutoffDate.setUTCDate(cutoffDate.getUTCDate() - 90);
+const pastCutoff = cutoffDate.toISOString().slice(0, 10);
 
 // Display names, derived from registry.json at build time and shipped in the data
 // island. registry.json itself is ~50 KB and must never reach the client bundle.
@@ -47,37 +54,27 @@ for (const j of registry.jurisdictions as Array<Record<string, string>>) {
   }
 }
 
-const today = new Date().toISOString().slice(0, 10);
-const horizonEnd = addMonths(today, 12);
-
-// One 30-day retention horizon, matching RETENTION_DAYS in netlify/functions/events.ts
-// and the build-time expiry guard (design §10). A single window everywhere — the past
-// list, the shipped island, and the overlay all cut at the same 30 days — so a baked id
-// the overlay can return is exactly a baked id the island still carries.
-const RETENTION_DAYS = 30;
-const retentionCutoff = (() => {
-  const d = new Date(`${today}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() - RETENTION_DAYS);
-  return d.toISOString().slice(0, 10);
-})();
-
+// The page prerenders the FULL, unfiltered calendar — that is the no-JavaScript
+// invariant. The client narrows it in place; nothing here is filtered.
 const allOccurrences = expandAll(bakedEvents, horizonEnd);
-const { upcoming, past } = splitByToday(allOccurrences, today);
-const recentPast = past.filter((o) => o.date >= retentionCutoff);
+const { upcoming, past: recentPast } = splitByToday(allOccurrences, today);
+const past = recentPast.filter((o) => o.date >= pastCutoff);
 
-// Bounded island: ship only events still inside the retention horizon, not the whole
-// baked array (design §12). An event's last relevant day is the end of its series, or
-// its single date. Anything older is neither rendered as a card nor returned by
-// /api/events, so shipping it would only bloat the page.
-const lastRelevantDate = (e: PublicEvent): string => e.recurrence?.until ?? e.date;
-const islandEvents = bakedEvents.filter((e) => lastRelevantDate(e) >= retentionCutoff);
+// County slugs with at least one upcoming occurrence, busiest first. The client
+// builds one chip per slug — never one per registry county — so the row stays a
+// row.
+const counties = countyOptions(upcoming).map((c) => c.county);
 
 const island = {
-  events: islandEvents,
+  events: bakedEvents,
   cityNames,
   countyNames,
   today,
   horizonEnd,
+  pastCutoff,
+  // The county slugs that get a chip on first paint. The overlay merge may add a
+  // transient chip for a county it introduces, but the initial row comes from here.
+  counties,
 };
 ---
 
@@ -108,6 +105,10 @@ const island = {
       <button id="tab-month" role="tab" aria-selected="false" aria-controls="panel-month" class="events-tab" data-tab="month" tabindex="-1">Month</button>
       <button id="tab-map" role="tab" aria-selected="false" aria-controls="panel-map" class="events-tab events-tab-map" data-tab="map" tabindex="-1">Map</button>
     </div>
+
+    {/* Built by events-page.ts on load. Empty and hidden without JavaScript,
+        so there is no dead control — the full list below is the complete view. */}
+    <nav id="events-filters" class="events-filters" aria-label="Filter events" hidden></nav>
 
     <div class="events-grid">
       <div id="panel-map" role="tabpanel" aria-labelledby="tab-map" tabindex="0" data-panel="map">
@@ -387,4 +388,60 @@ const island = {
   .intake-panel h2 { color: #e8e8e8; font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem; }
   .intake-panel p { margin: 0 0 1rem; }
   .intake-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0; }
+
+  /* --- Filter chips ---
+     Built by events-page.ts, so styled globally: runtime-created nodes carry no
+     data-astro-* attribute for a scoped rule to match. The container ships hidden
+     and the script unhides it, which is why there is no flash of an empty bar. */
+  .events-filters {
+    max-width: 84rem;
+    margin: 0 auto;
+    padding: 1rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .events-filters[hidden] { display: none; }
+  .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+  .filter-legend { color: #525252; margin-right: 0.35rem; }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: transparent;
+    color: #a3a3a3;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .filter-chip:hover { border-color: rgba(255, 255, 255, 0.28); color: #e8e8e8; }
+  .filter-chip.is-active { border-color: #dc2626; background: rgba(220, 38, 38, 0.14); color: #ffffff; }
+  .filter-chip:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+  /* A chip that matches nothing right now still has to be reachable, or filtering
+     into a dead end leaves no way back out. Dimmed, not removed. */
+  .filter-chip[data-count='0'] { opacity: 0.45; }
+
+  .filter-chip-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #737373; }
+  .filter-chip.is-active .filter-chip-count { color: #fca5a5; }
+
+  .filter-clear {
+    color: #737373;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    margin-left: 0.35rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .filter-clear[hidden] { display: none; }
+  .events-past[hidden] { display: none; }
 </style>
