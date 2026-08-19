@@ -214,15 +214,24 @@ desktop.addEventListener('change', (e) => { if (e.matches) void loadMap(); });
 
 function focusListCard(eventId: string, date: string | null) {
   const list = document.getElementById('events-list');
-  if (!list || !eventId) return;
+  // Fallback: with no matching card, keep keyboard focus in the calendar by
+  // landing it on the List tab rather than letting selectTab() drop it to <body>.
+  const focusListTab = () => document.getElementById('tab-list')?.focus();
+  if (!list || !eventId) { focusListTab(); return; }
   const cards = Array.from(
     list.querySelectorAll<HTMLElement>(`[data-event-id="${CSS.escape(eventId)}"]`),
   );
   // A recurring event has one card per occurrence, all sharing its id; match the
   // date too so the chip lands on its own day, falling back to the first card.
   const card = (date && cards.find((c) => c.dataset.date === date)) || cards[0];
-  if (!card) return;
+  if (!card) { focusListTab(); return; }
   card.scrollIntoView({ block: 'center' });
+  // selectTab('list') set the Month panel to display:none while the activated chip
+  // still held focus, so document.activeElement had already reset to <body>. Move
+  // focus onto the card itself (WCAG 2.4.3): make it programmatically focusable and
+  // focus without scrolling, since scrollIntoView above already positioned it.
+  card.tabIndex = -1;
+  card.focus({ preventScroll: true });
   card.classList.add('event-card-flash');
   window.setTimeout(() => card.classList.remove('event-card-flash'), 1200);
 }
@@ -390,5 +399,26 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && dialog && !dialog.hidden) {
     dialog.hidden = true;
     document.getElementById('intake-open')?.focus();
+  }
+});
+// Focus trap: an aria-modal dialog must keep Tab focus inside while open, or Tab
+// escapes to the page behind the overlay. Mirrors the action-modal trap in
+// src/scripts/action-modal/modal-controller.ts (the project a11y standard).
+dialog?.addEventListener('keydown', (e) => {
+  if (!dialog || e.key !== 'Tab' || dialog.hidden) return;
+  const focusable = Array.from(
+    dialog.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"]), a[href]',
+    ),
+  ).filter((node) => node.offsetParent !== null);
+  if (focusable.length === 0) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
   }
 });
