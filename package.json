@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "tina": "tinacms dev -c \"astro dev\"",
     "start": "astro dev",
-    "prebuild": "node scripts/sync-open-civics.mjs",
+    "prebuild": "node scripts/sync-open-civics.mjs && node scripts/build-county-shapes.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
