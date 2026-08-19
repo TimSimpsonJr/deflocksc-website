@@ -303,7 +303,16 @@ function buildCard(o: Occurrence): HTMLLIElement {
 
   const body = el('div', 'event-body');
   body.append(el('h3', 'event-title', e.title));
-  body.append(el('p', 'event-meta', `${formatTime12(e.time)} · ${placeLabel(e)}`));
+  // Mirror EventsList.astro's .event-meta exactly: the visible date block is
+  // aria-hidden, so the accessible date lives in an sr-only span here. Without
+  // it a screen reader hears the time and place but never the date. Keep the
+  // markup identical to the server render (the documented class-parity contract).
+  const meta = el('p', 'event-meta');
+  meta.append(
+    el('span', 'sr-only', `${o.date} `),
+    document.createTextNode(`${formatTime12(e.time)} · ${placeLabel(e)}`),
+  );
+  body.append(meta);
   if (e.address) body.append(el('p', 'event-address', e.address));
   if (e.description) body.append(el('p', 'event-desc', e.description));
 
@@ -587,16 +596,43 @@ document.getElementById('events-filters')?.addEventListener('click', (e) => {
   else pushHash({ ...filter, type: value as EventTypeFilter });
 });
 
+/** Does this hash carry a filter key this page owns? Distinguishes a real filter
+ *  hash (#county=…, #type=…) from an in-page anchor like the Base.astro skip
+ *  link's #main-content, which must not be read as "clear the filter". */
+function hashHasFilterKey(hash: string): boolean {
+  const raw = hash.replace(/^#/, '');
+  for (const part of raw.split('&')) {
+    const eq = part.indexOf('=');
+    if (eq < 0) continue;
+    const key = part.slice(0, eq);
+    if (key === 'county' || key === 'type') return true;
+  }
+  return false;
+}
+
 // Back, forward, and any manual edit of the hash are hash changes; the pushState
 // in pushHash deliberately is not, so this fires once per user navigation and
-// never doubles a re-render.
-window.addEventListener('hashchange', () => applyFilter(parseFilterHash(location.hash)));
+// never doubles a re-render. An empty hash clears (back button to a hashless
+// URL); a hash with a recognised filter key applies. Any other in-page anchor —
+// the skip link's #main-content, a future deep link — is ignored, so activating
+// it can never wipe the active county/type selection.
+window.addEventListener('hashchange', () => {
+  if (location.hash.replace(/^#/, '') === '' || hashHasFilterKey(location.hash)) {
+    applyFilter(parseFilterHash(location.hash));
+  }
+});
 
 // First paint: build the chips, then apply whatever the hash already asked for.
-// On a bare /events this re-renders the identical full list; on a shared
-// #county=… link it narrows immediately.
+// On a bare /events the server already rendered the identical full list, so a
+// re-render would only re-announce the whole aria-live list to a screen reader;
+// sync the chip active-states to the DOM instead. A shared #county=… link still
+// needs the real re-render to narrow the list.
 buildFilters();
-applyFilter(filter);
+if (filter.county === 'all' && filter.type === 'all') {
+  syncChrome();
+} else {
+  applyFilter(filter);
+}
 
 async function loadOverlay() {
   try {

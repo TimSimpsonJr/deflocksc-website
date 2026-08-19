@@ -321,7 +321,8 @@ export function filterHash(filter: EventFilter): string {
  * Anything that is not a recognised type slug under type= is ignored; an unknown
  * county under county= is kept, so a shared #county=<slug> for a county with no
  * current events resolves to the empty state rather than silently widening to
- * every event in the state.
+ * every event in the state. A malformed percent-escape in any part is skipped
+ * rather than thrown, so a crafted link like #county=% cannot abort the caller.
  */
 export function parseFilterHash(hash: string): EventFilter {
   const raw = hash.replace(/^#/, '');
@@ -331,7 +332,15 @@ export function parseFilterHash(hash: string): EventFilter {
     const eq = part.indexOf('=');
     if (eq < 0) continue;
     const key = part.slice(0, eq);
-    const value = decodeURIComponent(part.slice(eq + 1));
+    let value: string;
+    try {
+      value = decodeURIComponent(part.slice(eq + 1));
+    } catch {
+      // A truncated or malformed percent-escape (#county=%, #type=%zz) makes
+      // decodeURIComponent throw a URIError. Skip that one part instead of
+      // letting the throw abort the whole page module at import time.
+      continue;
+    }
     if (key === 'county' && value) county = value;
     else if (key === 'type') {
       if (value === TYPE_SLUGS.meetup) type = 'meetup';

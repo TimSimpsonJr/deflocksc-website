@@ -397,6 +397,16 @@ describe('filterHash and parseFilterHash', () => {
     expect(parseFilterHash('#')).toEqual(ALL_EVENTS);
     expect(parseFilterHash('#nonsense')).toEqual(ALL_EVENTS);
   });
+
+  it('skips a malformed percent-escape instead of throwing (crafted-link DoS)', () => {
+    // decodeURIComponent('%') throws a URIError; a shared #county=% must not take
+    // the whole page module down with it. The bad part is dropped.
+    expect(() => parseFilterHash('#county=%')).not.toThrow();
+    expect(parseFilterHash('#county=%')).toEqual(ALL_EVENTS);
+    expect(parseFilterHash('#type=%zz')).toEqual(ALL_EVENTS);
+    // A malformed part next to a good one keeps the good one.
+    expect(parseFilterHash('#county=%&type=meetups')).toEqual({ county: 'all', type: 'meetup' });
+  });
 });
 
 describe('emptyStateProof', () => {
