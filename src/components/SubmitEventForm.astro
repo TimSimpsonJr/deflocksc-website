@@ -1,0 +1,667 @@
+---
+import { allCitySlugs } from '../lib/jurisdictions.js';
+import { cityLabel } from '../lib/city-label.js';
+
+// Same allowlist the server validates against, so the select can never offer a
+// value `validateSubmission()` would reject. County is NOT asked for: it is
+// derived server-side via `countyForCity()`, and a submitted county is a
+// validation error (design §6).
+const cityOptions = allCitySlugs()
+  .map((slug) => ({ slug, label: cityLabel(slug) }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const labelClass =
+  "block font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.16em] text-[#a3a3a3] mb-1.5";
+const inputClass =
+  'w-full bg-[#111111] border border-[rgba(255,255,255,0.12)] text-[#e8e8e8] px-3 py-2.5 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]';
+const hintClass = 'text-[13px] text-[#737373] mt-1.5 leading-[1.5]';
+const errorClass = 'text-[13px] text-[#f87171] mt-1.5 leading-[1.5]';
+---
+
+<div class="max-w-[640px]">
+  <p id="submit-status" class="sr-only" role="status" aria-live="polite"></p>
+
+  <p
+    id="error-summary"
+    tabindex="-1"
+    hidden
+    class="border-l-2 border-[#dc2626] bg-[rgba(220,38,38,0.08)] text-[#fca5a5] text-sm px-4 py-3 mb-6"
+  >
+  </p>
+
+  <form id="submit-event-form" novalidate>
+    <!-- Event type -->
+    <fieldset class="border-0 p-0 m-0 mb-8">
+      <legend class={labelClass}>Event type</legend>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <label class="flex gap-3 items-start border border-[rgba(255,255,255,0.12)] p-4 cursor-pointer hover:border-[rgba(255,255,255,0.28)] transition-colors">
+          <input type="radio" name="type" value="meetup" checked class="mt-1 accent-[#dc2626]" />
+          <span>
+            <span class="block text-[#e8e8e8] text-sm font-bold mb-1">Organizing meetup</span>
+            <span class="block text-[13px] text-[#737373] leading-[1.5]">
+              Title, date, time, city. No address is published. You share the venue inside the Signal group.
+            </span>
+          </span>
+        </label>
+        <label class="flex gap-3 items-start border border-[rgba(255,255,255,0.12)] p-4 cursor-pointer hover:border-[rgba(255,255,255,0.28)] transition-colors">
+          <input type="radio" name="type" value="public" class="mt-1 accent-[#dc2626]" />
+          <span>
+            <span class="block text-[#e8e8e8] text-sm font-bold mb-1">Public event</span>
+            <span class="block text-[13px] text-[#737373] leading-[1.5]">
+              Council meetings and public-facing actions. Address is required and published.
+            </span>
+          </span>
+        </label>
+      </div>
+      <p class={errorClass} data-error-for="type" id="error-type" hidden></p>
+    </fieldset>
+
+    <!--
+      Honeypot. Hidden with CSS, never type="hidden" (bots skip hidden inputs).
+      autocomplete="one-time-code" keeps browser autofill from populating it and
+      locking out a real organizer. tabindex="-1" and aria-hidden="true" keep it
+      out of the tab order and the accessibility tree. Design §6.
+      The submit function drops any submission where `website` is non-empty, and
+      strips the (empty) key before validation.
+    -->
+    <div class="hp-field" aria-hidden="true">
+      <label for="field-website">Website</label>
+      <input
+        id="field-website"
+        name="website"
+        type="text"
+        autocomplete="one-time-code"
+        tabindex="-1"
+        aria-hidden="true"
+      />
+    </div>
+
+    <!-- Title -->
+    <div class="mb-6">
+      <label for="field-title" class={labelClass}>Title</label>
+      <input
+        id="field-title"
+        name="title"
+        type="text"
+        required
+        maxlength="80"
+        autocomplete="off"
+        spellcheck="false"
+        class={inputClass}
+        aria-describedby="hint-title error-title"
+      />
+      <p id="hint-title" class={hintClass}>
+        Up to 80 characters. Plain text, Latin script, no emoji.
+      </p>
+      <p class={errorClass} data-error-for="title" id="error-title" hidden></p>
+    </div>
+
+    <!-- Date + time -->
+    <div class="grid gap-6 sm:grid-cols-2 mb-6">
+      <div>
+        <label for="field-date" class={labelClass}>Date</label>
+        <input
+          id="field-date"
+          name="date"
+          type="date"
+          required
+          class={inputClass}
+          aria-describedby="hint-date error-date"
+        />
+        <p id="hint-date" class={hintClass}>Within the next 12 months.</p>
+        <p class={errorClass} data-error-for="date" id="error-date" hidden></p>
+      </div>
+      <div>
+        <label for="field-time" class={labelClass}>Start time</label>
+        <input
+          id="field-time"
+          name="time"
+          type="time"
+          step="60"
+          required
+          class={inputClass}
+          aria-describedby="hint-time error-time"
+        />
+        <p id="hint-time" class={hintClass}>24-hour clock. Eastern time.</p>
+        <p class={errorClass} data-error-for="time" id="error-time" hidden></p>
+      </div>
+    </div>
+
+    <!-- Recurrence. The schema (Task 11) accepts recurrence = { freq, until }
+         with freq in ('weekly','monthly_nth'); the UI maps monthly ->
+         monthly_nth. The `until` field is revealed only when the event repeats
+         and its key is omitted from the payload otherwise. -->
+    <div class="mb-6">
+      <label for="field-repeats" class={labelClass}>Repeats</label>
+      <select
+        id="field-repeats"
+        name="repeats"
+        class={inputClass}
+        aria-describedby="hint-repeats"
+      >
+        <option value="none" selected>Does not repeat</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly (same weekday each month)</option>
+      </select>
+      <p id="hint-repeats" class={hintClass}>
+        Leave this on "Does not repeat" for a one-off. Recurring events run up to 6 months out.
+      </p>
+    </div>
+
+    <div id="recurrence-until-field" class="mb-6" hidden>
+      <label for="field-until" class={labelClass}>Repeat until</label>
+      <input
+        id="field-until"
+        name="recurrence.until"
+        type="date"
+        class={inputClass}
+        aria-describedby="hint-until error-until"
+      />
+      <p id="hint-until" class={hintClass}>
+        The last date the event repeats, within 6 months of the start date.
+      </p>
+      <p class={errorClass} data-error-for="recurrence.until" id="error-until" hidden></p>
+    </div>
+
+    <!-- City -->
+    <div class="mb-6">
+      <label for="field-city" class={labelClass}>City</label>
+      <select
+        id="field-city"
+        name="city"
+        required
+        class={inputClass}
+        aria-describedby="hint-city error-city"
+      >
+        <option value="" disabled selected>Select a city</option>
+        {cityOptions.map((option) => <option value={option.slug}>{option.label}</option>)}
+      </select>
+      <p id="hint-city" class={hintClass}>
+        The county is filled in for you. Not on the list? Email us and we will add it.
+      </p>
+      <p class={errorClass} data-error-for="city" id="error-city" hidden></p>
+    </div>
+
+    <!-- Public-event-only fields -->
+    <div id="public-only-fields" hidden>
+      <div class="mb-6">
+        <label for="field-address" class={labelClass}>Address</label>
+        <input
+          id="field-address"
+          name="address"
+          type="text"
+          maxlength="120"
+          autocomplete="off"
+          class={inputClass}
+          aria-describedby="hint-address error-address"
+        />
+        <p id="hint-address" class={hintClass}>
+          Published on the calendar and in the map popup. Public venues only.
+        </p>
+        <p class={errorClass} data-error-for="address" id="error-address" hidden></p>
+      </div>
+
+      <div class="mb-6">
+        <label for="field-description" class={labelClass}>Description (optional)</label>
+        <textarea
+          id="field-description"
+          name="description"
+          rows="4"
+          maxlength="300"
+          class={inputClass}
+          aria-describedby="hint-description error-description"></textarea>
+        <p id="hint-description" class={hintClass}>
+          Up to 300 characters. It goes live immediately with nobody reading it first.
+        </p>
+        <p class={errorClass} data-error-for="description" id="error-description" hidden></p>
+      </div>
+    </div>
+
+    <!-- Signal group link + the §13 setup checklist -->
+    <div class="mb-6">
+      <label for="field-signal-url" class={labelClass}>Signal group link</label>
+      <input
+        id="field-signal-url"
+        name="signalUrl"
+        type="text"
+        required
+        inputmode="url"
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+        placeholder="https://signal.group/#..."
+        class={inputClass}
+        aria-describedby="hint-signal-url error-signal-url"
+      />
+      <p id="hint-signal-url" class={hintClass}>
+        <span id="signal-url-requirement">Required. Every meetup needs a group.</span>
+        The link is never published on the site; visitors reach it through a redirect.
+      </p>
+      <p class={errorClass} data-error-for="signalUrl" id="error-signal-url" hidden></p>
+
+      <details id="signal-setup" class="mt-3 border border-[rgba(251,191,36,0.25)] bg-[rgba(251,191,36,0.05)]">
+        <summary class="cursor-pointer px-4 py-3 text-[#fbbf24] text-sm font-bold list-none">
+          Before you paste that link
+        </summary>
+        <div id="signal-setup-panel" class="px-4 pb-4 pt-0">
+          <p class="text-[#a3a3a3] text-sm mb-3">Four things, once per group.</p>
+          <ol class="list-decimal pl-5 space-y-3 text-[#a3a3a3] text-sm leading-[1.6] marker:text-[#fbbf24]">
+            <li>
+              <strong class="text-[#e8e8e8]">Give it a boring name and leave the description blank.</strong>
+              Anyone holding the link can read your group's name, description, and member count without joining.
+              "Thursday group" tells them nothing. "Greenville DeflockSC organizers" tells them your chapter exists
+              and how many of you there are. The address never goes in the description.
+            </li>
+            <li>
+              <strong class="text-[#e8e8e8]">Set disappearing messages before you invite anyone.</strong>
+              Group Settings &#8250; Disappearing Messages. 1 week is a fine default. Do it first, or the early
+              messages stay forever.
+            </li>
+            <li>
+              <strong class="text-[#e8e8e8]">Hide your own number.</strong>
+              Settings &#8250; Privacy &#8250; Phone Number &#8250; Nobody. Set a username instead. You're about to
+              be in a room with strangers.
+            </li>
+            <li>
+              <strong class="text-[#e8e8e8]">Burn the group when the event's over.</strong>
+              Have everyone leave, then delete it. Move the people you trust into a separate group. Don't reuse an
+              event group for anything else, and only keep one alive if the event actually recurs.
+            </li>
+          </ol>
+        </div>
+      </details>
+    </div>
+
+    <!-- Organizer code -->
+    <div class="mb-8">
+      <label for="field-organizer-code" class={labelClass}>Organizer code</label>
+      <input
+        id="field-organizer-code"
+        name="organizerCode"
+        type="text"
+        required
+        maxlength="128"
+        autocomplete="off"
+        autocapitalize="none"
+        autocorrect="off"
+        spellcheck="false"
+        placeholder="drum yoga vivid clay"
+        class={inputClass}
+        aria-describedby="hint-organizer-code error-organizer-code"
+      />
+      <p id="hint-organizer-code" class={hintClass}>
+        The four words you were given. Capitals, spaces, and hyphens do not matter.
+      </p>
+      <p class={errorClass} data-error-for="organizerCode" id="error-organizer-code" hidden></p>
+    </div>
+
+    <button
+      type="submit"
+      id="submit-button"
+      class="bg-[#dc2626] hover:bg-[#b91c1c] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-[0.08em] px-8 py-3.5 transition-colors"
+    >
+      Publish event
+    </button>
+
+    <noscript>
+      <p class="text-[#fca5a5] text-sm mt-4">
+        This form needs JavaScript to submit. Email us instead and we will post it for you.
+      </p>
+    </noscript>
+  </form>
+
+  <!-- Success -->
+  <div id="success-panel" tabindex="-1" hidden class="border-l-2 border-[#16a34a] bg-[rgba(22,163,74,0.06)] px-5 py-5">
+    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.16em] text-[#4ade80] mb-2">Published</p>
+    <h2 class="text-[#e8e8e8] text-xl font-bold mb-2">Your event is live.</h2>
+    <p class="text-[#a3a3a3] text-sm mb-4">
+      This is its permanent link. Save it now: the id is not something we can look up for you later.
+    </p>
+    <div class="flex gap-2 mb-3">
+      <input
+        id="permalink-input"
+        type="text"
+        readonly
+        value=""
+        aria-label="Event permalink"
+        class="flex-1 bg-[#111111] border border-[rgba(255,255,255,0.12)] text-[#e8e8e8] px-3 py-2.5 text-sm font-['DM_Mono',monospace] focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]"
+      />
+      <button
+        type="button"
+        id="copy-permalink"
+        class="bg-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.14)] text-[#e8e8e8] font-bold text-xs uppercase tracking-[0.08em] px-5 py-2.5 transition-colors min-w-[7rem]"
+      >
+        Copy
+      </button>
+    </div>
+    <p class="text-sm">
+      <a id="success-link" href="/events" class="text-[#fbbf24] hover:text-[#fcd34d] underline">/events</a>
+      <span class="text-[#737373]"> &middot; </span>
+      <a href="/events/submit" class="text-[#fbbf24] hover:text-[#fcd34d] underline">Submit another</a>
+    </p>
+  </div>
+</div>
+
+<style>
+  /* Astro scopes these, so they apply only inside this component. */
+
+  /* Explicit, so a utility class can never win over a `hidden` toggle. */
+  [hidden] {
+    display: none !important;
+  }
+
+  /* Honeypot: hidden with CSS, off-screen and non-interactive, but a real
+     text input in the DOM so a naive bot fills it. */
+  .hp-field {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #signal-setup summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #signal-setup summary::after {
+    content: ' +';
+  }
+
+  #signal-setup[open] summary::after {
+    content: ' \2212';
+  }
+</style>
+
+<script>
+  const form = document.getElementById('submit-event-form') as HTMLFormElement;
+  const publicOnly = document.getElementById('public-only-fields') as HTMLElement;
+  const addressInput = document.getElementById('field-address') as HTMLInputElement;
+  const descriptionInput = document.getElementById('field-description') as HTMLTextAreaElement;
+  const signalInput = document.getElementById('field-signal-url') as HTMLInputElement;
+  const signalRequirement = document.getElementById('signal-url-requirement') as HTMLElement;
+  const dateInput = document.getElementById('field-date') as HTMLInputElement;
+  const repeatsSelect = document.getElementById('field-repeats') as HTMLSelectElement;
+  const untilField = document.getElementById('recurrence-until-field') as HTMLElement;
+  const untilInput = document.getElementById('field-until') as HTMLInputElement;
+  const honeypot = document.getElementById('field-website') as HTMLInputElement;
+  const statusEl = document.getElementById('submit-status') as HTMLElement;
+  const errorSummary = document.getElementById('error-summary') as HTMLElement;
+  const submitButton = document.getElementById('submit-button') as HTMLButtonElement;
+  const successPanel = document.getElementById('success-panel') as HTMLElement;
+  const successLink = document.getElementById('success-link') as HTMLAnchorElement;
+  const permalinkInput = document.getElementById('permalink-input') as HTMLInputElement;
+  const copyButton = document.getElementById('copy-permalink') as HTMLButtonElement;
+
+  // Allowlist of field names the server may point an error at. Any other value
+  // in the response is ignored, so a response body can never drive a selector.
+  const FIELD_NAMES = [
+    'type',
+    'title',
+    'description',
+    'date',
+    'time',
+    'city',
+    'address',
+    'signalUrl',
+    'recurrence.until',
+    'organizerCode',
+  ];
+
+  const FIELD_ERROR_MESSAGES: Record<string, string> = {
+    required: 'This is required.',
+    too_long: 'Too long. Shorten it and try again.',
+    too_short: 'Too short.',
+    invalid_format: 'That format is not accepted.',
+    not_allowed: 'This field is not accepted for this event type.',
+    past_date: 'Pick a date in the future.',
+    too_far_out: 'Pick a date within the next 12 months.',
+    unknown_city: 'Pick a city from the list.',
+    derived_field: 'The server fills this in. Do not submit it.',
+    invalid_url: 'Must be a https://signal.group/#... invite link.',
+    disallowed_characters: 'Remove unusual characters and try again.',
+    until_not_after_date: 'The repeat-until date must be after the start date.',
+    until_too_far_out: 'Recurring events can run at most 6 months out.',
+  };
+
+  const TOP_LEVEL_MESSAGES: Record<string, string> = {
+    invalid: 'Some fields need fixing. See the notes below.',
+    invalid_code: 'That organizer code is not valid.',
+    revoked_code: 'That organizer code is not valid.',
+    rate_limited: 'Too many submissions from your network today. Try again tomorrow.',
+    duplicate: 'An event with these details has already been submitted.',
+    body_too_large: 'That submission is too large. Shorten the description and try again.',
+    context_refused: 'Submissions are turned off on this deploy.',
+    server_error: 'Something broke on our end. Try again in a minute.',
+  };
+
+  function isoDate(value: Date): string {
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${value.getFullYear()}-${month}-${day}`;
+  }
+
+  // Set at load, never baked, so a stale build cannot ship a stale bound.
+  const today = new Date();
+  dateInput.min = isoDate(today);
+  dateInput.max = isoDate(new Date(today.getFullYear(), today.getMonth() + 12, today.getDate()));
+
+  function currentType(): string {
+    const checked = form.querySelector('input[name="type"]:checked') as HTMLInputElement | null;
+    return checked ? checked.value : 'meetup';
+  }
+
+  function applyType(): void {
+    const isPublic = currentType() === 'public';
+    publicOnly.hidden = !isPublic;
+    addressInput.required = isPublic;
+    // Disabled keeps hidden fields out of native validation and out of focus order.
+    addressInput.disabled = !isPublic;
+    descriptionInput.disabled = !isPublic;
+    signalInput.required = !isPublic;
+    signalRequirement.textContent = isPublic
+      ? 'Optional for public events.'
+      : 'Required. Every meetup needs a group.';
+  }
+
+  // Keep the `until` bounds pinned to the start date: strictly after it, and no
+  // more than 6 months out. Client-side hint only; the server is authoritative.
+  function syncUntilBounds(): void {
+    const start = dateInput.value;
+    if (!start) {
+      untilInput.removeAttribute('min');
+      untilInput.removeAttribute('max');
+      return;
+    }
+    const parts = start.split('-').map(Number);
+    const y = parts[0];
+    const m = parts[1];
+    const d = parts[2];
+    untilInput.min = isoDate(new Date(y, m - 1, d + 1));
+    untilInput.max = isoDate(new Date(y, m - 1 + 6, d));
+  }
+
+  function applyRepeats(): void {
+    const recurring = repeatsSelect.value !== 'none';
+    untilField.hidden = !recurring;
+    untilInput.required = recurring;
+    // Disabled keeps the hidden `until` out of native validation and focus order.
+    untilInput.disabled = !recurring;
+    if (recurring) syncUntilBounds();
+  }
+
+  form.querySelectorAll('input[name="type"]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      clearErrors();
+      applyType();
+    });
+  });
+  applyType();
+
+  repeatsSelect.addEventListener('change', () => {
+    clearErrors();
+    applyRepeats();
+  });
+  dateInput.addEventListener('change', syncUntilBounds);
+  applyRepeats();
+
+  function fieldValue(id: string): string {
+    const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
+    return el ? el.value.trim() : '';
+  }
+
+  // Build the recurrence object the schema accepts, or null when the event does
+  // not repeat. The UI's "monthly" maps to the schema's `monthly_nth`.
+  function buildRecurrence(): { freq: 'weekly' | 'monthly_nth'; until: string } | null {
+    const repeats = repeatsSelect.value;
+    if (repeats === 'none') return null;
+    const until = untilInput.value.trim();
+    if (!until) return null;
+    return { freq: repeats === 'monthly' ? 'monthly_nth' : 'weekly', until };
+  }
+
+  function clearErrors(): void {
+    form.querySelectorAll('[data-error-for]').forEach((el) => {
+      const node = el as HTMLElement;
+      node.textContent = '';
+      node.hidden = true;
+    });
+    form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+    errorSummary.textContent = '';
+    errorSummary.hidden = true;
+  }
+
+  function showFormError(message: string): void {
+    // textContent only. Nothing from a response body is ever parsed as HTML.
+    errorSummary.textContent = message;
+    errorSummary.hidden = false;
+    statusEl.textContent = message;
+    errorSummary.focus();
+  }
+
+  function setBusy(busy: boolean): void {
+    submitButton.disabled = busy;
+    submitButton.textContent = busy ? 'Publishing...' : 'Publish event';
+    if (busy) statusEl.textContent = 'Publishing your event.';
+  }
+
+  function showFailure(status: number, body: any): void {
+    const code = body && typeof body.code === 'string' ? body.code : 'server_error';
+    const errors = body && Array.isArray(body.errors) ? body.errors : [];
+    let placed = 0;
+
+    for (const item of errors) {
+      if (!item || typeof item.field !== 'string') continue;
+      if (FIELD_NAMES.indexOf(item.field) === -1) continue;
+      const target = form.querySelector(`[data-error-for="${item.field}"]`) as HTMLElement | null;
+      if (!target) continue;
+      target.textContent = FIELD_ERROR_MESSAGES[item.code] || 'That value is not accepted.';
+      target.hidden = false;
+      const input = form.querySelector(`[name="${item.field}"]`);
+      if (input) input.setAttribute('aria-invalid', 'true');
+      placed += 1;
+    }
+
+    const heading = TOP_LEVEL_MESSAGES[code] || TOP_LEVEL_MESSAGES.server_error;
+    showFormError(placed > 0 ? heading : `${heading} (HTTP ${status})`);
+  }
+
+  function showSuccess(id: string): void {
+    form.hidden = true;
+    errorSummary.hidden = true;
+    permalinkInput.value = `${window.location.origin}/events#${id}`;
+    successLink.href = `/events#${id}`;
+    successLink.textContent = `/events#${id}`;
+    successPanel.hidden = false;
+    statusEl.textContent = 'Event published. Copy your permalink.';
+    successPanel.focus();
+  }
+
+  copyButton.addEventListener('click', async () => {
+    permalinkInput.select();
+    try {
+      await navigator.clipboard.writeText(permalinkInput.value);
+      copyButton.textContent = 'Copied';
+    } catch {
+      copyButton.textContent = 'Press Ctrl+C';
+    }
+    window.setTimeout(() => {
+      copyButton.textContent = 'Copy';
+    }, 3000);
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearErrors();
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    const type = currentType();
+    const isPublic = type === 'public';
+
+    // Build the payload by OMITTING inapplicable keys rather than sending null.
+    // The server schema is .strict(): an `address` or `description` key on a
+    // meetup is itself the error, and an optional field counts as "not
+    // provided" only when its key is absent, never when it is null (design §6).
+    const payload: Record<string, unknown> = {
+      type,
+      title: fieldValue('field-title'),
+      date: fieldValue('field-date'),
+      time: fieldValue('field-time'),
+      city: fieldValue('field-city'),
+      organizerCode: fieldValue('field-organizer-code'),
+      // Honeypot. The function reads and drops this before validation, so it is
+      // always sent (empty for a human) and never omitted.
+      website: honeypot.value,
+    };
+
+    if (isPublic) {
+      // Address is required for a public event; description is optional and its
+      // key is added only when the organizer actually filled it.
+      payload.address = fieldValue('field-address');
+      const description = fieldValue('field-description');
+      if (description) payload.description = description;
+    }
+
+    // Signal link: required for a meetup, optional for a public event. The key
+    // is omitted entirely when empty.
+    const signalUrl = fieldValue('field-signal-url');
+    if (signalUrl) payload.signalUrl = signalUrl;
+
+    // Recurrence: the key is present only when the event repeats.
+    const recurrence = buildRecurrence();
+    if (recurrence) payload.recurrence = recurrence;
+
+    setBusy(true);
+
+    let response: Response;
+    let body: any = null;
+    try {
+      response = await fetch('/api/submit-event', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      body = await response.json().catch(() => null);
+    } catch {
+      setBusy(false);
+      showFormError('Could not reach the server. Check your connection and try again.');
+      return;
+    }
+
+    setBusy(false);
+
+    if (response.ok && body && body.ok === true && typeof body.id === 'string') {
+      showSuccess(body.id);
+      return;
+    }
+
+    showFailure(response.status, body);
+  });
+</script>
