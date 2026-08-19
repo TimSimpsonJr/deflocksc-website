@@ -411,30 +411,61 @@ const errorClass = 'text-[13px] text-[#f87171] mt-1.5 leading-[1.5]';
     'organizerCode',
   ];
 
+  // Keyed by the machine codes the server actually emits (Task 11 event-schema
+  // plus the sanitize-text, signal-url and organizer-code primitives). A code
+  // that is not listed falls through to the generic message in showFailure(),
+  // which still anchors to the right field — an unmapped code degrades to
+  // fail-safe, never to a wrong field or a wrong message.
   const FIELD_ERROR_MESSAGES: Record<string, string> = {
-    required: 'This is required.',
-    too_long: 'Too long. Shorten it and try again.',
-    too_short: 'Too short.',
-    invalid_format: 'That format is not accepted.',
-    not_allowed: 'This field is not accepted for this event type.',
-    past_date: 'Pick a date in the future.',
-    too_far_out: 'Pick a date within the next 12 months.',
+    // Text fields (title, description, address) via sanitizeText.
+    empty: 'This is required.',
+    too_many_bytes: 'Too long. Shorten it and try again.',
+    too_many_graphemes: 'Too long. Shorten it and try again.',
+    newline: 'Remove the line breaks and try again.',
+    emoji: 'Remove the emoji and try again.',
+    script_not_allowed: 'Use Latin script only.',
+    control_char: 'Remove unusual characters and try again.',
+    zero_width: 'Remove unusual characters and try again.',
+    bidi_control: 'Remove unusual characters and try again.',
+    combining_run: 'Remove unusual characters and try again.',
+    unassigned_or_private: 'Remove unusual characters and try again.',
+    // Date and time.
+    date_in_past: 'Pick today or a later date.',
+    date_too_far_out: 'Pick a date within the next 12 months.',
+    not_a_real_date: 'That is not a real date.',
+    bad_format: 'That value is not accepted.',
+    // City.
     unknown_city: 'Pick a city from the list.',
-    derived_field: 'The server fills this in. Do not submit it.',
-    invalid_url: 'Must be a https://signal.group/#... invite link.',
-    disallowed_characters: 'Remove unusual characters and try again.',
+    // Recurrence end date.
     until_not_after_date: 'The repeat-until date must be after the start date.',
     until_too_far_out: 'Recurring events can run at most 6 months out.',
+    // Cross-field requirements (meetup vs public event).
+    required_for_meetup: 'Every meetup needs a Signal group link.',
+    required_for_public: 'A public event needs an address.',
+    not_allowed_for_meetup: 'This field is not accepted for a meetup.',
+    // Signal group link.
+    unparseable: 'Must be a https://signal.group/#... invite link.',
+    bad_protocol: 'Must be a https://signal.group/#... invite link.',
+    bad_host: 'Must be a https://signal.group/#... invite link.',
+    bad_fragment: 'The link is missing its #... invite code.',
+    has_path: 'The link must end at signal.group/#... with nothing extra.',
+    has_query: 'Remove the query string from the link.',
+    has_port: 'Remove the port number from the link.',
+    has_credentials: 'Remove the username or password from the link.',
+    // Organizer code (byte cap emits too_many_bytes, handled above).
+    wrong_shape: 'The code is four words. Check what you were given.',
   };
 
+  // Keyed by the top-level codes the server actually emits in `body.error`.
+  // server_error is the local fallback for a network fault or any unmapped code.
   const TOP_LEVEL_MESSAGES: Record<string, string> = {
     invalid: 'Some fields need fixing. See the notes below.',
     invalid_code: 'That organizer code is not valid.',
-    revoked_code: 'That organizer code is not valid.',
     rate_limited: 'Too many submissions from your network today. Try again tomorrow.',
-    duplicate: 'An event with these details has already been submitted.',
     body_too_large: 'That submission is too large. Shorten the description and try again.',
-    context_refused: 'Submissions are turned off on this deploy.',
+    length_required: 'That submission could not be sent. Reload the page and try again.',
+    invalid_json: 'That submission could not be read. Reload the page and try again.',
+    unavailable: 'Submissions are temporarily unavailable. Try again in a minute.',
     server_error: 'Something broke on our end. Try again in a minute.',
   };
 
@@ -549,7 +580,14 @@ const errorClass = 'text-[13px] text-[#f87171] mt-1.5 leading-[1.5]';
   }
 
   function showFailure(status: number, body: any): void {
-    const code = body && typeof body.code === 'string' ? body.code : 'server_error';
+    // The server carries its machine code in `body.error` (e.g. { error:
+    // 'invalid_code' }). `body.code` is accepted only as a defensive fallback.
+    const code =
+      body && typeof body.error === 'string'
+        ? body.error
+        : body && typeof body.code === 'string'
+          ? body.code
+          : 'server_error';
     const errors = body && Array.isArray(body.errors) ? body.errors : [];
     let placed = 0;
 
