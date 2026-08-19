@@ -194,3 +194,159 @@ export function groupByMonth(
   }
   return new Map([...out.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)));
 }
+
+/* ------------------------------------------------------------------------ *
+ * Filtering (design §12)
+ *
+ * Three callers share every function below, which is the entire point of
+ * putting them here: the prerender in src/pages/events.astro (which renders the
+ * full, unfiltered list), the browser in src/scripts/events-page.ts (which
+ * narrows it), and the tests. A filter that is computed one way at build and
+ * another way at runtime is a filter that eventually shows a visitor a list the
+ * URL disagrees with.
+ * ------------------------------------------------------------------------ */
+
+/** URL slug for each event type, used in the hash. No SC county is named
+ *  "meetups" or "public", so the two dimensions never collide in one hash. */
+export const TYPE_SLUGS = { meetup: 'meetups', public: 'public' } as const;
+
+export type EventTypeFilter = 'all' | 'meetup' | 'public';
+
+export interface EventFilter {
+  /** A county slug, or the literal 'all'. Unknown slugs are legal and match nothing. */
+  county: string;
+  type: EventTypeFilter;
+}
+
+/** The unfiltered state, i.e. what /events renders with no hash. */
+export const ALL_EVENTS: EventFilter = { county: 'all', type: 'all' };
+
+export function matchesFilter(event: PublicEvent, filter: EventFilter): boolean {
+  if (filter.county !== 'all' && event.county !== filter.county) return false;
+  if (filter.type !== 'all' && event.type !== filter.type) return false;
+  return true;
+}
+
+/**
+ * Filter stored events. Applied *before* recurrence expansion by the client, so
+ * an excluded recurring event cannot leak a single occurrence. An unknown county
+ * slug simply matches nothing — it is not an error, because a visitor can paste
+ * any #county= hash and an empty calendar with a recruit prompt tells them more
+ * than a broken control would.
+ */
+export function filterEvents(
+  events: readonly PublicEvent[],
+  filter: EventFilter,
+): PublicEvent[] {
+  return events.filter((e) => matchesFilter(e, filter));
+}
+
+/** The same predicate over already-expanded occurrences. */
+export function filterOccurrences(
+  occurrences: readonly Occurrence[],
+  filter: EventFilter,
+): Occurrence[] {
+  return occurrences.filter((o) => matchesFilter(o.event, filter));
+}
+
+/**
+ * The counties worth offering as chips, busiest first, ties broken by slug.
+ * Derived from the occurrences that exist — never from the 46-county registry —
+ * so the chip row stays a row.
+ */
+export function countyOptions(
+  occurrences: readonly Occurrence[],
+): Array<{ county: string; count: number }> {
+  const counts = new Map<string, number>();
+  for (const o of occurrences) {
+    counts.set(o.event.county, (counts.get(o.event.county) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([county, count]) => ({ county, count }))
+    .sort((a, b) => b.count - a.count || (a.county < b.county ? -1 : 1));
+}
+
+export interface FilterFacets {
+  /** Occurrences per county under the active *type* filter (county ignored). */
+  countyCounts: Record<string, number>;
+  /** Total occurrences under the active *type* filter, for the "All counties" chip. */
+  countyAll: number;
+  /** Occurrences per type under the active *county* filter (type ignored). */
+  typeCounts: { all: number; meetup: number; public: number };
+}
+
+/**
+ * Counts for the chip badges. Each dimension is faceted by the *other* one, which
+ * is why a chip can read 0: "Greenville 0" under an active Meetups filter means
+ * Greenville has events but no meetups, and that is worth showing rather than
+ * hiding, because hiding it would strand anyone who filtered into a dead end.
+ */
+export function facetCounts(
+  occurrences: readonly Occurrence[],
+  active: EventFilter,
+): FilterFacets {
+  const countyCounts: Record<string, number> = {};
+  let countyAll = 0;
+  for (const o of filterOccurrences(occurrences, { county: 'all', type: active.type })) {
+    countyCounts[o.event.county] = (countyCounts[o.event.county] ?? 0) + 1;
+    countyAll += 1;
+  }
+
+  const inCounty = filterOccurrences(occurrences, { county: active.county, type: 'all' });
+  return {
+    countyCounts,
+    countyAll,
+    typeCounts: {
+      all: inCounty.length,
+      meetup: inCounty.filter((o) => o.event.type === 'meetup').length,
+      public: inCounty.filter((o) => o.event.type === 'public').length,
+    },
+  };
+}
+
+/**
+ * The URL hash for a filter: '' for the unfiltered state, '#county=greenville',
+ * '#type=meetups', '#county=greenville&type=meetups'. Shareable among the ~all
+ * visitors who have JavaScript; the no-JS page ignores it and shows everything.
+ */
+export function filterHash(filter: EventFilter): string {
+  const parts: string[] = [];
+  if (filter.county !== 'all') parts.push(`county=${filter.county}`);
+  if (filter.type !== 'all') parts.push(`type=${TYPE_SLUGS[filter.type]}`);
+  return parts.length ? `#${parts.join('&')}` : '';
+}
+
+/**
+ * Inverse of filterHash, tolerant of a leading '#' and of an empty string.
+ * Anything that is not a recognised type slug under type= is ignored; an unknown
+ * county under county= is kept, so a shared #county=<slug> for a county with no
+ * current events resolves to the empty state rather than silently widening to
+ * every event in the state.
+ */
+export function parseFilterHash(hash: string): EventFilter {
+  const raw = hash.replace(/^#/, '');
+  let county = 'all';
+  let type: EventTypeFilter = 'all';
+  for (const part of raw.split('&')) {
+    const eq = part.indexOf('=');
+    if (eq < 0) continue;
+    const key = part.slice(0, eq);
+    const value = decodeURIComponent(part.slice(eq + 1));
+    if (key === 'county' && value) county = value;
+    else if (key === 'type') {
+      if (value === TYPE_SLUGS.meetup) type = 'meetup';
+      else if (value === TYPE_SLUGS.public) type = 'public';
+    }
+  }
+  return { county, type };
+}
+
+/**
+ * The social-proof line under the empty state (design §12). Shared by the
+ * prerender and the browser so a county filtered down to nothing shows the same
+ * sentence as a calendar that was empty to begin with.
+ */
+export function emptyStateProof(pastCount: number): string {
+  if (pastCount <= 0) return 'Be the first to put something on it.';
+  return `${pastCount} ${pastCount === 1 ? 'event has' : 'events have'} run in the last 90 days.`;
+}

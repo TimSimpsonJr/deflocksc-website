@@ -8,6 +8,15 @@ import {
   dayOfMonth,
   formatTime12,
   sortKey,
+  ALL_EVENTS,
+  matchesFilter,
+  filterEvents,
+  filterOccurrences,
+  countyOptions,
+  facetCounts,
+  filterHash,
+  parseFilterHash,
+  emptyStateProof,
 } from './events-view.js';
 import type { PublicEvent } from './public-event.js';
 
@@ -177,5 +186,229 @@ describe('formatters', () => {
   it('builds a lexically sortable key', () => {
     expect(sortKey('2026-09-01', '19:00', 'aaaaaaaa')).toBe('2026-09-01T19:00#aaaaaaaa');
     expect(sortKey('2026-09-01', '08:00', 'zzzzzzzz') < sortKey('2026-09-01', '19:00', 'aaaaaaaa')).toBe(true);
+  });
+});
+
+// Four events across three counties and both types. Every filter test reads from
+// this one set so a filter's result is always checkable by eye against it.
+const MIXED = [
+  ev({ id: 'gv1meet', county: 'greenville', city: 'greenville', type: 'meetup', date: '2026-09-01' }),
+  ev({ id: 'gv2publ', county: 'greenville', city: 'greer', type: 'public', date: '2026-09-04' }),
+  ev({ id: 'ch1meet', county: 'charleston', city: 'charleston', type: 'meetup', date: '2026-09-02' }),
+  ev({ id: 'ri1publ', county: 'richland', city: 'columbia', type: 'public', date: '2026-09-03' }),
+];
+
+describe('matchesFilter', () => {
+  it('accepts everything under the all/all filter', () => {
+    expect(MIXED.every((e) => matchesFilter(e, ALL_EVENTS))).toBe(true);
+  });
+
+  it('rejects an event in another county', () => {
+    expect(matchesFilter(MIXED[0], { county: 'charleston', type: 'all' })).toBe(false);
+  });
+
+  it('rejects an event of another type', () => {
+    expect(matchesFilter(MIXED[0], { county: 'all', type: 'public' })).toBe(false);
+  });
+});
+
+describe('filterEvents', () => {
+  it('returns every event under the all/all filter', () => {
+    expect(filterEvents(MIXED, ALL_EVENTS).map((e) => e.id)).toEqual([
+      'gv1meet', 'gv2publ', 'ch1meet', 'ri1publ',
+    ]);
+  });
+
+  it('returns a fresh array rather than the input', () => {
+    expect(filterEvents(MIXED, ALL_EVENTS)).not.toBe(MIXED);
+  });
+
+  it('filters by county slug', () => {
+    expect(filterEvents(MIXED, { county: 'greenville', type: 'all' }).map((e) => e.id)).toEqual([
+      'gv1meet', 'gv2publ',
+    ]);
+  });
+
+  it('filters by event type', () => {
+    expect(filterEvents(MIXED, { county: 'all', type: 'meetup' }).map((e) => e.id)).toEqual([
+      'gv1meet', 'ch1meet',
+    ]);
+  });
+
+  it('composes county and type', () => {
+    expect(filterEvents(MIXED, { county: 'greenville', type: 'public' }).map((e) => e.id)).toEqual([
+      'gv2publ',
+    ]);
+  });
+
+  it('returns empty for an unknown county without throwing', () => {
+    expect(() => filterEvents(MIXED, { county: 'not-a-county', type: 'all' })).not.toThrow();
+    expect(filterEvents(MIXED, { county: 'not-a-county', type: 'all' })).toEqual([]);
+  });
+
+  it('returns empty for an unknown county composed with a type', () => {
+    expect(filterEvents(MIXED, { county: 'not-a-county', type: 'meetup' })).toEqual([]);
+  });
+
+  it('returns empty for a county with no event of the requested type', () => {
+    expect(filterEvents(MIXED, { county: 'richland', type: 'meetup' })).toEqual([]);
+  });
+});
+
+describe('filtering and recurrence expansion', () => {
+  const RECURRING = [
+    ev({
+      id: 'gvweekly',
+      county: 'greenville',
+      date: '2026-09-01',
+      recurrence: { freq: 'weekly', until: '2026-09-22' },
+    }),
+    ev({ id: 'ch1once', county: 'charleston', date: '2026-09-03', recurrence: null }),
+  ];
+
+  it('really does recur (fixture guard)', () => {
+    const all = expandAll(RECURRING, '2027-09-01');
+    expect(all.filter((o) => o.event.id === 'gvweekly').length).toBeGreaterThan(1);
+  });
+
+  it('leaks no occurrence of a recurring event that the filter excludes', () => {
+    const out = expandAll(filterEvents(RECURRING, { county: 'charleston', type: 'all' }), '2027-09-01');
+    expect(out.map((o) => o.event.id)).toEqual(['ch1once']);
+  });
+
+  it('leaks no occurrence when the filter is applied after expansion either', () => {
+    const all = expandAll(RECURRING, '2027-09-01');
+    expect(filterOccurrences(all, { county: 'charleston', type: 'all' }).map((o) => o.event.id)).toEqual([
+      'ch1once',
+    ]);
+  });
+
+  it('agrees whether the filter runs before or after expansion', () => {
+    const filter = { county: 'greenville', type: 'all' as const };
+    const before = expandAll(filterEvents(RECURRING, filter), '2027-09-01');
+    const after = filterOccurrences(expandAll(RECURRING, '2027-09-01'), filter);
+    expect(after.map((o) => `${o.date}:${o.event.id}`)).toEqual(
+      before.map((o) => `${o.date}:${o.event.id}`),
+    );
+  });
+});
+
+describe('countyOptions', () => {
+  it('lists only counties that actually have occurrences', () => {
+    const occ = expandAll(MIXED, '2027-09-01');
+    expect(countyOptions(occ).map((c) => c.county).sort()).toEqual([
+      'charleston', 'greenville', 'richland',
+    ]);
+  });
+
+  it('counts occurrences, not events, and sorts busiest first', () => {
+    const occ = expandAll(MIXED, '2027-09-01');
+    expect(countyOptions(occ)).toEqual([
+      { county: 'greenville', count: 2 },
+      { county: 'charleston', count: 1 },
+      { county: 'richland', count: 1 },
+    ]);
+  });
+
+  it('returns an empty list for no occurrences', () => {
+    expect(countyOptions([])).toEqual([]);
+  });
+});
+
+describe('facetCounts', () => {
+  const OCC = expandAll(MIXED, '2027-09-01');
+
+  it('reports full totals under the all/all filter', () => {
+    const f = facetCounts(OCC, ALL_EVENTS);
+    expect(f.countyAll).toBe(4);
+    expect(f.countyCounts).toEqual({ greenville: 2, charleston: 1, richland: 1 });
+    expect(f.typeCounts).toEqual({ all: 4, meetup: 2, public: 2 });
+  });
+
+  it('facets the county counts by the active type', () => {
+    const f = facetCounts(OCC, { county: 'all', type: 'meetup' });
+    expect(f.countyCounts).toEqual({ greenville: 1, charleston: 1 });
+    expect(f.countyAll).toBe(2);
+  });
+
+  it('facets the type counts by the active county', () => {
+    const f = facetCounts(OCC, { county: 'greenville', type: 'all' });
+    expect(f.typeCounts).toEqual({ all: 2, meetup: 1, public: 1 });
+  });
+
+  it('leaves the county counts untouched by the active county', () => {
+    const f = facetCounts(OCC, { county: 'greenville', type: 'all' });
+    expect(f.countyCounts).toEqual({ greenville: 2, charleston: 1, richland: 1 });
+  });
+
+  it('reports zeros for an unknown active county', () => {
+    const f = facetCounts(OCC, { county: 'not-a-county', type: 'all' });
+    expect(f.typeCounts).toEqual({ all: 0, meetup: 0, public: 0 });
+  });
+});
+
+describe('filterHash and parseFilterHash', () => {
+  it('maps the all/all filter to an empty hash', () => {
+    expect(filterHash(ALL_EVENTS)).toBe('');
+  });
+
+  it('maps a county filter to a county hash', () => {
+    expect(filterHash({ county: 'greenville', type: 'all' })).toBe('#county=greenville');
+  });
+
+  it('maps a type filter to a type hash', () => {
+    expect(filterHash({ county: 'all', type: 'meetup' })).toBe('#type=meetups');
+    expect(filterHash({ county: 'all', type: 'public' })).toBe('#type=public');
+  });
+
+  it('puts the county first in a composed hash', () => {
+    expect(filterHash({ county: 'greenville', type: 'meetup' })).toBe(
+      '#county=greenville&type=meetups',
+    );
+  });
+
+  it('round-trips every shape', () => {
+    for (const filter of [
+      ALL_EVENTS,
+      { county: 'greenville', type: 'all' as const },
+      { county: 'all', type: 'meetup' as const },
+      { county: 'all', type: 'public' as const },
+      { county: 'greenville', type: 'meetup' as const },
+    ]) {
+      expect(parseFilterHash(filterHash(filter))).toEqual(filter);
+    }
+  });
+
+  it('parses a hash string with the leading # already stripped', () => {
+    expect(parseFilterHash('county=greenville&type=meetups')).toEqual({
+      county: 'greenville',
+      type: 'meetup',
+    });
+  });
+
+  it('keeps an unknown county so the filter resolves to empty rather than to everything', () => {
+    const filter = parseFilterHash('#county=not-a-county');
+    expect(filter).toEqual({ county: 'not-a-county', type: 'all' });
+    expect(filterEvents(MIXED, filter)).toEqual([]);
+  });
+
+  it('falls back to all events for an empty hash and for junk', () => {
+    expect(parseFilterHash('')).toEqual(ALL_EVENTS);
+    expect(parseFilterHash('#')).toEqual(ALL_EVENTS);
+    expect(parseFilterHash('#nonsense')).toEqual(ALL_EVENTS);
+  });
+});
+
+describe('emptyStateProof', () => {
+  it('invites the first event when nothing has run', () => {
+    expect(emptyStateProof(0)).toBe('Be the first to put something on it.');
+  });
+
+  it('uses the singular for one past event', () => {
+    expect(emptyStateProof(1)).toBe('1 event has run in the last 90 days.');
+  });
+
+  it('uses the plural for several', () => {
+    expect(emptyStateProof(3)).toBe('3 events have run in the last 90 days.');
   });
 });
