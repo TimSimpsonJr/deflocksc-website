@@ -140,6 +140,26 @@ describe('foldStoredEvents', () => {
     expect(serializeEventsFile(foldStoredEvents([a, b])))
       .toBe(serializeEventsFile(foldStoredEvents([b, a])));
   });
+
+  it('drops a malformed-date record that the build guard would reject', () => {
+    // isExpired() keeps an unparseable date (fail-open, by design), so only this
+    // schema gate stops such a record from being committed forever.
+    const out = foldStoredEvents([
+      storedEvent({ id: 'aaaaaaaa', date: '2026-09-01' }),
+      storedEvent({ id: 'bbbbbbbb', date: 'not-a-real-date' }),
+    ]);
+    expect(out.map((e) => e.id)).toEqual(['aaaaaaaa']);
+  });
+
+  it('drops a record with a non-conforming field value, failing toward non-publication', () => {
+    const out = foldStoredEvents([
+      storedEvent({ id: 'aaaaaaaa' }),
+      storedEvent({ id: 'bbbbbbbb', time: '99:99' }),
+      // hasSignalGroup must be a boolean; a corrupted value is dropped, not shipped.
+      storedEvent({ id: 'cccccccc', hasSignalGroup: 'yes' as unknown as boolean }),
+    ]);
+    expect(out.map((e) => e.id)).toEqual(['aaaaaaaa']);
+  });
 });
 
 describe('isExpired', () => {

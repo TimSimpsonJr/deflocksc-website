@@ -1,6 +1,6 @@
 import type { Config, Context } from '@netlify/functions';
 import { eventsStore } from '../../src/lib/blob-stores.js';
-import { toPublicEvent, type PublicEvent, type StoredEvent } from '../../src/lib/public-event.js';
+import { isStoredRecord, toPublicEvent, type PublicEvent, type StoredEvent } from '../../src/lib/public-event.js';
 
 /**
  * How long a finished event stays in the overlay response.
@@ -17,23 +17,6 @@ const DAY_MS = 86_400_000;
 const ISO_DATE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 
 const CDN_CACHE = 'public, max-age=60, stale-while-revalidate=120';
-
-/**
- * Narrow an untyped blob payload to something worth projecting.
- *
- * This is a shape check, not validation. `toPublicEvent()` is the security
- * boundary; this only keeps garbage (nulls, strings, arrays, half-written
- * records) out of the sort and the projection.
- */
-function isStoredRecord(value: unknown): value is StoredEvent {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
-  const record = value as Record<string, unknown>;
-  return (
-    typeof record.id === 'string' &&
-    typeof record.date === 'string' &&
-    typeof record.time === 'string'
-  );
-}
 
 /**
  * The last calendar date a record is relevant on: the end of the series when

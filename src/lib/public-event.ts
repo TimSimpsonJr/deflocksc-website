@@ -98,3 +98,28 @@ export function toPublicEvent(record: StoredEvent): PublicEvent {
 
   return projected as PublicEvent;
 }
+
+/**
+ * Narrow an untyped blob payload to a `StoredEvent`-shaped object.
+ *
+ * This is a shape check, not validation: it keeps garbage (nulls, strings,
+ * arrays, half-written records) out of any pipeline that reads the `events`
+ * store, so nothing downstream projects or sorts a non-record. `toPublicEvent`
+ * stays the confidentiality boundary and `publicEventSchema` the value-level
+ * one; this only guarantees a real object carrying the three fields every
+ * consumer sorts and dedupes on.
+ *
+ * Shared by the /api/events read path (netlify/functions/events.ts) and the
+ * weekly fold (netlify/functions/fold-events.ts) so both gate the store the
+ * same way — the fold's sink is a permanent commit, so garbage must never
+ * reach its projection either.
+ */
+export function isStoredRecord(value: unknown): value is StoredEvent {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.id === 'string' &&
+    typeof record.date === 'string' &&
+    typeof record.time === 'string'
+  );
+}

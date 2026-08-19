@@ -155,4 +155,46 @@ describe('fold-events scheduled function', () => {
     expect(res.status).toBe(200);
     expect(calls[1].body.message).toBe('chore: fold events (1 added)');
   });
+
+  it('drops a store record that is not object-shaped before it can be committed', async () => {
+    listMock.mockResolvedValue({
+      blobs: [{ key: 'aaaaaaaa' }, { key: 'garbage0' }],
+    });
+    getMock.mockImplementation(async (key: string) =>
+      key === 'aaaaaaaa' ? storedEvent({ id: key }) : 'not-an-object',
+    );
+
+    const mod = await import('../../netlify/functions/fold-events.js');
+    const res = await mod.default(new Request('https://deflocksc.org/'), {} as any);
+
+    expect(res.status).toBe(200);
+    const committed = JSON.parse(
+      Buffer.from(calls[1].body.content, 'base64').toString('utf8'),
+    );
+    expect(committed.map((e: any) => e.id)).toEqual(['aaaaaaaa']);
+    expect(calls[1].body.message).toBe('chore: fold events (1 added)');
+  });
+
+  it('drops a malformed-date record so a bad commit cannot stall every later build', async () => {
+    // The store write path validates dates, so this needs corruption to occur —
+    // but if it does, the record must never reach the permanent commit, because
+    // the build-time schema guard would then reject events.json on every deploy.
+    listMock.mockResolvedValue({
+      blobs: [{ key: 'aaaaaaaa' }, { key: 'baddate0' }],
+    });
+    getMock.mockImplementation(async (key: string) =>
+      key === 'aaaaaaaa'
+        ? storedEvent({ id: key })
+        : storedEvent({ id: key, date: 'not-a-real-date' }),
+    );
+
+    const mod = await import('../../netlify/functions/fold-events.js');
+    const res = await mod.default(new Request('https://deflocksc.org/'), {} as any);
+
+    expect(res.status).toBe(200);
+    const committed = JSON.parse(
+      Buffer.from(calls[1].body.content, 'base64').toString('utf8'),
+    );
+    expect(committed.map((e: any) => e.id)).toEqual(['aaaaaaaa']);
+  });
 });

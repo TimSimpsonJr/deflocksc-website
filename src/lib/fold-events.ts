@@ -1,5 +1,6 @@
 import { toPublicEvent } from './public-event.js';
 import type { PublicEvent, StoredEvent } from './public-event.js';
+import { publicEventSchema } from './event-schema.js';
 
 /**
  * The one and only path the fold ever writes. Deliberately a module constant
@@ -38,24 +39,39 @@ export function buildCommitMessage(addedCount: number): string {
 }
 
 /**
- * Projects stored records to the public field set, drops tombstones, and sorts
- * by date then id. The sort is what makes the weekly diff stable: the Blobs
- * `list()` order is not guaranteed, and an unsorted file would churn every row
- * on every fold. Expiry pruning is a separate pass (`pruneExpired`) so the
- * caller supplies the clock and the projection stays a pure function of its
- * argument.
+ * Projects stored records to the public field set, drops tombstones and any
+ * record that would not survive the build guard, and sorts by date then id.
+ *
+ * The sort is what makes the weekly diff stable: the Blobs `list()` order is
+ * not guaranteed, and an unsorted file would churn every row on every fold.
+ * Expiry pruning is a separate pass (`pruneExpired`) so the caller supplies the
+ * clock and the projection stays a pure function of its argument.
+ *
+ * Every projection is gated against `publicEventSchema` — the SAME strict
+ * schema `events.astro` re-applies to src/data/events.json at build time
+ * (design §16.1). The fold's sink is the highest-consequence one in the system
+ * (a permanent commit to master), so it fails toward non-publication: a
+ * non-conforming record is dropped here rather than committed, where it would
+ * otherwise fail every later build until a human intervened. This is also the
+ * guard that catches a malformed date — `isExpired()` deliberately keeps an
+ * unparseable date (deferring to this schema check), so without this gate such
+ * a record would sail through `pruneExpired` and land in the file forever.
  */
 export function foldStoredEvents(records: readonly StoredEvent[]): PublicEvent[] {
-  return records
-    .filter((record) => record.revoked !== true)
-    .map((record) => toPublicEvent(record))
-    .sort((a, b) => {
-      if (a.date < b.date) return -1;
-      if (a.date > b.date) return 1;
-      if (a.id < b.id) return -1;
-      if (a.id > b.id) return 1;
-      return 0;
-    });
+  const published: PublicEvent[] = [];
+  for (const record of records) {
+    if (record.revoked === true) continue;
+    const projected = toPublicEvent(record);
+    if (!publicEventSchema.safeParse(projected).success) continue;
+    published.push(projected);
+  }
+  return published.sort((a, b) => {
+    if (a.date < b.date) return -1;
+    if (a.date > b.date) return 1;
+    if (a.id < b.id) return -1;
+    if (a.id > b.id) return 1;
+    return 0;
+  });
 }
 
 // --- expiry (design §10) -----------------------------------------------------

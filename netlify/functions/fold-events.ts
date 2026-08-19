@@ -1,5 +1,6 @@
 import type { Config, Context } from '@netlify/functions';
 import { eventsStore } from '../../src/lib/blob-stores.js';
+import { isStoredRecord } from '../../src/lib/public-event.js';
 import type { StoredEvent } from '../../src/lib/public-event.js';
 import { commitEventsJson, foldStoredEvents, pruneExpired } from '../../src/lib/fold-events.js';
 import type { CommitTarget } from '../../src/lib/fold-events.js';
@@ -37,13 +38,18 @@ async function readAllStoredEvents(): Promise<StoredEvent[]> {
   const listing = (await store.list()) as { blobs: Array<{ key: string }> };
   const records = await Promise.all(
     listing.blobs.map(async (blob) => {
-      const record = (await store.get(blob.key, { type: 'json' })) as StoredEvent | null;
+      const record = (await store.get(blob.key, { type: 'json' })) as unknown;
       return record;
     }),
   );
   // A key that lists but does not resolve is a transient store read, not a
-  // reason to stall the whole week's fold.
-  return records.filter((record): record is StoredEvent => record !== null && record !== undefined);
+  // reason to stall the whole week's fold. A key that resolves to something
+  // that is not a `StoredEvent`-shaped object (null, a string, an array, a
+  // half-written record) is dropped for the same reason the sibling
+  // /api/events endpoint drops it — garbage must never reach the projection,
+  // and here the projection commits permanently. Value-level validity (dates,
+  // field types) is then enforced downstream by foldStoredEvents.
+  return records.filter(isStoredRecord);
 }
 
 export default async (_req: Request, _context: Context): Promise<Response> => {
