@@ -26,6 +26,13 @@ export type Centroids = Record<string, [number, number]>;
 export interface EventLayerData {
   /** County outlines, from /districts/sc-counties.json. */
   counties: GeoJSON.FeatureCollection;
+  /**
+   * The SC state boundary, from /districts/state-outline.json. Used to build the
+   * inverse mask that paints everything outside South Carolina the frame's dark
+   * bg, so only SC shows through the base tiles. Optional: without it the mask is
+   * skipped and the base tiles show edge to edge, exactly as before.
+   */
+  stateOutline?: GeoJSON.FeatureCollection;
   /** The occurrences to plot. */
   events: readonly Occurrence[];
   /**
@@ -54,6 +61,7 @@ interface EventLayerState {
 }
 
 const EVENT_LAYER_IDS = [
+  'sc-mask',
   'county-fill',
   'county-outline',
   'county-highlight',
@@ -61,6 +69,100 @@ const EVENT_LAYER_IDS = [
   'city-dots',
   'city-labels',
 ];
+
+/**
+ * The map frame's dark background (#0d0d0d, matching .events-map-frame). The
+ * outside-SC mask is painted this colour so the masked area reads as the frame,
+ * not as a second map.
+ */
+const MASK_COLOR = '#0d0d0d';
+
+/**
+ * A ring that wraps the whole web-mercator world. Used as the exterior of the
+ * mask polygon; the SC boundary rings become holes cut out of it. Wound
+ * counter-clockwise; MapLibre keys holes off ring position, not winding, so the
+ * order below (world first, SC after) is what makes SC the hole.
+ */
+const WORLD_RING: GeoJSON.Position[] = [
+  [-180, -85],
+  [180, -85],
+  [180, 85],
+  [-180, 85],
+  [-180, -85],
+];
+
+/** The exterior ring(s) of the SC boundary, whatever geometry type it ships as. */
+function stateExteriorRings(fc: GeoJSON.FeatureCollection): GeoJSON.Position[][] {
+  const rings: GeoJSON.Position[][] = [];
+  for (const f of fc.features) {
+    const g = f.geometry;
+    if (g.type === 'Polygon') rings.push(g.coordinates[0]);
+    else if (g.type === 'MultiPolygon') for (const part of g.coordinates) rings.push(part[0]);
+  }
+  return rings;
+}
+
+/**
+ * World-with-SC-cut-out, as a one-feature collection. The single polygon has the
+ * world ring as its exterior and every SC exterior ring as a hole, so a fill of it
+ * covers the globe except South Carolina.
+ */
+function buildMask(stateOutline: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
+  const holes = stateExteriorRings(stateOutline);
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'Polygon', coordinates: [WORLD_RING, ...holes] },
+      },
+    ],
+  };
+}
+
+/**
+ * The [[west, south], [east, north]] bounds of one county's geometry, or null if
+ * the county is unknown. The composer owns view state, so it calls this and drives
+ * fitBounds itself; the layer only exposes the geometry it already holds.
+ */
+export function countyBounds(
+  map: maplibregl.Map,
+  county: string,
+): [[number, number], [number, number]] | null {
+  const state = eventStates.get(map);
+  if (!state) return null;
+  const feature = state.counties.features.find(
+    (f) => String(f.properties?.county ?? '') === county,
+  );
+  if (!feature) return null;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  const walk = (coords: unknown): void => {
+    if (
+      Array.isArray(coords) &&
+      typeof coords[0] === 'number' &&
+      typeof coords[1] === 'number'
+    ) {
+      const x = coords[0] as number;
+      const y = coords[1] as number;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+      return;
+    }
+    if (Array.isArray(coords)) for (const c of coords) walk(c);
+  };
+  walk((feature.geometry as { coordinates: unknown }).coordinates);
+  if (minX === Infinity) return null;
+  return [
+    [minX, minY],
+    [maxX, maxY],
+  ];
+}
 
 /**
  * Zoom at which the county choropleth has fully faded out and the city pins have
@@ -193,19 +295,40 @@ export function addEventLayers(map: maplibregl.Map, data: EventLayerData): void 
     data: { type: 'FeatureCollection', features: [] },
   });
 
+  // --- Outside-SC mask (bottom-most event layer) ---
+  // Everything outside South Carolina is painted the frame's dark bg, so only SC
+  // shows through the base tiles. Added first, so it sits beneath the choropleth
+  // and pins (both of which live inside SC and are never covered).
+  if (data.stateOutline) {
+    map.addSource('sc-mask', { type: 'geojson', data: buildMask(data.stateOutline) });
+    map.addLayer({
+      id: 'sc-mask',
+      type: 'fill',
+      source: 'sc-mask',
+      paint: { 'fill-color': MASK_COLOR, 'fill-opacity': 1 },
+    });
+  }
+
   // --- Below z8: county choropleth + count badges ---
+  // Every one of the 46 counties paints: a muted grey where there are no events
+  // (no badge), red-ramped where there is at least one. Both are clickable — the
+  // fill is a hit target regardless of count — so any county can be selected.
 
   map.addLayer({
     id: 'county-fill',
     type: 'fill',
     source: 'sc-counties',
-    filter: ['>', ['get', 'count'], 0],
     paint: {
       'fill-color': [
-        'interpolate', ['linear'], ['get', 'count'],
-        1, '#7f1d1d',
-        3, '#b91c1c',
-        8, '#ef4444',
+        'case',
+        ['==', ['get', 'count'], 0],
+        '#3f3f46',
+        [
+          'interpolate', ['linear'], ['get', 'count'],
+          1, '#7f1d1d',
+          3, '#b91c1c',
+          8, '#ef4444',
+        ],
       ],
       'fill-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.55, 8, 0],
     },
@@ -215,24 +338,33 @@ export function addEventLayers(map: maplibregl.Map, data: EventLayerData): void 
     id: 'county-outline',
     type: 'line',
     source: 'sc-counties',
-    filter: ['>', ['get', 'count'], 0],
     paint: {
-      'line-color': '#fca5a5',
+      // Faint neutral hairline around a zero-event county so it still reads as a
+      // distinct region; the reddish outline is reserved for counties with events.
+      'line-color': [
+        'case',
+        ['==', ['get', 'count'], 0],
+        'rgba(255,255,255,0.14)',
+        '#fca5a5',
+      ],
       'line-width': 1,
       'line-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.7, 8, 0],
     },
   });
 
   // County-select highlight. Its own source so a setData on sc-counties (a count
-  // refresh) never disturbs the selection, and vice versa.
+  // refresh) never disturbs the selection, and vice versa. Unlike the choropleth,
+  // this outline does NOT fade at the z8 crossfade: zoom-to-county carries the view
+  // past z8, and the amber outline is what keeps the selected county legible around
+  // the city pins once the choropleth underneath it has faded out.
   map.addLayer({
     id: 'county-highlight',
     type: 'line',
     source: 'county-selected',
     paint: {
       'line-color': '#fbbf24',
-      'line-width': 2,
-      'line-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.9, 8, 0],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 7, 2, 10, 3],
+      'line-opacity': 0.9,
     },
   });
 
@@ -301,7 +433,7 @@ export function removeEventLayers(map: maplibregl.Map): void {
   eventStates.get(map)?.teardown();
   eventStates.delete(map);
   for (const id of EVENT_LAYER_IDS) if (map.getLayer(id)) map.removeLayer(id);
-  for (const id of ['sc-counties', 'event-cities', 'county-selected']) {
+  for (const id of ['sc-mask', 'sc-counties', 'event-cities', 'county-selected']) {
     if (map.getSource(id)) map.removeSource(id);
   }
 }

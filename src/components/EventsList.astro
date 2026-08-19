@@ -55,12 +55,14 @@ const place = (o: Occurrence) =>
     ))}
   </ul>
 
-  <!-- One empty state for both cases. A county filtered down to nothing and a
-       calendar that was empty to begin with get the same lead, the same proof
-       line, and the same two ways in — the only thing that differs is the
-       number, and that comes from emptyStateProof() on both render paths. -->
+  <!-- One empty state, two leads. A calendar empty to begin with keeps the
+       general lead below (the no-JavaScript default); when the client filters to
+       a specific county with nothing on it, events-page.ts rewrites the lead to
+       name that county ("No events in Greenville County yet"). The proof line and
+       the two ways in are shared, and the proof comes from emptyStateProof() on
+       both render paths. -->
   <div id="events-empty" class="events-empty" hidden={upcoming.length > 0}>
-    <p class="events-empty-lead">Nothing on the calendar right now.</p>
+    <p class="events-empty-lead" id="events-empty-lead">Nothing on the calendar right now.</p>
     <p class="events-empty-proof" id="events-empty-proof">{emptyStateProof(past.length)}</p>
     <p class="events-empty-actions">
       <a class="event-signal" href="/events/submit">Submit an event</a>

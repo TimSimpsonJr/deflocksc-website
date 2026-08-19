@@ -117,9 +117,55 @@ const SC_BOUNDS: [[number, number], [number, number]] = [
   [-78.5, 35.3],
 ];
 
+/** SC_BOUNDS with generous padding, used as the map's maxBounds so the user can
+ *  pan within SC and a little past its edges but never off into other states.
+ *  Wide enough that the full-SC framing still fits without being clamped. */
+const SC_MAX_BOUNDS: [[number, number], [number, number]] = [
+  [-85.2, 30.4],
+  [-76.8, 36.9],
+];
+
+/** Padding (px) and zoom cap for the zoom-to-county animation. The cap keeps a
+ *  small county from diving so far in that it loses all context; the county still
+ *  crosses the z8 crossfade, so its city pins appear and the amber outline (which
+ *  no longer fades at z8) frames them. */
+const COUNTY_FIT_PADDING = 40;
+const COUNTY_FIT_MAXZOOM = 9;
+/** Shared duration for both the zoom-in-to-county and zoom-back-to-SC animations. */
+const FIT_DURATION_MS = 650;
+
 let mapHandle: MapHandle | null = null;
 let eventsLayer: typeof import('./map/layers/events.js') | null = null;
 let mapLoading = false;
+
+/** The county the map view is currently framed on ('all' = full SC). Tracked so a
+ *  filter change that leaves the county untouched (e.g. a type toggle) does not
+ *  re-trigger the fit animation. Seeded when the map first loads. */
+let fittedCounty: string | null = null;
+
+/** Frame the map on the active county, or back out to the full SC view, animating
+ *  only when the selection actually changed. The layer owns the geometry and
+ *  exposes countyBounds(); the composer owns the view and drives the camera here. */
+function fitToSelection(animate: boolean): void {
+  if (!mapHandle || !eventsLayer) return;
+  if (filter.county === fittedCounty) return;
+  fittedCounty = filter.county;
+  const duration = animate ? FIT_DURATION_MS : 0;
+  if (filter.county === 'all') {
+    mapHandle.map.fitBounds(SC_BOUNDS, { padding: 20, duration });
+    return;
+  }
+  const bounds = eventsLayer.countyBounds(mapHandle.map, filter.county);
+  if (bounds) {
+    mapHandle.map.fitBounds(bounds, {
+      padding: COUNTY_FIT_PADDING,
+      maxZoom: COUNTY_FIT_MAXZOOM,
+      duration,
+    });
+  } else {
+    mapHandle.map.fitBounds(SC_BOUNDS, { padding: 20, duration });
+  }
+}
 
 /** How long to wait for the style 'load' event before treating it as a failure. */
 const MAP_LOAD_TIMEOUT_MS = 15000;
@@ -155,14 +201,20 @@ async function loadMap() {
   let handle: MapHandle | null = null;
   try {
     await import('maplibre-gl/dist/maplibre-gl.css');
-    const [{ createMap }, layer, centroidsMod, countiesRes] = await Promise.all([
+    const [{ createMap }, layer, centroidsMod, countiesRes, outlineRes] = await Promise.all([
       import('./map/core.js'),
       import('./map/layers/events.js'),
       import('../data/city-centroids.json'),
       fetch('/districts/sc-counties.json'),
+      fetch('/districts/state-outline.json'),
     ]);
     if (!countiesRes.ok) throw new Error(`sc-counties.json: ${countiesRes.status}`);
     const counties = (await countiesRes.json()) as GeoJSON.FeatureCollection;
+    // The mask is a nice-to-have, not load-bearing: a failed state-outline fetch
+    // leaves the map unmasked rather than aborting the whole load.
+    const stateOutline = outlineRes.ok
+      ? ((await outlineRes.json()) as GeoJSON.FeatureCollection)
+      : undefined;
 
     handle = createMap({
       container: 'events-map',
@@ -170,6 +222,7 @@ async function loadMap() {
       center: [-81.0, 33.7],
       zoom: 6,
       interactive: true,
+      maxBounds: SC_MAX_BOUNDS,
     });
 
     // Wait for the style, but bound the wait: a 'load' event that never fires — a
@@ -192,6 +245,7 @@ async function loadMap() {
 
     layer.addEventLayers(map, {
       counties,
+      stateOutline,
       events: mapOccurrences(),
       centroids: (centroidsMod as { default: Record<string, unknown> }).default,
       cityNames: island.cityNames,
@@ -208,6 +262,21 @@ async function loadMap() {
     // from scratch instead of resizing a half-initialized handle.
     mapHandle = handle;
     eventsLayer = layer;
+
+    // Seed the view to match the active filter. A bare /events (county 'all') stays
+    // on the full-SC framing set above; a shared #county=… link frames that county
+    // now, without an animation on first paint. fittedCounty starts here so later
+    // selection changes animate and pure type toggles do not.
+    fittedCounty = 'all';
+    fitToSelection(false);
+
+    // DEV-ONLY test hook. import.meta.env.DEV is statically replaced with `false`
+    // in a production build, so Vite dead-code-eliminates this line and the handle
+    // never ships. It lets headless E2E read the live map (zoom, bounds, layers)
+    // without the composer having to surface its private map state in prod.
+    if (import.meta.env.DEV) {
+      (window as unknown as { __eventsMap?: unknown }).__eventsMap = map;
+    }
   } catch (err) {
     console.warn('events: map unavailable', err);
     handle?.destroy();
@@ -549,17 +618,29 @@ function syncChrome(): void {
   const pastCount = document.getElementById('events-past-count');
   if (pastCount) pastCount.textContent = String(pastShown);
 
-  // One empty state for both cases: a county filtered down to nothing gets the
-  // same lead, the same proof line, and the same two ways in as a calendar that
-  // was empty to begin with.
+  // The empty state serves two cases with the same proof line and the same two
+  // ways in. Only the lead differs: a specific county filtered down to nothing
+  // names that county ("No events in Greenville County yet"), so selecting a
+  // zero-event county reads as a clear answer rather than a blank "0 upcoming";
+  // a calendar empty to begin with keeps the general lead.
   const empty = document.getElementById('events-empty');
   if (empty) empty.hidden = shown > 0;
+  const lead = document.getElementById('events-empty-lead');
+  if (lead) {
+    lead.textContent =
+      filter.county === 'all'
+        ? 'Nothing on the calendar right now.'
+        : `No events in ${island.countyNames[filter.county] ?? filter.county} County yet.`;
+  }
   const proof = document.getElementById('events-empty-proof');
   if (proof) proof.textContent = emptyStateProof(pastShown);
 
   if (mapHandle && eventsLayer) {
     eventsLayer.setEventData(mapHandle.map, mapOccurrences());
     eventsLayer.setSelectedCounty(mapHandle.map, filter.county === 'all' ? null : filter.county);
+    // Animate the view to the newly selected county, or back out to the full SC
+    // view when the selection clears. No-ops when the county is unchanged.
+    fitToSelection(true);
   }
 }
 
