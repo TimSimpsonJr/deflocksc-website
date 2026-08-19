@@ -10,6 +10,7 @@ import { publicEventSchema } from '../lib/event-schema.js';
 import {
   expandAll,
   splitByToday,
+  collapseSeries,
   addMonths,
   countyOptions,
 } from '../lib/events-view.js';
@@ -100,10 +101,17 @@ const allOccurrences = expandAll(bakedEvents, horizonEnd);
 const { upcoming, past: recentPast } = splitByToday(allOccurrences, today);
 const past = recentPast.filter((o) => o.date >= pastCutoff);
 
-// County slugs with at least one upcoming occurrence, busiest first. The client
-// builds one chip per slug — never one per registry county — so the row stays a
-// row.
-const counties = countyOptions(upcoming).map((c) => c.county);
+// The LIST view collapses each recurring series to a single row (its next
+// upcoming occurrence); the MONTH grid keeps every occurrence. `upcomingList` is
+// therefore one row per distinct event, which is also what the "N upcoming"
+// heading and the chip counts report.
+const upcomingList = collapseSeries(upcoming);
+
+// County slugs with at least one upcoming event, busiest first. Derived from the
+// collapsed list so the chip order matches the distinct-event counts the client
+// renders on the badges. The client builds one chip per slug — never one per
+// registry county — so the row stays a row.
+const counties = countyOptions(upcomingList).map((c) => c.county);
 
 const island = {
   events: bakedEvents,
@@ -131,6 +139,12 @@ const island = {
         venues are never published here — the address is shared inside the event's
         Signal group.
       </p>
+      <a
+        href="/events/submit"
+        class="inline-block mt-6 bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.08em] px-8 py-3.5 transition-colors cursor-pointer no-underline"
+      >
+        Submit an event
+      </a>
     </div>
   </section>
 
@@ -156,7 +170,7 @@ const island = {
       </div>
 
       <div id="panel-list" role="tabpanel" aria-labelledby="tab-list" tabindex="0" data-panel="list" class="is-active">
-        <EventsList upcoming={upcoming} past={past} cityNames={cityNames} countyNames={countyNames} />
+        <EventsList upcoming={upcomingList} past={past} cityNames={cityNames} countyNames={countyNames} />
       </div>
 
       <div id="panel-month" role="tabpanel" aria-labelledby="tab-month" tabindex="0" data-panel="month">
@@ -324,6 +338,9 @@ const island = {
   }
   .event-badge-meetup { color: #fbbf24; }
   .event-badge-public { color: #4ade80; }
+  /* Recurrence frequency for a collapsed series ("REPEATS WEEKLY"). Neutral so it
+     reads as metadata beside the amber/green type badge, not a second call. */
+  .event-badge-repeat { color: #9ca3af; }
 
   .event-signal {
     display: inline-flex;

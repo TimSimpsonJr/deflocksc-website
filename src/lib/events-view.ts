@@ -125,6 +125,46 @@ export function splitByToday(
   return { upcoming, past };
 }
 
+/**
+ * Collapse a sorted occurrence list to one row per event — the LIST-view model.
+ *
+ * The month grid shows every occurrence of a recurring series, but the list must
+ * not: a weekly series would otherwise flood it with one row per week. Keep the
+ * FIRST occurrence of each event id and drop the rest. Because the input is
+ * sorted ascending (expandAll → splitByToday preserve that order), the first
+ * occurrence of an id is its NEXT upcoming one, which is the date/time the row
+ * should show. A one-off event has a single occurrence and passes through
+ * unchanged; a recurring series contributes exactly one row. The result is one
+ * entry per distinct EVENT, in calendar order of each event's next occurrence —
+ * so its length is the count the "N upcoming" heading and the chip badges show.
+ *
+ * Order-preserving and pure: it never mutates the input or the occurrences.
+ */
+export function collapseSeries(occurrences: readonly Occurrence[]): Occurrence[] {
+  const seen = new Set<string>();
+  const out: Occurrence[] = [];
+  for (const o of occurrences) {
+    if (seen.has(o.event.id)) continue;
+    seen.add(o.event.id);
+    out.push(o);
+  }
+  return out;
+}
+
+/**
+ * The LIST-view recurrence badge text, or null for a one-off event.
+ *
+ * Rendered in the same DM Mono `.event-badge` style as "Public event" /
+ * "Location in group" (CSS uppercases it, so it reads "REPEATS WEEKLY"). A
+ * one-off event returns null and gets no badge.
+ */
+export function recurrenceLabel(
+  recurrence: PublicEvent['recurrence'],
+): string | null {
+  if (!recurrence) return null;
+  return recurrence.freq === 'weekly' ? 'Repeats weekly' : 'Repeats monthly';
+}
+
 /** 'AUG' for '2026-08-22'. */
 export function monthAbbr(iso: string): string {
   return MONTHS_ABBR[Number(iso.slice(5, 7)) - 1];

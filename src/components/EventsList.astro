@@ -1,6 +1,6 @@
 ---
 import type { Occurrence } from '../lib/events-view.js';
-import { monthAbbr, dayOfMonth, formatTime12, sortKey, emptyStateProof } from '../lib/events-view.js';
+import { monthAbbr, dayOfMonth, formatTime12, sortKey, emptyStateProof, recurrenceLabel } from '../lib/events-view.js';
 
 interface Props {
   upcoming: Occurrence[];
@@ -43,6 +43,9 @@ const place = (o: Occurrence) =>
             <span class={`event-badge ${o.event.type === 'meetup' ? 'event-badge-meetup' : 'event-badge-public'}`}>
               {o.event.type === 'meetup' ? 'Location in group' : 'Public event'}
             </span>
+            {recurrenceLabel(o.event.recurrence) && (
+              <span class="event-badge event-badge-repeat">{recurrenceLabel(o.event.recurrence)}</span>
+            )}
             {o.event.hasSignalGroup && (
               <a class="event-signal" href={`/go/${o.event.id}`} rel="noreferrer">Join Signal group</a>
             )}
@@ -60,6 +63,7 @@ const place = (o: Occurrence) =>
     <p class="events-empty-lead">Nothing on the calendar right now.</p>
     <p class="events-empty-proof" id="events-empty-proof">{emptyStateProof(past.length)}</p>
     <p class="events-empty-actions">
+      <a class="event-signal" href="/events/submit">Submit an event</a>
       <a class="event-signal" href="mailto:hello@deflocksc.org">Email us</a>
       <button id="intake-open" type="button" class="event-signal event-signal-btn">Join the Signal group</button>
     </p>

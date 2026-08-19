@@ -4,6 +4,8 @@ import {
   parseOverlayEnvelope,
   expandAll,
   splitByToday,
+  collapseSeries,
+  recurrenceLabel,
   monthAbbr,
   dayOfMonth,
   formatTime12,
@@ -160,6 +162,81 @@ describe('splitByToday', () => {
       '2027-08-18',
     );
     expect(splitByToday(occ, '2026-08-18').past.map((o) => o.date)).toEqual(['2026-08-15', '2026-08-10']);
+  });
+});
+
+describe('collapseSeries', () => {
+  it('keeps a one-off event as its single row', () => {
+    const occ = expandAll([ev({ id: 'aaaaaaaa', date: '2026-09-01', recurrence: null })], '2027-09-01');
+    expect(collapseSeries(occ).map((o) => `${o.date}:${o.event.id}`)).toEqual(['2026-09-01:aaaaaaaa']);
+  });
+
+  it('collapses a recurring series to one row at its next (earliest) occurrence', () => {
+    const occ = expandAll(
+      [ev({ id: 'gvweekly', date: '2026-09-01', recurrence: { freq: 'weekly', until: '2026-09-22' } })],
+      '2027-09-01',
+    );
+    expect(occ.length).toBeGreaterThan(1); // fixture guard: it really recurs
+    const rows = collapseSeries(occ);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].date).toBe('2026-09-01');
+    expect(rows[0].event.id).toBe('gvweekly');
+  });
+
+  it('emits one row per distinct event, ordered by each event next occurrence', () => {
+    const occ = expandAll(
+      [
+        ev({ id: 'gvweekly', date: '2026-09-01', recurrence: { freq: 'weekly', until: '2026-10-13' } }),
+        ev({ id: 'ch1once', date: '2026-09-03', recurrence: null }),
+        ev({ id: 'ri1once', date: '2026-09-02', recurrence: null }),
+      ],
+      '2027-09-01',
+    );
+    // gvweekly's next occurrence (09-01) sorts first, then the two one-offs.
+    expect(collapseSeries(occ).map((o) => `${o.date}:${o.event.id}`)).toEqual([
+      '2026-09-01:gvweekly',
+      '2026-09-02:ri1once',
+      '2026-09-03:ch1once',
+    ]);
+  });
+
+  it('returns an empty list for no occurrences and never mutates the input', () => {
+    expect(collapseSeries([])).toEqual([]);
+    const occ = expandAll([ev({ recurrence: { freq: 'weekly', until: '2026-09-22' } })], '2027-09-01');
+    const before = occ.length;
+    collapseSeries(occ);
+    expect(occ).toHaveLength(before);
+  });
+
+  it('makes facetCounts count distinct events, not occurrences', () => {
+    // A greenville weekly series (many occurrences) plus three one-offs. Per-
+    // occurrence facets would inflate greenville; the collapsed facets must not.
+    const events = [
+      ev({ id: 'gvweekly', county: 'greenville', type: 'meetup', date: '2026-09-01', recurrence: { freq: 'weekly', until: '2026-11-01' } }),
+      ev({ id: 'gv2once', county: 'greenville', type: 'public', date: '2026-09-04', recurrence: null }),
+      ev({ id: 'ch1once', county: 'charleston', type: 'meetup', date: '2026-09-02', recurrence: null }),
+      ev({ id: 'ri1once', county: 'richland', type: 'public', date: '2026-09-03', recurrence: null }),
+    ];
+    const occ = expandAll(events, '2027-09-01');
+    const collapsed = collapseSeries(occ);
+    const f = facetCounts(collapsed, ALL_EVENTS);
+    expect(f.countyAll).toBe(4);
+    expect(f.countyCounts).toEqual({ greenville: 2, charleston: 1, richland: 1 });
+    expect(f.typeCounts).toEqual({ all: 4, meetup: 2, public: 2 });
+  });
+});
+
+describe('recurrenceLabel', () => {
+  it('returns null for a one-off event (no badge)', () => {
+    expect(recurrenceLabel(null)).toBeNull();
+  });
+
+  it('labels a weekly series', () => {
+    expect(recurrenceLabel({ freq: 'weekly', until: '2026-12-01' })).toBe('Repeats weekly');
+  });
+
+  it('labels a monthly series', () => {
+    expect(recurrenceLabel({ freq: 'monthly_nth', until: '2026-12-01' })).toBe('Repeats monthly');
   });
 });
 

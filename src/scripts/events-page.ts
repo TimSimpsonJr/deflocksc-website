@@ -30,6 +30,8 @@ import {
   parseOverlayEnvelope,
   expandAll,
   splitByToday,
+  collapseSeries,
+  recurrenceLabel,
   monthAbbr,
   dayOfMonth,
   formatTime12,
@@ -325,6 +327,10 @@ function buildCard(o: Occurrence): HTMLLIElement {
       meetup ? 'Location in group' : 'Public event',
     ),
   );
+  // Mirror EventsList.astro: a collapsed recurring series carries a frequency
+  // badge next to the type badge. One-off events get null and no badge.
+  const repeat = recurrenceLabel(e.recurrence);
+  if (repeat) actions.append(el('span', 'event-badge event-badge-repeat', repeat));
   if (e.hasSignalGroup) {
     const a = el('a', 'event-signal', 'Join Signal group') as HTMLAnchorElement;
     a.href = `/go/${encodeURIComponent(e.id)}`;
@@ -389,9 +395,13 @@ function applyMerge(merged: PublicEvent[]) {
     island.today,
   ).upcoming;
 
+  // The list collapses a recurring series to one row (its next occurrence); the
+  // month chips still get every occurrence, so the two loops read different sets.
   const list = document.getElementById('events-list');
-  for (const o of freshOccurrences) {
+  for (const o of collapseSeries(freshOccurrences)) {
     if (list) insertSorted(list, buildCard(o), sortKey(o.date, o.event.time, o.event.id));
+  }
+  for (const o of freshOccurrences) {
     const chips = document.querySelector(`[data-chips="${CSS.escape(o.date)}"]`);
     if (chips) insertSorted(chips, buildChip(o), sortKey(o.date, o.event.time, o.event.id));
   }
@@ -432,7 +442,9 @@ function chipButton(
 function buildFilters(): void {
   const nav = document.getElementById('events-filters');
   if (!nav) return;
-  const facets = facetCounts(upcomingFor(allEvents), filter);
+  // Collapse first so the chip badges count distinct EVENTS (each series once),
+  // matching the collapsed list rows rather than the per-occurrence map counts.
+  const facets = facetCounts(collapseSeries(upcomingFor(allEvents)), filter);
 
   const countyRow = document.createElement('div');
   countyRow.className = 'filter-row';
@@ -475,7 +487,9 @@ function buildFilters(): void {
  *  block, the empty state, and the map. Shared by the filter path and the overlay
  *  merge so the two can never disagree. */
 function syncChrome(): void {
-  const facets = facetCounts(upcomingFor(allEvents), filter);
+  // Collapsed so the chip counts match the collapsed list (distinct events); the
+  // header count below reads the rendered row count, which is already collapsed.
+  const facets = facetCounts(collapseSeries(upcomingFor(allEvents)), filter);
 
   const countyRow = document
     .querySelector<HTMLElement>('[data-filter-key="county"]')
@@ -561,8 +575,10 @@ function applyFilter(next: EventFilter): void {
   const upcoming = split.upcoming;
   const past = split.past.filter((o) => o.date >= island.pastCutoff);
 
+  // The list shows one row per event (collapsed series); the month grid keeps
+  // every occurrence, so each reads from a different set of the same `upcoming`.
   const list = document.getElementById('events-list');
-  if (list) list.replaceChildren(...upcoming.map(buildCard));
+  if (list) list.replaceChildren(...collapseSeries(upcoming).map(buildCard));
 
   for (const chips of document.querySelectorAll<HTMLElement>('[data-chips]')) {
     chips.replaceChildren();
