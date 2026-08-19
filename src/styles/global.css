@@ -6,6 +6,12 @@
 @import "@fontsource/dm-mono/400.css";
 @import "@fontsource/dm-mono/500.css";
 
+/* accessible-autocomplete base stylesheet (city combobox on the submit form).
+   Re-themed to the dark `deflock` palette in the events-form section below;
+   the overrides there are unlayered and later in source order, so they win over
+   these base rules at equal specificity without needing !important. */
+@import "accessible-autocomplete/dist/accessible-autocomplete.min.css";
+
 @import "tailwindcss";
 
 /* ── daisyUI (Tailwind 4 plugin) ──
@@ -319,4 +325,113 @@
   [data-reveal-delay="2"] { transition-delay: 160ms; }
   [data-reveal-delay="3"] { transition-delay: 240ms; }
   [data-reveal-delay="4"] { transition-delay: 320ms; }
+}
+
+/* ── Events submit form: enhanced pickers ──
+   The city <select> is progressively enhanced by accessible-autocomplete's
+   enhanceSelectElement() into a searchable combobox, and the date <input> is
+   enhanced on desktop with a Cally calendar. Both build DOM at runtime (Cally
+   inside shadow roots), so the widget skins live here in global CSS rather than
+   in the component's build-scoped <style>. Values mirror the daisyUI `deflock`
+   theme (base-100 #171717, base-content #e8e8e8, primary #dc2626) for AA
+   contrast. These rules are unlayered and follow the imported base stylesheet,
+   so they win over accessible-autocomplete's light defaults by source order. */
+
+/* City combobox (accessible-autocomplete, default `autocomplete__` namespace).
+   Matched to the daisyUI `.input` look: base-100 fill, 20%-content border,
+   field radius, red focus ring consistent with the site's :focus-visible. */
+.autocomplete__wrapper {
+  position: relative;
+}
+.autocomplete__input {
+  background-color: #171717;
+  color: #e8e8e8;
+  border: 1px solid color-mix(in oklab, #e8e8e8 20%, transparent);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.autocomplete__input::placeholder {
+  color: #737373;
+}
+.autocomplete__input--focused,
+.autocomplete__input:focus {
+  outline: 2px solid #dc2626;
+  outline-offset: 2px;
+  border-color: #d4d4d4;
+  box-shadow: none;
+}
+.autocomplete__hint {
+  color: #737373;
+}
+.autocomplete__menu {
+  background-color: #1a1a1a;
+  border: 1px solid color-mix(in oklab, #e8e8e8 20%, transparent);
+  border-top: 0;
+  color: #e8e8e8;
+}
+.autocomplete__option {
+  color: #e8e8e8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.875rem;
+}
+.autocomplete__option:hover,
+.autocomplete__option--focused {
+  background-color: #dc2626;
+  color: #ffffff;
+  border-bottom-color: #dc2626;
+}
+.autocomplete__option--no-results {
+  background-color: #1a1a1a;
+  color: #a3a3a3;
+}
+
+/* Cally date picker. Only two custom properties (`--color-accent`,
+   `--color-text-on-accent`) drive the selected-day highlight; everything else
+   is themed through the exposed shadow ::part()s. `calendar-month` and
+   `calendar-date` are light-DOM elements with their own shadow roots, so a
+   single ::part() hop from the document stylesheet reaches their parts. */
+.deflock-calendar {
+  --color-accent: #dc2626;
+  --color-text-on-accent: #ffffff;
+  color: #e8e8e8;
+  font-family: 'Instrument Sans Variable', sans-serif;
+  font-size: 0.875rem;
+}
+.deflock-calendar::part(heading) {
+  color: #e8e8e8;
+  font-weight: 700;
+}
+.deflock-calendar::part(button) {
+  color: #e8e8e8;
+  border-radius: 0.25rem;
+}
+.deflock-calendar::part(button):hover {
+  background-color: #262626;
+}
+calendar-month.deflock-month::part(heading) {
+  color: #e8e8e8;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+}
+calendar-month.deflock-month::part(button) {
+  color: #e8e8e8;
+  border-radius: 0.25rem;
+}
+calendar-month.deflock-month::part(button):hover {
+  background-color: #262626;
+}
+calendar-month.deflock-month::part(today) {
+  outline: 1px solid rgba(251, 191, 36, 0.5);
+  outline-offset: -1px;
+}
+calendar-month.deflock-month::part(outside) {
+  color: #525252;
+}
+calendar-month.deflock-month::part(disallowed) {
+  color: #404040;
+  cursor: not-allowed;
 }
