@@ -42,3 +42,6 @@ id_ed25519
 
 # brainstorming visual companion mockups (not committed)
 .superpowers/
+
+# TIGERweb response cache for scripts/build-city-centroids.py (not committed)
+scripts/.cache/
