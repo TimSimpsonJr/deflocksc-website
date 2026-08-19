@@ -66,6 +66,156 @@
   color: #d4d4d4;
 }
 
+/* ── MapLibre dark chrome ──
+   Applied by adding `map-dark` to a MapLibre container element. Global (not
+   scoped to one component) so a second map container gets the same controls
+   and popup skin instead of MapLibre's unstyled defaults. */
+.map-dark .maplibregl-ctrl-group {
+  background: rgba(38, 38, 38, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(64, 64, 64, 0.6);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.map-dark .maplibregl-ctrl-group button {
+  width: 36px;
+  height: 36px;
+}
+
+.map-dark .maplibregl-ctrl-group button + button {
+  border-top: 1px solid #404040;
+}
+
+.map-dark .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(1) brightness(0.7);
+}
+
+.map-dark .maplibregl-ctrl-group button:hover .maplibregl-ctrl-icon {
+  filter: invert(1) brightness(0.9);
+}
+
+.map-dark .maplibregl-ctrl-group button:hover {
+  background: rgba(64, 64, 64, 0.5);
+}
+
+.map-dark .maplibregl-popup-content {
+  background: #262626;
+  border: 1px solid #404040;
+  border-radius: 0.75rem;
+  padding: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+.map-dark .maplibregl-popup-tip {
+  border-top-color: #262626;
+}
+
+.map-dark .maplibregl-popup-close-button {
+  color: #737373;
+  font-size: 18px;
+  padding: 4px 8px;
+  right: 2px;
+  top: 2px;
+}
+
+.map-dark .maplibregl-popup-close-button:hover {
+  color: #d4d4d4;
+  background: transparent;
+}
+
+/* ── Camera popup body (markup built by src/scripts/map/layers/cameras.ts) ── */
+.camera-popup {
+  width: 220px;
+}
+
+.camera-popup-img {
+  position: relative;
+  background: #171717;
+  height: 120px;
+  overflow: hidden;
+}
+
+.camera-popup-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.camera-popup-img-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #d4d4d4;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.camera-popup-img-empty {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-popup-img-empty span {
+  color: #525252;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.camera-popup-mfr {
+  padding: 12px 14px 0;
+  color: #a3a3a3;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.camera-popup-mfr strong {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.camera-popup-op {
+  padding: 6px 14px 0;
+  color: #737373;
+  font-size: 12px;
+}
+
+.camera-popup-dir {
+  padding: 6px 14px 0;
+  color: #737373;
+  font-size: 12px;
+}
+
+.camera-popup-link {
+  display: block;
+  padding: 10px 14px;
+  margin-top: 10px;
+  border-top: 1px solid #404040;
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.camera-popup-link:hover {
+  color: #f87171;
+}
+
 /* Dark scrollbars — matches site background */
 * {
   scrollbar-color: #404040 transparent;

@@ -1,23 +1,13 @@
 /**
- * Camera map initialization and interaction.
+ * Camera layer.
  *
- * Loads Deflock camera data, renders clusters and directional cones
- * on a MapLibre GL JS map, and handles mobile toggle / glow frame tracking.
+ * Everything Deflock-camera-specific: vendor reference images, the
+ * directional cone icon, direction parsing, the camera popup, and the
+ * cluster / dot / cone layers with their event handlers.
  */
 
 import maplibregl from 'maplibre-gl';
-
-const MAP_CENTER: [number, number] = [-82.39, 34.85];
-const MAP_ZOOM = 11;
-
-let map: maplibregl.Map | null = null;
-
-interface DeflockCamera {
-  id: number;
-  lat: number;
-  lon: number;
-  tags?: Record<string, string>;
-}
+import { escapeHtml } from '../../../lib/escape-html.js';
 
 // --- Vendor image lookup ---
 
@@ -45,14 +35,14 @@ function getVendorImageUrl(manufacturer: string | null): string | null {
 
 // --- Wikimedia thumbnail URL ---
 
-function wikimediaThumbnailUrl(filename: string): string {
+export function wikimediaThumbnailUrl(filename: string): string {
   const clean = filename.replace(/^File:/, '').replace(/ /g, '_');
   return `https://commons.wikimedia.org/w/thumb.php?f=${encodeURIComponent(clean)}&w=300`;
 }
 
 // --- Direction parsing ---
 
-function parseDirection(tags: Record<string, string> | undefined): number | null {
+export function parseDirection(tags: Record<string, string> | undefined): number | null {
   if (!tags) return null;
   const raw = tags['direction'] || tags['camera:direction'];
   if (!raw) return null;
@@ -81,7 +71,7 @@ function parseDirection(tags: Record<string, string> | undefined): number | null
 
 // --- Directional cone image ---
 
-function createConeImage(): { width: number; height: number; data: Uint8ClampedArray } {
+export function createConeImage(): { width: number; height: number; data: Uint8ClampedArray } {
   const coneSize = 80;
   const coneCanvas = document.createElement('canvas');
   coneCanvas.width = coneSize;
@@ -120,14 +110,8 @@ function createConeImage(): { width: number; height: number; data: Uint8ClampedA
 
 // --- Camera popup ---
 
-function escapeHtml(str: string): string {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-function showCameraPopup(e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) {
-  if (!e.features?.length || !map) return;
+function showCameraPopup(map: maplibregl.Map, e: maplibregl.MapLayerMouseEvent): void {
+  if (!e.features?.length) return;
   const feat = e.features[0];
   const coords = (feat.geometry as GeoJSON.Point).coordinates.slice() as [number, number];
   const props = feat.properties;
@@ -178,10 +162,16 @@ function showCameraPopup(e: maplibregl.MapMouseEvent & { features?: maplibregl.M
     .addTo(map);
 }
 
-// --- Map layer setup ---
+// --- Layers ---
 
-function addCameraLayers(geojson: GeoJSON.FeatureCollection) {
-  if (!map) return;
+const CAMERA_LAYER_IDS = ['cluster-glow', 'clusters', 'cluster-count', 'camera-dots', 'camera-cones'];
+
+/** Per-map event teardown, so removeCameraLayers can unbind what it bound. */
+const cameraTeardowns = new WeakMap<maplibregl.Map, () => void>();
+
+export function addCameraLayers(map: maplibregl.Map, geojson: GeoJSON.FeatureCollection): void {
+  // Popups read this lazily on click, so there is no need to block setup on it.
+  void loadVendorImages();
 
   map.addSource('cameras', {
     type: 'geojson',
@@ -280,124 +270,64 @@ function addCameraLayers(geojson: GeoJSON.FeatureCollection) {
       'icon-rotation-alignment': 'map',
     },
   });
+
+  bindCameraEvents(map);
+}
+
+export function removeCameraLayers(map: maplibregl.Map): void {
+  cameraTeardowns.get(map)?.();
+  cameraTeardowns.delete(map);
+
+  for (const id of CAMERA_LAYER_IDS) {
+    if (map.getLayer(id)) map.removeLayer(id);
+  }
+  if (map.hasImage('cone')) map.removeImage('cone');
+  if (map.getSource('cameras')) map.removeSource('cameras');
 }
 
 // --- Map event handlers ---
 
-function bindMapEvents() {
-  if (!map) return;
-
+function bindCameraEvents(map: maplibregl.Map): void {
   // Cluster click -> zoom in
-  map.on('click', 'clusters', (e) => {
-    const features = map!.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+  const onClusterClick = (e: maplibregl.MapLayerMouseEvent) => {
+    const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
     if (!features.length) return;
     const clusterId = features[0].properties.cluster_id;
-    const source = map!.getSource('cameras') as maplibregl.GeoJSONSource;
+    const source = map.getSource('cameras') as maplibregl.GeoJSONSource;
     source.getClusterExpansionZoom(clusterId).then((zoom) => {
-      map!.easeTo({
+      map.easeTo({
         center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number],
         zoom,
       });
     });
-  });
-
-  // Pointer cursors on clusters
-  map.on('mouseenter', 'clusters', () => { map!.getCanvas().style.cursor = 'pointer'; });
-  map.on('mouseleave', 'clusters', () => { map!.getCanvas().style.cursor = ''; });
+  };
 
   // Camera dot and cone clicks -> popup
-  map.on('click', 'camera-dots', showCameraPopup);
-  map.on('click', 'camera-cones', showCameraPopup);
+  const onCameraClick = (e: maplibregl.MapLayerMouseEvent) => showCameraPopup(map, e);
 
-  // Pointer cursors on camera features
-  map.on('mouseenter', 'camera-dots', () => { map!.getCanvas().style.cursor = 'pointer'; });
-  map.on('mouseleave', 'camera-dots', () => { map!.getCanvas().style.cursor = ''; });
-  map.on('mouseenter', 'camera-cones', () => { map!.getCanvas().style.cursor = 'pointer'; });
-  map.on('mouseleave', 'camera-cones', () => { map!.getCanvas().style.cursor = ''; });
-}
+  // Pointer cursors on interactive features
+  const onEnter = () => { map.getCanvas().style.cursor = 'pointer'; };
+  const onLeave = () => { map.getCanvas().style.cursor = ''; };
 
-// --- Scroll zoom ---
+  map.on('click', 'clusters', onClusterClick);
+  map.on('mouseenter', 'clusters', onEnter);
+  map.on('mouseleave', 'clusters', onLeave);
+  map.on('click', 'camera-dots', onCameraClick);
+  map.on('click', 'camera-cones', onCameraClick);
+  map.on('mouseenter', 'camera-dots', onEnter);
+  map.on('mouseleave', 'camera-dots', onLeave);
+  map.on('mouseenter', 'camera-cones', onEnter);
+  map.on('mouseleave', 'camera-cones', onLeave);
 
-let scrollUnlocked = false;
-
-function setupScrollBehavior() {
-  if (!map) return;
-  // Ctrl held: temporarily enable native scrollZoom (smooth inertia)
-  document.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Control' && !scrollUnlocked) map!.scrollZoom.enable();
+  cameraTeardowns.set(map, () => {
+    map.off('click', 'clusters', onClusterClick);
+    map.off('mouseenter', 'clusters', onEnter);
+    map.off('mouseleave', 'clusters', onLeave);
+    map.off('click', 'camera-dots', onCameraClick);
+    map.off('click', 'camera-cones', onCameraClick);
+    map.off('mouseenter', 'camera-dots', onEnter);
+    map.off('mouseleave', 'camera-dots', onLeave);
+    map.off('mouseenter', 'camera-cones', onEnter);
+    map.off('mouseleave', 'camera-cones', onLeave);
   });
-  document.addEventListener('keyup', (e: KeyboardEvent) => {
-    if (e.key === 'Control' && !scrollUnlocked) map!.scrollZoom.disable();
-  });
-}
-
-export function toggleScrollZoom(): boolean {
-  scrollUnlocked = !scrollUnlocked;
-  if (map) {
-    if (scrollUnlocked) map.scrollZoom.enable();
-    else map.scrollZoom.disable();
-  }
-  return scrollUnlocked;
-}
-
-// --- Map initialization ---
-
-function initMap() {
-  map = new maplibregl.Map({
-    container: 'camera-map',
-    style: '/map-style.json',
-    center: MAP_CENTER,
-    zoom: MAP_ZOOM,
-    attributionControl: false,
-    scrollZoom: false,
-  });
-
-  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-
-  map.on('load', async () => {
-    try {
-      const [res] = await Promise.all([
-        fetch('/camera-data.json'),
-        loadVendorImages(),
-      ]);
-      if (!res.ok) throw new Error(`Failed to load camera data: ${res.status}`);
-      const cameras: DeflockCamera[] = await res.json();
-
-      const geojson: GeoJSON.FeatureCollection = {
-        type: 'FeatureCollection',
-        features: cameras.map((cam) => {
-          const direction = parseDirection(cam.tags);
-          return {
-            type: 'Feature' as const,
-            geometry: {
-              type: 'Point' as const,
-              coordinates: [cam.lon, cam.lat],
-            },
-            properties: {
-              id: cam.id,
-              direction,
-              hasDirection: direction !== null,
-              manufacturer: cam.tags?.manufacturer || null,
-              operator: cam.tags?.operator || null,
-              wikimedia_commons: cam.tags?.wikimedia_commons || null,
-            },
-          };
-        }),
-      };
-
-      addCameraLayers(geojson);
-      bindMapEvents();
-      setupScrollBehavior();
-    } catch (err) {
-      console.error('Failed to load camera data:', err);
-    }
-  });
-}
-
-// --- Public API ---
-
-export { initMap, map };
-
-export function resizeMap() {
-  if (map) map.resize();
 }
