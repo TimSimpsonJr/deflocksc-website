@@ -139,9 +139,11 @@ const island = {
         Phone Number to Nobody. Use a name you don't mind strangers keeping.
       </p>
       <p class="intake-actions">
-        <!-- No href: /go/intake is set on window.location at click time by
+        {/* No href: the intake path is set on window.location at click time by
              events-page.ts, so the path never appears in the static HTML and a
-             scraper that never clicks never sees it. -->
+             scraper that never clicks never sees it. Kept as an Astro comment
+             (not an HTML comment) so the build strips it from output instead of
+             preserving it and leaking the path into the static markup. */}
         <button id="intake-confirm" type="button" class="event-signal event-signal-btn">I've done that, open Signal</button>
         <button id="intake-cancel" type="button" class="event-signal event-signal-btn">Cancel</button>
       </p>
