@@ -487,8 +487,10 @@ describe('filterHash and parseFilterHash', () => {
 });
 
 describe('emptyStateProof', () => {
-  it('invites the first event when nothing has run', () => {
-    expect(emptyStateProof(0)).toBe('Be the first to put something on it.');
+  it('points to the Signal group when nothing has run', () => {
+    expect(emptyStateProof(0)).toBe(
+      "Nothing has run in the last 90 days either. Join the Signal group and you'll hear when the first one lands.",
+    );
   });
 
   it('uses the singular for one past event', () => {

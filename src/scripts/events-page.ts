@@ -475,7 +475,7 @@ function buildFilters(): void {
   clear.id = 'filter-clear';
   clear.className = 'filter-clear';
   clear.dataset.filterKey = 'clear';
-  clear.textContent = 'Clear';
+  clear.textContent = 'Clear filters';
   clear.hidden = filter.county === 'all' && filter.type === 'all';
   typeRow.append(clear);
 

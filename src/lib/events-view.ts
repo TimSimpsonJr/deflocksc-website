@@ -396,6 +396,7 @@ export function parseFilterHash(hash: string): EventFilter {
  * sentence as a calendar that was empty to begin with.
  */
 export function emptyStateProof(pastCount: number): string {
-  if (pastCount <= 0) return 'Be the first to put something on it.';
+  if (pastCount <= 0)
+    return "Nothing has run in the last 90 days either. Join the Signal group and you'll hear when the first one lands.";
   return `${pastCount} ${pastCount === 1 ? 'event has' : 'events have'} run in the last 90 days.`;
 }

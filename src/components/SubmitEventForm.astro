@@ -177,7 +177,9 @@ const errorClass = 'text-[13px] text-[#f87171] mt-1.5 leading-[1.5]';
         {cityOptions.map((option) => <option value={option.slug}>{option.label}</option>)}
       </select>
       <p id="hint-city" class={hintClass}>
-        The county is filled in for you. Not on the list? Email us and we will add it.
+        The county is filled in for you. Not on the list?
+        <a href="mailto:deflocksc@proton.me" class="underline hover:text-[#e8e8e8]">Email us</a>
+        and we'll add it.
       </p>
       <p class={errorClass} data-error-for="city" id="error-city" hidden></p>
     </div>
@@ -305,7 +307,9 @@ const errorClass = 'text-[13px] text-[#f87171] mt-1.5 leading-[1.5]';
 
     <noscript>
       <p class="text-[#fca5a5] text-sm mt-4">
-        This form needs JavaScript to submit. Email us instead and we will post it for you.
+        This form needs JavaScript to submit.
+        <a href="mailto:deflocksc@proton.me" class="underline hover:text-[#fecaca]">Email us</a>
+        instead and we'll post it for you.
       </p>
     </noscript>
   </form>
@@ -331,13 +335,13 @@ const errorClass = 'text-[13px] text-[#f87171] mt-1.5 leading-[1.5]';
         id="copy-permalink"
         class="bg-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.14)] text-[#e8e8e8] font-bold text-xs uppercase tracking-[0.08em] px-5 py-2.5 transition-colors min-w-[7rem]"
       >
-        Copy
+        Copy link
       </button>
     </div>
     <p class="text-sm">
       <a id="success-link" href="/events" class="text-[#fbbf24] hover:text-[#fcd34d] underline">/events</a>
       <span class="text-[#737373]"> &middot; </span>
-      <a href="/events/submit" class="text-[#fbbf24] hover:text-[#fcd34d] underline">Submit another</a>
+      <a href="/events/submit" class="text-[#fbbf24] hover:text-[#fcd34d] underline">Post another event</a>
     </p>
   </div>
 </div>
@@ -624,10 +628,10 @@ const errorClass = 'text-[13px] text-[#f87171] mt-1.5 leading-[1.5]';
       await navigator.clipboard.writeText(permalinkInput.value);
       copyButton.textContent = 'Copied';
     } catch {
-      copyButton.textContent = 'Press Ctrl+C';
+      copyButton.textContent = 'Select and copy';
     }
     window.setTimeout(() => {
-      copyButton.textContent = 'Copy';
+      copyButton.textContent = 'Copy link';
     }, 3000);
   });
 
