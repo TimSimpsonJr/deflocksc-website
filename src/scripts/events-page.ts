@@ -98,44 +98,95 @@ let mapHandle: MapHandle | null = null;
 let eventsLayer: typeof import('./map/layers/events.js') | null = null;
 let mapLoading = false;
 
+/** How long to wait for the style 'load' event before treating it as a failure. */
+const MAP_LOAD_TIMEOUT_MS = 15000;
+
+function clearMapNotice() {
+  document.getElementById('events-map-frame')?.querySelector('.events-map-error')?.remove();
+}
+
+// Visible, retryable fallback for a failed map load. Without it a rejected import,
+// a non-OK sc-counties fetch, or a style-load timeout would leave the map frame
+// blank with no explanation and no way back.
+function showMapNotice() {
+  const frame = document.getElementById('events-map-frame');
+  if (!frame || frame.querySelector('.events-map-error')) return;
+  const box = el('div', 'events-map-error');
+  box.append(
+    el('p', 'events-map-error-lead', "The map couldn't load."),
+    el('p', 'events-map-error-note', 'The List and Month views show the same events.'),
+  );
+  const retry = el('button', 'event-signal event-signal-btn', 'Try again') as HTMLButtonElement;
+  retry.type = 'button';
+  retry.addEventListener('click', () => { clearMapNotice(); void loadMap(); });
+  box.append(retry);
+  frame.append(box);
+}
+
 async function loadMap() {
   if (mapHandle) { mapHandle.resize(); return; }
   if (mapLoading) return;
   mapLoading = true;
+  clearMapNotice();
 
-  await import('maplibre-gl/dist/maplibre-gl.css');
-  const [{ createMap }, layer, centroidsMod, countiesRes] = await Promise.all([
-    import('./map/core.js'),
-    import('./map/layers/events.js'),
-    import('../data/city-centroids.json'),
-    fetch('/districts/sc-counties.json'),
-  ]);
-  if (!countiesRes.ok) throw new Error(`sc-counties.json: ${countiesRes.status}`);
-  const counties = (await countiesRes.json()) as GeoJSON.FeatureCollection;
-  eventsLayer = layer;
+  let handle: MapHandle | null = null;
+  try {
+    await import('maplibre-gl/dist/maplibre-gl.css');
+    const [{ createMap }, layer, centroidsMod, countiesRes] = await Promise.all([
+      import('./map/core.js'),
+      import('./map/layers/events.js'),
+      import('../data/city-centroids.json'),
+      fetch('/districts/sc-counties.json'),
+    ]);
+    if (!countiesRes.ok) throw new Error(`sc-counties.json: ${countiesRes.status}`);
+    const counties = (await countiesRes.json()) as GeoJSON.FeatureCollection;
 
-  const handle = createMap({
-    container: 'events-map',
-    style: '/map-style.json',
-    center: [-81.0, 33.7],
-    zoom: 6,
-    interactive: true,
-  });
-  mapHandle = handle;
+    handle = createMap({
+      container: 'events-map',
+      style: '/map-style.json',
+      center: [-81.0, 33.7],
+      zoom: 6,
+      interactive: true,
+    });
 
-  await new Promise<void>((resolve) => {
-    if (handle.map.isStyleLoaded()) resolve();
-    else handle.map.once('load', () => resolve());
-  });
+    // Wait for the style, but bound the wait: a 'load' event that never fires — a
+    // missing or invalid /map-style.json, say — would otherwise hang this promise
+    // forever with mapLoading stuck true. The timeout turns that hang into a
+    // rejection that the catch below handles, so the load stays retryable. (We do
+    // not reject on the map's 'error' event: MapLibre fires it for benign, non-fatal
+    // problems like a single dropped tile, which must not abort a working map.)
+    const map = handle.map;
+    await new Promise<void>((resolve, reject) => {
+      if (map.isStyleLoaded()) { resolve(); return; }
+      const timer = window.setTimeout(
+        () => reject(new Error('events-map: style load timed out')),
+        MAP_LOAD_TIMEOUT_MS,
+      );
+      map.once('load', () => { window.clearTimeout(timer); resolve(); });
+    });
 
-  handle.map.fitBounds(SC_BOUNDS, { padding: 20, duration: 0 });
+    map.fitBounds(SC_BOUNDS, { padding: 20, duration: 0 });
 
-  layer.addEventLayers(handle.map, {
-    counties,
-    events: occurrences,
-    centroids: (centroidsMod as { default: Record<string, unknown> }).default,
-    cityNames: island.cityNames,
-  });
+    layer.addEventLayers(map, {
+      counties,
+      events: occurrences,
+      centroids: (centroidsMod as { default: Record<string, unknown> }).default,
+      cityNames: island.cityNames,
+    });
+
+    // Commit only once the map is fully built. A mid-build failure therefore leaves
+    // mapHandle null, so the next Map-tab click or desktop media-query change retries
+    // from scratch instead of resizing a half-initialized handle.
+    mapHandle = handle;
+    eventsLayer = layer;
+  } catch (err) {
+    console.warn('events: map unavailable', err);
+    handle?.destroy();
+    showMapNotice();
+    // mapHandle stays null: a later trigger (tab click, media change, Try again) retries.
+  } finally {
+    mapLoading = false;
+  }
 }
 
 // Desktop shows the map permanently, so load it when it scrolls into view.
@@ -153,6 +204,36 @@ if (mapEl && desktop.matches) {
   io.observe(mapEl);
 }
 desktop.addEventListener('change', (e) => { if (e.matches) void loadMap(); });
+
+// --- Month chip -> list card --------------------------------------------
+// A month chip points at its matching list card. That card lives in the List
+// panel, which is display:none while the Month tab is active, so a bare fragment
+// jump (#event-<id>) lands on nothing. Intercept the click, switch to the list
+// view, then scroll the card in. Delegated on the panel so it also covers chips
+// that applyMerge() inserts after load.
+
+function focusListCard(eventId: string, date: string | null) {
+  const list = document.getElementById('events-list');
+  if (!list || !eventId) return;
+  const cards = Array.from(
+    list.querySelectorAll<HTMLElement>(`[data-event-id="${CSS.escape(eventId)}"]`),
+  );
+  // A recurring event has one card per occurrence, all sharing its id; match the
+  // date too so the chip lands on its own day, falling back to the first card.
+  const card = (date && cards.find((c) => c.dataset.date === date)) || cards[0];
+  if (!card) return;
+  card.scrollIntoView({ block: 'center' });
+  card.classList.add('event-card-flash');
+  window.setTimeout(() => card.classList.remove('event-card-flash'), 1200);
+}
+
+document.getElementById('panel-month')?.addEventListener('click', (e) => {
+  const chip = (e.target as Element).closest<HTMLElement>('.month-chip');
+  if (!chip) return;
+  e.preventDefault();
+  selectTab('list');
+  focusListCard(chip.dataset.eventId ?? '', chip.dataset.date ?? null);
+});
 
 // --- Card and chip construction (mirrors EventsList / EventsMonth) -------
 
@@ -216,6 +297,7 @@ function buildChip(o: Occurrence): HTMLAnchorElement {
   a.className = 'month-chip';
   a.href = `#event-${encodeURIComponent(o.event.id)}`;
   a.dataset.eventId = o.event.id;
+  a.dataset.date = o.date;
   a.dataset.sort = sortKey(o.date, o.event.time, o.event.id);
   a.title = `${formatTime12(o.event.time)} · ${island.cityNames[o.event.city] ?? o.event.city}`;
   a.append(el('span', 'event-title month-chip-title', o.event.title));

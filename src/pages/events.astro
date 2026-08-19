@@ -298,6 +298,17 @@ const island = {
   .event-signal:hover { background: #b91c1c; }
   .event-signal-btn { font-family: inherit; }
 
+  /* Brief highlight when a month-view chip scrolls its list card into view, so the
+     eye lands on the right row after the tab swap. */
+  @keyframes event-card-flash {
+    from { background: #2a2118; border-left-color: #fbbf24; }
+    to   { background: #1a1a1a; border-left-color: #dc2626; }
+  }
+  .event-card-flash { animation: event-card-flash 1.2s ease-out; }
+  @media (prefers-reduced-motion: reduce) {
+    .event-card-flash { animation: none; outline: 2px solid #fbbf24; outline-offset: 2px; }
+  }
+
   /* --- Empty state and past events --- */
   .events-empty {
     background: #1a1a1a;

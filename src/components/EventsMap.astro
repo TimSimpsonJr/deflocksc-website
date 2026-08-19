@@ -58,6 +58,24 @@
     color: #a3a3a3;
   }
 
+  /* Fallback shown by events-page.ts when the map fails to load. Created at
+     runtime, so it carries no scoped attribute and must be styled with :global. */
+  :global(.events-map-error) {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1.5rem;
+    text-align: center;
+    background: rgba(13, 13, 13, 0.92);
+  }
+  :global(.events-map-error-lead) { color: #e8e8e8; font-size: 0.95rem; font-weight: 700; margin: 0; }
+  :global(.events-map-error-note) { color: #737373; font-size: 0.82rem; margin: 0; max-width: 22rem; }
+
   .map-badge {
     position: absolute;
     top: 12px;

@@ -53,6 +53,15 @@ const EVENT_LAYER_IDS = [
   'city-labels',
 ];
 
+/**
+ * Zoom at which the county choropleth has fully faded out and the city pins have
+ * fully faded in (see the fill-opacity / circle-opacity interpolations below, which
+ * both reach their end state at zoom 8). Click ownership switches here so an
+ * invisible layer never wins a click: below it, clicks are counties; at or above it,
+ * clicks are city pins.
+ */
+const CROSSFADE_ZOOM = 8;
+
 /** Per-map state, so setEventData can recompute and removeEventLayers can unbind. */
 const eventStates = new WeakMap<maplibregl.Map, EventLayerState>();
 
@@ -270,6 +279,9 @@ function bindEventInteractions(map: maplibregl.Map): () => void {
   // overstating a privacy control on an anti-surveillance site costs more than not
   // having one.
   const onCityClick = (e: maplibregl.MapLayerMouseEvent) => {
+    // City pins are invisible below the crossfade zoom; a click near a centroid
+    // there belongs to the choropleth, not to a pin, so ignore it.
+    if (map.getZoom() < CROSSFADE_ZOOM) return;
     const f = e.features?.[0];
     if (!f) return;
     const label = String(f.properties?.label ?? '');
@@ -288,6 +300,11 @@ function bindEventInteractions(map: maplibregl.Map): () => void {
 
   // County fill -> highlight the clicked county and ease in past the crossfade.
   const onCountyClick = (e: maplibregl.MapLayerMouseEvent) => {
+    // The choropleth has fully faded out at and above the crossfade zoom; the fill
+    // is still a hit target there, so ignore those clicks (they belong to the city
+    // pins). This also caps the ease-in below to a single step: after one click the
+    // map sits at >= CROSSFADE_ZOOM, so a second click no longer reaches this layer.
+    if (map.getZoom() >= CROSSFADE_ZOOM) return;
     const f = e.features?.[0];
     const selected = map.getSource('county-selected') as maplibregl.GeoJSONSource | undefined;
     selected?.setData({
