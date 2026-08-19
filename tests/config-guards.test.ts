@@ -63,3 +63,95 @@ describe('Umami beacon exclusion (design §14)', () => {
     expect(html).toContain(UMAMI_ATTR);
   });
 });
+
+// --- Config-content guards (CSP, caching, lighthouse, gitignore) ---
+// These read the config files directly rather than dist/, so unlike the Umami
+// guard above they do not depend on the build. They share the file only so all
+// config regressions live in one place.
+
+// tests/ sits one directory below the repo root
+const rootUrl = new URL('../', import.meta.url);
+const read = (relativePath: string): string =>
+  readFileSync(new URL(relativePath, rootUrl), 'utf8');
+
+/**
+ * Parse a Netlify `_headers` file into { pathPattern: [headerLine, ...] }.
+ * Unindented non-comment lines are path patterns; indented lines are header values.
+ */
+function parseHeadersFile(text: string): Record<string, string[]> {
+  const blocks: Record<string, string[]> = {};
+  let current: string | null = null;
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed === '' || trimmed.startsWith('#')) continue;
+    if (!/^\s/.test(line)) {
+      current = trimmed;
+      blocks[current] = [];
+    } else if (current !== null) {
+      blocks[current].push(trimmed);
+    }
+  }
+  return blocks;
+}
+
+const headerBlocks = parseHeadersFile(read('public/_headers'));
+const cspLine =
+  (headerBlocks['/*'] ?? []).find((l) => /^content-security-policy:/i.test(l)) ?? '';
+
+const netlifyToml = read('netlify.toml');
+const tomlHeaderPaths = [...netlifyToml.matchAll(/^\s*for\s*=\s*"([^"]+)"/gm)].map((m) => m[1]);
+
+describe('public/_headers', () => {
+  it('declares exactly one header block, for /*', () => {
+    expect(Object.keys(headerBlocks)).toEqual(['/*']);
+  });
+
+  it('adds base-uri, form-action and object-src to the CSP', () => {
+    for (const directive of ["base-uri 'none'", "form-action 'self'", "object-src 'none'"]) {
+      expect(cspLine).toContain(directive);
+      // exactly once: a duplicated directive is a merge artifact, and the
+      // browser honours the most restrictive occurrence, hiding the mistake
+      expect(cspLine.split(directive).length - 1).toBe(1);
+    }
+  });
+
+  it('sets no Cache-Control on the /* rule', () => {
+    const cacheLines = (headerBlocks['/*'] ?? []).filter((l) => /^cache-control:/i.test(l));
+    expect(cacheLines).toEqual([]);
+  });
+
+  it('sets no header rule on /api/*', () => {
+    expect(Object.keys(headerBlocks).filter((p) => p.startsWith('/api'))).toEqual([]);
+  });
+});
+
+describe('netlify.toml', () => {
+  it('marks /_astro/* immutable for a year', () => {
+    expect(tomlHeaderPaths).toEqual(['/*', '/_astro/*']);
+    expect(netlifyToml).toContain('Cache-Control = "public, max-age=31536000, immutable"');
+  });
+
+  it('declares no header rule on /api/*', () => {
+    expect(tomlHeaderPaths.filter((p) => p.startsWith('/api'))).toEqual([]);
+  });
+
+  it('does not redefine the CSP (public/_headers is the only definition)', () => {
+    // netlify.toml wins on a same-path same-header conflict, so a stale copy here
+    // would silently override the real policy
+    expect(netlifyToml).not.toMatch(/^\s*Content-Security-Policy\s*=/im);
+  });
+});
+
+describe('repo config', () => {
+  it('audits /events in lighthouserc.json', () => {
+    const lhci = JSON.parse(read('lighthouserc.json'));
+    // The events-page task added this entry; this guard only stops a later edit
+    // from dropping it. This task does not modify lighthouserc.json.
+    expect(lhci.ci.collect.url).toContain('/events');
+  });
+
+  it('gitignores .env', () => {
+    const lines = read('.gitignore').split(/\r?\n/).map((l) => l.trim());
+    expect(lines).toContain('.env');
+  });
+});

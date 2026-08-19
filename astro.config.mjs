@@ -4,6 +4,17 @@ import sitemap from '@astrojs/sitemap';
 
 import tailwindcss from '@tailwindcss/vite';
 
+// Netlify Functions do not run under `astro dev`. To exercise them locally, run
+//   npx netlify functions:serve
+// in a second terminal (serves netlify/functions/ on port 9999); the proxies below
+// forward the production URLs to it so client code can use the real paths.
+//
+// Caveat: `functions:serve` routes by file name, not by each function's
+// `config.path`, so `context.params` is NOT populated behind this proxy.
+// `/go/:eventId` parameter handling is verified against a Netlify deploy preview,
+// never against `astro dev`.
+const FUNCTIONS_SERVER = 'http://127.0.0.1:9999';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://deflocksc.org',
@@ -22,6 +33,23 @@ export default defineConfig({
           target: 'https://geocoding.geo.census.gov',
           changeOrigin: true,
           rewrite: (path) => path.replace('/api/geocode', '/geocoder/geographies/onelineaddress'),
+        },
+        '/api/events': {
+          target: FUNCTIONS_SERVER,
+          changeOrigin: true,
+          rewrite: (path) => path.replace('/api/events', '/.netlify/functions/events'),
+        },
+        '/api/submit-event': {
+          target: FUNCTIONS_SERVER,
+          changeOrigin: true,
+          rewrite: (path) => path.replace('/api/submit-event', '/.netlify/functions/submit-event'),
+        },
+        // Regex key (leading ^) so this matches only /go/<id> and never a future
+        // page route that happens to start with "go".
+        '^/go/[A-Za-z0-9_-]+$': {
+          target: FUNCTIONS_SERVER,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/go\//, '/.netlify/functions/go/'),
         },
       },
     },

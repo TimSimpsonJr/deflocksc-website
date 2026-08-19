@@ -24,7 +24,10 @@
   status = 200
   query = {address = ":address", benchmark = ":benchmark", vintage = ":vintage", format = ":format"}
 
-# Security headers
+# Security headers.
+# CSP is defined ONLY in public/_headers. Do not add it here: when both files set
+# the same header for the same path, netlify.toml wins, so a stale copy in this
+# file would silently override the real policy.
 [[headers]]
   for = "/*"
   [headers.values]
@@ -32,3 +35,15 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(self), camera=(), microphone=(), payment=()"
+
+# Astro emits content-hashed filenames under /_astro/, so the URL changes whenever
+# the bytes change and the response can never go stale. Netlify's default is
+# `public, max-age=0, must-revalidate`, which costs 13-18 billed conditional
+# requests per repeat visit for zero body bytes.
+#
+# Deliberately NOT applied to /api/*: those are function responses and each function
+# sets its own Cache-Control (or none). Never widen this to /* .
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
