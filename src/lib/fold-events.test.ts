@@ -160,6 +160,34 @@ describe('foldStoredEvents', () => {
     ]);
     expect(out.map((e) => e.id)).toEqual(['aaaaaaaa']);
   });
+
+  it('drops a record whose revoked tombstone is corrupt, not exactly false (fail-closed)', () => {
+    // go.ts and submit-event.ts both require revoked === false before treating a
+    // record as live; the fold matches them. `revoked` is the single most
+    // safety-relevant field (a burned organizer), and the schema gate cannot see
+    // it (toPublicEvent drops it), so a truthy-but-not-true, a numeric, or an
+    // absent revoked must be treated as a corrupt tombstone and never published.
+    const out = foldStoredEvents([
+      storedEvent({ id: 'aaaaaaaa' }), // revoked: false -> the only live record
+      storedEvent({ id: 'bbbbbbbb', revoked: 'true' as unknown as boolean }),
+      storedEvent({ id: 'cccccccc', revoked: 1 as unknown as boolean }),
+      storedEvent({ id: 'dddddddd', revoked: undefined as unknown as boolean }),
+    ]);
+    expect(out.map((e) => e.id)).toEqual(['aaaaaaaa']);
+  });
+
+  it('publishes the schema-sanitized value, not the raw stored text (rewrite-class corruption)', () => {
+    // publicEventSchema runs sanitizeText, which trims an edge BOM and collapses
+    // horizontal-space runs. The fold commits that canonical form, not the raw
+    // projection — otherwise the build-time guard (the same accept-and-rewrite
+    // schema) could never catch the non-canonical value it just re-accepts.
+    const out = foldStoredEvents([
+      storedEvent({ id: 'aaaaaaaa', title: '﻿County  council meeting' }),
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0].title).toBe('County council meeting');
+    expect(out[0].title).not.toContain('﻿');
+  });
 });
 
 describe('isExpired', () => {

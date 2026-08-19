@@ -56,14 +56,29 @@ export function buildCommitMessage(addedCount: number): string {
  * guard that catches a malformed date — `isExpired()` deliberately keeps an
  * unparseable date (deferring to this schema check), so without this gate such
  * a record would sail through `pruneExpired` and land in the file forever.
+ *
+ * Both gates fail closed. The tombstone check publishes only a record whose
+ * `revoked` is exactly `false` — matching go.ts and submit-event.ts, where a
+ * `revoked` that is truthy-but-not-`true` or absent entirely is treated as a
+ * corrupt record, not a live one. `revoked` marks a burned organizer; the
+ * schema gate cannot see it (`toPublicEvent` drops it before parsing), so if
+ * this check were `!== true` a corrupted tombstone would be committed to git
+ * history permanently. And what is published is the schema's PARSED output, not
+ * the raw projection: `publicEventSchema` runs `sanitizeText` over the text
+ * fields, so a stored value that is non-canonical but still acceptable (a
+ * leading BOM, fullwidth glyphs NFKC maps to ASCII, a doubled space) is
+ * committed in its sanitized form rather than verbatim. Publishing the raw
+ * projection would let rewrite-class corruption slip past the build guard,
+ * which re-applies this same accept-and-rewrite schema and so cannot catch it.
  */
 export function foldStoredEvents(records: readonly StoredEvent[]): PublicEvent[] {
   const published: PublicEvent[] = [];
   for (const record of records) {
-    if (record.revoked === true) continue;
+    if (record.revoked !== false) continue;
     const projected = toPublicEvent(record);
-    if (!publicEventSchema.safeParse(projected).success) continue;
-    published.push(projected);
+    const parsed = publicEventSchema.safeParse(projected);
+    if (!parsed.success) continue;
+    published.push(parsed.data as PublicEvent);
   }
   return published.sort((a, b) => {
     if (a.date < b.date) return -1;
