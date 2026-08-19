@@ -45,3 +45,8 @@ id_ed25519
 
 # TIGERweb response cache for scripts/build-city-centroids.py (not committed)
 scripts/.cache/
+
+# Dev-only dummy event seed for reviewing the events calendar UI. Loaded ONLY
+# under import.meta.env.DEV in src/pages/events.astro and dead-code-eliminated
+# from production builds. Must never be committed or shipped.
+src/data/events.dev.json

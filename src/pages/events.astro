@@ -36,6 +36,46 @@ const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index
   return toPublicEvent(parsed.data as unknown as StoredEvent);
 });
 
+// DEV-ONLY dummy-event seed. This entire branch is gated on import.meta.env.DEV,
+// which Vite statically replaces with the literal `false` in a production build,
+// so the block — the fs read, the fixture path, everything — is dead-code
+// eliminated and can NEVER ship. The fixture (src/data/events.dev.json) is
+// gitignored, so it also never enters the repo. Records get NO shortcut past the
+// confidentiality boundary: each one runs through the IDENTICAL publicEventSchema
+// strict validation and toPublicEvent projection the baked records use above, so
+// a fixture carrying a server-only field (signalUrl, codeDigest, revoked) is
+// rejected here exactly as a bad events.json commit would be. The read is wrapped
+// in try/catch so a missing fixture is a silent no-op.
+if (import.meta.env.DEV) {
+  try {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const devPath = path.resolve(process.cwd(), 'src/data/events.dev.json');
+    const devRaw = JSON.parse(fs.readFileSync(devPath, 'utf8')) as unknown[];
+    devRaw.forEach((raw, index) => {
+      const parsed = publicEventSchema.safeParse(raw);
+      if (!parsed.success) {
+        const issue = parsed.error.issues[0];
+        const at = issue.path.length > 0 ? issue.path.join('.') : '_record';
+        const detail =
+          issue.code === 'unrecognized_keys' ? 'unexpected_field' : issue.message;
+        throw new Error(
+          `src/data/events.dev.json: record ${index} at "${at}" failed strict validation (${detail})`,
+        );
+      }
+      bakedEvents.push(toPublicEvent(parsed.data as unknown as StoredEvent));
+    });
+  } catch (err) {
+    // A missing fixture is the normal case (it is gitignored and optional), so
+    // ENOENT is a no-op. Anything else — malformed JSON, a record that failed
+    // strict validation — is surfaced loudly in the dev console but never fails
+    // the dev server.
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+      console.warn('[events dev seed] skipped:', (err as Error).message);
+    }
+  }
+}
+
 const today = new Date().toISOString().slice(0, 10);
 const horizonEnd = addMonths(today, 12);
 const cutoffDate = new Date(`${today}T00:00:00Z`);
