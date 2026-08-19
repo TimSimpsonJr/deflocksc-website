@@ -41,7 +41,7 @@ export const WORDLIST_SHA_REL = 'scripts/data/eff-short-wordlist-2.sha256';
 
 const DIGEST_RE = /^[0-9a-f]{64}$/;
 const SEGMENT_RE = /^[a-z0-9]+$/;
-const WORD_RE = /^[a-z]+$/;
+const WORD_RE = /^[a-z]+(?:-[a-z]+)*$/;
 const DICE_RE = /^[1-6]{4}$/;
 const NON_LETTER_RE = /[^a-z]+/;
 
