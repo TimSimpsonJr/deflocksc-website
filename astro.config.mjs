@@ -27,6 +27,17 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
+    // maplibre-gl 5.x ships native class fields in its UMD bundle and builds its
+    // web worker by string-serializing modules into a blob. If esbuild downlevels
+    // those class fields (default target < es2022), it rewrites them to a
+    // `__publicField(...)` helper defined in module scope — a reference the
+    // blob-ified worker cannot see, so the worker throws "__publicField is not
+    // defined" and ALL GeoJSON tiling silently fails (the events choropleth/badges
+    // and the camera map both go blank). Targeting es2022 keeps class fields native,
+    // so no helper is emitted. See maplibre/maplibre-gl-js#7069.
+    esbuild: { target: 'es2022' },
+    build: { target: 'es2022' },
+    optimizeDeps: { esbuildOptions: { target: 'es2022' } },
     server: {
       proxy: {
         '/api/geocode': {
