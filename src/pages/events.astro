@@ -12,7 +12,6 @@ import {
   splitByToday,
   collapseSeries,
   addMonths,
-  countyOptions,
 } from '../lib/events-view.js';
 import { toJsonIsland } from '../lib/json-island.js';
 
@@ -107,12 +106,6 @@ const past = recentPast.filter((o) => o.date >= pastCutoff);
 // heading and the chip counts report.
 const upcomingList = collapseSeries(upcoming);
 
-// County slugs with at least one upcoming event, busiest first. Derived from the
-// collapsed list so the chip order matches the distinct-event counts the client
-// renders on the badges. The client builds one chip per slug — never one per
-// registry county — so the row stays a row.
-const counties = countyOptions(upcomingList).map((c) => c.county);
-
 const island = {
   events: bakedEvents,
   cityNames,
@@ -120,9 +113,6 @@ const island = {
   today,
   horizonEnd,
   pastCutoff,
-  // The county slugs that get a chip on first paint. The overlay merge may add a
-  // transient chip for a county it introduces, but the initial row comes from here.
-  counties,
 };
 ---
 
@@ -448,45 +438,77 @@ const island = {
   .intake-panel p { margin: 0 0 1rem; }
   .intake-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0; }
 
-  /* --- Filter chips ---
+  /* --- Filters: county combobox + type segmented control ---
      Built by events-page.ts, so styled globally: runtime-created nodes carry no
      data-astro-* attribute for a scoped rule to match. The container ships hidden
-     and the script unhides it, which is why there is no flash of an empty bar. */
+     and the script unhides it, which is why there is no flash of an empty bar. The
+     county combobox is accessible-autocomplete (default `autocomplete__` namespace),
+     which the dark `.autocomplete__*` skin in src/styles/global.css already themes;
+     only the events-specific tweaks (width, dropdown-arrow visibility over the
+     opaque input, the count in each option) live here. */
   .events-filters {
     max-width: 84rem;
     margin: 0 auto;
     padding: 1rem 0 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.65rem;
   }
   .events-filters[hidden] { display: none; }
-  .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+  .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
   .filter-legend { color: #525252; margin-right: 0.35rem; }
 
-  .filter-chip {
+  /* County combobox. The label sits left of a fixed-width searchable input that
+     wraps below the label on narrow screens. */
+  .events-county-ac {
+    flex: 0 1 22rem;
+    width: 22rem;
+    max-width: 100%;
+  }
+  /* The opaque input (#171717, from the global skin) would hide the dropdown arrow,
+     which the base stylesheet renders at z-index:-1 behind the input. Lift it above
+     the input and pad the input so text never runs under it. Scoped to this
+     combobox so the submit form's city picker (no dropdown arrow) is untouched. */
+  .events-county-ac .autocomplete__input { padding-right: 2rem; }
+  .events-county-ac .autocomplete__dropdown-arrow-down {
+    z-index: 1;
+    fill: #a3a3a3;
+    color: #a3a3a3;
+    pointer-events: none;
+  }
+  /* The per-county event count carried in each option label. */
+  .county-opt-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #737373; }
+  .autocomplete__option:hover .county-opt-count,
+  .autocomplete__option--focused .county-opt-count { color: #fecaca; }
+
+  /* Type segmented control: three joined radios, one active. */
+  .type-segmented {
+    display: inline-flex;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.25rem;
+    overflow: hidden;
+  }
+  .seg-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.4rem;
     min-height: 44px;
-    padding: 0 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 0 0.85rem;
+    border: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
     background: transparent;
     color: #a3a3a3;
     font-family: inherit;
     font-size: 0.8125rem;
-    text-decoration: none;
     cursor: pointer;
   }
-  .filter-chip:hover { border-color: rgba(255, 255, 255, 0.28); color: #e8e8e8; }
-  .filter-chip.is-active { border-color: #dc2626; background: rgba(220, 38, 38, 0.14); color: #ffffff; }
-  .filter-chip:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
-  /* A chip that matches nothing right now still has to be reachable, or filtering
-     into a dead end leaves no way back out. Dimmed, not removed. */
-  .filter-chip[data-count='0'] { opacity: 0.6; }
-
-  .filter-chip-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #737373; }
-  .filter-chip.is-active .filter-chip-count { color: #fca5a5; }
+  .seg-btn:first-child { border-left: 0; }
+  .seg-btn:hover { color: #e8e8e8; background: rgba(255, 255, 255, 0.04); }
+  .seg-btn.is-active { background: rgba(220, 38, 38, 0.14); color: #ffffff; }
+  /* Inset so the ring is not clipped by the group's overflow:hidden. */
+  .seg-btn:focus-visible { outline: 2px solid #fbbf24; outline-offset: -2px; }
+  .seg-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #737373; }
+  .seg-btn.is-active .seg-count { color: #fca5a5; }
 
   .filter-clear {
     color: #737373;

@@ -39,10 +39,19 @@ import {
   matchesFilter,
   filterEvents,
   facetCounts,
+  countyOptions,
   filterHash,
   parseFilterHash,
   emptyStateProof,
 } from '../lib/events-view.js';
+// The county filter is a searchable combobox built on accessible-autocomplete,
+// the same widget (and the same dark `.autocomplete__*` skin in global.css) the
+// submit form's city picker uses. escapeHtml guards the county name where it is
+// interpolated into a suggestion template that accessible-autocomplete writes as
+// innerHTML — county names are build-time-trusted registry data, but the project
+// rule is that nothing reaches innerHTML unescaped.
+import accessibleAutocomplete from 'accessible-autocomplete';
+import { escapeHtml } from '../lib/escape-html.js';
 
 interface Island {
   events: PublicEvent[];
@@ -51,7 +60,6 @@ interface Island {
   today: string;
   horizonEnd: string;
   pastCutoff: string;
-  counties: string[];
 }
 
 const islandEl = document.getElementById('events-data');
@@ -482,62 +490,206 @@ function applyMerge(merged: PublicEvent[]) {
 
 // --- Filter ---------------------------------------------------------------
 //
-// The chips do not exist without this file: the <nav id="events-filters"> the
-// page ships is empty and hidden, so a no-JavaScript visitor sees the complete
-// list and no dead control. Here we build the chips, filter the list in place,
-// and keep the choice in the URL hash so a filtered view is shareable and the
-// back button works. `el`, `buildCard`, `buildChip`, and `placeLabel` already
-// exist in this module (the events-page task); they are used, not redefined.
+// The filter controls do not exist without this file: the <nav id="events-filters">
+// the page ships is empty and hidden, so a no-JavaScript visitor sees the complete
+// list and no dead control. Here we build a searchable COUNTY combobox
+// (accessible-autocomplete — the same widget and dark `.autocomplete__*` skin the
+// submit form's city picker uses) and a 3-way TYPE segmented control, filter the
+// list in place, and keep the choice in the URL hash so a filtered view is
+// shareable and the back button works. `el`, `buildCard`, `buildChip`, and
+// `placeLabel` already exist in this module; they are used, not redefined.
 
-function chipButton(
-  key: string,
-  value: string,
-  label: string,
-  count: number,
-): HTMLButtonElement {
+/** One entry in the county combobox: the slug it filters to, its display name, and
+ *  the count shown in the option label (faceted by the active type, exactly as the
+ *  old chip badge was). The synthetic slug 'all' is the "All counties (N)" option
+ *  that clears the county filter — a dropdown option cannot carry a badge
+ *  cross-browser, so the count rides in the label text instead. */
+interface CountyResult {
+  slug: string;
+  name: string;
+  count: number;
+}
+
+/** The county the combobox currently reflects ('all' = cleared). Tracked so
+ *  syncChrome only rebuilds the combobox when the county changed OUTSIDE it (a map
+ *  click, the back-to-SC control, a hashchange), never on the change the combobox
+ *  itself just made — which would fight accessible-autocomplete's controlled input. */
+let comboboxCounty: string | null = null;
+
+/** accessible-autocomplete source: the county list filtered by the typed query,
+ *  each option carrying its type-faceted count. Recomputed on every keystroke, so
+ *  the counts and the county set stay current with the live merged event data (a
+ *  county the overlay introduces appears with no special case). With an empty query
+ *  — the showAllValues dropdown, or the query still equal to the active county's
+ *  name — it returns the whole list plus the "All counties (N)" clear option on
+ *  top. The active county is always present, even at zero upcoming, so a shared
+ *  #county= link to an empty county is still shown and clearable. */
+function countySource(
+  query: string,
+  populateResults: (results: CountyResult[]) => void,
+): void {
+  const q = (query || '').trim().toLowerCase();
+  const collapsed = collapseSeries(upcomingFor(allEvents));
+  const facets = facetCounts(collapsed, filter);
+  const results: CountyResult[] = countyOptions(collapsed).map(({ county }) => ({
+    slug: county,
+    name: island.countyNames[county] ?? county,
+    count: facets.countyCounts[county] ?? 0,
+  }));
+  if (filter.county !== 'all' && !results.some((c) => c.slug === filter.county)) {
+    results.push({
+      slug: filter.county,
+      name: island.countyNames[filter.county] ?? filter.county,
+      count: 0,
+    });
+  }
+  const selectedName =
+    filter.county === 'all'
+      ? ''
+      : (island.countyNames[filter.county] ?? filter.county).toLowerCase();
+  const showAll = q === '' || q === selectedName;
+  const matched = showAll ? results : results.filter((c) => c.name.toLowerCase().includes(q));
+  if (showAll) {
+    populateResults([{ slug: 'all', name: 'All counties', count: facets.countyAll }, ...matched]);
+  } else {
+    populateResults(matched);
+  }
+}
+
+// accessible-autocomplete seeds state.options with the raw defaultValue STRING in
+// its constructor (options: defaultValue ? [defaultValue] : []) and runs both
+// templates over it before the source ever replaces it — so a non-empty
+// defaultValue (a #county= link on first paint, or the rebuild after a map click)
+// hands these templates a plain string, not a CountyResult. They must tolerate it,
+// or the widget throws on mount and never renders. The default AA templates handle
+// this because they are the identity function; ours carry structure, so they guard.
+
+/** The string dropped into the input when a county is confirmed: its plain name,
+ *  or '' for the "All counties" clear option (so clearing empties the field). */
+function countyInputValue(result: CountyResult | string | undefined): string {
+  if (!result) return '';
+  if (typeof result === 'string') return result;
+  return result.slug !== 'all' ? result.name : '';
+}
+
+/** A menu row: the name plus the faceted count in parentheses. Written as innerHTML
+ *  by accessible-autocomplete, so the name is escaped (it is build-time-trusted
+ *  registry data, but nothing reaches innerHTML unescaped in this project). */
+function countySuggestion(result: CountyResult | string | undefined): string {
+  if (!result) return '';
+  if (typeof result === 'string') return escapeHtml(result);
+  const label = result.slug === 'all' ? 'All counties' : result.name;
+  return `${escapeHtml(label)} <span class="county-opt-count">(${result.count})</span>`;
+}
+
+/** A confirmed county drives the same pushHash path a chip click used to. Guarded
+ *  so re-confirming the county already active (e.g. autoselect on the shown value)
+ *  is a no-op rather than a redundant history entry. */
+function countyOnConfirm(result: CountyResult | undefined): void {
+  const slug = result && typeof result === 'object' && result.slug ? result.slug : 'all';
+  comboboxCounty = slug;
+  if (slug !== filter.county) pushHash({ ...filter, county: slug });
+}
+
+/** (Re)mount the county combobox into its container, seeded to the active county.
+ *  accessible-autocomplete owns a controlled input, so the only reliable way to
+ *  reflect an EXTERNAL county change (map click, back-to-SC, hashchange) is to
+ *  rebuild it with a fresh defaultValue. Cheap, and only done when the county
+ *  actually changed outside the combobox (see syncChrome). */
+function renderCountyCombobox(): void {
+  const container = document.getElementById('events-county-ac');
+  if (!container) return;
+  container.replaceChildren();
+  const selectedName =
+    filter.county === 'all' ? '' : (island.countyNames[filter.county] ?? filter.county);
+  accessibleAutocomplete({
+    element: container,
+    id: 'events-county',
+    name: 'events-county',
+    source: countySource,
+    minLength: 0,
+    showAllValues: true,
+    autoselect: true,
+    confirmOnBlur: false,
+    displayMenu: 'overlay',
+    placeholder: 'Search counties',
+    defaultValue: selectedName,
+    templates: { inputValue: countyInputValue, suggestion: countySuggestion },
+    onConfirm: countyOnConfirm,
+    tNoResults: () => 'No matching county',
+  });
+  document.getElementById('events-county')?.setAttribute('autocomplete', 'off');
+  comboboxCounty = filter.county;
+}
+
+/** One button in the 3-way type segmented control (an ARIA radiogroup). Roving
+ *  tabindex and aria-checked are maintained by syncChrome; this only builds it. */
+function typeRadio(value: EventTypeFilter, label: string): HTMLButtonElement {
   const b = document.createElement('button');
   b.type = 'button';
-  b.className = 'filter-chip';
-  b.dataset.filterKey = key;
+  b.className = 'seg-btn';
+  b.dataset.filterKey = 'type';
   b.dataset.filterValue = value;
-  b.dataset.count = String(count);
-  b.append(document.createTextNode(label), el('span', 'filter-chip-count', String(count)));
+  b.setAttribute('role', 'radio');
+  b.setAttribute('aria-checked', 'false');
+  b.tabIndex = -1;
+  b.append(document.createTextNode(label), el('span', 'seg-count', '0'));
   return b;
 }
 
-/** Build the two chip rows and the clear button, once, from the counties that
- *  have events. Counts and active states are set here and then maintained by
- *  syncChrome(); this only decides which chips exist. */
+/** Build the county row (label + combobox) and the type row (segmented control +
+ *  clear button), once. Counts and active states are set here and then maintained
+ *  by syncChrome(); this only decides which controls exist. */
 function buildFilters(): void {
   const nav = document.getElementById('events-filters');
   if (!nav) return;
-  // Collapse first so the chip badges count distinct EVENTS (each series once),
-  // matching the collapsed list rows rather than the per-occurrence map counts.
-  const facets = facetCounts(collapseSeries(upcomingFor(allEvents)), filter);
 
   const countyRow = document.createElement('div');
-  countyRow.className = 'filter-row';
-  const countyLegend = document.createElement('span');
-  countyLegend.className = 'filter-legend label-mono';
-  countyLegend.textContent = 'County';
-  countyRow.append(countyLegend, chipButton('county', 'all', 'All counties', facets.countyAll));
-  for (const slug of island.counties) {
-    countyRow.append(
-      chipButton('county', slug, island.countyNames[slug] ?? slug, facets.countyCounts[slug] ?? 0),
-    );
-  }
+  countyRow.className = 'filter-row filter-row-county';
+  const countyLabel = document.createElement('label');
+  countyLabel.className = 'filter-legend label-mono';
+  countyLabel.setAttribute('for', 'events-county');
+  countyLabel.textContent = 'County';
+  const countyAc = document.createElement('div');
+  countyAc.id = 'events-county-ac';
+  countyAc.className = 'events-county-ac';
+  countyRow.append(countyLabel, countyAc);
 
   const typeRow = document.createElement('div');
-  typeRow.className = 'filter-row';
+  typeRow.className = 'filter-row filter-row-type';
   const typeLegend = document.createElement('span');
   typeLegend.className = 'filter-legend label-mono';
+  typeLegend.id = 'events-type-legend';
   typeLegend.textContent = 'Type';
-  typeRow.append(
-    typeLegend,
-    chipButton('type', 'all', 'All types', facets.typeCounts.all),
-    chipButton('type', 'meetup', 'Meetups', facets.typeCounts.meetup),
-    chipButton('type', 'public', 'Public events', facets.typeCounts.public),
+  const seg = document.createElement('div');
+  seg.className = 'type-segmented';
+  seg.setAttribute('role', 'radiogroup');
+  seg.setAttribute('aria-labelledby', 'events-type-legend');
+  seg.append(
+    typeRadio('all', 'All'),
+    typeRadio('meetup', 'Meetups'),
+    typeRadio('public', 'Public events'),
   );
+  // Arrow keys move the selection like a native radiogroup: focus follows and the
+  // filter changes through the same pushHash path a click uses.
+  seg.addEventListener('keydown', (e) => {
+    const keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+    if (!keys.includes(e.key)) return;
+    e.preventDefault();
+    const radios = Array.from(seg.querySelectorAll<HTMLButtonElement>('[role="radio"]'));
+    const current = radios.findIndex((r) => r.dataset.filterValue === filter.type);
+    let next: number;
+    if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = radios.length - 1;
+    else {
+      const dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1;
+      next = ((current < 0 ? 0 : current) + dir + radios.length) % radios.length;
+    }
+    const value = radios[next].dataset.filterValue as EventTypeFilter;
+    radios[next].focus();
+    if (value !== filter.type) pushHash({ ...filter, type: value });
+  });
+  typeRow.append(typeLegend, seg);
 
   const clear = document.createElement('button');
   clear.type = 'button';
@@ -550,58 +702,36 @@ function buildFilters(): void {
 
   nav.replaceChildren(countyRow, typeRow);
   nav.hidden = false;
+
+  renderCountyCombobox();
 }
 
-/** Chip counts, active states, the clear button, the header count, the past
- *  block, the empty state, and the map. Shared by the filter path and the overlay
- *  merge so the two can never disagree. */
+/** The type-control counts and checked state, the county combobox selection, the
+ *  clear button, the header count, the past block, the empty state, and the map.
+ *  Shared by the filter path and the overlay merge so the two can never disagree. */
 function syncChrome(): void {
-  // Collapsed so the chip counts match the collapsed list (distinct events); the
+  // Collapsed so the option counts match the collapsed list (distinct events); the
   // header count below reads the rendered row count, which is already collapsed.
   const facets = facetCounts(collapseSeries(upcomingFor(allEvents)), filter);
 
-  const countyRow = document
-    .querySelector<HTMLElement>('[data-filter-key="county"]')
-    ?.parentElement;
-
-  // A county the overlay introduced has no first-paint chip. Give it a transient
-  // one so a map selection into that county is always visible in the chip row.
-  if (countyRow && filter.county !== 'all') {
-    const known = countyRow.querySelector(`[data-filter-value="${CSS.escape(filter.county)}"]`);
-    if (!known) {
-      const chip = chipButton(
-        'county',
-        filter.county,
-        island.countyNames[filter.county] ?? filter.county,
-        0,
-      );
-      chip.dataset.transient = '1';
-      countyRow.append(chip);
-    }
-  }
-  for (const stale of document.querySelectorAll<HTMLElement>('[data-transient="1"]')) {
-    if (stale.dataset.filterValue !== filter.county) stale.remove();
+  // Type segmented control: the faceted count on each option, the checked radio,
+  // and the roving tabindex (only the checked radio is a tab stop).
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('.seg-btn')) {
+    const value = (btn.dataset.filterValue ?? 'all') as 'all' | 'meetup' | 'public';
+    const active = filter.type === value;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-checked', String(active));
+    btn.tabIndex = active ? 0 : -1;
+    const badge = btn.querySelector('.seg-count');
+    if (badge) badge.textContent = String(facets.typeCounts[value] ?? 0);
   }
 
-  for (const chip of document.querySelectorAll<HTMLElement>('.filter-chip')) {
-    const key = chip.dataset.filterKey;
-    const value = chip.dataset.filterValue ?? 'all';
-
-    const active = key === 'county' ? filter.county === value : filter.type === value;
-    chip.classList.toggle('is-active', active);
-    if (active) chip.setAttribute('aria-current', 'true');
-    else chip.removeAttribute('aria-current');
-
-    const count =
-      key === 'county'
-        ? value === 'all'
-          ? facets.countyAll
-          : facets.countyCounts[value] ?? 0
-        : facets.typeCounts[value as 'all' | 'meetup' | 'public'] ?? 0;
-    chip.dataset.count = String(count);
-    const badge = chip.querySelector('.filter-chip-count');
-    if (badge) badge.textContent = String(count);
-  }
+  // County combobox: rebuild it only when the county changed OUTSIDE the combobox
+  // (map click, back-to-SC, hashchange). A change the combobox itself made already
+  // left it showing the right value, and rebuilding mid-interaction would fight
+  // accessible-autocomplete's controlled input. The combobox option counts refresh
+  // from countySource on the next open, so a type toggle needs no rebuild here.
+  if (comboboxCounty !== filter.county) renderCountyCombobox();
 
   const clear = document.getElementById('filter-clear');
   if (clear) clear.hidden = filter.county === 'all' && filter.type === 'all';
@@ -689,14 +819,18 @@ function pushHash(next: EventFilter): void {
   applyFilter(next);
 }
 
+// Clicks on the type segmented buttons and the clear button. The county combobox
+// lives in this same <nav> but its accessible-autocomplete nodes carry no
+// data-filter-key, so a click there resolves to null and is ignored — county
+// selection goes through countyOnConfirm, not this handler.
 document.getElementById('events-filters')?.addEventListener('click', (e) => {
-  const chip = (e.target as HTMLElement).closest<HTMLElement>('[data-filter-key]');
-  if (!chip) return;
-  const key = chip.dataset.filterKey;
-  const value = chip.dataset.filterValue ?? 'all';
+  const control = (e.target as HTMLElement).closest<HTMLElement>('[data-filter-key]');
+  if (!control) return;
+  const key = control.dataset.filterKey;
   if (key === 'clear') pushHash({ county: 'all', type: 'all' });
-  else if (key === 'county') pushHash({ ...filter, county: value });
-  else pushHash({ ...filter, type: value as EventTypeFilter });
+  else if (key === 'type') {
+    pushHash({ ...filter, type: (control.dataset.filterValue ?? 'all') as EventTypeFilter });
+  }
 });
 
 // The map's back-to-state button clears just the county, reusing the exact
@@ -735,11 +869,11 @@ window.addEventListener('hashchange', () => {
   }
 });
 
-// First paint: build the chips, then apply whatever the hash already asked for.
-// On a bare /events the server already rendered the identical full list, so a
-// re-render would only re-announce the whole aria-live list to a screen reader;
-// sync the chip active-states to the DOM instead. A shared #county=… link still
-// needs the real re-render to narrow the list.
+// First paint: build the filter controls, then apply whatever the hash already
+// asked for. On a bare /events the server already rendered the identical full
+// list, so a re-render would only re-announce the whole aria-live list to a
+// screen reader; sync the control states to the DOM instead. A shared #county=…
+// link still needs the real re-render to narrow the list.
 buildFilters();
 if (filter.county === 'all' && filter.type === 'all') {
   syncChrome();
