@@ -498,7 +498,14 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
       // Start empty rather than pre-filling the placeholder option's label.
       defaultValue: '',
       autoselect: true,
-      confirmOnBlur: true,
+      // confirmOnBlur MUST stay false here. With minLength:0 + showAllValues, a
+      // bare click populates all options and sets selected=0; a confirmOnBlur:true
+      // blur (or an Escape, which blurs with an empty query) would then commit the
+      // first city alphabetically to the hidden <select> even though the organizer
+      // never typed or picked one — an invisible wrong-city publish. The reviewed
+      // events-page county combobox matches (confirmOnBlur:false at
+      // events-page.ts). Blur without an explicit pick leaves the select as-is.
+      confirmOnBlur: false,
       // Show the whole city list as soon as the field is focused (minLength: 0 +
       // showAllValues) and float the menu over the following fields, mirroring
       // the reviewed events-page county combobox. enhanceSelectElement passes
