@@ -389,6 +389,22 @@
   color: #a3a3a3;
 }
 
+/* With showAllValues the widget renders a dropdown arrow; the base stylesheet
+   places it at z-index:-1, where the opaque #171717 input hides it. Lift it
+   above the input and pad the input so text never runs under it — the same
+   treatment the reviewed events-page county combobox uses. Scoped to
+   #city-field so the address typeahead in the same form (no dropdown arrow,
+   showAllValues off) is untouched. */
+#city-field .autocomplete__input {
+  padding-right: 2rem;
+}
+#city-field .autocomplete__dropdown-arrow-down {
+  z-index: 1;
+  fill: #a3a3a3;
+  color: #a3a3a3;
+  pointer-events: none;
+}
+
 /* Cally date picker. Only two custom properties (`--color-accent`,
    `--color-text-on-accent`) drive the selected-day highlight; everything else
    is themed through the exposed shadow ::part()s. `calendar-month` and

@@ -204,8 +204,10 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
       <p class={errorClass} data-error-for="recurrence.until" id="error-until" hidden></p>
     </div>
 
-    <!-- City -->
-    <div class="mb-6">
+    <!-- City. The wrapper carries an id so the runtime-built combobox's dropdown
+         styling can be scoped in global.css without leaking to the address
+         typeahead, which shares the same `.autocomplete__*` namespace. -->
+    <div id="city-field" class="mb-6">
       <label for="field-city" class={labelClass}>City<span class={reqClass} aria-hidden="true">*</span></label>
       <select
         id="field-city"
@@ -418,6 +420,16 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
     display: none !important;
   }
 
+  /* Desktop-only: when the script reveals the themed Cally button it adds
+     `native-cal-hidden` to the date input, and this hides the input's built-in
+     calendar icon so the field does not offer two pickers side by side. The
+     field still displays and accepts the typed date and remains the form's
+     value source. On mobile (or if the enhancement never runs) the class is
+     absent, so the native picker keeps its icon and stays fully functional. */
+  #field-date.native-cal-hidden::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
   /* Honeypot: hidden with CSS, off-screen and non-interactive, but a real
      text input in the DOM so a naive bot fills it. */
   .hp-field {
@@ -487,6 +499,14 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
       defaultValue: '',
       autoselect: true,
       confirmOnBlur: true,
+      // Show the whole city list as soon as the field is focused (minLength: 0 +
+      // showAllValues) and float the menu over the following fields, mirroring
+      // the reviewed events-page county combobox. enhanceSelectElement passes
+      // these through, and its option-derived source returns every city on an
+      // empty query.
+      minLength: 0,
+      showAllValues: true,
+      displayMenu: 'overlay',
       placeholder: 'Search cities',
       // Empty name keeps the visible input out of any native form submission;
       // the <select name="city"> remains the single value source.
@@ -708,9 +728,15 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
     // The toggle only makes sense where there is room for a popover.
     if (desktopMql.matches) {
       dateCalToggle.hidden = false;
+      // Cally is now the calendar picker here, so suppress the native input's
+      // own calendar icon (CSS) to avoid offering two pickers at once. Toggled
+      // in lockstep with the button so the class is present exactly when Cally
+      // is available; on mobile it is removed and the native picker is whole.
+      dateInput.classList.add('native-cal-hidden');
     } else {
       closeDateCal();
       dateCalToggle.hidden = true;
+      dateInput.classList.remove('native-cal-hidden');
     }
   }
   syncCalToViewport();
