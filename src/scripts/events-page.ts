@@ -453,15 +453,19 @@ function insertSorted(container: Element, node: HTMLElement, key: string) {
 // --- Merge and patch ----------------------------------------------------
 
 function applyMerge(merged: PublicEvent[]) {
-  const live = new Set(merged.map((e) => e.id));
+  const liveById = new Map(merged.map((e) => [e.id, e] as const));
 
-  // 1. Defensive prune: drop any rendered card whose id is not in the merged set.
-  //    Under add-only merge the baked set is always retained (the overlay never
-  //    tombstones), so in practice this removes nothing — a revoked-but-not-yet-
-  //    folded event stays listed here and is stopped at /go instead. It remains as a
-  //    guard against a card with no backing record.
+  // 1. Defensive prune: drop any rendered card whose id is not in the merged set,
+  //    OR whose event does not match the active filter. Under add-only merge the
+  //    baked set is always retained (the overlay never tombstones), so the id check
+  //    in practice removes nothing — a revoked-but-not-yet-folded event stays listed
+  //    here and is stopped at /go instead. The filter check enforces the same
+  //    invariant the insert step below already holds to: an overlay merge that lands
+  //    while a county is selected must not leave another county's card (a baked one
+  //    the server rendered, say) behind in the narrowed list.
   for (const node of Array.from(document.querySelectorAll<HTMLElement>('[data-event-id]'))) {
-    if (!live.has(node.dataset.eventId!)) node.remove();
+    const event = liveById.get(node.dataset.eventId!);
+    if (!event || !matchesFilter(event, filter)) node.remove();
   }
 
   // 2. Insert events submitted since the last fold — but only the ones the active
@@ -785,8 +789,13 @@ function syncChrome(): void {
 function applyFilter(next: EventFilter): void {
   filter = next;
 
+  // Narrow the list from `next` directly, not from the module-level `filter`.
+  // They are equal on the line above, but reading `next` here makes the list's
+  // county/type narrowing depend only on the argument this call was handed —
+  // never on the assignment ordering — so a county selection can never render a
+  // list wider than the filter it was called with.
   const split = splitByToday(
-    expandAll(filterEvents(allEvents, filter), island.horizonEnd),
+    expandAll(filterEvents(allEvents, next), island.horizonEnd),
     island.today,
   );
   const upcoming = split.upcoming;

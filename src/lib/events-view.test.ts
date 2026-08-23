@@ -332,6 +332,53 @@ describe('filterEvents', () => {
   });
 });
 
+describe('list narrowing (regression: county selection filters the list)', () => {
+  // Mirror the exact pipeline src/scripts/events-page.ts applyFilter() renders the
+  // sidebar list from: filter the stored events, expand recurrence, split at today,
+  // collapse a series to a single row. Selecting a county MUST leave only that
+  // county's rows. Bug #2 was the sidebar list keeping other counties (Spartanburg,
+  // Beaufort, Columbia) after a Greenville map county-select; this locks the
+  // narrowing invariant at the pure level the whole feature composes from.
+  const HORIZON = '2027-09-01';
+  const TODAY = '2026-08-23';
+  const listRows = (events: PublicEvent[], filter: { county: string; type: 'all' | 'meetup' | 'public' }) =>
+    collapseSeries(splitByToday(expandAll(filterEvents(events, filter), HORIZON), TODAY).upcoming);
+
+  it('shows every county under the cleared filter', () => {
+    expect(listRows(MIXED, ALL_EVENTS).map((o) => o.event.id)).toEqual([
+      'gv1meet', 'ch1meet', 'ri1publ', 'gv2publ',
+    ]);
+  });
+
+  it('narrows the list to only the selected county', () => {
+    expect(listRows(MIXED, { county: 'greenville', type: 'all' }).map((o) => o.event.id)).toEqual([
+      'gv1meet', 'gv2publ',
+    ]);
+  });
+
+  it('leaves no other-county row when a county is selected', () => {
+    const rows = listRows(MIXED, { county: 'greenville', type: 'all' });
+    expect(rows.every((o) => o.event.county === 'greenville')).toBe(true);
+    expect(rows.some((o) => o.event.county === 'charleston')).toBe(false);
+  });
+
+  it('restores every county when the selection is cleared', () => {
+    expect(listRows(MIXED, { county: 'greenville', type: 'all' })).toHaveLength(2);
+    expect(listRows(MIXED, ALL_EVENTS)).toHaveLength(4);
+  });
+
+  it('narrows a recurring series to its county without leaking occurrences', () => {
+    const events = [
+      ev({ id: 'gvweekly', county: 'greenville', date: '2026-09-01', recurrence: { freq: 'weekly', until: '2026-10-13' } }),
+      ev({ id: 'spb1once', county: 'spartanburg', date: '2026-09-02', recurrence: null }),
+    ];
+    // One collapsed row, Greenville only — the Spartanburg one-off is filtered out.
+    expect(listRows(events, { county: 'greenville', type: 'all' }).map((o) => o.event.id)).toEqual([
+      'gvweekly',
+    ]);
+  });
+});
+
 describe('filtering and recurrence expansion', () => {
   const RECURRING = [
     ev({
