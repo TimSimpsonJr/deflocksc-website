@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { dissolveRings, simplifyRing, ringArea } from './build-county-shapes.mjs';
+import {
+  dissolveRings,
+  simplifyRing,
+  ringArea,
+  ringSelfIntersects,
+} from './build-county-shapes.mjs';
 
 // Two unit squares sharing the edge x=1. Dissolved, they are one 2x1 rectangle.
 const left = [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]];
@@ -70,5 +75,38 @@ describe('ringArea', () => {
 
   it('is negative for a clockwise ring', () => {
     expect(ringArea([...left].reverse())).toBeCloseTo(-1, 6);
+  });
+});
+
+describe('ringSelfIntersects', () => {
+  it('flags a bowtie (crossing chords) as self-intersecting', () => {
+    // Edges (0,0)->(2,2) and (2,0)->(0,2) cross at (1,1): the classic self-crossing.
+    const bowtie = [[0, 0], [2, 2], [2, 0], [0, 2], [0, 0]];
+    expect(ringSelfIntersects(bowtie)).toBe(true);
+  });
+
+  it('flags a spur that doubles back across the boundary', () => {
+    // A thin spike whose returning edge crosses the top edge — the shape the old
+    // edge-cancellation dissolve spliced in at multi-district junctions.
+    const spur = [[0, 0], [4, 0], [4, 4], [1, 4], [3, 5], [1.5, 3], [0, 4], [0, 0]];
+    expect(ringSelfIntersects(spur)).toBe(true);
+  });
+
+  it('does not flag a simple square', () => {
+    expect(ringSelfIntersects(left)).toBe(false);
+  });
+
+  it('does not flag a simple convex polygon', () => {
+    const hexagon = [[0, 1], [1, 0], [2, 0], [3, 1], [2, 2], [1, 2], [0, 1]];
+    expect(ringSelfIntersects(hexagon)).toBe(false);
+  });
+
+  it('does not flag a triangle (too few edges to cross)', () => {
+    expect(ringSelfIntersects([[0, 0], [1, 0], [0, 1], [0, 0]])).toBe(false);
+  });
+
+  it('accepts the outline dissolveRings actually produces', () => {
+    const [ring] = dissolveRings([left, right]);
+    expect(ringSelfIntersects(ring)).toBe(false);
   });
 });
