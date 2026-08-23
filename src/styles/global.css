@@ -378,6 +378,13 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 0.875rem;
 }
+/* The base stylesheet zebra-stripes odd rows to near-white (#f3f2f1), which is
+   unreadable under the dark skin (#e8e8e8 text ≈ 1.08:1). Flatten odd rows to
+   the menu fill so every row matches. Placed before the hover/focused rule so
+   the red active state (equal specificity) still wins via source order. */
+.autocomplete__option--odd {
+  background-color: #1a1a1a;
+}
 .autocomplete__option:hover,
 .autocomplete__option--focused {
   background-color: #dc2626;
