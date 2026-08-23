@@ -239,6 +239,13 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
           aria-describedby="hint-address error-address"
         />
         <p id="hint-address" class={hintClass}>Published publicly. Public venues only.</p>
+        <!-- Revealed by the script only once the typeahead is actually wired, so
+             a no-JS visitor (who gets no lookup) never sees a claim that does not
+             apply to them. Honest by design: the query does leave the browser. -->
+        <p id="hint-address-osm" class={hintClass} hidden>
+          Type-ahead suggestions come from OpenStreetMap, relayed through our server. We don't store
+          what you type, and this address gets published either way.
+        </p>
         <p class={errorClass} data-error-for="address" id="error-address" hidden></p>
       </div>
 
@@ -443,7 +450,10 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
 
   const form = document.getElementById('submit-event-form') as HTMLFormElement;
   const publicOnly = document.getElementById('public-only-fields') as HTMLElement;
-  const addressInput = document.getElementById('field-address') as HTMLInputElement;
+  // `let`, not `const`: the plain text input is progressively enhanced into an
+  // accessible-autocomplete combobox below, and this reference is repointed at
+  // the combobox (which keeps the same id/name) once that runs.
+  let addressInput = document.getElementById('field-address') as HTMLInputElement;
   const descriptionInput = document.getElementById('field-description') as HTMLTextAreaElement;
   const signalInput = document.getElementById('field-signal-url') as HTMLInputElement;
   const signalMarkerReq = document.getElementById('signal-marker-req') as HTMLElement;
@@ -498,6 +508,83 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
 
   function cityControl(): HTMLElement {
     return cityInput ?? citySelect;
+  }
+
+  // --- Address typeahead (public events only) --------------------------------
+  // The served plain <input> is the no-JS fallback and the value source. Here it
+  // is progressively enhanced into an accessible-autocomplete combobox backed by
+  // /api/address-suggest, our same-origin Photon/OSM proxy. The combobox is
+  // created with the SAME id and name, and the original node is then removed, so
+  // #field-address stays the single plain-text value source: the submit payload
+  // reads getElementById('field-address').value exactly as before, and the
+  // server contract is untouched. Unlike the city combobox this uses
+  // autoselect/confirmOnBlur = false, because a typed street address that is not
+  // in the suggestion list must survive as-is rather than snap to a match.
+  const addressOsmHint = document.getElementById('hint-address-osm') as HTMLElement;
+  let addressDebounce: number | undefined;
+  let addressAbort: AbortController | null = null;
+
+  function addressSource(query: string, populateResults: (results: string[]) => void): void {
+    window.clearTimeout(addressDebounce);
+    const q = query.trim();
+    if (q.length < 3) {
+      populateResults([]);
+      return;
+    }
+    // Debounce so a burst of keystrokes makes one request, and abort the prior
+    // in-flight call so a slow early response cannot overwrite a newer one.
+    addressDebounce = window.setTimeout(() => {
+      if (addressAbort) addressAbort.abort();
+      addressAbort = new AbortController();
+      fetch('/api/address-suggest?q=' + encodeURIComponent(q), {
+        signal: addressAbort.signal,
+        headers: { accept: 'application/json' },
+      })
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => {
+          const list = Array.isArray(data)
+            ? (data.filter((item) => typeof item === 'string') as string[]).slice(0, 5)
+            : [];
+          populateResults(list);
+        })
+        .catch(() => {
+          // Aborted, offline, or unparseable: degrade to no suggestions.
+          populateResults([]);
+        });
+    }, 250);
+  }
+
+  try {
+    const original = addressInput;
+    const container = document.createElement('div');
+    original.parentNode?.insertBefore(container, original);
+    // Free the id/name first so the combobox can claim them with no duplicate.
+    original.removeAttribute('id');
+    original.removeAttribute('name');
+    accessibleAutocomplete({
+      element: container,
+      id: 'field-address',
+      name: 'address',
+      source: addressSource,
+      defaultValue: original.value,
+      minLength: 3,
+      autoselect: false,
+      confirmOnBlur: false,
+      showNoOptionsFound: false,
+      displayMenu: 'overlay',
+    });
+    original.parentNode?.removeChild(original);
+    addressInput = document.getElementById('field-address') as HTMLInputElement;
+    addressInput.setAttribute('maxlength', '120');
+    addressInput.setAttribute('autocomplete', 'off');
+    addressInput.setAttribute('aria-describedby', 'hint-address hint-address-osm error-address');
+    // The lookup is live now, so disclose it. Hidden until here so no-JS users
+    // are never shown a claim about a lookup they do not get.
+    addressOsmHint.hidden = false;
+  } catch {
+    // Enhancement failed: the served plain input stays in place, usable, and the
+    // OSM disclosure stays hidden because no lookup happens.
+    addressInput = document.getElementById('field-address') as HTMLInputElement;
   }
 
   // Allowlist of field names the server may point an error at. Any other value

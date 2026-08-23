@@ -55,6 +55,12 @@ export default defineConfig({
           changeOrigin: true,
           rewrite: (path) => path.replace('/api/submit-event', '/.netlify/functions/submit-event'),
         },
+        '/api/address-suggest': {
+          target: FUNCTIONS_SERVER,
+          changeOrigin: true,
+          rewrite: (path) =>
+            path.replace('/api/address-suggest', '/.netlify/functions/address-suggest'),
+        },
         // Regex key (leading ^) so this matches only /go/<id> and never a future
         // page route that happens to start with "go".
         '^/go/[A-Za-z0-9_-]+$': {
