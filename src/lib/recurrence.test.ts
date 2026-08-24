@@ -190,3 +190,66 @@ describe('expandOccurrences: indefinite until (until === null)', () => {
     expect(out.length).toBe(400);
   });
 });
+
+describe('expandOccurrences: monthly_nth with an nths list', () => {
+  it('emits 1st & 3rd Monday of every month in date order', () => {
+    // Sep 2026 Mondays: 7, 14, 21, 28 -> 1st = Sep 7, 3rd = Sep 21.
+    expect(
+      expandOccurrences('2026-09-07', { freq: 'monthly_nth', nths: [1, 3], until: null }, '2026-11-30'),
+    ).toEqual([
+      '2026-09-07', '2026-09-21',
+      '2026-10-05', '2026-10-19',
+      '2026-11-02', '2026-11-16',
+    ]);
+  });
+
+  it('keeps startDate as occurrence #1 and skips earlier same-month slots', () => {
+    // startDate is the 3rd Monday; the 1st Monday (Sep 7) is before it and is dropped.
+    expect(
+      expandOccurrences('2026-09-21', { freq: 'monthly_nth', nths: [1, 3], until: null }, '2026-10-31'),
+    ).toEqual(['2026-09-21', '2026-10-05', '2026-10-19']);
+  });
+
+  it("resolves 'last' to the final weekday of each month (4th or 5th)", () => {
+    // Last Tuesday: Sep 29 (5th), Oct 27 (4th), Nov 24 (4th), Dec 29 (5th).
+    expect(
+      expandOccurrences('2026-09-29', { freq: 'monthly_nth', nths: ['last'], until: null }, '2026-12-31'),
+    ).toEqual(['2026-09-29', '2026-10-27', '2026-11-24', '2026-12-29']);
+  });
+
+  it('skips a listed slot that a month does not contain (a missing 5th)', () => {
+    // 1st & 5th Monday: only November 2026 has a 5th Monday (Nov 30).
+    expect(
+      expandOccurrences('2026-09-07', { freq: 'monthly_nth', nths: [1, 5], until: null }, '2026-11-30'),
+    ).toEqual(['2026-09-07', '2026-10-05', '2026-11-02', '2026-11-30']);
+  });
+
+  it('de-duplicates a month where two slots resolve to the same date', () => {
+    // 5th & last Tuesday collapse to one date in a five-Tuesday month (Sep 29),
+    // and 'last' still fires in a four-Tuesday month (Oct 27) where 5 does not.
+    expect(
+      expandOccurrences('2026-09-29', { freq: 'monthly_nth', nths: [5, 'last'], until: '2026-10-31' }, '2026-12-31'),
+    ).toEqual(['2026-09-29', '2026-10-27']);
+  });
+
+  it('is UTC-correct across the fall-back DST boundary (Nov 1 2026)', () => {
+    // 1st & 3rd Sunday spanning the fall-back date; the day must not shift.
+    expect(
+      expandOccurrences('2026-10-04', { freq: 'monthly_nth', nths: [1, 3], until: null }, '2026-11-30'),
+    ).toEqual(['2026-10-04', '2026-10-18', '2026-11-01', '2026-11-15']);
+  });
+
+  it('absent nths behaves identically to an explicit single-nth list', () => {
+    const absent = expandOccurrences('2026-08-11', { freq: 'monthly_nth', until: '2026-12-31' }, '2027-01-31');
+    const explicit = expandOccurrences('2026-08-11', { freq: 'monthly_nth', nths: [2], until: '2026-12-31' }, '2027-01-31');
+    expect(explicit).toEqual(absent);
+    expect(absent).toEqual(['2026-08-11', '2026-09-08', '2026-10-13', '2026-11-10', '2026-12-08']);
+  });
+
+  it('throws when startDate is not one of the listed slots', () => {
+    // 2026-09-14 is the 2nd Monday; nths [1, 3] does not include it.
+    expect(() =>
+      expandOccurrences('2026-09-14', { freq: 'monthly_nth', nths: [1, 3], until: null }, '2026-12-31'),
+    ).toThrow(RangeError);
+  });
+});

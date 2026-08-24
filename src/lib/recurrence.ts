@@ -51,6 +51,13 @@ export interface Recurrence {
    * submissions always set a concrete date; only curated (council) entries use null.
    */
   until: string | null;
+  /**
+   * monthly_nth only. When absent, the series is the single nth-weekday that
+   * startDate itself falls on (back-compatible). When present, every listed
+   * slot's nth-weekday is emitted each month ('last' = the final such weekday),
+   * merged in date order; startDate must be one of its month's slots.
+   */
+  nths?: Array<1 | 2 | 3 | 4 | 5 | 'last'>;
 }
 
 /** Format a UTC millisecond value as a "YYYY-MM-DD" calendar day. */
@@ -104,6 +111,32 @@ function nthWeekdayOfMonth(
   return Date.UTC(year, monthIndex, day);
 }
 
+/** UTC milliseconds for the final `weekday` (0 = Sunday) of the given month.
+ *  Every month has one, so this never returns null. */
+function lastWeekdayOfMonth(year: number, monthIndex: number, weekday: number): number {
+  const daysInMonth = new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
+  const lastWeekday = new Date(Date.UTC(year, monthIndex, daysInMonth)).getUTCDay();
+  const offset = (lastWeekday - weekday + 7) % 7;
+  return Date.UTC(year, monthIndex, daysInMonth - offset);
+}
+
+/**
+ * UTC milliseconds for one month-slot: the nth (1-5) weekday via
+ * nthWeekdayOfMonth, or the final weekday of the month for 'last'. Returns null
+ * only for an nth the month does not contain (a 5th weekday in a four-weekday
+ * month); 'last' never returns null.
+ */
+function resolveSlot(
+  year: number,
+  monthIndex: number,
+  weekday: number,
+  slot: 1 | 2 | 3 | 4 | 5 | 'last',
+): number | null {
+  return slot === 'last'
+    ? lastWeekdayOfMonth(year, monthIndex, weekday)
+    : nthWeekdayOfMonth(year, monthIndex, weekday, slot);
+}
+
 /**
  * Expand a recurrence rule into the calendar days it covers.
  *
@@ -144,9 +177,8 @@ export function expandOccurrences(
   if (startMs > endMs) return [];
   if (!rec) return [formatIsoDate(startMs)];
 
-  const out: string[] = [formatIsoDate(startMs)];
-
   if (rec.freq === 'weekly') {
+    const out: string[] = [formatIsoDate(startMs)];
     let cursor = startMs + 7 * DAY_MS;
     while (cursor <= endMs && out.length < MAX_OCCURRENCES) {
       out.push(formatIsoDate(cursor));
@@ -155,29 +187,60 @@ export function expandOccurrences(
     return out;
   }
 
+  // monthly_nth. The weekday comes from startDate. The month-slots are rec.nths
+  // when present, else the single nth that startDate itself falls on (the
+  // back-compatible default). startDate must be one of the slots its own month
+  // produces, so it is always occurrence #1.
   const start = new Date(startMs);
   const weekday = start.getUTCDay();
-  // 1st through 5th: day 1-7 is the 1st, 8-14 the 2nd, and so on.
-  const nth = Math.floor((start.getUTCDate() - 1) / 7) + 1;
-  let year = start.getUTCFullYear();
-  let monthIndex = start.getUTCMonth();
+  const slots: Array<1 | 2 | 3 | 4 | 5 | 'last'> =
+    rec.nths ?? [(Math.floor((start.getUTCDate() - 1) / 7) + 1) as 1 | 2 | 3 | 4 | 5];
+
+  const startYear = start.getUTCFullYear();
+  const startMonth = start.getUTCMonth();
+  const startIsASlot = slots.some(
+    (slot) => resolveSlot(startYear, startMonth, weekday, slot) === startMs,
+  );
+  if (!startIsASlot) {
+    throw new RangeError('recurrence startDate must fall on one of nths');
+  }
+
+  const out: string[] = [];
+  let year = startYear;
+  let monthIndex = startMonth;
+  let firstMonth = true;
 
   while (out.length < MAX_OCCURRENCES) {
+    // Every slot's date in this month, ascending and de-duplicated (nths [5,
+    // 'last'] collapse to one date in a five-weekday month).
+    const seen = new Set<number>();
+    const monthDates: number[] = [];
+    for (const slot of slots) {
+      const ms = resolveSlot(year, monthIndex, weekday, slot);
+      if (ms !== null && !seen.has(ms)) {
+        seen.add(ms);
+        monthDates.push(ms);
+      }
+    }
+    monthDates.sort((a, b) => a - b);
+
+    let stop = false;
+    for (const ms of monthDates) {
+      // Anchor month: a slot before startDate is in the past; startDate itself
+      // is a slot (validated above), so it is always the first emitted date.
+      if (firstMonth && ms < startMs) continue;
+      if (ms > endMs) { stop = true; break; }
+      out.push(formatIsoDate(ms));
+      if (out.length >= MAX_OCCURRENCES) { stop = true; break; }
+    }
+    if (stop) break;
+
+    firstMonth = false;
     monthIndex += 1;
-    if (monthIndex > 11) {
-      monthIndex = 0;
-      year += 1;
-    }
-    const candidate = nthWeekdayOfMonth(year, monthIndex, weekday, nth);
-    if (candidate === null) {
-      // No Nth such weekday this month (a 5th Tuesday in a 4-Tuesday month).
-      // Skip it, but stop once the whole month is past the end, otherwise a
-      // series with no further occurrences would walk forward forever.
-      if (Date.UTC(year, monthIndex, 1) > endMs) break;
-      continue;
-    }
-    if (candidate > endMs) break;
-    out.push(formatIsoDate(candidate));
+    if (monthIndex > 11) { monthIndex = 0; year += 1; }
+    // Stop once the whole next month is past the end, so a series whose only
+    // remaining slots do not exist (a 5th-weekday-only rule) cannot loop forever.
+    if (Date.UTC(year, monthIndex, 1) > endMs) break;
   }
 
   return out;
