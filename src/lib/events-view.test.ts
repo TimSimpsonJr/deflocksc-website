@@ -21,6 +21,7 @@ import {
   emptyStateProof,
   eventTypeLabel,
 } from './events-view.js';
+import type { EventFilter } from './events-view.js';
 import type { PublicEvent } from './public-event.js';
 
 function ev(over: Partial<PublicEvent> = {}): PublicEvent {
@@ -342,7 +343,7 @@ describe('list narrowing (regression: county selection filters the list)', () =>
   // narrowing invariant at the pure level the whole feature composes from.
   const HORIZON = '2027-09-01';
   const TODAY = '2026-08-23';
-  const listRows = (events: PublicEvent[], filter: { county: string; type: 'all' | 'meetup' | 'public' }) =>
+  const listRows = (events: PublicEvent[], filter: EventFilter) =>
     collapseSeries(splitByToday(expandAll(filterEvents(events, filter), HORIZON), TODAY).upcoming);
 
   it('shows every county under the cleared filter', () => {
