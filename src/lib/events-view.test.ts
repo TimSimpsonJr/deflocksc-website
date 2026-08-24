@@ -20,6 +20,8 @@ import {
   parseFilterHash,
   emptyStateProof,
   eventTypeLabel,
+  upcomingOccurrences,
+  upcomingFooter,
 } from './events-view.js';
 import type { EventFilter } from './events-view.js';
 import type { PublicEvent } from './public-event.js';
@@ -609,5 +611,63 @@ describe('eventTypeLabel', () => {
     expect(eventTypeLabel('meetup')).toBe('Location in group');
     expect(eventTypeLabel('public')).toBe('Public event');
     expect(eventTypeLabel('council')).toBe('Council meeting');
+  });
+});
+
+describe('upcomingOccurrences', () => {
+  it('returns the next `limit` dates on/after today for a recurring event', () => {
+    // Weekly from Sep 1; today is Sep 15, so Sep 1/8 drop off.
+    expect(
+      upcomingOccurrences('2026-09-01', { freq: 'weekly', until: null }, '2026-09-15', '2026-12-31'),
+    ).toEqual(['2026-09-15', '2026-09-22', '2026-09-29', '2026-10-06', '2026-10-13', '2026-10-20']);
+  });
+
+  it('defaults to a limit of 6', () => {
+    expect(
+      upcomingOccurrences('2026-09-01', { freq: 'weekly', until: null }, '2026-09-01', '2026-12-31'),
+    ).toHaveLength(6);
+  });
+
+  it('honours a custom limit', () => {
+    expect(
+      upcomingOccurrences('2026-09-01', { freq: 'weekly', until: null }, '2026-09-01', '2026-12-31', 3),
+    ).toEqual(['2026-09-01', '2026-09-08', '2026-09-15']);
+  });
+
+  it('returns the single date for a future one-off', () => {
+    expect(upcomingOccurrences('2026-09-01', null, '2026-08-01', '2026-12-31')).toEqual(['2026-09-01']);
+  });
+
+  it('returns nothing for a past one-off', () => {
+    expect(upcomingOccurrences('2026-08-01', null, '2026-09-01', '2026-12-31')).toEqual([]);
+  });
+
+  it('expands 1st & 3rd Monday in date order', () => {
+    expect(
+      upcomingOccurrences(
+        '2026-09-07',
+        { freq: 'monthly_nth', nths: [1, 3], until: null },
+        '2026-09-07',
+        '2026-12-31',
+        4,
+      ),
+    ).toEqual(['2026-09-07', '2026-09-21', '2026-10-05', '2026-10-19']);
+  });
+});
+
+describe('upcomingFooter', () => {
+  it('is empty for a one-off event', () => {
+    expect(upcomingFooter(null, 0)).toBe('');
+  });
+
+  it('names an indefinite series and how many are shown', () => {
+    expect(upcomingFooter({ freq: 'monthly_nth', nths: [1, 3], until: null }, 6)).toBe(
+      'Recurs indefinitely · showing the next 6',
+    );
+  });
+
+  it('states the cadence for a bounded series', () => {
+    expect(upcomingFooter({ freq: 'weekly', until: '2027-01-01' }, 4)).toBe('Repeats weekly');
+    expect(upcomingFooter({ freq: 'monthly_nth', until: '2027-01-01' }, 4)).toBe('Repeats monthly');
   });
 });

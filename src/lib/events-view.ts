@@ -190,6 +190,39 @@ export function eventTypeLabel(type: PublicEvent['type']): string {
   }
 }
 
+/**
+ * The next `limit` occurrence dates on or after `todayIso` for an event, bounded
+ * by `horizonEndIso`. Built on expandOccurrences, so it inherits the UTC
+ * calendar-day discipline and the MAX_OCCURRENCES cap. A one-off event yields
+ * its single date when it is today-or-later, else nothing. Powers the popover's
+ * "Upcoming meetings" list.
+ */
+export function upcomingOccurrences(
+  startDate: string,
+  recurrence: PublicEvent['recurrence'],
+  todayIso: string,
+  horizonEndIso: string,
+  limit = 6,
+): string[] {
+  return expandOccurrences(startDate, recurrence ?? null, horizonEndIso)
+    .filter((date) => date >= todayIso)
+    .slice(0, limit);
+}
+
+/**
+ * The muted footer under the popover's upcoming list: the cadence in words for a
+ * bounded series, or an "indefinite / showing the next N" line for a null-until
+ * (council) series. Empty for a one-off event (which shows no list).
+ */
+export function upcomingFooter(
+  recurrence: PublicEvent['recurrence'],
+  shown: number,
+): string {
+  if (!recurrence) return '';
+  if (recurrence.until === null) return `Recurs indefinitely · showing the next ${shown}`;
+  return recurrence.freq === 'weekly' ? 'Repeats weekly' : 'Repeats monthly';
+}
+
 /** 'AUG' for '2026-08-22'. */
 export function monthAbbr(iso: string): string {
   return MONTHS_ABBR[Number(iso.slice(5, 7)) - 1];
