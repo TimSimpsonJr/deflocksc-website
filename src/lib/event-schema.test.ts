@@ -270,4 +270,24 @@ describe('publicEventSchema — the stored/public shape', () => {
       expect(parsed.success, `${key} must be rejected`).toBe(false);
     }
   });
+
+  it('accepts a council record with source, indefinite until, and nths', () => {
+    const record = {
+      id: 'council-greenville-city',
+      type: 'council',
+      title: 'Greenville City Council',
+      description: 'Sign up with the clerk to speak. Each speaker gets 3 minutes.',
+      date: '2026-09-14',
+      time: '17:30',
+      city: 'greenville',
+      county: 'greenville',
+      address: '206 S Main St, Greenville, SC 29601',
+      hasSignalGroup: false,
+      recurrence: { freq: 'monthly_nth', nths: [2, 4], until: null },
+      organizer: 'Greenville City Council',
+      createdAt: '2026-08-17T14:22:00Z',
+      source: 'https://www.greenvillesc.gov/185/City-Council',
+    };
+    expect(publicEventSchema.safeParse(record).success).toBe(true);
+  });
 });

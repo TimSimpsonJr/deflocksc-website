@@ -31,7 +31,7 @@ export interface StoredEvent {
  */
 export interface PublicEvent {
   id: string;
-  type: 'meetup' | 'public';
+  type: 'meetup' | 'public' | 'council';
   title: string;
   description: string | null;
   date: string;
@@ -40,9 +40,17 @@ export interface PublicEvent {
   county: string;
   address: string | null;
   hasSignalGroup: boolean;
-  recurrence: { freq: 'weekly' | 'monthly_nth'; until: string } | null;
+  recurrence: {
+    freq: 'weekly' | 'monthly_nth';
+    until: string | null;
+    nths?: Array<1 | 2 | 3 | 4 | 5 | 'last'>;
+  } | null;
   organizer: string;
   createdAt: string;
+  /** Curated council entries only: the official schedule URL. Absent on
+   *  submitted (meetup/public) events. Not part of PUBLIC_EVENT_FIELDS — it is
+   *  set directly by loadCouncilEvents(), never projected from a StoredEvent. */
+  source?: string | null;
 }
 
 /**

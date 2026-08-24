@@ -224,7 +224,7 @@ const submissionSchema = z
 export const publicEventSchema = z
   .object({
     id: z.string(),
-    type: z.enum(['meetup', 'public']),
+    type: z.enum(['meetup', 'public', 'council']),
     title: sanitizedField(TITLE_LIMITS),
     description: sanitizedField(DESCRIPTION_LIMITS).nullable(),
     date: z.string().regex(ISO_DATE_RE, 'bad_format').refine(isRealIsoDate, 'not_a_real_date'),
@@ -239,12 +239,27 @@ export const publicEventSchema = z
         until: z
           .string()
           .regex(ISO_DATE_RE, 'bad_format')
-          .refine(isRealIsoDate, 'not_a_real_date'),
+          .refine(isRealIsoDate, 'not_a_real_date')
+          .nullable(),
+        nths: z
+          .array(
+            z.union([
+              z.literal(1),
+              z.literal(2),
+              z.literal(3),
+              z.literal(4),
+              z.literal(5),
+              z.literal('last'),
+            ]),
+          )
+          .min(1)
+          .optional(),
       })
       .strict()
       .nullable(),
     organizer: z.string(),
     createdAt: z.string(),
+    source: z.string().nullable().optional(),
   })
   .strict();
 
