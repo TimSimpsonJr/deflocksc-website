@@ -19,6 +19,11 @@
 import maplibregl from 'maplibre-gl';
 import { collapseSeries, monthAbbr, dayOfMonth } from '../../../lib/events-view.js';
 import type { Occurrence } from '../../../lib/events-view.js';
+// Defined in events-constants.ts (a maplibre-free module) so the events-page composer
+// can import it WITHOUT statically pulling maplibre-gl into the page's eager chunk.
+// Used by the click handlers below and re-exported (see below) so this layer module
+// still surfaces it; the single definition and full rationale live in that module.
+import { CROSSFADE_ZOOM } from './events-constants.js';
 
 /** [lng, lat] per city slug. */
 export type Centroids = Record<string, [number, number]>;
@@ -175,14 +180,10 @@ export function countyBounds(
   ];
 }
 
-/**
- * Zoom at which the county choropleth has fully faded out and the city pins have
- * fully faded in (see the fill-opacity / circle-opacity interpolations below, which
- * both reach their end state at zoom 8). Click ownership switches here so an
- * invisible layer never wins a click: below it, clicks are counties; at or above it,
- * clicks are city pins.
- */
-const CROSSFADE_ZOOM = 8;
+// Re-exported (imported at the top from events-constants.ts) so the events layer
+// module — the composer's natural place to look — still surfaces CROSSFADE_ZOOM,
+// while the single definition and the maplibre-free rationale live in that module.
+export { CROSSFADE_ZOOM };
 
 /** Per-map state, so setEventData can recompute and removeEventLayers can unbind. */
 const eventStates = new WeakMap<maplibregl.Map, EventLayerState>();
@@ -383,7 +384,7 @@ export function addEventLayers(map: maplibregl.Map, data: EventLayerData): void 
         '#fca5a5',
       ],
       'line-width': 1,
-      'line-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.7, 8, 0],
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.6, 8, 0],
     },
   });
 

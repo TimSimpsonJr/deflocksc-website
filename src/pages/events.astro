@@ -648,12 +648,17 @@ const island = {
      deflock theme; only the popover-specific type scale lives here, ported from
      the approved mockup. Global because the dialog's contents are filled by
      events-page.ts at runtime (no scoped data-astro-* attribute to match). */
-  /* Type label under the title — the de-slopped replacement for the old coloured
-     "eyebrow" + dot. Reuses the shared .event-typeline idiom (muted DM Mono, so
-     card and popover match); only its margins around the title live here. Type is
-     still colour-cued by the card's corner dot; this plain muted label is the
-     accessible signal, so type is never colour-only. */
+  /* Type label under the title. Reuses the shared .event-typeline idiom (DM Mono,
+     uppercase); only its margins around the title live here. The label is coloured
+     by type to match the card — amber meetup, green public — keyed off the dialog's
+     data-type, which openEventPopover sets with a closed ternary. The label text
+     always names the type, so colour is reinforcing, never the sole signal. */
   .event-pop-typeline { margin: 0 0 1.1rem; }
+  /* Colour the popover type label the same way the card does (event-card--{type}),
+     here via the dialog's data-type. Amber #fbbf24 (~11:1) and green #4ade80 (~12:1)
+     both clear WCAG AA on the popover's dark base-200 background. */
+  #event-detail[data-type="meetup"] .event-pop-typeline { color: #fbbf24; }
+  #event-detail[data-type="public"] .event-pop-typeline { color: #4ade80; }
   .event-pop-title {
     color: #e8e8e8;
     font-size: 1.3rem;

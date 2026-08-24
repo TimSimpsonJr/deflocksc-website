@@ -25,6 +25,13 @@
 import type { PublicEvent } from '../lib/public-event.js';
 import type { Occurrence, EventFilter, EventTypeFilter } from '../lib/events-view.js';
 import type { MapHandle } from './map/core.js';
+// The crossfade zoom is the single source of truth in map/layers/events-constants.ts
+// (the events layer re-exports it). The composer imports it so fitToSelection can
+// guarantee a county fit reaches it and the city pins become visible + clickable.
+// Imported from the constants module, NOT from map/layers/events.ts: that module
+// imports maplibre-gl at module scope, so a static import from it would drag the
+// ~1 MB maplibre bundle into this page's eager chunk and break the lazy map load.
+import { CROSSFADE_ZOOM } from './map/layers/events-constants.js';
 import {
   mergeEvents,
   parseOverlayEnvelope,
@@ -167,11 +174,27 @@ function fitToSelection(animate: boolean): void {
   }
   const bounds = eventsLayer.countyBounds(mapHandle.map, filter.county);
   if (bounds) {
-    mapHandle.map.fitBounds(bounds, {
+    // A county's natural fit can settle just below the z8 crossfade — especially on
+    // a small map container, where the fixed 40px padding eats a big fraction of the
+    // viewport (and even some large counties settle just under z8 on desktop). Below
+    // z8 the city pins are both invisible (circle-opacity 0) and unclickable
+    // (onCityClick bails under CROSSFADE_ZOOM), so probe the fit first and, when it
+    // would land short, force the view to exactly CROSSFADE_ZOOM.
+    // Trade-off: a large county on a small map may then crop slightly, but its pins
+    // stay visible and reachable, which is what the county fit is for.
+    const cam = mapHandle.map.cameraForBounds(bounds, {
       padding: COUNTY_FIT_PADDING,
       maxZoom: COUNTY_FIT_MAXZOOM,
-      duration,
     });
+    if (cam && typeof cam.zoom === 'number' && cam.zoom < CROSSFADE_ZOOM) {
+      mapHandle.map.easeTo({ center: cam.center, zoom: CROSSFADE_ZOOM, duration });
+    } else {
+      mapHandle.map.fitBounds(bounds, {
+        padding: COUNTY_FIT_PADDING,
+        maxZoom: COUNTY_FIT_MAXZOOM,
+        duration,
+      });
+    }
   } else {
     mapHandle.map.fitBounds(SC_BOUNDS, { padding: 20, duration });
   }
@@ -233,6 +256,11 @@ async function loadMap() {
       zoom: 6,
       interactive: true,
       maxBounds: SC_MAX_BOUNDS,
+      // Plain wheel / one-finger drag scrolls the PAGE past the map; Ctrl/Cmd+wheel
+      // (desktop) and two-finger drag (mobile) zoom/pan the map. Replaces the manual
+      // Ctrl scroll-lock, which was fragile on desktop and trapped one-finger pans on
+      // mobile. Scoped to the events map — the camera map keeps its own behaviour.
+      cooperativeGestures: true,
     });
 
     // Wait for the style, but bound the wait: a 'load' event that never fires — a
@@ -526,9 +554,13 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
   const e = o.event;
   const meetup = e.type === 'meetup';
 
-  // Type label under the title (the coloured eyebrow + dot are gone). Same wording
-  // and muted idiom as the card's quiet label; type stays colour-cued by the card
-  // corner dot, so this plain label is the accessible signal — never colour-only.
+  // Type label under the title. Same wording and idiom as the card's quiet label,
+  // and now coloured by type the same way the card is (amber meetup, green public):
+  // a closed meetup ? 'meetup' : 'public' ternary sets data-type on the dialog, and
+  // the popover CSS in events.astro keys the label colour off it. Closed ternary, so
+  // only the two known values reach the attribute — never a raw type string. The
+  // label text always names the type, so colour is reinforcing, never the sole cue.
+  detailDialog.dataset.type = meetup ? 'meetup' : 'public';
   const typeLabel = document.getElementById('event-detail-typelabel');
   if (typeLabel) typeLabel.textContent = meetup ? 'Location in group' : 'Public event';
 
