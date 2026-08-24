@@ -45,8 +45,12 @@ const ISO_DATE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 
 export interface Recurrence {
   freq: 'weekly' | 'monthly_nth';
-  /** Inclusive last calendar day of the series, "YYYY-MM-DD". */
-  until: string;
+  /**
+   * Inclusive last calendar day of the series, "YYYY-MM-DD", or null for an
+   * indefinite series that is clamped only by the caller's horizon. Organizer
+   * submissions always set a concrete date; only curated (council) entries use null.
+   */
+  until: string | null;
 }
 
 /** Format a UTC millisecond value as a "YYYY-MM-DD" calendar day. */
@@ -131,7 +135,10 @@ export function expandOccurrences(
     if (rec.freq !== 'weekly' && rec.freq !== 'monthly_nth') {
       throw new RangeError('recurrence.freq must be "weekly" or "monthly_nth"');
     }
-    endMs = Math.min(parseIsoDate(rec.until, 'recurrence.until'), horizonMs);
+    endMs =
+      rec.until === null
+        ? horizonMs
+        : Math.min(parseIsoDate(rec.until, 'recurrence.until'), horizonMs);
   }
 
   if (startMs > endMs) return [];

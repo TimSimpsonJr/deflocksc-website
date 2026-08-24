@@ -166,3 +166,27 @@ describe('expandOccurrences: input guards', () => {
     expect(message).not.toContain('evil');
   });
 });
+
+describe('expandOccurrences: indefinite until (until === null)', () => {
+  it('weekly with null until expands to the horizon and no further', () => {
+    expect(
+      expandOccurrences('2026-09-01', { freq: 'weekly', until: null }, '2026-09-22'),
+    ).toEqual(['2026-09-01', '2026-09-08', '2026-09-15', '2026-09-22']);
+  });
+
+  it('monthly_nth with null until expands to the horizon and no further', () => {
+    // 2026-08-11 is the 2nd Tuesday; the horizon (Nov 30) is the only bound.
+    expect(
+      expandOccurrences('2026-08-11', { freq: 'monthly_nth', until: null }, '2026-11-30'),
+    ).toEqual(['2026-08-11', '2026-09-08', '2026-10-13', '2026-11-10']);
+  });
+
+  it('still caps a null-until runaway at 400 occurrences', () => {
+    const out = expandOccurrences(
+      '2026-01-01',
+      { freq: 'weekly', until: null },
+      '2046-01-01',
+    );
+    expect(out.length).toBe(400);
+  });
+});
