@@ -191,6 +191,21 @@ export function expandOccurrences(
   // when present, else the single nth that startDate itself falls on (the
   // back-compatible default). startDate must be one of the slots its own month
   // produces, so it is always occurrence #1.
+  // Defence in depth: nths is the one field trusted from its TS type alone, and
+  // this function's threat model is a hand-edited or fold-corrupted events.json.
+  // Garbage members fail OPEN into the output -- a string nth formats as
+  // "0NaN-NaN-NaN", a fractional day is truncated onto the wrong weekday, and a
+  // zero or negative nth rolls into the previous month past nthWeekdayOfMonth's
+  // upper-bound-only guard -- so reject anything that is not absent or an array
+  // whose every member is 'last' or an integer 1-5, matching freq/date checks.
+  if (
+    rec.nths !== undefined &&
+    (!Array.isArray(rec.nths) ||
+      !rec.nths.every((n) => n === 'last' || (Number.isInteger(n) && n >= 1 && n <= 5)))
+  ) {
+    throw new RangeError("recurrence.nths must be an array of integers 1-5 or 'last'");
+  }
+
   const start = new Date(startMs);
   const weekday = start.getUTCDay();
   const slots: Array<1 | 2 | 3 | 4 | 5 | 'last'> =

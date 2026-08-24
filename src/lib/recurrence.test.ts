@@ -252,4 +252,54 @@ describe('expandOccurrences: monthly_nth with an nths list', () => {
       expandOccurrences('2026-09-14', { freq: 'monthly_nth', nths: [1, 3], until: null }, '2026-12-31'),
     ).toThrow(RangeError);
   });
+
+  // Defence in depth: nths is trusted from its TS type alone, so a hand-edited
+  // or fold-corrupted events.json can smuggle garbage members that otherwise
+  // fail OPEN into the output. Each of these must fail closed with RangeError.
+  it('throws RangeError on a string nth member (would emit "0NaN-NaN-NaN")', () => {
+    expect(() =>
+      expandOccurrences(
+        '2026-09-08',
+        { freq: 'monthly_nth', nths: [2, 'blah'] as unknown as Array<1 | 2>, until: null },
+        '2026-12-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError on a fractional nth member (would shift the weekday)', () => {
+    expect(() =>
+      expandOccurrences(
+        '2026-09-08',
+        { freq: 'monthly_nth', nths: [2, 1.5] as unknown as Array<1 | 2>, until: null },
+        '2026-12-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError on a zero or out-of-range nth member', () => {
+    expect(() =>
+      expandOccurrences(
+        '2026-09-08',
+        { freq: 'monthly_nth', nths: [2, 0] as unknown as Array<1 | 2>, until: null },
+        '2026-12-31',
+      ),
+    ).toThrow(RangeError);
+    expect(() =>
+      expandOccurrences(
+        '2026-09-08',
+        { freq: 'monthly_nth', nths: [2, 6] as unknown as Array<1 | 2>, until: null },
+        '2026-12-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError (not TypeError) on a non-array nths', () => {
+    expect(() =>
+      expandOccurrences(
+        '2026-09-08',
+        { freq: 'monthly_nth', nths: 'last' as unknown as Array<'last'>, until: null },
+        '2026-12-31',
+      ),
+    ).toThrow(RangeError);
+  });
 });
