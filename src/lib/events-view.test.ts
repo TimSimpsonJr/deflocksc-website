@@ -19,6 +19,7 @@ import {
   filterHash,
   parseFilterHash,
   emptyStateProof,
+  eventTypeLabel,
 } from './events-view.js';
 import type { PublicEvent } from './public-event.js';
 
@@ -222,7 +223,7 @@ describe('collapseSeries', () => {
     const f = facetCounts(collapsed, ALL_EVENTS);
     expect(f.countyAll).toBe(4);
     expect(f.countyCounts).toEqual({ greenville: 2, charleston: 1, richland: 1 });
-    expect(f.typeCounts).toEqual({ all: 4, meetup: 2, public: 2 });
+    expect(f.typeCounts).toEqual({ all: 4, meetup: 2, public: 2, council: 0 });
   });
 });
 
@@ -446,7 +447,7 @@ describe('facetCounts', () => {
     const f = facetCounts(OCC, ALL_EVENTS);
     expect(f.countyAll).toBe(4);
     expect(f.countyCounts).toEqual({ greenville: 2, charleston: 1, richland: 1 });
-    expect(f.typeCounts).toEqual({ all: 4, meetup: 2, public: 2 });
+    expect(f.typeCounts).toEqual({ all: 4, meetup: 2, public: 2, council: 0 });
   });
 
   it('facets the county counts by the active type', () => {
@@ -457,7 +458,7 @@ describe('facetCounts', () => {
 
   it('facets the type counts by the active county', () => {
     const f = facetCounts(OCC, { county: 'greenville', type: 'all' });
-    expect(f.typeCounts).toEqual({ all: 2, meetup: 1, public: 1 });
+    expect(f.typeCounts).toEqual({ all: 2, meetup: 1, public: 1, council: 0 });
   });
 
   it('leaves the county counts untouched by the active county', () => {
@@ -467,7 +468,7 @@ describe('facetCounts', () => {
 
   it('reports zeros for an unknown active county', () => {
     const f = facetCounts(OCC, { county: 'not-a-county', type: 'all' });
-    expect(f.typeCounts).toEqual({ all: 0, meetup: 0, public: 0 });
+    expect(f.typeCounts).toEqual({ all: 0, meetup: 0, public: 0, council: 0 });
   });
 });
 
@@ -546,5 +547,66 @@ describe('emptyStateProof', () => {
 
   it('uses the plural for several', () => {
     expect(emptyStateProof(3)).toBe('3 events have run in the last 90 days.');
+  });
+});
+
+describe('matchesFilter — council isolation', () => {
+  const gvCouncil = ev({ id: 'gvcncl', county: 'greenville', type: 'council' });
+  const gvPublic = ev({ id: 'gvpub', county: 'greenville', type: 'public' });
+  const gvMeet = ev({ id: 'gvmeet', county: 'greenville', type: 'meetup' });
+
+  it("'public' matches only public and excludes council", () => {
+    expect(matchesFilter(gvPublic, { county: 'all', type: 'public' })).toBe(true);
+    expect(matchesFilter(gvCouncil, { county: 'all', type: 'public' })).toBe(false);
+  });
+
+  it("'council' isolates council and excludes public and meetup", () => {
+    expect(matchesFilter(gvCouncil, { county: 'all', type: 'council' })).toBe(true);
+    expect(matchesFilter(gvPublic, { county: 'all', type: 'council' })).toBe(false);
+    expect(matchesFilter(gvMeet, { county: 'all', type: 'council' })).toBe(false);
+  });
+
+  it("'all' includes council", () => {
+    expect(matchesFilter(gvCouncil, { county: 'all', type: 'all' })).toBe(true);
+  });
+});
+
+describe('facetCounts — council is a counted type', () => {
+  it('counts council occurrences under the all/all filter', () => {
+    const events = [
+      ev({ id: 'm', county: 'greenville', type: 'meetup', date: '2026-09-01' }),
+      ev({ id: 'p', county: 'greenville', type: 'public', date: '2026-09-02' }),
+      ev({ id: 'c', county: 'greenville', type: 'council', date: '2026-09-03' }),
+    ];
+    const occ = expandAll(events, '2027-09-01');
+    expect(facetCounts(occ, ALL_EVENTS).typeCounts).toEqual({
+      all: 3,
+      meetup: 1,
+      public: 1,
+      council: 1,
+    });
+  });
+});
+
+describe('type filter hash — council', () => {
+  it('maps the council filter to #type=council', () => {
+    expect(filterHash({ county: 'all', type: 'council' })).toBe('#type=council');
+  });
+
+  it('parses #type=council back to the council filter', () => {
+    expect(parseFilterHash('#type=council')).toEqual({ county: 'all', type: 'council' });
+  });
+
+  it('round-trips a composed county + council hash', () => {
+    const filter = { county: 'greenville', type: 'council' as const };
+    expect(parseFilterHash(filterHash(filter))).toEqual(filter);
+  });
+});
+
+describe('eventTypeLabel', () => {
+  it('labels each type', () => {
+    expect(eventTypeLabel('meetup')).toBe('Location in group');
+    expect(eventTypeLabel('public')).toBe('Public event');
+    expect(eventTypeLabel('council')).toBe('Council meeting');
   });
 });

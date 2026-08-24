@@ -165,6 +165,19 @@ export function recurrenceLabel(
   return recurrence.freq === 'weekly' ? 'Repeats weekly' : 'Repeats monthly';
 }
 
+/**
+ * The human type label shown on the card's quiet type line and in the popover.
+ * The single source of truth for the three type labels, shared by the server
+ * card (EventsList.astro) and the client card (buildCard) so they cannot drift.
+ * The label always NAMES the type, so the type colour is reinforcing, never the
+ * sole cue.
+ */
+export function eventTypeLabel(type: PublicEvent['type']): string {
+  if (type === 'meetup') return 'Location in group';
+  if (type === 'council') return 'Council meeting';
+  return 'Public event';
+}
+
 /** 'AUG' for '2026-08-22'. */
 export function monthAbbr(iso: string): string {
   return MONTHS_ABBR[Number(iso.slice(5, 7)) - 1];
@@ -248,9 +261,9 @@ export function groupByMonth(
 
 /** URL slug for each event type, used in the hash. No SC county is named
  *  "meetups" or "public", so the two dimensions never collide in one hash. */
-export const TYPE_SLUGS = { meetup: 'meetups', public: 'public' } as const;
+export const TYPE_SLUGS = { meetup: 'meetups', public: 'public', council: 'council' } as const;
 
-export type EventTypeFilter = 'all' | 'meetup' | 'public';
+export type EventTypeFilter = 'all' | 'meetup' | 'public' | 'council';
 
 export interface EventFilter {
   /** A county slug, or the literal 'all'. Unknown slugs are legal and match nothing. */
@@ -312,7 +325,7 @@ export interface FilterFacets {
   /** Total occurrences under the active *type* filter, for the "All counties" chip. */
   countyAll: number;
   /** Occurrences per type under the active *county* filter (type ignored). */
-  typeCounts: { all: number; meetup: number; public: number };
+  typeCounts: { all: number; meetup: number; public: number; council: number };
 }
 
 /**
@@ -340,6 +353,7 @@ export function facetCounts(
       all: inCounty.length,
       meetup: inCounty.filter((o) => o.event.type === 'meetup').length,
       public: inCounty.filter((o) => o.event.type === 'public').length,
+      council: inCounty.filter((o) => o.event.type === 'council').length,
     },
   };
 }
@@ -385,6 +399,7 @@ export function parseFilterHash(hash: string): EventFilter {
     else if (key === 'type') {
       if (value === TYPE_SLUGS.meetup) type = 'meetup';
       else if (value === TYPE_SLUGS.public) type = 'public';
+      else if (value === TYPE_SLUGS.council) type = 'council';
     }
   }
   return { county, type };
