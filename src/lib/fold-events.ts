@@ -108,17 +108,11 @@ export function foldStoredEvents(records: readonly StoredEvent[]): PublicEvent[]
 export const EXPIRY_HORIZON_DAYS = 30;
 const EXPIRY_HORIZON_MS = EXPIRY_HORIZON_DAYS * 24 * 60 * 60 * 1000;
 
-// Mirrors PublicEvent['recurrence'] (public-event.ts): `until` is nullable — a
-// curated council record may recur indefinitely (until: null) — and `nths` is an
-// optional monthly-nth selection. Kept in sync so a PublicEvent is assignable to
-// DatedEvent without a cast; ReadonlyArray so a mutable PublicEvent.nths still fits.
-type EventRecurrence =
-  | {
-      readonly freq: 'weekly' | 'monthly_nth';
-      readonly until: string | null;
-      readonly nths?: ReadonlyArray<1 | 2 | 3 | 4 | 5 | 'last'>;
-    }
-  | null;
+// Sourced directly from PublicEvent so it cannot drift from the published shape:
+// `until` is nullable (a curated council record may recur indefinitely) and
+// `nths` is an optional monthly-nth selection. A PublicEvent is therefore
+// assignable to DatedEvent without a cast.
+type EventRecurrence = PublicEvent['recurrence'];
 
 interface DatedEvent {
   readonly date: string;

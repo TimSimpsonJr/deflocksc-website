@@ -56,8 +56,15 @@ export interface PublicEvent {
 /**
  * The allowlist. Adding a field to `StoredEvent` does NOT publish it; a field
  * only becomes public by being added here and to `PublicEvent` deliberately.
+ *
+ * Typed `keyof PublicEvent & keyof StoredEvent`, not `keyof PublicEvent`: the
+ * projection copies each field straight off a `StoredEvent`, so every allowlisted
+ * key must exist on `StoredEvent` too. This intersection also statically bans a
+ * loader-only field (`source`, which lives on `PublicEvent` but never on a
+ * `StoredEvent`) from ever being added to this list — a defence of the same
+ * confidentiality invariant `toPublicEvent` enforces at runtime.
  */
-export const PUBLIC_EVENT_FIELDS: readonly (keyof PublicEvent)[] = [
+export const PUBLIC_EVENT_FIELDS: readonly (keyof PublicEvent & keyof StoredEvent)[] = [
   'id',
   'type',
   'title',
