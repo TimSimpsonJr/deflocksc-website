@@ -1,6 +1,6 @@
 ---
 import type { Occurrence } from '../lib/events-view.js';
-import { monthAbbr, dayOfMonth, formatTime12, sortKey, emptyStateProof, recurrenceLabel } from '../lib/events-view.js';
+import { monthAbbr, dayOfMonth, formatTime12, sortKey, emptyStateProof, recurrenceLabel, eventTypeLabel } from '../lib/events-view.js';
 
 interface Props {
   upcoming: Occurrence[];
@@ -47,7 +47,7 @@ const place = (o: Occurrence) =>
               label, and " · Repeats …" appended for a collapsed recurring series.
               The Signal join lives only in the detail popover now, never here. */}
           <p class="event-typeline">
-            {o.event.type === 'meetup' ? 'Location in group' : 'Public event'}{recurrenceLabel(o.event.recurrence) ? ` · ${recurrenceLabel(o.event.recurrence)}` : ''}
+            {eventTypeLabel(o.event.type)}{recurrenceLabel(o.event.recurrence) ? ` · ${recurrenceLabel(o.event.recurrence)}` : ''}
           </p>
         </div>
       </li>

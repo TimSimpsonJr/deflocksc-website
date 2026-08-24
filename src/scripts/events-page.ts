@@ -52,6 +52,9 @@ import {
   filterHash,
   parseFilterHash,
   emptyStateProof,
+  eventTypeLabel,
+  upcomingOccurrences,
+  upcomingFooter,
 } from '../lib/events-view.js';
 // The county filter is a searchable combobox built on accessible-autocomplete,
 // the same widget (and the same dark `.autocomplete__*` skin in global.css) the
@@ -398,10 +401,9 @@ function placeLabel(e: PublicEvent): string {
 
 function buildCard(o: Occurrence): HTMLLIElement {
   const e = o.event;
-  const meetup = e.type === 'meetup';
-  // Closed ternary, not `--${e.type}`, so only the two known type suffixes can
-  // ever reach a class name.
-  const typeSuffix = meetup ? 'meetup' : 'public';
+  // Closed ternary, not `--${e.type}`, so only the three known type suffixes can
+  // ever reach a class name (amber meetup, green public, blue council).
+  const typeSuffix = e.type === 'meetup' ? 'meetup' : e.type === 'council' ? 'council' : 'public';
   const li = document.createElement('li');
   // The event-card--{type} modifier keys the typeline colour (amber = meetup,
   // green = public) in events.astro. Closed ternary via typeSuffix, so only the
@@ -450,7 +452,7 @@ function buildCard(o: Occurrence): HTMLLIElement {
   // appended for a collapsed recurring series. The Signal join lives only in the
   // detail popover now, so the card's sole control is the title button above.
   const repeat = recurrenceLabel(e.recurrence);
-  const typeLabel = meetup ? 'Location in group' : 'Public event';
+  const typeLabel = eventTypeLabel(e.type);
   body.append(el('p', 'event-typeline', repeat ? `${typeLabel} · ${repeat}` : typeLabel));
 
   li.append(date, body);
@@ -542,6 +544,14 @@ function fullDateLabel(iso: string): string {
   return `${WEEKDAYS[weekdayIndex(iso)]}, ${monthLong(y, m)} ${dayOfMonth(iso)}, ${y}`;
 }
 
+/** 'Wednesday, Oct 14' for '2026-10-14'. Uses the same zone-independent helpers
+ *  as fullDateLabel so the popover date never drifts a day. */
+function upcomingDateLabel(iso: string): string {
+  const y = Number(iso.slice(0, 4));
+  const m = Number(iso.slice(5, 7)) - 1;
+  return `${WEEKDAYS[weekdayIndex(iso)]}, ${monthLong(y, m).slice(0, 3)} ${dayOfMonth(iso)}`;
+}
+
 function mapsSearchUrl(address: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
@@ -554,15 +564,12 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
   const e = o.event;
   const meetup = e.type === 'meetup';
 
-  // Type label under the title. Same wording and idiom as the card's quiet label,
-  // and now coloured by type the same way the card is (amber meetup, green public):
-  // a closed meetup ? 'meetup' : 'public' ternary sets data-type on the dialog, and
-  // the popover CSS in events.astro keys the label colour off it. Closed ternary, so
-  // only the two known values reach the attribute — never a raw type string. The
-  // label text always names the type, so colour is reinforcing, never the sole cue.
-  detailDialog.dataset.type = meetup ? 'meetup' : 'public';
+  // Closed three-way, so only the known values reach the attribute (amber
+  // meetup, green public, blue council); the popover CSS keys the label colour
+  // off it, and the label text always names the type.
+  detailDialog.dataset.type = e.type === 'meetup' ? 'meetup' : e.type === 'council' ? 'council' : 'public';
   const typeLabel = document.getElementById('event-detail-typelabel');
-  if (typeLabel) typeLabel.textContent = meetup ? 'Location in group' : 'Public event';
+  if (typeLabel) typeLabel.textContent = eventTypeLabel(e.type);
 
   // Title (also labels the dialog via aria-labelledby).
   const title = document.getElementById('event-detail-title');
@@ -606,12 +613,28 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
     desc.hidden = !e.description;
   }
 
-  // Recurrence badge (optional).
-  const repeat = recurrenceLabel(e.recurrence);
-  const recurrenceBadge = document.getElementById('event-detail-recurrence');
-  if (recurrenceBadge) {
-    recurrenceBadge.textContent = repeat ?? '';
-    recurrenceBadge.hidden = !repeat;
+  // "Upcoming meetings" list for ANY recurring event (council, recurring meetup,
+  // recurring public). The next occurrences on/after today, up to 6, via the
+  // unit-tested upcomingOccurrences; the first row is tagged "Next" and a muted
+  // footer states the cadence. A one-off event shows no list.
+  const upcomingWrap = document.getElementById('event-detail-upcoming');
+  const upcomingList = document.getElementById('event-detail-upcoming-list');
+  const upcomingFoot = document.getElementById('event-detail-upcoming-foot');
+  if (upcomingWrap && upcomingList && upcomingFoot) {
+    upcomingList.replaceChildren();
+    if (e.recurrence) {
+      const dates = upcomingOccurrences(e.date, e.recurrence, island.today, island.horizonEnd);
+      dates.forEach((d, i) => {
+        const row = el('li', 'event-pop-upcoming-item');
+        row.append(el('span', 'event-pop-upcoming-date', `${upcomingDateLabel(d)} · ${formatTime12(e.time)}`));
+        if (i === 0) row.append(el('span', 'event-pop-upcoming-next', 'Next'));
+        upcomingList.append(row);
+      });
+      upcomingFoot.textContent = upcomingFooter(e.recurrence, dates.length);
+      upcomingWrap.hidden = dates.length === 0;
+    } else {
+      upcomingWrap.hidden = true;
+    }
   }
 
   // Signal CTA (only when the event has a group). The primary action for meetups.
@@ -885,6 +908,7 @@ function buildFilters(): void {
     typeRadio('all', 'All'),
     typeRadio('meetup', 'Meetups'),
     typeRadio('public', 'Public events'),
+    typeRadio('council', 'Council meetings'),
   );
   // Arrow keys move the selection like a native radiogroup: focus follows and the
   // filter changes through the same pushHash path a click uses.
@@ -933,7 +957,7 @@ function syncChrome(): void {
   // Type filter: the faceted count on each option, the checked radio,
   // and the roving tabindex (only the checked radio is a tab stop).
   for (const btn of document.querySelectorAll<HTMLButtonElement>('.events-type-btn')) {
-    const value = (btn.dataset.filterValue ?? 'all') as 'all' | 'meetup' | 'public';
+    const value = (btn.dataset.filterValue ?? 'all') as 'all' | 'meetup' | 'public' | 'council';
     const active = filter.type === value;
     // is-selected is the same active-pill hook the view tabs use; aria-checked is
     // the radiogroup state. The shared pill rule keys on both, so they agree.

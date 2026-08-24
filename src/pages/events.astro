@@ -251,11 +251,16 @@ const island = {
         <dd class="event-pop-dd" id="event-detail-place"></dd>
       </dl>
 
+      <div class="event-pop-upcoming" id="event-detail-upcoming" hidden>
+        <p class="event-pop-upcoming-label">Upcoming meetings</p>
+        <ul class="event-pop-upcoming-list" id="event-detail-upcoming-list"></ul>
+        <p class="event-pop-upcoming-foot" id="event-detail-upcoming-foot"></p>
+      </div>
+
       <p class="event-pop-desc" id="event-detail-desc" hidden></p>
 
       <div class="modal-action event-pop-foot">
-        <span class="badge badge-sm badge-neutral mr-auto" id="event-detail-recurrence" hidden></span>
-        <form method="dialog"><button class="btn btn-ghost btn-sm" type="submit">Close</button></form>
+        <form method="dialog" class="mr-auto"><button class="btn btn-ghost btn-sm" type="submit">Close</button></form>
         <a class="btn btn-primary btn-sm" id="event-detail-signal" rel="noreferrer" hidden>Join Signal group</a>
       </div>
     </div>
@@ -460,6 +465,7 @@ const island = {
      .event-card so the shared popover label (.event-pop-typeline) stays muted grey. */
   .event-card--meetup .event-typeline { color: #fbbf24; }
   .event-card--public .event-typeline { color: #4ade80; }
+  .event-card--council .event-typeline { color: #60a5fa; }
 
   .event-signal {
     display: inline-flex;
@@ -686,6 +692,7 @@ const island = {
      both clear WCAG AA on the popover's dark base-200 background. */
   #event-detail[data-type="meetup"] .event-pop-typeline { color: #fbbf24; }
   #event-detail[data-type="public"] .event-pop-typeline { color: #4ade80; }
+  #event-detail[data-type="council"] .event-pop-typeline { color: #60a5fa; }
   .event-pop-title {
     color: #e8e8e8;
     font-size: 1.3rem;
@@ -720,8 +727,45 @@ const island = {
   .event-pop-desc { color: #a3a3a3; font-size: 0.9rem; line-height: 1.6; margin: 0 0 1.25rem; overflow-wrap: anywhere; }
   .event-pop-desc[hidden] { display: none; }
   .event-pop-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; }
-  #event-detail-recurrence[hidden] { display: none; }
   #event-detail-signal[hidden] { display: none; }
+
+  /* --- Popover "Upcoming meetings" list ---
+     Shown for any recurring event: a bordered list of the next few dates, the
+     first tagged "Next", with a muted cadence/indefinite footer. Amber "Next"
+     pill matches the site's emphasis idiom; contrast and a real <ul> keep it
+     accessible with no reliance on colour. */
+  .event-pop-upcoming { margin: 0 0 1.25rem; }
+  .event-pop-upcoming[hidden] { display: none; }
+  .event-pop-upcoming-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b6b6b;
+    margin: 0 0 0.5rem;
+  }
+  .event-pop-upcoming-list { list-style: none; margin: 0; padding: 0; }
+  .event-pop-upcoming-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #d4d4d4;
+    font-size: 0.875rem;
+    padding: 0.4rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .event-pop-upcoming-item:first-child { border-top: 0; }
+  .event-pop-upcoming-next {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.5);
+    border-radius: 2px;
+    padding: 1px 5px;
+  }
+  .event-pop-upcoming-foot { color: #8a8a8a; font-size: 0.8125rem; margin: 0.5rem 0 0; }
 
   /* Respect reduced-motion for the modal's open/close transition. The id+class
      selectors outrank daisyUI's bare .modal / .modal-box, so no !important. */
