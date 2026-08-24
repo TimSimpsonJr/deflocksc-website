@@ -57,6 +57,16 @@ export function buildCommitMessage(addedCount: number): string {
  * unparseable date (deferring to this schema check), so without this gate such
  * a record would sail through `pruneExpired` and land in the file forever.
  *
+ * A `council` record is dropped too, even though `publicEventSchema` now admits
+ * `type: 'council'` (for council-events.ts's loader). events.json holds ONLY
+ * folded submissions (meetup/public); curated council meetings live in
+ * council-meetings.json and merge in via loadCouncilEvents(). Committing a
+ * council record here would pass this schema yet fail the very next build's
+ * events.astro guard, stalling every deploy until a human reverted — the exact
+ * fail-open direction this fold is built against. Reachable only via store
+ * corruption (submissionSchema still rejects 'council'), so this is
+ * defense-in-depth, mirroring the explicit council rejection in events.astro.
+ *
  * Both gates fail closed. The tombstone check publishes only a record whose
  * `revoked` is exactly `false` — matching go.ts and submit-event.ts, where a
  * `revoked` that is truthy-but-not-`true` or absent entirely is treated as a
@@ -78,6 +88,9 @@ export function foldStoredEvents(records: readonly StoredEvent[]): PublicEvent[]
     const projected = toPublicEvent(record);
     const parsed = publicEventSchema.safeParse(projected);
     if (!parsed.success) continue;
+    // Never commit a council record to events.json (see docstring): it would
+    // pass this schema but fail the next build's events.astro guard.
+    if (parsed.data.type === 'council') continue;
     published.push(parsed.data as PublicEvent);
   }
   return published.sort((a, b) => {
@@ -95,15 +108,30 @@ export function foldStoredEvents(records: readonly StoredEvent[]): PublicEvent[]
 export const EXPIRY_HORIZON_DAYS = 30;
 const EXPIRY_HORIZON_MS = EXPIRY_HORIZON_DAYS * 24 * 60 * 60 * 1000;
 
-type EventRecurrence = { readonly freq: 'weekly' | 'monthly_nth'; readonly until: string } | null;
+// Mirrors PublicEvent['recurrence'] (public-event.ts): `until` is nullable — a
+// curated council record may recur indefinitely (until: null) — and `nths` is an
+// optional monthly-nth selection. Kept in sync so a PublicEvent is assignable to
+// DatedEvent without a cast; ReadonlyArray so a mutable PublicEvent.nths still fits.
+type EventRecurrence =
+  | {
+      readonly freq: 'weekly' | 'monthly_nth';
+      readonly until: string | null;
+      readonly nths?: ReadonlyArray<1 | 2 | 3 | 4 | 5 | 'last'>;
+    }
+  | null;
 
 interface DatedEvent {
   readonly date: string;
   readonly recurrence: EventRecurrence;
 }
 
-/** The last day an event is active: recurrence.until when it recurs, else its own date. */
-export function finalDateOf(event: DatedEvent): string {
+/**
+ * The last day an event is active: recurrence.until when it recurs to a fixed
+ * end, else its own date. Returns null for an indefinite recurrence
+ * (recurrence.until === null), which isExpired() reads as "no final date, never
+ * expires".
+ */
+export function finalDateOf(event: DatedEvent): string | null {
   return event.recurrence ? event.recurrence.until : event.date;
 }
 
@@ -112,11 +140,14 @@ export function finalDateOf(event: DatedEvent): string {
  * The horizon is measured from the end of that calendar day in UTC, so an event
  * is not counted expired on the very day it turns 30 days old. `now` is passed
  * in rather than read from the clock so both the fold and the build guard are
- * deterministic. An unparseable date is never treated as expired — the strict
- * schema guard, not this predicate, is what rejects a malformed date.
+ * deterministic. An indefinite recurrence (until: null) has no final date and is
+ * never expired; an unparseable date is likewise never treated as expired — the
+ * strict schema guard, not this predicate, is what rejects a malformed date.
  */
 export function isExpired(event: DatedEvent, now: Date): boolean {
-  const end = Date.parse(`${finalDateOf(event)}T23:59:59.999Z`);
+  const finalDate = finalDateOf(event);
+  if (finalDate === null) return false;
+  const end = Date.parse(`${finalDate}T23:59:59.999Z`);
   if (Number.isNaN(end)) return false;
   return now.getTime() - end > EXPIRY_HORIZON_MS;
 }

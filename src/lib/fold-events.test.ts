@@ -176,6 +176,19 @@ describe('foldStoredEvents', () => {
     expect(out.map((e) => e.id)).toEqual(['aaaaaaaa']);
   });
 
+  it('drops a council-typed record so a corrupt store entry cannot stall the build', () => {
+    // publicEventSchema admits type:'council' for council-events.ts's loader, but
+    // events.json holds ONLY folded submissions. A council record differs from the
+    // kept public one by type alone, so it passes the schema — yet committing it
+    // would fail the next build's events.astro guard. The fold drops it (fail-
+    // closed), matching that guard. Reachable only via store corruption.
+    const out = foldStoredEvents([
+      storedEvent({ id: 'aaaaaaaa' }),
+      storedEvent({ id: 'bbbbbbbb', type: 'council' as unknown as StoredEvent['type'] }),
+    ]);
+    expect(out.map((e) => e.id)).toEqual(['aaaaaaaa']);
+  });
+
   it('publishes the schema-sanitized value, not the raw stored text (rewrite-class corruption)', () => {
     // publicEventSchema runs sanitizeText, which trims an edge BOM and collapses
     // horizontal-space runs. The fold commits that canonical form, not the raw
@@ -205,6 +218,14 @@ describe('isExpired', () => {
 
   it('keeps a future event', () => {
     expect(isExpired({ date: '2026-12-01', recurrence: null }, NOW)).toBe(false);
+  });
+
+  it('never expires an indefinite recurrence (until: null)', () => {
+    // A curated council record recurs indefinitely: finalDateOf returns null and
+    // isExpired reads that as "no final date", however old the start date is.
+    expect(
+      isExpired({ date: '2020-01-01', recurrence: { freq: 'weekly', until: null } }, NOW),
+    ).toBe(false);
   });
 
   it('measures a recurring event from recurrence.until, not its start date', () => {
