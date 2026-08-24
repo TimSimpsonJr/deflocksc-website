@@ -139,15 +139,17 @@ const island = {
   </section>
 
   <section class="events-body">
-    <div
-      class="events-tabs"
-      role="tablist"
-      aria-label="Calendar views"
-      id="events-tabs"
-    >
-      <button id="tab-list" role="tab" aria-selected="true" aria-controls="panel-list" class="events-tab is-selected" data-tab="list">List</button>
-      <button id="tab-month" role="tab" aria-selected="false" aria-controls="panel-month" class="events-tab" data-tab="month" tabindex="-1">Month</button>
-      <button id="tab-map" role="tab" aria-selected="false" aria-controls="panel-map" class="events-tab events-tab-map" data-tab="map" tabindex="-1">Map</button>
+    <div class="events-tabs-bar">
+      <div
+        class="events-tabs tabs tabs-box"
+        role="tablist"
+        aria-label="Calendar views"
+        id="events-tabs"
+      >
+        <button id="tab-list" role="tab" aria-selected="true" aria-controls="panel-list" class="events-tab tab is-selected" data-tab="list" type="button">List</button>
+        <button id="tab-month" role="tab" aria-selected="false" aria-controls="panel-month" class="events-tab tab" data-tab="month" type="button" tabindex="-1">Month</button>
+        <button id="tab-map" role="tab" aria-selected="false" aria-controls="panel-map" class="events-tab tab events-tab-map" data-tab="map" type="button" tabindex="-1">Map</button>
+      </div>
     </div>
 
     {/* Built by events-page.ts on load. Empty and hidden without JavaScript,
@@ -264,10 +266,31 @@ const island = {
 
   .events-body { background: #171717; padding: 0 1.5rem 4rem; }
 
-  /* --- Tabs --- */
-  .events-tabs {
-    display: flex;
-    gap: 0.25rem;
+  /* --- Tabs (daisyUI tabs-box, deflock-themed) ---
+     The picker is daisyUI `tabs tabs-box` (mockup Section B, Option 1): a
+     base-200 tray with a raised active pill. `.events-tabs-bar` keeps the
+     original full-width sticky header + hairline divider, and the compact boxed
+     tray sits at its left, aligned to the page content. The daisyUI classes
+     supply the tabs-box VISUAL; the rules below re-theme it for the deflock DARK
+     theme and repair three things the defaults get wrong here (verified against
+     the theme tokens in global.css and daisyui/components/tab.css):
+       1. Active pill — daisyUI paints it base-100 (#171717), which is DARKER than
+          the base-200 (#1a1a1a) tray, and its elevation shadow is zeroed by the
+          theme's --depth:0, so the pill is all but invisible. A clearly lighter
+          neutral fill plus a hairline edge make it a raised chip; selection is
+          carried by luminance + shape (and aria-selected), never hue alone, so it
+          survives colour-blindness. Brand red stays reserved for the Signal CTA,
+          matching the card design language.
+       2. Inactive text — daisyUI dims it to ~50% (color-mix ≈ #818181 on the
+          tray ≈ 4.47:1, just under AA). Reset to #a3a3a3 (~6.9:1 on #1a1a1a).
+       3. Focus ring — replaced with the page's amber ring (high contrast on the
+          dark tray) instead of daisyUI's thin currentColor outline, which can
+          otherwise render in the dim inactive colour.
+     Active styles key on aria-selected AND is-selected: selectTab() toggles both
+     together, so the visual active state and the accessible state agree by
+     construction. Active pill text (#e8e8e8) on the #333 pill is ~10.3:1.
+     Unlayered on purpose, so these win over daisyUI's @layer utilities rules. */
+  .events-tabs-bar {
     max-width: 84rem;
     margin: 0 auto;
     padding: 1rem 0;
@@ -277,20 +300,30 @@ const island = {
     background: #171717;
     z-index: 20;
   }
+  /* Compact tray: shrink the flex row (daisyUI forces display:flex) to its three
+     tabs so the box reads as a toggle, not a full-width bar. */
+  .events-tabs {
+    width: fit-content;
+    max-width: 100%;
+  }
   .events-tab {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: #737373;
-    background: transparent;
-    border: 1px solid transparent;
-    padding: 0.75rem 1.1rem;
-    min-height: 44px;
+    min-height: 44px;                 /* WCAG touch target */
+    border: 1px solid transparent;    /* reserve the pill border so activating adds no shift */
+    color: #a3a3a3;                   /* inactive: AA on the base-200 tray */
     cursor: pointer;
   }
-  .events-tab.is-selected { color: #e8e8e8; border-color: #dc2626; }
-  .events-tab:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+  .events-tab:hover { color: #e8e8e8; }
+  .events-tab.is-selected,
+  .events-tab[aria-selected="true"] {
+    background: #333333;
+    color: #e8e8e8;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  .events-tab:focus-visible {
+    outline: 2px solid #fbbf24;
+    outline-offset: 2px;
+    z-index: 1;
+  }
 
   /* --- Panels: tabbed on mobile, two columns on desktop --- */
   .events-grid { max-width: 84rem; margin: 0 auto; padding-top: 1.5rem; }
