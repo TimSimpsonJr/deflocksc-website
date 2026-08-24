@@ -152,11 +152,11 @@ export function collapseSeries(occurrences: readonly Occurrence[]): Occurrence[]
 }
 
 /**
- * The LIST-view recurrence badge text, or null for a one-off event.
+ * The LIST-view recurrence label text, or null for a one-off event.
  *
- * Rendered in the same DM Mono `.event-badge` style as "Public event" /
- * "Location in group" (CSS uppercases it, so it reads "REPEATS WEEKLY"). A
- * one-off event returns null and gets no badge.
+ * Appended to the card's quiet type line in the muted DM Mono `.event-typeline`
+ * idiom, e.g. "Public event · Repeats weekly" (CSS uppercases it, so it reads
+ * "… · REPEATS WEEKLY"). A one-off event returns null and gets no suffix.
  */
 export function recurrenceLabel(
   recurrence: PublicEvent['recurrence'],

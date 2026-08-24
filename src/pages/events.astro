@@ -210,11 +210,8 @@ const island = {
         <button class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3" aria-label="Close">✕</button>
       </form>
 
-      <p class="event-pop-eyebrow" id="event-detail-eyebrow">
-        <span class="event-pop-dot" id="event-detail-dot" aria-hidden="true"></span>
-        <span id="event-detail-typelabel"></span>
-      </p>
       <h3 class="event-pop-title" id="event-detail-title"></h3>
+      <p class="event-typeline event-pop-typeline" id="event-detail-typelabel"></p>
 
       <dl class="event-pop-dl">
         <dt class="event-pop-dt">When</dt>
@@ -288,8 +285,10 @@ const island = {
           otherwise render in the dim inactive colour.
      Active styles key on aria-selected AND is-selected: selectTab() toggles both
      together, so the visual active state and the accessible state agree by
-     construction. Active pill text (#e8e8e8) on the #333 pill is ~10.3:1.
-     Unlayered on purpose, so these win over daisyUI's @layer utilities rules. */
+     construction. The active pill rule below is shared verbatim with the type
+     filter (a radiogroup keyed on aria-checked), so the two controls' pills are
+     one source of truth. Unlayered on purpose, so these win over daisyUI's
+     @layer utilities rules. */
   .events-tabs-bar {
     max-width: 84rem;
     margin: 0 auto;
@@ -313,11 +312,19 @@ const island = {
     cursor: pointer;
   }
   .events-tab:hover { color: #e8e8e8; }
+  /* Active pill. Keyed on is-selected + aria-selected (the view tabs) AND
+     aria-checked (the type filter, a radiogroup that borrows this exact pill so
+     the two controls cannot drift). WCAG 1.4.11: the fill (#3d3d3d) and the
+     hairline (rgba white .36, ~#6c6c6c composited on the #1a1a1a tray → ~3.3:1)
+     lift the selected state clear of 3:1 non-text contrast against the tray;
+     selection is carried by fill + border + shape + aria, never hue. Active pill
+     text (#e8e8e8) on #3d3d3d is ~8.9:1 (AA). */
   .events-tab.is-selected,
-  .events-tab[aria-selected="true"] {
-    background: #333333;
+  .events-tab[aria-selected="true"],
+  .events-tab[aria-checked="true"] {
+    background: #3d3d3d;
     color: #e8e8e8;
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.36);
   }
   .events-tab:focus-visible {
     outline: 2px solid #fbbf24;
@@ -415,21 +422,21 @@ const island = {
   .event-meta { color: #a3a3a3; font-size: 0.875rem; margin: 0 0 0.35rem; }
   .event-address { color: #a3a3a3; font-size: 0.8125rem; margin: 0 0 0.35rem; }
   .event-desc { color: #a3a3a3; font-size: 0.875rem; margin: 0 0 0.5rem; overflow-wrap: anywhere; }
-  .event-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin: 0.5rem 0 0; }
-
-  .event-badge {
+  /* Quiet type/recurrence line ("PUBLIC EVENT · REPEATS MONTHLY"). The de-slopped
+     replacement for the old coloured pill badges: the site's muted DM Mono label
+     idiom (uppercase, letter-spaced, #a3a3a3 ~6.9:1 on the #1a1a1a card), shared
+     with the popover's type label (.event-pop-typeline) so card and popover read
+     the same. Type is still cued by colour via the corner dot; this text is the
+     explicit, accessible signal, so type is never conveyed by colour alone. */
+  .event-typeline {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    padding: 0.3rem 0.55rem;
-    border: 1px solid currentColor;
+    color: #a3a3a3;
+    margin: 0;
   }
-  .event-badge-meetup { color: #fbbf24; }
-  .event-badge-public { color: #4ade80; }
-  /* Recurrence frequency for a collapsed series ("REPEATS WEEKLY"). Neutral so it
-     reads as metadata beside the amber/green type badge, not a second call. */
-  .event-badge-repeat { color: #9ca3af; }
+  .event-card .event-typeline { margin: 0.6rem 0 0; }
 
   .event-signal {
     display: inline-flex;
@@ -588,34 +595,16 @@ const island = {
   .autocomplete__option:hover .county-opt-count,
   .autocomplete__option--focused .county-opt-count { color: #fecaca; }
 
-  /* Type segmented control: three joined radios, one active. */
-  .type-segmented {
-    display: inline-flex;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 0.25rem;
-    overflow: hidden;
-  }
-  .seg-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    min-height: 44px;
-    padding: 0 0.85rem;
-    border: 0;
-    border-left: 1px solid rgba(255, 255, 255, 0.12);
-    background: transparent;
-    color: #a3a3a3;
-    font-family: inherit;
-    font-size: 0.8125rem;
-    cursor: pointer;
-  }
-  .seg-btn:first-child { border-left: 0; }
-  .seg-btn:hover { color: #e8e8e8; background: rgba(255, 255, 255, 0.04); }
-  .seg-btn.is-active { background: rgba(220, 38, 38, 0.14); color: #ffffff; }
-  /* Inset so the ring is not clipped by the group's overflow:hidden. */
-  .seg-btn:focus-visible { outline: 2px solid #fbbf24; outline-offset: -2px; }
-  .seg-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #737373; }
-  .seg-btn.is-active .seg-count { color: #fca5a5; }
+  /* Type filter: an ARIA radiogroup that borrows the view-tabs pill VERBATIM. Each
+     radio ships `events-tab tab events-type-btn`, the group ships
+     `events-tabs tabs tabs-box`, so the tray, pill, active fill/border, focus
+     ring, sizing and hover all come from the .events-tab rules above (one source
+     of truth — the two controls cannot drift). Selection is aria-checked, not
+     aria-selected; the shared active rule matches both. Only the per-option count
+     needs its own styling here. */
+  .events-type-btn { gap: 0.4rem; }
+  .seg-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #8a8a8a; }
+  .events-tab[aria-checked="true"] .seg-count { color: #c9c9c9; }
 
   .filter-clear {
     color: #737373;
@@ -652,7 +641,10 @@ const island = {
     cursor: pointer;
   }
   .event-title-btn:hover { color: #ffffff; text-decoration: underline; text-underline-offset: 2px; }
-  .event-title-btn:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+  /* Inset ring: the parent .event-title clamps with overflow:hidden + max-height,
+     which would clip an outset (positive-offset) outline. Matches the tab/seg
+     buttons' inset ring. */
+  .event-title-btn:focus-visible { outline: 2px solid #fbbf24; outline-offset: -2px; }
 
   /* --- Event detail popover (Section C of the dev mockup) ---
      Text styling for the daisyUI <dialog class="modal"> defined near the panels
@@ -660,27 +652,18 @@ const island = {
      deflock theme; only the popover-specific type scale lives here, ported from
      the approved mockup. Global because the dialog's contents are filled by
      events-page.ts at runtime (no scoped data-astro-* attribute to match). */
-  .event-pop-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin: 0 0 0.5rem;
-  }
-  .event-pop-eyebrow--meetup { color: #fbbf24; }
-  .event-pop-eyebrow--public { color: #4ade80; }
-  .event-pop-dot { width: 0.5rem; height: 0.5rem; border-radius: 9999px; flex: none; display: inline-block; }
-  .event-pop-dot--meetup { background: #fbbf24; }
-  .event-pop-dot--public { background: #4ade80; }
+  /* Type label under the title — the de-slopped replacement for the old coloured
+     "eyebrow" + dot. Reuses the shared .event-typeline idiom (muted DM Mono, so
+     card and popover match); only its margins around the title live here. Type is
+     still colour-cued by the card's corner dot; this plain muted label is the
+     accessible signal, so type is never colour-only. */
+  .event-pop-typeline { margin: 0 0 1.1rem; }
   .event-pop-title {
     color: #e8e8e8;
     font-size: 1.3rem;
     font-weight: 700;
     line-height: 1.2;
-    margin: 0 0 1.1rem;
+    margin: 0 0 0.4rem;
     overflow-wrap: anywhere;
     unicode-bidi: isolate;
   }

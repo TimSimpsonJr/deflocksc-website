@@ -253,12 +253,17 @@
   }
   :global(.events-popup-event:hover) { background: rgba(255, 255, 255, 0.06); }
   :global(.events-popup-event:focus-visible) { outline: 2px solid #fbbf24; outline-offset: -2px; }
-  :global(.events-popup-event-date) {
+  /* Raised above `.events-popup span` (0,1,1): that broad rule paints every span
+     #a3a3a3, which on specificity would otherwise beat a bare
+     `.events-popup-event-date` (0,1,0) and grey out the red date and the light
+     title. Prefixing with `.events-popup` (0,2,0) restores the intended colours;
+     the title inherits the button's #e8e8e8. */
+  :global(.events-popup .events-popup-event-date) {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.08em;
     color: #dc2626;
     flex: none;
   }
-  :global(.events-popup-event-title) { min-width: 0; overflow-wrap: anywhere; }
+  :global(.events-popup .events-popup-event-title) { min-width: 0; overflow-wrap: anywhere; color: inherit; }
 </style>

@@ -42,16 +42,13 @@ const place = (o: Occurrence) =>
           </p>
           {o.event.address && <p class="event-address">{o.event.address}</p>}
           {o.event.description && <p class="event-desc">{o.event.description}</p>}
-          <p class="event-actions">
-            <span class={`event-badge ${o.event.type === 'meetup' ? 'event-badge-meetup' : 'event-badge-public'}`}>
-              {o.event.type === 'meetup' ? 'Location in group' : 'Public event'}
-            </span>
-            {recurrenceLabel(o.event.recurrence) && (
-              <span class="event-badge event-badge-repeat">{recurrenceLabel(o.event.recurrence)}</span>
-            )}
-            {o.event.hasSignalGroup && (
-              <a class="event-signal" href={`/go/${o.event.id}`} rel="noreferrer">Join Signal group</a>
-            )}
+          {/* Quiet type/recurrence line — the de-slopped replacement for the old
+              coloured badge row. MUST stay in class-parity with buildCard() in
+              events-page.ts: a single <p class="event-typeline"> with the type
+              label, and " · Repeats …" appended for a collapsed recurring series.
+              The Signal join lives only in the detail popover now, never here. */}
+          <p class="event-typeline">
+            {o.event.type === 'meetup' ? 'Location in group' : 'Public event'}{recurrenceLabel(o.event.recurrence) ? ` · ${recurrenceLabel(o.event.recurrence)}` : ''}
           </p>
         </div>
       </li>

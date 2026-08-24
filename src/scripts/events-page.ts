@@ -370,6 +370,10 @@ function placeLabel(e: PublicEvent): string {
 
 function buildCard(o: Occurrence): HTMLLIElement {
   const e = o.event;
+  const meetup = e.type === 'meetup';
+  // Closed ternary, not `--${e.type}`, so only the two known type suffixes can
+  // ever reach a class name.
+  const typeSuffix = meetup ? 'meetup' : 'public';
   const li = document.createElement('li');
   li.className = 'event-card';
   li.dataset.eventId = e.id;
@@ -381,7 +385,7 @@ function buildCard(o: Occurrence): HTMLLIElement {
   // Mirror EventsList.astro's date panel exactly (the class-parity contract): a
   // type-coloured dot in the panel corner, then the day, then the month abbr.
   date.append(
-    el('span', `event-date-dot event-date-dot--${e.type}`),
+    el('span', `event-date-dot event-date-dot--${typeSuffix}`),
     el('span', 'event-date-day', dayOfMonth(o.date)),
     el('span', 'event-date-mon', monthAbbr(o.date)),
   );
@@ -411,26 +415,13 @@ function buildCard(o: Occurrence): HTMLLIElement {
   if (e.address) body.append(el('p', 'event-address', e.address));
   if (e.description) body.append(el('p', 'event-desc', e.description));
 
-  const actions = el('p', 'event-actions');
-  const meetup = e.type === 'meetup';
-  actions.append(
-    el(
-      'span',
-      `event-badge ${meetup ? 'event-badge-meetup' : 'event-badge-public'}`,
-      meetup ? 'Location in group' : 'Public event',
-    ),
-  );
-  // Mirror EventsList.astro: a collapsed recurring series carries a frequency
-  // badge next to the type badge. One-off events get null and no badge.
+  // Quiet type/recurrence line. Mirrors EventsList.astro's <p class="event-typeline">
+  // exactly (the class-parity contract): the type label, with " · Repeats …"
+  // appended for a collapsed recurring series. The Signal join lives only in the
+  // detail popover now, so the card's sole control is the title button above.
   const repeat = recurrenceLabel(e.recurrence);
-  if (repeat) actions.append(el('span', 'event-badge event-badge-repeat', repeat));
-  if (e.hasSignalGroup) {
-    const a = el('a', 'event-signal', 'Join Signal group') as HTMLAnchorElement;
-    a.href = `/go/${encodeURIComponent(e.id)}`;
-    a.rel = 'noreferrer';
-    actions.append(a);
-  }
-  body.append(actions);
+  const typeLabel = meetup ? 'Location in group' : 'Public event';
+  body.append(el('p', 'event-typeline', repeat ? `${typeLabel} · ${repeat}` : typeLabel));
 
   li.append(date, body);
   return li;
@@ -533,11 +524,9 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
   const e = o.event;
   const meetup = e.type === 'meetup';
 
-  // Eyebrow: type dot colour + label.
-  const eyebrow = document.getElementById('event-detail-eyebrow');
-  if (eyebrow) eyebrow.className = `event-pop-eyebrow event-pop-eyebrow--${e.type}`;
-  const dot = document.getElementById('event-detail-dot');
-  if (dot) dot.className = `event-pop-dot event-pop-dot--${e.type}`;
+  // Type label under the title (the coloured eyebrow + dot are gone). Same wording
+  // and muted idiom as the card's quiet label; type stays colour-cued by the card
+  // corner dot, so this plain label is the accessible signal — never colour-only.
   const typeLabel = document.getElementById('event-detail-typelabel');
   if (typeLabel) typeLabel.textContent = meetup ? 'Location in group' : 'Public event';
 
@@ -680,7 +669,8 @@ function applyMerge(merged: PublicEvent[]) {
 // the page ships is empty and hidden, so a no-JavaScript visitor sees the complete
 // list and no dead control. Here we build a searchable COUNTY combobox
 // (accessible-autocomplete — the same widget and dark `.autocomplete__*` skin the
-// submit form's city picker uses) and a 3-way TYPE segmented control, filter the
+// submit form's city picker uses) and a 3-way TYPE filter (an ARIA radiogroup
+// styled as daisyUI tabs-box pills), filter the
 // list in place, and keep the choice in the URL hash so a filtered view is
 // shareable and the back button works. `el`, `buildCard`, `buildChip`, and
 // `placeLabel` already exist in this module; they are used, not redefined.
@@ -808,12 +798,16 @@ function renderCountyCombobox(): void {
   comboboxCounty = filter.county;
 }
 
-/** One button in the 3-way type segmented control (an ARIA radiogroup). Roving
- *  tabindex and aria-checked are maintained by syncChrome; this only builds it. */
+/** One button in the 3-way type filter (an ARIA radiogroup styled as a tabs-box
+ *  pill). Roving tabindex and aria-checked are maintained by syncChrome; this
+ *  only builds it. */
 function typeRadio(value: EventTypeFilter, label: string): HTMLButtonElement {
   const b = document.createElement('button');
   b.type = 'button';
-  b.className = 'seg-btn';
+  // Borrow the view-tabs pill verbatim (events-tab + daisyUI tab), so the type
+  // filter and the List/Month/Map tabs share one pill style and cannot drift.
+  // Keeps role="radio" (radiogroup semantics) — the class is visual only.
+  b.className = 'events-tab tab events-type-btn';
   b.dataset.filterKey = 'type';
   b.dataset.filterValue = value;
   b.setAttribute('role', 'radio');
@@ -823,8 +817,8 @@ function typeRadio(value: EventTypeFilter, label: string): HTMLButtonElement {
   return b;
 }
 
-/** Build the county row (label + combobox) and the type row (segmented control +
- *  clear button), once. Counts and active states are set here and then maintained
+/** Build the county row (label + combobox) and the type row (radiogroup pill
+ *  filter + clear button), once. Counts and active states are set here and then maintained
  *  by syncChrome(); this only decides which controls exist. */
 function buildFilters(): void {
   const nav = document.getElementById('events-filters');
@@ -848,7 +842,9 @@ function buildFilters(): void {
   typeLegend.id = 'events-type-legend';
   typeLegend.textContent = 'Type';
   const seg = document.createElement('div');
-  seg.className = 'type-segmented';
+  // Same daisyUI tabs-box tray the view tabs use, so the type filter reads as the
+  // same pill control. role="radiogroup" (not tablist) keeps the radio semantics.
+  seg.className = 'events-tabs tabs tabs-box';
   seg.setAttribute('role', 'radiogroup');
   seg.setAttribute('aria-labelledby', 'events-type-legend');
   seg.append(
@@ -900,12 +896,14 @@ function syncChrome(): void {
   // header count below reads the rendered row count, which is already collapsed.
   const facets = facetCounts(collapseSeries(upcomingFor(allEvents)), filter);
 
-  // Type segmented control: the faceted count on each option, the checked radio,
+  // Type filter: the faceted count on each option, the checked radio,
   // and the roving tabindex (only the checked radio is a tab stop).
-  for (const btn of document.querySelectorAll<HTMLButtonElement>('.seg-btn')) {
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('.events-type-btn')) {
     const value = (btn.dataset.filterValue ?? 'all') as 'all' | 'meetup' | 'public';
     const active = filter.type === value;
-    btn.classList.toggle('is-active', active);
+    // is-selected is the same active-pill hook the view tabs use; aria-checked is
+    // the radiogroup state. The shared pill rule keys on both, so they agree.
+    btn.classList.toggle('is-selected', active);
     btn.setAttribute('aria-checked', String(active));
     btn.tabIndex = active ? 0 : -1;
     const badge = btn.querySelector('.seg-count');
@@ -1010,7 +1008,7 @@ function pushHash(next: EventFilter): void {
   applyFilter(next);
 }
 
-// Clicks on the type segmented buttons and the clear button. The county combobox
+// Clicks on the type filter buttons and the clear button. The county combobox
 // lives in this same <nav> but its accessible-autocomplete nodes carry no
 // data-filter-key, so a click there resolves to null and is ignored — county
 // selection goes through countyOnConfirm, not this handler.
