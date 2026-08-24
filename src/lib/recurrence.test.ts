@@ -302,4 +302,51 @@ describe('expandOccurrences: monthly_nth with an nths list', () => {
       ),
     ).toThrow(RangeError);
   });
+
+  it('throws RangeError on an empty nths array', () => {
+    // [] passes Array.prototype.every vacuously; the length check rejects it so a
+    // curated entry with no slots cannot silently produce zero occurrences.
+    expect(() =>
+      expandOccurrences(
+        '2026-09-08',
+        { freq: 'monthly_nth', nths: [] as unknown as Array<1 | 2>, until: null },
+        '2026-12-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError on a null nths rather than falling back to the derived nth', () => {
+    // Pins the guard against the `?? [derivedNth]` fallback: a corrupt null must
+    // fail loudly, not be treated as "no nths" and collapse to startDate's nth.
+    expect(() =>
+      expandOccurrences(
+        '2026-09-08',
+        { freq: 'monthly_nth', nths: null as unknown as Array<1 | 2>, until: null },
+        '2026-12-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError on an out-of-range nth member (7)', () => {
+    expect(() =>
+      expandOccurrences(
+        '2026-09-08',
+        { freq: 'monthly_nth', nths: [2, 7] as unknown as Array<1 | 2>, until: null },
+        '2026-12-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('fires the hoisted nths guard even when startMs > endMs (empty series)', () => {
+    // until precedes startDate, so the series is empty and the function would
+    // early-return []. The nths validation is hoisted BEFORE that early-return,
+    // so corruption is still detected uniformly rather than silently ignored.
+    expect(() =>
+      expandOccurrences(
+        '2026-09-08',
+        { freq: 'monthly_nth', nths: [7] as unknown as Array<1 | 2>, until: '2026-01-01' },
+        '2026-12-31',
+      ),
+    ).toThrow(RangeError);
+  });
 });

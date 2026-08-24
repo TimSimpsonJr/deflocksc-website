@@ -256,6 +256,28 @@ function publicEventRecord(overrides: Record<string, unknown> = {}): Record<stri
   };
 }
 
+/** A valid curated council record: type 'council', a source URL, and an
+ *  indefinite monthly_nth recurrence. */
+function councilEventRecord(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    id: 'council-greenville-city',
+    type: 'council',
+    title: 'Greenville City Council',
+    description: 'Sign up with the clerk to speak. Each speaker gets 3 minutes.',
+    date: '2026-09-14',
+    time: '17:30',
+    city: 'greenville',
+    county: 'greenville',
+    address: '206 S Main St, Greenville, SC 29601',
+    hasSignalGroup: false,
+    recurrence: { freq: 'monthly_nth', nths: [2, 4], until: null },
+    organizer: 'Greenville City Council',
+    createdAt: '2026-08-17T14:22:00Z',
+    source: 'https://www.greenvillesc.gov/185/City-Council',
+    ...overrides,
+  };
+}
+
 describe('publicEventSchema — the stored/public shape', () => {
   it('accepts a valid PublicEvent record', () => {
     expect(publicEventSchema.safeParse(publicEventRecord()).success).toBe(true);
@@ -323,5 +345,39 @@ describe('publicEventSchema — the stored/public shape', () => {
     expect(parsed.success).toBe(false);
     if (parsed.success) return;
     expect(parsed.error.issues.some((i) => i.message === 'nths_requires_council')).toBe(true);
+  });
+
+  // Fail-closed on the recurrence sub-object itself: `nths` is monthly_nth-only.
+  // A curated { freq: 'weekly', nths: [...] } would otherwise validate and then be
+  // silently ignored by expandOccurrences (which reads nths only for monthly_nth).
+  it('rejects nths on a weekly recurrence, even for a council record', () => {
+    const parsed = publicEventSchema.safeParse(
+      councilEventRecord({ recurrence: { freq: 'weekly', until: null, nths: [1, 3] } }),
+    );
+    expect(parsed.success).toBe(false);
+    if (parsed.success) return;
+    expect(parsed.error.issues.some((i) => i.message === 'nths_requires_monthly_nth')).toBe(true);
+  });
+
+  // The council `source` renders as an href, so the render schema caps its length
+  // and requires an http(s) scheme on its own — it is not self-sufficient otherwise.
+  it('rejects a source that is not an http(s) URL', () => {
+    expect(publicEventSchema.safeParse(councilEventRecord({ source: 'not-a-url' })).success).toBe(
+      false,
+    );
+    expect(
+      publicEventSchema.safeParse(councilEventRecord({ source: 'javascript:alert(1)' })).success,
+    ).toBe(false);
+    expect(
+      publicEventSchema.safeParse(councilEventRecord({ source: 'ftp://example.gov/agenda' }))
+        .success,
+    ).toBe(false);
+  });
+
+  it('rejects an over-length source (> 300 chars)', () => {
+    const longSource = `https://example.gov/${'a'.repeat(300)}`;
+    expect(publicEventSchema.safeParse(councilEventRecord({ source: longSource })).success).toBe(
+      false,
+    );
   });
 });

@@ -50,7 +50,11 @@ export interface ValidatedSubmission {
   county: string;
   address: string | null;
   signalUrl: string | null;
-  /** Structurally identical to `Recurrence` in ./recurrence.js. */
+  /**
+   * A strict SUBSET of `Recurrence` in ./recurrence.js: a submission can set
+   * neither `nths` nor a null `until` (both are curated-council-only), so `until`
+   * is always a concrete date here and there is no `nths` field.
+   */
   recurrence: { freq: 'weekly' | 'monthly_nth'; until: string } | null;
   codeNormalized: string;
 }
@@ -66,6 +70,21 @@ function isRealIsoDate(iso: string): boolean {
   if (m < 1 || m > 12 || d < 1 || d > 31) return false;
   const t = new Date(Date.UTC(y, m - 1, d));
   return t.getUTCFullYear() === y && t.getUTCMonth() === m - 1 && t.getUTCDate() === d;
+}
+
+/**
+ * True only for an absolute http(s) URL. The council `source` is rendered as an
+ * href, so a value that does not parse to an http/https scheme (a `javascript:`
+ * or `data:` URL, or free text that is not a URL at all) must not reach the
+ * page. Same parse-and-check idiom as isRealIsoDate above.
+ */
+function isHttpUrl(value: string): boolean {
+  try {
+    const u = new URL(value);
+    return u.protocol === 'https:' || u.protocol === 'http:';
+  } catch {
+    return false;
+  }
 }
 
 function todayIso(): string {
@@ -256,10 +275,23 @@ export const publicEventSchema = z
           .optional(),
       })
       .strict()
+      .superRefine((r, ctx) => {
+        // Fail-closed: `nths` is a monthly_nth-only selection. A curated
+        // { freq: 'weekly', nths: [...] } would otherwise validate here and then
+        // be SILENTLY IGNORED by expandOccurrences, which reads nths only in its
+        // monthly_nth branch — rendering a plain weekly series instead of the
+        // curated slots. Reject it at the boundary so the mistake fails loudly.
+        if (r.nths !== undefined && r.freq !== 'monthly_nth') {
+          ctx.addIssue({ code: 'custom', path: ['nths'], message: 'nths_requires_monthly_nth' });
+        }
+      })
       .nullable(),
     organizer: z.string(),
     createdAt: z.string(),
-    source: z.string().nullable().optional(),
+    // Council-only official-schedule URL. Capped and scheme-checked here so the
+    // render schema is self-sufficient: the value is bound for an href, so an
+    // unbounded or non-http(s) string must never pass this gate on its own.
+    source: z.string().max(300).refine(isHttpUrl, 'bad_source').nullable().optional(),
   })
   .strict()
   .superRefine((value, ctx) => {

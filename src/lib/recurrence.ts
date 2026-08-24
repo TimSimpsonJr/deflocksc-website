@@ -138,13 +138,41 @@ function resolveSlot(
 }
 
 /**
+ * A well-formed `nths`: a NON-EMPTY array whose every member is exactly one of
+ * 1|2|3|4|5|'last'. Rejects null, an empty array, a sparse array (an indexed
+ * scan visits holes as `undefined`, unlike Array.prototype.every, which skips
+ * them), a non-finite or fractional number, and anything out of the 1-5 range.
+ *
+ * `nths` is the one recurrence field trusted from its TypeScript type alone, and
+ * this module's threat model is a hand-edited or fold-corrupted events.json.
+ * Every rejected shape here otherwise fails OPEN downstream: a string member
+ * formats as "0NaN-NaN-NaN", a fractional day truncates onto the wrong weekday,
+ * a zero or negative nth rolls into the previous month past nthWeekdayOfMonth's
+ * upper-bound-only guard, and null/empty silently collapses to startDate's own
+ * derived nth via the `??` fallback. Reject all of them so corruption fails loud.
+ */
+function isValidNths(value: unknown): boolean {
+  if (!Array.isArray(value) || value.length === 0) return false;
+  for (let i = 0; i < value.length; i += 1) {
+    const member = value[i];
+    if (member === 'last') continue;
+    if (typeof member !== 'number' || !Number.isInteger(member) || member < 1 || member > 5) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
  * Expand a recurrence rule into the calendar days it covers.
  *
  * `startDate` is occurrence #1 and is always included, subject to the bounds.
  * Both `rec.until` and `horizonEndIso` are INCLUSIVE, and each clamps
- * independently -- the effective end is the earlier of the two. A start date
- * past the effective end yields an empty array, including when `rec` is null,
- * so the returned list never contains a date past either bound.
+ * independently -- the effective end is the earlier of the two. `rec.until` may
+ * be null (an indefinite series), in which case `horizonEndIso` is the sole
+ * bound. A start date past the effective end yields an empty array, including
+ * when `rec` is null, so the returned list never contains a date past either
+ * bound.
  *
  * `monthly_nth` repeats the Nth-weekday-of-month implied by `startDate`
  * (2026-08-11 is the 2nd Tuesday, so the series is every 2nd Tuesday). A month
@@ -168,6 +196,15 @@ export function expandOccurrences(
     if (rec.freq !== 'weekly' && rec.freq !== 'monthly_nth') {
       throw new RangeError('recurrence.freq must be "weekly" or "monthly_nth"');
     }
+    // Validate nths here -- next to the freq check and BEFORE any bounds
+    // early-return -- so a corrupt list is detected uniformly, even when the
+    // series is empty (startMs > endMs) or the freq is weekly (which ignores
+    // nths). See isValidNths for the fail-open shapes this closes.
+    if (rec.nths !== undefined && !isValidNths(rec.nths)) {
+      throw new RangeError(
+        "recurrence.nths must be a non-empty array of integers 1-5 or 'last'",
+      );
+    }
     endMs =
       rec.until === null
         ? horizonMs
@@ -190,22 +227,8 @@ export function expandOccurrences(
   // monthly_nth. The weekday comes from startDate. The month-slots are rec.nths
   // when present, else the single nth that startDate itself falls on (the
   // back-compatible default). startDate must be one of the slots its own month
-  // produces, so it is always occurrence #1.
-  // Defence in depth: nths is the one field trusted from its TS type alone, and
-  // this function's threat model is a hand-edited or fold-corrupted events.json.
-  // Garbage members fail OPEN into the output -- a string nth formats as
-  // "0NaN-NaN-NaN", a fractional day is truncated onto the wrong weekday, and a
-  // zero or negative nth rolls into the previous month past nthWeekdayOfMonth's
-  // upper-bound-only guard -- so reject anything that is not absent or an array
-  // whose every member is 'last' or an integer 1-5, matching freq/date checks.
-  if (
-    rec.nths !== undefined &&
-    (!Array.isArray(rec.nths) ||
-      !rec.nths.every((n) => n === 'last' || (Number.isInteger(n) && n >= 1 && n <= 5)))
-  ) {
-    throw new RangeError("recurrence.nths must be an array of integers 1-5 or 'last'");
-  }
-
+  // produces, so it is always occurrence #1. rec.nths was validated by
+  // isValidNths above, before the bounds early-return.
   const start = new Date(startMs);
   const weekday = start.getUTCDay();
   const slots: Array<1 | 2 | 3 | 4 | 5 | 'last'> =
