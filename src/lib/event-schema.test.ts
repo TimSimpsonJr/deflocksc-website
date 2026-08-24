@@ -290,4 +290,38 @@ describe('publicEventSchema — the stored/public shape', () => {
     };
     expect(publicEventSchema.safeParse(record).success).toBe(true);
   });
+
+  // The council type widened the shape to admit `source`, a null `until`, and
+  // `nths`. Those fields are legitimate ONLY on a council record; on a folded
+  // meetup/public record they cannot occur (toPublicEvent projects neither
+  // `source` nor `nths`, and a submission's until is always a concrete date).
+  // Without the type coupling the widening is fail-open: a hand-edited events.json
+  // record smuggling council-style recurrence would pass and then render with
+  // silently wrong dates. These three pin the coupling shut.
+  it('rejects source on a non-council record', () => {
+    const parsed = publicEventSchema.safeParse(
+      publicEventRecord({ source: 'https://example.gov/agenda' }),
+    );
+    expect(parsed.success).toBe(false);
+    if (parsed.success) return;
+    expect(parsed.error.issues.some((i) => i.message === 'source_requires_council')).toBe(true);
+  });
+
+  it('rejects an indefinite (null) until on a non-council record', () => {
+    const parsed = publicEventSchema.safeParse(
+      publicEventRecord({ recurrence: { freq: 'weekly', until: null } }),
+    );
+    expect(parsed.success).toBe(false);
+    if (parsed.success) return;
+    expect(parsed.error.issues.some((i) => i.message === 'null_until_requires_council')).toBe(true);
+  });
+
+  it('rejects nths on a non-council record', () => {
+    const parsed = publicEventSchema.safeParse(
+      publicEventRecord({ recurrence: { freq: 'monthly_nth', until: '2026-12-01', nths: [1, 3] } }),
+    );
+    expect(parsed.success).toBe(false);
+    if (parsed.success) return;
+    expect(parsed.error.issues.some((i) => i.message === 'nths_requires_council')).toBe(true);
+  });
 });

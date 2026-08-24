@@ -33,6 +33,18 @@ const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index
       `src/data/events.json: record ${index} at "${at}" failed strict validation (${detail})`,
     );
   }
+  // events.json holds ONLY folded submissions (meetup/public). Curated council
+  // records live in council-meetings.json and merge in via loadCouncilEvents();
+  // they must never arrive on this path, where toPublicEvent's 13-field allowlist
+  // would silently strip their `source` and `nths` and render the wrong dates.
+  // publicEventSchema now admits `type: 'council'` for the council loader's sake,
+  // so reject it explicitly here rather than let a mistyped record through.
+  if (parsed.data.type === 'council') {
+    throw new Error(
+      `src/data/events.json: record ${index} has type "council"; curated council ` +
+        `meetings belong in council-meetings.json, not events.json`,
+    );
+  }
   return toPublicEvent(parsed.data as unknown as StoredEvent);
 });
 
@@ -61,6 +73,12 @@ if (import.meta.env.DEV) {
           issue.code === 'unrecognized_keys' ? 'unexpected_field' : issue.message;
         throw new Error(
           `src/data/events.dev.json: record ${index} at "${at}" failed strict validation (${detail})`,
+        );
+      }
+      if (parsed.data.type === 'council') {
+        throw new Error(
+          `src/data/events.dev.json: record ${index} has type "council"; council ` +
+            `meetings load from council-meetings.json, not this submissions fixture`,
         );
       }
       bakedEvents.push(toPublicEvent(parsed.data as unknown as StoredEvent));

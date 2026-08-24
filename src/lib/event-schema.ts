@@ -261,7 +261,45 @@ export const publicEventSchema = z
     createdAt: z.string(),
     source: z.string().nullable().optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    // Type coupling for the three council-only fields. Widening the shape to
+    // admit `source`, an indefinite (`null`) `until`, and `nths` is what lets a
+    // curated council record validate — but those fields are legitimate ONLY on
+    // a `council` record. A curated council entry enters via council-events.ts's
+    // loadCouncilEvents(), never this gate's fold/submission path, so on a
+    // folded meetup/public record they cannot legitimately occur: toPublicEvent
+    // projects neither `source` nor `nths`, and a submission's recurrence.until
+    // is always a concrete date. Without this refinement the widening is
+    // fail-open — a hand-edited src/data/events.json record (the exact "later bad
+    // commit" this schema exists to catch) carrying council-style recurrence
+    // would pass, then render with silently wrong dates, because toPublicEvent's
+    // deep-pick drops `nths` and the series falls back to startDate's own nth.
+    // Rejecting them here unless `type === 'council'` keeps the failure loud at
+    // the boundary and makes the "Absent on submitted (meetup/public) events"
+    // invariant documented on PublicEvent something the schema actually enforces.
+    if (value.type === 'council') return;
+
+    if (value.source !== undefined) {
+      ctx.addIssue({ code: 'custom', path: ['source'], message: 'source_requires_council' });
+    }
+    if (value.recurrence !== null) {
+      if (value.recurrence.until === null) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['recurrence', 'until'],
+          message: 'null_until_requires_council',
+        });
+      }
+      if (value.recurrence.nths !== undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['recurrence', 'nths'],
+          message: 'nths_requires_council',
+        });
+      }
+    }
+  });
 
 function invalid(errors: FieldError[]): Err<'invalid'> & { errors: FieldError[] } {
   return { ...err('invalid'), errors };
