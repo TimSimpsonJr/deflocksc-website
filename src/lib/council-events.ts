@@ -84,7 +84,10 @@ const councilRecurrenceSchema = z
 
 /**
  * The strict shape of one council-meetings.json entry. `.strict()` rejects any
- * unexpected key (a smuggled signalUrl/codeDigest/id-collision). The superRefine
+ * unexpected key (a smuggled signalUrl/codeDigest). It does NOT enforce
+ * id-uniqueness across entries — that is a cross-entry invariant a per-entry
+ * schema cannot see, so parseCouncilEvents enforces it with a Set pass that
+ * throws on a duplicate id. The superRefine
  * enforces two cross-field rules: `county` must be the county the registry
  * derives from `city` (a typo like city greenville / county spartanburg fails),
  * and `nths` is only meaningful for monthly_nth.
@@ -105,8 +108,8 @@ export const councilEventSchema = z
     county: z.string(),
     address: sanitizedField(ADDRESS_LIMITS),
     recurrence: councilRecurrenceSchema.nullable(),
-    source: z.string().refine(isHttpUrl, 'bad_source'),
-    organizer: z.string().min(1),
+    source: z.string().max(300).refine(isHttpUrl, 'bad_source'),
+    organizer: sanitizedField(TITLE_LIMITS),
   })
   .strict()
   .superRefine((value, ctx) => {
@@ -130,7 +133,18 @@ export const councilEventSchema = z
  * aborts rather than shipping unverified council data.
  */
 export function parseCouncilEvents(raw: readonly unknown[]): PublicEvent[] {
+  const seenIds = new Set<string>();
   return raw.map((entry, index) => {
+    // Mirror validateSubmission's guard on the sibling boundary. JSON.parse
+    // materializes `__proto__` as an own enumerable key rather than setting the
+    // prototype, and zod 4 skips it during its unrecognized-key scan, so
+    // `.strict()` alone would not reject it. Inert today (the projection below is
+    // explicit, never a spread), but kept so the two boundaries stay consistent.
+    if (entry !== null && typeof entry === 'object' && Object.hasOwn(entry, '__proto__')) {
+      throw new Error(
+        `src/data/council-meetings.json: record ${index} has an own "__proto__" key`,
+      );
+    }
     const parsed = councilEventSchema.safeParse(entry);
     if (!parsed.success) {
       const issue = parsed.error.issues[0];
@@ -141,6 +155,17 @@ export function parseCouncilEvents(raw: readonly unknown[]): PublicEvent[] {
       );
     }
     const c = parsed.data;
+    // Id-uniqueness is a cross-entry invariant the per-entry schema cannot see.
+    // Two entries sharing an id pass validation, then silently collapse
+    // downstream (events-view.ts collapseSeries dedupes by id, mergeEvents drops
+    // baked-id overlay matches) — a curation typo would hide a meeting instead of
+    // failing the build. Throw so the Astro build aborts, naming the id and index.
+    if (seenIds.has(c.id)) {
+      throw new Error(
+        `src/data/council-meetings.json: record ${index} has duplicate id "${c.id}"`,
+      );
+    }
+    seenIds.add(c.id);
     // Explicit construction, never a spread — the same discipline toPublicEvent
     // and validateSubmission use. hasSignalGroup is forced false; there is no
     // signalUrl on a council PublicEvent, and createdAt is synthesized from the

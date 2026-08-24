@@ -87,6 +87,34 @@ describe('parseCouncilEvents — rejected (a bad entry fails the build)', () => 
     const bad = councilEntry({ county: 'spartanburg' });
     expect(() => parseCouncilEvents([councilEntry(), bad])).toThrow(/record 1/);
   });
+
+  it('throws naming the id when two entries share an id', () => {
+    // Both entries validate per-entry; the second collides on id. Without the
+    // Set pass it would silently collapse downstream instead of failing here.
+    expect(() => parseCouncilEvents([councilEntry(), councilEntry()])).toThrow(
+      /council-greenville-city/,
+    );
+  });
+
+  it('rejects a source longer than 300 chars', () => {
+    const longUrl = `https://example.com/${'a'.repeat(300)}`;
+    expect(() => parseCouncilEvents([councilEntry({ source: longUrl })])).toThrow();
+  });
+
+  it('rejects an organizer carrying a zero-width character', () => {
+    // organizer now flows through sanitizeText (like title/description/address),
+    // so an invisible-format char is rejected rather than shipped in the island.
+    expect(() =>
+      parseCouncilEvents([councilEntry({ organizer: 'Greenville City Council\u200BX' })]),
+    ).toThrow();
+  });
+
+  it('rejects an own __proto__ key', () => {
+    // JSON.parse materializes `__proto__` as an own enumerable key; the guard
+    // rejects it, mirroring validateSubmission on the sibling boundary.
+    const withProto = JSON.parse('{"__proto__": {"polluted": true}, "id": "council-x"}');
+    expect(() => parseCouncilEvents([withProto])).toThrow(/__proto__/);
+  });
 });
 
 describe('loadCouncilEvents — the committed seed', () => {

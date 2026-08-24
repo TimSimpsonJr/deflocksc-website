@@ -173,9 +173,21 @@ export function recurrenceLabel(
  * sole cue.
  */
 export function eventTypeLabel(type: PublicEvent['type']): string {
-  if (type === 'meetup') return 'Location in group';
-  if (type === 'council') return 'Council meeting';
-  return 'Public event';
+  switch (type) {
+    case 'meetup':
+      return 'Location in group';
+    case 'public':
+      return 'Public event';
+    case 'council':
+      return 'Council meeting';
+    default: {
+      // Exhaustiveness guard: adding a member to PublicEvent['type'] without a
+      // label here fails the build (the unhandled type is no longer `never`)
+      // instead of silently rendering as 'Public event'.
+      const unhandled: never = type;
+      return unhandled;
+    }
+  }
 }
 
 /** 'AUG' for '2026-08-22'. */
