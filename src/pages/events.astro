@@ -318,24 +318,47 @@ const island = {
   .events-count { margin-bottom: 0.75rem; }
   .events-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
 
+  /* Option 3 "side docket": a full-height NEUTRAL date panel (#0d0d0d, the theme's
+     deep base) flush against the card's left edge, with a type-coloured dot in its
+     corner. No red accent bar — the panel is the structure, the dot carries the
+     type, and brand red is reserved for the Signal CTA. */
   .event-card {
     display: grid;
-    grid-template-columns: 3.5rem minmax(0, 1fr);
-    gap: 1rem;
+    grid-template-columns: 4.25rem minmax(0, 1fr);
     background: #1a1a1a;
     border: 1px solid rgba(255, 255, 255, 0.07);
-    border-left: 2px solid #dc2626;
-    padding: 1rem;
+    overflow: hidden;
   }
-  .event-date { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+  .event-date {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    background: #0d0d0d;
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  /* Type marker in the panel corner: amber = meetup, green = public. Decorative —
+     .event-date is aria-hidden and the type is announced by the badge below. */
+  .event-date-dot {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 9999px;
+  }
+  .event-date-dot--meetup { background: #fbbf24; }
+  .event-date-dot--public { background: #4ade80; }
+  .event-date-day { color: #e8e8e8; font-size: 1.7rem; font-weight: 800; line-height: 1; }
   .event-date-mon {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
-    letter-spacing: 0.15em;
-    color: #dc2626;
+    letter-spacing: 0.14em;
+    color: #8a8a8a;
   }
-  .event-date-day { color: #e8e8e8; font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
-  .event-body { min-width: 0; }
+  .event-body { min-width: 0; padding: 1rem; }
 
   /* Defence in depth against hostile titles (design §6). The sanitizer rejects
      bidi overrides, zero-width runs, and stacked combining marks at submit time and
@@ -394,10 +417,12 @@ const island = {
   .event-signal-btn { font-family: inherit; }
 
   /* Brief highlight when a month-view chip scrolls its list card into view, so the
-     eye lands on the right row after the tab swap. */
+     eye lands on the right row after the tab swap. The left accent bar is gone, so
+     the flash now pulses the whole card's border and background from an amber
+     highlight back to the resting neutral. */
   @keyframes event-card-flash {
-    from { background: #2a2118; border-left-color: #fbbf24; }
-    to   { background: #1a1a1a; border-left-color: #dc2626; }
+    from { background: #2a2118; border-color: #fbbf24; }
+    to   { background: #1a1a1a; border-color: rgba(255, 255, 255, 0.07); }
   }
   .event-card-flash { animation: event-card-flash 1.2s ease-out; }
   @media (prefers-reduced-motion: reduce) {
@@ -446,14 +471,20 @@ const island = {
   .month-cell-today { border-color: #dc2626; }
   .month-daynum { font-family: 'DM Mono', monospace; font-size: 10px; color: #737373; }
   .month-chips { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+  /* De-slopped to match the cards: no red left bar. A neutral fill with a hairline
+     border keeps each chip legible and obviously clickable in the dense grid; the
+     hover/focus states make the affordance explicit. */
   .month-chip {
     display: block;
-    background: rgba(220, 38, 38, 0.18);
-    border-left: 2px solid #dc2626;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 2px;
     padding: 1px 3px;
     text-decoration: none;
     min-width: 0;
   }
+  .month-chip:hover { background: rgba(255, 255, 255, 0.10); border-color: rgba(255, 255, 255, 0.18); }
+  .month-chip:focus-visible { outline: 2px solid #fbbf24; outline-offset: 1px; }
   .month-chip-title { font-size: 10px; font-weight: 600; color: #e8e8e8; margin: 0; line-height: 1.25; max-height: 2lh; }
 
   /* --- Intake dialog --- */

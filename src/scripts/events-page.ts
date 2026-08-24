@@ -378,9 +378,12 @@ function buildCard(o: Occurrence): HTMLLIElement {
 
   const date = el('div', 'event-date');
   date.setAttribute('aria-hidden', 'true');
+  // Mirror EventsList.astro's date panel exactly (the class-parity contract): a
+  // type-coloured dot in the panel corner, then the day, then the month abbr.
   date.append(
-    el('span', 'event-date-mon', monthAbbr(o.date)),
+    el('span', `event-date-dot event-date-dot--${e.type}`),
     el('span', 'event-date-day', dayOfMonth(o.date)),
+    el('span', 'event-date-mon', monthAbbr(o.date)),
   );
 
   const body = el('div', 'event-body');
