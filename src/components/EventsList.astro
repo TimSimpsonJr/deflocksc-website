@@ -23,13 +23,12 @@ const place = (o: Occurrence) =>
   <ul id="events-list" class="events-list" aria-live="polite">
     {upcoming.map((o) => (
       <li
-        class="event-card"
+        class={`event-card event-card--${o.event.type}`}
         data-event-id={o.event.id}
         data-date={o.date}
         data-sort={sortKey(o.date, o.event.time, o.event.id)}
       >
         <div class="event-date" aria-hidden="true">
-          <span class={`event-date-dot event-date-dot--${o.event.type}`}></span>
           <span class="event-date-day">{dayOfMonth(o.date)}</span>
           <span class="event-date-mon">{monthAbbr(o.date)}</span>
         </div>

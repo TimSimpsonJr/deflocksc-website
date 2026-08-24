@@ -379,18 +379,6 @@ const island = {
     background: #0d0d0d;
     border-right: 1px solid rgba(255, 255, 255, 0.07);
   }
-  /* Type marker in the panel corner: amber = meetup, green = public. Decorative —
-     .event-date is aria-hidden and the type is announced by the badge below. */
-  .event-date-dot {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    width: 0.45rem;
-    height: 0.45rem;
-    border-radius: 9999px;
-  }
-  .event-date-dot--meetup { background: #fbbf24; }
-  .event-date-dot--public { background: #4ade80; }
   .event-date-day { color: #e8e8e8; font-size: 1.7rem; font-weight: 800; line-height: 1; }
   .event-date-mon {
     font-family: 'DM Mono', monospace;
@@ -423,11 +411,12 @@ const island = {
   .event-address { color: #a3a3a3; font-size: 0.8125rem; margin: 0 0 0.35rem; }
   .event-desc { color: #a3a3a3; font-size: 0.875rem; margin: 0 0 0.5rem; overflow-wrap: anywhere; }
   /* Quiet type/recurrence line ("PUBLIC EVENT · REPEATS MONTHLY"). The de-slopped
-     replacement for the old coloured pill badges: the site's muted DM Mono label
-     idiom (uppercase, letter-spaced, #a3a3a3 ~6.9:1 on the #1a1a1a card), shared
-     with the popover's type label (.event-pop-typeline) so card and popover read
-     the same. Type is still cued by colour via the corner dot; this text is the
-     explicit, accessible signal, so type is never conveyed by colour alone. */
+     replacement for the old coloured pill badges: the site's DM Mono label idiom
+     (uppercase, letter-spaced). This base stays muted grey (#a3a3a3 ~6.9:1 on the
+     #1a1a1a card) and is shared with the popover's type label (.event-pop-typeline),
+     which keeps the muted treatment. On the CARD the colour is keyed to the event
+     type below. The label text always names the type, so colour is reinforcing,
+     never the sole signal. */
   .event-typeline {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
@@ -437,6 +426,13 @@ const island = {
     margin: 0;
   }
   .event-card .event-typeline { margin: 0.6rem 0 0; }
+  /* Option A type cue: the card's type label is coloured by type — amber for a
+     meetup, green for a public event — keyed off the event-card--{type} modifier
+     present on both render paths (EventsList.astro + buildCard). Amber #fbbf24
+     (~11:1) and green #4ade80 (~12:1) on #1a1a1a both clear WCAG AA. Scoped to
+     .event-card so the shared popover label (.event-pop-typeline) stays muted grey. */
+  .event-card--meetup .event-typeline { color: #fbbf24; }
+  .event-card--public .event-typeline { color: #4ade80; }
 
   .event-signal {
     display: inline-flex;

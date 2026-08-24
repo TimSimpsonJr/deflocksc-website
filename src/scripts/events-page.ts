@@ -375,17 +375,19 @@ function buildCard(o: Occurrence): HTMLLIElement {
   // ever reach a class name.
   const typeSuffix = meetup ? 'meetup' : 'public';
   const li = document.createElement('li');
-  li.className = 'event-card';
+  // The event-card--{type} modifier keys the typeline colour (amber = meetup,
+  // green = public) in events.astro. Closed ternary via typeSuffix, so only the
+  // two known suffixes can reach a class name.
+  li.className = `event-card event-card--${typeSuffix}`;
   li.dataset.eventId = e.id;
   li.dataset.date = o.date;
   li.dataset.sort = sortKey(o.date, e.time, e.id);
 
   const date = el('div', 'event-date');
   date.setAttribute('aria-hidden', 'true');
-  // Mirror EventsList.astro's date panel exactly (the class-parity contract): a
-  // type-coloured dot in the panel corner, then the day, then the month abbr.
+  // Mirror EventsList.astro's date panel exactly (the class-parity contract):
+  // the day, then the month abbr.
   date.append(
-    el('span', `event-date-dot event-date-dot--${typeSuffix}`),
     el('span', 'event-date-day', dayOfMonth(o.date)),
     el('span', 'event-date-mon', monthAbbr(o.date)),
   );
@@ -608,8 +610,8 @@ detailDialog?.addEventListener('close', () => {
 // Sidebar cards: the title button opens the popover. Delegated on the stable
 // #events-list <ul> so it covers both the server-rendered cards and the ones
 // buildCard() inserts later, without either renderer wiring a per-card listener.
-// The "Join Signal group" link is a sibling, not a descendant of this button, so
-// a click on it never reaches here — it just follows its href to /go/<id>.
+// The title button is now the card's only control — the Signal join moved to the
+// detail popover — so this handler owns every click that lands on a card.
 document.getElementById('events-list')?.addEventListener('click', (ev) => {
   const btn = (ev.target as HTMLElement).closest<HTMLElement>('.event-title-btn');
   if (!btn) return;
