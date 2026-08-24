@@ -7,6 +7,7 @@ import registry from '../data/registry.json';
 import bakedEventsRaw from '../data/events.json';
 import { toPublicEvent, type PublicEvent, type StoredEvent } from '../lib/public-event.js';
 import { publicEventSchema } from '../lib/event-schema.js';
+import { loadCouncilEvents } from '../lib/council-events.js';
 import {
   expandAll,
   splitByToday,
@@ -93,6 +94,14 @@ if (import.meta.env.DEV) {
     }
   }
 }
+
+// Curated council meetings (src/data/council-meetings.json), merged into the
+// baked list alongside the folded submissions. loadCouncilEvents() validates each
+// entry with the strict councilEventSchema and throws on a bad one, so an
+// unverified or malformed council entry fails the build here rather than shipping.
+// These are curated-only: they never touch Netlify Blobs, /go, or the submission
+// path, and carry hasSignalGroup === false with no signalUrl.
+bakedEvents.push(...loadCouncilEvents());
 
 const today = new Date().toISOString().slice(0, 10);
 const horizonEnd = addMonths(today, 12);

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseCouncilEvents } from './council-events.js';
+import { parseCouncilEvents, loadCouncilEvents } from './council-events.js';
 
 function councilEntry(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
@@ -86,5 +86,23 @@ describe('parseCouncilEvents — rejected (a bad entry fails the build)', () => 
   it('names the record index and field in the error', () => {
     const bad = councilEntry({ county: 'spartanburg' });
     expect(() => parseCouncilEvents([councilEntry(), bad])).toThrow(/record 1/);
+  });
+});
+
+describe('loadCouncilEvents — the committed seed', () => {
+  it('loads council-meetings.json as valid council PublicEvents', () => {
+    const events = loadCouncilEvents();
+    expect(events.length).toBe(2);
+    for (const e of events) {
+      expect(e.type).toBe('council');
+      expect(e.hasSignalGroup).toBe(false);
+      expect(typeof e.source).toBe('string');
+      expect(e.id.startsWith('council-')).toBe(true);
+    }
+  });
+
+  it('includes the Greenville and Columbia city councils', () => {
+    const ids = loadCouncilEvents().map((e) => e.id).sort();
+    expect(ids).toEqual(['council-columbia-city', 'council-greenville-city']);
   });
 });

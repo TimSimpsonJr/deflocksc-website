@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": "council-greenville-city",
+    "type": "council",
+    "title": "Greenville City Council",
+    "description": "Regular council meeting. Public comment sign-up is handled by the City Clerk before the meeting starts; arrive early to add your name. Each speaker gets 3 minutes.",
+    "date": "2026-09-14",
+    "time": "17:30",
+    "city": "greenville",
+    "county": "greenville",
+    "address": "206 S Main St, Greenville, SC 29601",
+    "recurrence": { "freq": "monthly_nth", "nths": [2, 4], "until": null },
+    "source": "https://www.greenvillesc.gov/185/City-Council",
+    "organizer": "Greenville City Council"
+  },
+  {
+    "id": "council-columbia-city",
+    "type": "council",
+    "title": "Columbia City Council",
+    "description": "Regular council meeting. Sign up with the City Clerk to speak during the public-comment period. Each speaker gets 3 minutes.",
+    "date": "2026-09-01",
+    "time": "18:00",
+    "city": "columbia",
+    "county": "richland",
+    "address": "1737 Main St, Columbia, SC 29201",
+    "recurrence": { "freq": "monthly_nth", "nths": [1, 3], "until": null },
+    "source": "https://www.columbiasc.gov/city-council",
+    "organizer": "Columbia City Council"
+  }
+]
