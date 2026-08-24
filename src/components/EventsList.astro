@@ -33,7 +33,9 @@ const place = (o: Occurrence) =>
           <span class="event-date-day">{dayOfMonth(o.date)}</span>
         </div>
         <div class="event-body">
-          <h3 class="event-title">{o.event.title}</h3>
+          <h3 class="event-title">
+            <button type="button" class="event-title-btn" aria-haspopup="dialog">{o.event.title}</button>
+          </h3>
           <p class="event-meta">
             <span class="sr-only">{o.date} </span>{formatTime12(o.event.time)} · {place(o)}
           </p>

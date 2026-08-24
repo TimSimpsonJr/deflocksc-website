@@ -33,7 +33,9 @@ import {
   collapseSeries,
   recurrenceLabel,
   monthAbbr,
+  monthLong,
   dayOfMonth,
+  weekdayIndex,
   formatTime12,
   sortKey,
   matchesFilter,
@@ -262,6 +264,7 @@ async function loadMap() {
         // decides. That is what makes the chip and the amber outline the same thing.
         pushHash({ ...filter, county: county ?? 'all' });
       },
+      onEventOpen: (occurrence, invoker) => openEventPopover(occurrence, invoker),
     });
     layer.setSelectedCounty(map, filter.county === 'all' ? null : filter.county);
 
@@ -381,7 +384,17 @@ function buildCard(o: Occurrence): HTMLLIElement {
   );
 
   const body = el('div', 'event-body');
-  body.append(el('h3', 'event-title', e.title));
+  // The title is a button that opens the shared detail popover. Mirrors
+  // EventsList.astro's <h3><button class="event-title-btn">…</button></h3> so the
+  // server render and this client render stay in class-parity (the documented
+  // contract). A delegated handler on #events-list opens the popover, so this
+  // renderer attaches no per-card listener.
+  const heading = el('h3', 'event-title');
+  const titleBtn = el('button', 'event-title-btn', e.title) as HTMLButtonElement;
+  titleBtn.type = 'button';
+  titleBtn.setAttribute('aria-haspopup', 'dialog');
+  heading.append(titleBtn);
+  body.append(heading);
   // Mirror EventsList.astro's .event-meta exactly: the visible date block is
   // aria-hidden, so the accessible date lives in an sr-only span here. Without
   // it a screen reader hears the time and place but never the date. Keep the
@@ -449,6 +462,172 @@ function insertSorted(container: Element, node: HTMLElement, key: string) {
   }
   container.append(node);
 }
+
+// --- Event detail popover -----------------------------------------------
+// One shared <dialog class="modal"> (server-rendered in events.astro) filled per
+// event and opened here. Both the sidebar cards and the map pins reach it through
+// openEventPopover, so there is a single detail surface. Native showModal() gives
+// the focus trap and Esc-to-close; the dialog's method="dialog" forms give the ✕,
+// the Close button, and the backdrop click their close behaviour. Every slot is
+// set with textContent or built as nodes — no event string reaches innerHTML.
+
+const detailDialog = document.getElementById('event-detail') as HTMLDialogElement | null;
+
+/** The control that opened the dialog, refocused on close (WCAG 2.4.3). */
+let popoverInvoker: HTMLElement | null = null;
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function svgEl(tag: string, attrs: Record<string, string>): SVGElement {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+  return node;
+}
+
+/** The external-link glyph beside a public event's address, matching the mockup.
+ *  Built via createElementNS (createElement makes HTML, not SVG, elements). */
+function extLinkIcon(): SVGElement {
+  const svg = svgEl('svg', {
+    class: 'event-pop-ext-icon',
+    viewBox: '0 0 24 24',
+    width: '14',
+    height: '14',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'aria-hidden': 'true',
+  });
+  svg.append(
+    svgEl('path', { d: 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6' }),
+    svgEl('polyline', { points: '15 3 21 3 21 9' }),
+    svgEl('line', { x1: '10', y1: '14', x2: '21', y2: '3' }),
+  );
+  return svg;
+}
+
+const WEEKDAYS = [
+  'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+] as const;
+
+/** 'Wednesday, October 14, 2026' for '2026-10-14'. Uses the same zone-independent
+ *  helpers the rest of the page does, so the popover date never drifts a day. */
+function fullDateLabel(iso: string): string {
+  const y = Number(iso.slice(0, 4));
+  const m = Number(iso.slice(5, 7)) - 1;
+  return `${WEEKDAYS[weekdayIndex(iso)]}, ${monthLong(y, m)} ${dayOfMonth(iso)}, ${y}`;
+}
+
+function mapsSearchUrl(address: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
+/** Fill the shared detail dialog for one occurrence and open it as a modal.
+ *  `invoker` is refocused when the dialog closes; it falls back to whatever had
+ *  focus at call time (the map popup button, say). */
+export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): void {
+  if (!detailDialog) return;
+  const e = o.event;
+  const meetup = e.type === 'meetup';
+
+  // Eyebrow: type dot colour + label.
+  const eyebrow = document.getElementById('event-detail-eyebrow');
+  if (eyebrow) eyebrow.className = `event-pop-eyebrow event-pop-eyebrow--${e.type}`;
+  const dot = document.getElementById('event-detail-dot');
+  if (dot) dot.className = `event-pop-dot event-pop-dot--${e.type}`;
+  const typeLabel = document.getElementById('event-detail-typelabel');
+  if (typeLabel) typeLabel.textContent = meetup ? 'Location in group' : 'Public event';
+
+  // Title (also labels the dialog via aria-labelledby).
+  const title = document.getElementById('event-detail-title');
+  if (title) title.textContent = e.title;
+
+  // When: full weekday + date + 12h time.
+  const when = document.getElementById('event-detail-when');
+  if (when) when.textContent = `${fullDateLabel(o.date)} · ${formatTime12(e.time)}`;
+
+  // Where: City · County County (same label the cards use).
+  const where = document.getElementById('event-detail-where');
+  if (where) where.textContent = placeLabel(e);
+
+  // Address (public → a maps-search link) OR the meetup location note.
+  const placeLabelEl = document.getElementById('event-detail-place-label');
+  const place = document.getElementById('event-detail-place');
+  if (placeLabelEl && place) {
+    place.replaceChildren();
+    if (!meetup && e.address) {
+      placeLabelEl.textContent = 'Address';
+      const a = el('a', 'event-pop-addr') as HTMLAnchorElement;
+      a.href = mapsSearchUrl(e.address);
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.append(
+        document.createTextNode(e.address),
+        extLinkIcon(),
+        el('span', 'sr-only', ' (opens in a new tab)'),
+      );
+      place.append(a);
+    } else {
+      placeLabelEl.textContent = 'Location';
+      place.textContent = 'Shared in the Signal group.';
+    }
+  }
+
+  // Description (optional).
+  const desc = document.getElementById('event-detail-desc');
+  if (desc) {
+    desc.textContent = e.description ?? '';
+    desc.hidden = !e.description;
+  }
+
+  // Recurrence badge (optional).
+  const repeat = recurrenceLabel(e.recurrence);
+  const recurrenceBadge = document.getElementById('event-detail-recurrence');
+  if (recurrenceBadge) {
+    recurrenceBadge.textContent = repeat ?? '';
+    recurrenceBadge.hidden = !repeat;
+  }
+
+  // Signal CTA (only when the event has a group). The primary action for meetups.
+  const signal = document.getElementById('event-detail-signal') as HTMLAnchorElement | null;
+  if (signal) {
+    if (e.hasSignalGroup) {
+      signal.href = `/go/${encodeURIComponent(e.id)}`;
+      signal.hidden = false;
+    } else {
+      signal.removeAttribute('href');
+      signal.hidden = true;
+    }
+  }
+
+  popoverInvoker = invoker ?? (document.activeElement as HTMLElement | null);
+  detailDialog.showModal();
+}
+
+// showModal() already traps focus and closes on Esc; the method="dialog" forms
+// handle the ✕, Close, and backdrop-click. All routes fire 'close', so returning
+// focus to the invoking control lives in one place here.
+detailDialog?.addEventListener('close', () => {
+  const invoker = popoverInvoker;
+  popoverInvoker = null;
+  if (invoker && invoker.isConnected) invoker.focus();
+});
+
+// Sidebar cards: the title button opens the popover. Delegated on the stable
+// #events-list <ul> so it covers both the server-rendered cards and the ones
+// buildCard() inserts later, without either renderer wiring a per-card listener.
+// The "Join Signal group" link is a sibling, not a descendant of this button, so
+// a click on it never reaches here — it just follows its href to /go/<id>.
+document.getElementById('events-list')?.addEventListener('click', (ev) => {
+  const btn = (ev.target as HTMLElement).closest<HTMLElement>('.event-title-btn');
+  if (!btn) return;
+  const card = btn.closest<HTMLElement>('[data-event-id]');
+  const id = card?.dataset.eventId;
+  const date = card?.dataset.date;
+  if (!id || !date) return;
+  const event = allEvents.find((candidate) => candidate.id === id);
+  if (event) openEventPopover({ event, date }, btn);
+});
 
 // --- Merge and patch ----------------------------------------------------
 

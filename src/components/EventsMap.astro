@@ -223,4 +223,42 @@
   :global(.events-popup strong) { color: #ffffff; font-size: 15px; }
   :global(.events-popup span)   { color: #a3a3a3; }
   :global(.events-popup em)     { color: #fbbf24; font-style: normal; font-size: 12px; }
+
+  /* Event rows inside a city pin's popup. Each is a real <button> (built in
+     map/layers/events.ts) that opens the shared detail popover. Styled as a
+     tappable full-width row; built at runtime, so styled with :global. */
+  :global(.events-popup-list) {
+    list-style: none;
+    margin: 2px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  :global(.events-popup-event) {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: 0.25rem;
+    padding: 6px 8px;
+    color: #e8e8e8;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.35;
+    cursor: pointer;
+  }
+  :global(.events-popup-event:hover) { background: rgba(255, 255, 255, 0.06); }
+  :global(.events-popup-event:focus-visible) { outline: 2px solid #fbbf24; outline-offset: -2px; }
+  :global(.events-popup-event-date) {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #dc2626;
+    flex: none;
+  }
+  :global(.events-popup-event-title) { min-width: 0; overflow-wrap: anywhere; }
 </style>

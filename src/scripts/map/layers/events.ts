@@ -17,7 +17,7 @@
  */
 
 import maplibregl from 'maplibre-gl';
-import { escapeHtml } from '../../../lib/escape-html.js';
+import { collapseSeries, monthAbbr, dayOfMonth } from '../../../lib/events-view.js';
 import type { Occurrence } from '../../../lib/events-view.js';
 
 /** [lng, lat] per city slug. */
@@ -49,6 +49,13 @@ export interface EventLayerData {
    * why the amber outline and the filter chip can never drift apart.
    */
   onCountySelect?: (county: string | null) => void;
+  /**
+   * Called when an event row in a city pin's popup is activated, with that
+   * occurrence and the button that invoked it. The layer owns the popup DOM; the
+   * composer owns the shared detail dialog and opens it (openEventPopover), so the
+   * map and the sidebar cards open the very same popover from one code path.
+   */
+  onEventOpen?: (occurrence: Occurrence, invoker: HTMLElement) => void;
 }
 
 interface EventLayerState {
@@ -57,6 +64,10 @@ interface EventLayerState {
   cityNames: Record<string, string>;
   selectedCounty: string | null;
   onCountySelect: ((county: string | null) => void) | null;
+  onEventOpen: ((occurrence: Occurrence, invoker: HTMLElement) => void) | null;
+  /** Per-city occurrences for the pin popups, one row per event (its next
+   *  occurrence). Rebuilt on every setEventData so it tracks the active filter. */
+  cityOccurrences: Map<string, Occurrence[]>;
   teardown: () => void;
 }
 
@@ -236,13 +247,35 @@ function applyCountyCounts(
 }
 
 /**
- * Push a new occurrence set at an events map. Recomputes county counts and city
- * pins from the map's stored state. No-op if the map has no event layers yet.
+ * Group occurrences by city slug and collapse each city's list to one row per
+ * event (its next occurrence). The input is sorted ascending, so collapseSeries
+ * keeps each event's earliest upcoming date — the date the popup row and the
+ * detail popover then agree on. This is what the pin popups iterate, so a weekly
+ * meetup shows as a single row, not one row per week over the horizon.
+ */
+function groupCityOccurrences(
+  occurrences: readonly Occurrence[],
+): Map<string, Occurrence[]> {
+  const byCity = new Map<string, Occurrence[]>();
+  for (const o of occurrences) {
+    const arr = byCity.get(o.event.city);
+    if (arr) arr.push(o);
+    else byCity.set(o.event.city, [o]);
+  }
+  for (const [city, list] of byCity) byCity.set(city, collapseSeries(list));
+  return byCity;
+}
+
+/**
+ * Push a new occurrence set at an events map. Recomputes county counts, city
+ * pins, and the per-city occurrence index the pin popups read. No-op if the map
+ * has no event layers yet.
  */
 export function setEventData(map: maplibregl.Map, occurrences: readonly Occurrence[]): void {
   const state = eventStates.get(map);
   if (!state) return;
   applyCountyCounts(map, state, occurrences);
+  state.cityOccurrences = groupCityOccurrences(occurrences);
   (map.getSource('event-cities') as maplibregl.GeoJSONSource | undefined)
     ?.setData(cityFeatureCollection(state, occurrences));
 }
@@ -282,6 +315,8 @@ export function addEventLayers(map: maplibregl.Map, data: EventLayerData): void 
     cityNames: data.cityNames,
     selectedCounty: null,
     onCountySelect: data.onCountySelect ?? null,
+    onEventOpen: data.onEventOpen ?? null,
+    cityOccurrences: new Map(),
     teardown: () => {},
   };
 
@@ -439,26 +474,61 @@ export function removeEventLayers(map: maplibregl.Map): void {
 }
 
 function bindEventInteractions(map: maplibregl.Map): () => void {
-  // City pin -> popup. The pin is a city centroid, not a venue; the copy says so —
-  // overstating a privacy control on an anti-surveillance site costs more than not
-  // having one.
+  // City pin -> popup listing the event(s) at that city. Each row is a real
+  // <button> that opens the shared detail popover for its occurrence, so a map
+  // pin and a sidebar card reach the identical dialog. Built as DOM nodes with
+  // setDOMContent (not setHTML): the buttons need click handlers, and no event
+  // string ever touches innerHTML. The pin marks a city centroid, not a venue.
   const onCityClick = (e: maplibregl.MapLayerMouseEvent) => {
     // City pins are invisible below the crossfade zoom; a click near a centroid
     // there belongs to the choropleth, not to a pin, so ignore it.
     if (map.getZoom() < CROSSFADE_ZOOM) return;
     const f = e.features?.[0];
     if (!f) return;
+    const state = eventStates.get(map);
+    if (!state) return;
+    const slug = String(f.properties?.city ?? '');
     const label = String(f.properties?.label ?? '');
-    const count = Number(f.properties?.count ?? 0);
-    const html =
-      `<div class="events-popup">` +
-      `<strong>${escapeHtml(label)}</strong>` +
-      `<span>${count} ${count === 1 ? 'event' : 'events'}</span>` +
-      `<em>Exact location shared in the group.</em>` +
-      `</div>`;
-    new maplibregl.Popup({ closeButton: true, maxWidth: '240px', offset: 14 })
+    const occurrences = state.cityOccurrences.get(slug) ?? [];
+
+    const container = document.createElement('div');
+    container.className = 'events-popup';
+    const heading = document.createElement('strong');
+    heading.textContent = label;
+    container.append(heading);
+
+    if (occurrences.length === 0) {
+      // Defensive: a rendered pin always has at least one occurrence, but if the
+      // index and the source ever drift, show the venue note rather than nothing.
+      const note = document.createElement('em');
+      note.textContent = 'Pins mark a city center, never a venue.';
+      container.append(note);
+    } else {
+      const list = document.createElement('ul');
+      list.className = 'events-popup-list';
+      for (const o of occurrences) {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'events-popup-event';
+        btn.setAttribute('aria-haspopup', 'dialog');
+        const date = document.createElement('span');
+        date.className = 'events-popup-event-date';
+        date.textContent = `${monthAbbr(o.date)} ${dayOfMonth(o.date)}`;
+        const title = document.createElement('span');
+        title.className = 'events-popup-event-title';
+        title.textContent = o.event.title;
+        btn.append(date, title);
+        btn.addEventListener('click', () => state.onEventOpen?.(o, btn));
+        li.append(btn);
+        list.append(li);
+      }
+      container.append(list);
+    }
+
+    new maplibregl.Popup({ closeButton: true, maxWidth: '260px', offset: 14 })
       .setLngLat((f.geometry as GeoJSON.Point).coordinates as [number, number])
-      .setHTML(html)
+      .setDOMContent(container)
       .addTo(map);
   };
 
