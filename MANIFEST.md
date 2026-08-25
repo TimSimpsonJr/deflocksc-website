@@ -2,136 +2,134 @@
 
 ## Stack
 
-Astro 5 + Tailwind CSS 4 advocacy site against ALPR surveillance in South Carolina.
-MapLibre GL JS for camera map. Self-hosted fonts (Instrument Sans Variable, DM Mono via @fontsource).
-Rep data from `open-civics` / `open-civics-boundaries` npm packages. Deployed on Netlify (auto-deploy from master).
+Astro 5 + Tailwind CSS 4 (+ daisyUI `deflock` theme) advocacy site against ALPR surveillance in
+South Carolina. MapLibre GL JS for the camera map and the events map. Self-hosted fonts (Instrument
+Sans Variable, DM Mono via @fontsource). Rep/boundary data from the `open-civics` npm packages.
+Community events + council meetings stored via Netlify Blobs. Vitest unit suite (co-located
+`*.test.ts`). Deployed on Netlify (auto-deploy from `master`); Umami analytics proxied through `/u`.
 
 ## Structure
 
 ```
 src/
   layouts/
-    Base.astro                  # Shell: Nav, main slot, Footer, JSON-LD, skip-to-content
+    Base.astro                  # Shell: Nav, main slot, Footer, JSON-LD, skip link; suppresses Umami on /events/*
   components/
-    Nav.astro                   # Fixed nav — logo, Toolkit dropdown, Blog link, "Take Action" CTA
+    Nav.astro                   # Fixed nav — logo, Toolkit dropdown, Blog, Events, "Take Action" CTA
     Hero.astro                  # Camera PNG + animated SVG light cones
     HowItWorks.astro            # Carousel explaining ALPR surveillance
-    HowItWorksOverlays.astro    # Case study overlay panels (extracted from HowItWorks)
+    HowItWorksOverlays.astro    # Case-study overlay panels (extracted from HowItWorks)
     MapSection.astro            # MapLibre camera map with clustering + popups
     BillTracker.astro           # SC legislature bill status cards
-    BlogPreview.astro           # Homepage 5-post carousel grid
+    BlogPreview.astro           # Homepage latest-posts carousel grid
     FAQ.astro                   # Accordion with optional source citations
-    CitizenToolkit.astro        # Homepage toolkit preview cards → links to /toolkit/*
+    CitizenToolkit.astro        # Homepage toolkit preview cards → /toolkit/*
     TakeAction.astro            # CTA section, opens ActionModal
     ActionModal.astro           # Rep lookup: geolocation, address, or manual dropdown
-    Footer.astro                # 3-column: About, Explore, Resources
-    ToolkitFoia.astro           # FOIA agency finder + letter templates with auto-fill
-    ToolkitSpeaking.astro       # Public comment guide: talk track, tips, rebuttals
-    ToolkitOutreach.astro       # One-pager, conversation starters, business cards, share links
-    ToolkitLegal.astro          # 4th Amendment primer, state map, bill gap analysis
+    Footer.astro                # Multi-column footer: About, Explore, Resources
+    ToolkitFoia/Speaking/Outreach/Legal.astro  # The 4 toolkit subpage bodies
+    CouncilBrief.astro          # Shared city/county "leave-behind" brief: dark on screen, light @media print sheet
+    EventsList.astro            # Events calendar list view
+    EventsMonth.astro           # Events calendar month grid
+    EventsMap.astro             # MapLibre map of event locations
+    SubmitEventForm.astro       # Community event submission form (city combobox, date picker)
   pages/
     index.astro                 # Homepage — assembles all section components
     404.astro                   # Branded error page
     toolkit/
-      index.astro               # Toolkit hub — card grid linking to 4 subpages + hash redirects
-      foia.astro                # FOIA templates subpage
-      speaking.astro            # Council meeting prep subpage
-      outreach.astro            # Outreach materials subpage
-      legal.astro               # Legal resources subpage
+      index.astro               # Toolkit hub — card grid + hash redirects
+      foia / speaking / outreach / legal.astro  # 4 toolkit subpages
+      speaking/city-council-brief.astro         # Printable city-council leave-behind
+      speaking/county-council-brief.astro       # Printable county-council leave-behind (defund/deny + FAQ)
+    events.astro                # Events calendar index (no analytics beacon)
+    events/submit.astro         # Event submission page
     blog/index.astro            # Blog listing — featured hero + grid + tag filtering
-    blog/[...slug].astro        # Individual post — TOC sidebar, progress bar, read time, related posts
-    blog/[...slug]/og.png.ts    # Dynamic OG image generation per post
+    blog/[...slug].astro        # Individual post — TOC, progress bar, read time, related
+    blog/[...slug]/og.png.ts    # Per-post OG image generation
     rss.xml.ts                  # RSS feed
-  lib/
-    blog-utils.ts               # Read time estimation + related posts matching
-    district-matcher.ts         # Boundary loading, district matching, Census geocoder (fetch)
-    geo-utils.ts                # Point-in-polygon, bounding box geometry
-    og-image.ts                 # Satori SVG-to-PNG for OG cards
-  scripts/
-    action-modal/               # ActionModal client-side logic (extracted)
-      index.ts                  #   Entry point, wires up modal events
-      group-builder.ts          #   Builds rep groups from matched districts
-      results-renderer.ts       #   Renders rep cards, letters, email/copy actions
-      modal-controller.ts       #   Open/close, focus trap, scroll lock
-      manual-dropdowns.ts       #   Manual district selection fallback
-      types.ts                  #   Shared type definitions
+  lib/                          # Pure, Vitest-covered modules (most have a co-located *.test.ts)
+    district-matcher.ts, geo-utils.ts   # District matching + geometry (rep lookup)
+    blog-utils.ts, og-image.ts          # Read-time/related posts + Satori OG image
+    event-schema.ts, public-event.ts    # Submitted-event validation + public (private-field-stripped) projection
+    recurrence.ts, fold-events.ts       # Recurring-series rule expansion + folding into dated instances
+    events-view.ts, council-events.ts   # Calendar view filtering + council-meeting-derived events
+    jurisdictions.ts, city-label.ts     # SC jurisdiction lookup + city-name normalization
+    organizer-code.ts, organizer-cli.ts # Organizer access codes + local CLI
+    rate-limit.ts, sanitize-text.ts, escape-html.ts, signal-url.ts, wordlist-file.ts  # Abuse controls + safe input/links
+    json-island.ts, text-result.ts, blob-stores.ts  # Data-island (de)serialize, Result type, Netlify Blobs store
+  scripts/                      # Client-side entry points (progressive enhancement)
+    action-modal/               # ActionModal logic: index, group-builder, results-renderer, modal-controller, manual-dropdowns, types
+    map/core.ts                 # MapLibre init/shared chrome
+    map/layers/cameras.ts       # Camera layer, popups, clusters (+ cameras.test.ts)
+    map/layers/events.ts        # Event-location layer (+ events-constants.ts)
+    events-page.ts              # Events calendar view interactivity (list/month/map, filters)
     bill-tracker.ts             # Bill card modals, status rendering
-    camera-map.ts               # MapLibre init, camera layers, popups, clusters
-    carousel.ts                 # Auto-advance, dot/arrow nav, keyboard a11y
-    case-studies.ts             # Case study card animations, overlay focus traps
+    case-studies.ts             # Case-study card animations, overlay focus traps
     foia-finder.ts              # Agency finder: location lookup, browse/filter, auto-fill
-    toolkit-legal.ts            # State comparison map, bill gap analysis interactivity
+    toolkit-legal.ts            # State comparison map, bill gap analysis
   data/
     bills.json                  # SC legislature bills (populated by scraper)
     action-letters.json         # 85 locally tailored letter templates (all 46 counties)
     registry.json               # Jurisdiction metadata for district matching
-    foia-contacts.json          # 64 curated FOIA contact records (agencies + custodians)
-    toolkit-foia.json           # 4 FOIA request templates
-    toolkit-speaking.json       # Public comment tips, talk track, rebuttals
-    toolkit-outreach.json       # One-pager, conversation starters, business card designs
-    toolkit-legal.json          # 4th Amendment cases, state comparison, bill gap analysis
-  styles/
-    global.css                  # Self-hosted font imports, Tailwind base, glow-frame, custom utilities
-  content/
-    blog/                       # 11 Markdown blog posts (9 published + 2 drafts), Astro content collections
-  content.config.ts             # Content collection definitions (glob loader)
-  umami.d.ts                    # Type declarations for Umami analytics
+    foia-contacts.json          # Curated FOIA contact records (agencies + custodians)
+    council-meetings.json       # SC city/county council meeting schedules (source for calendar)
+    events.json                 # Folded event instances served to the calendar
+    city-centroids.json         # City centroid coords for the events map (+ city-centroids.test.ts)
+    council-brief.ts            # Typed content for the two council leave-behind briefs (city + county)
+    toolkit-foia/speaking/outreach/legal.json  # Data for the 4 toolkit subpages
+  styles/global.css             # Font imports, Tailwind + daisyUI theme, glow-frame, label-mono utilities
+  content/blog/                 # 11 Markdown blog posts (Astro content collection, glob loader)
+  content.config.ts             # Content collection definitions
+  umami.d.ts                    # Umami analytics type declarations
 
 public/
-  robots.txt                    # Search engine crawl directives + sitemap reference
-  districts/                    # GeoJSON boundaries (synced from open-civics-boundaries npm)
-  camera-data.json              # Cached Deflock camera data
-  camera-counts.json            # Per-jurisdiction camera counts (build-time)
-  map-style.json                # Customized OpenFreeMap dark tile style
-  hero-cameras*.png             # Responsive hero image variants (650w–2600w)
-  og-image.png                  # Default Open Graph image
-  favicon.svg                   # Site favicon
   _headers                      # Netlify security headers (CSP, X-Frame-Options, Permissions-Policy)
+  robots.txt                    # Crawl directives + sitemap reference
+  districts/sc-counties.json    # County boundary GeoJSON (synced from open-civics)
+  camera-data.json, camera-counts.json, map-style.json  # Cached camera data, per-jurisdiction counts, OpenFreeMap dark style
+  hero-cameras*.{png,webp}      # Responsive hero image variants (650w–2600w)
+  og-image.png, favicon.svg     # Default OG image + favicon
+  blog/                         # Per-post images + SC county map SVG/PNG
+  docs/                         # Public FOIA-response PDFs
+  toolkit/                      # Toolkit downloads (FOIA PDFs, outreach cards, council-handout.pdf [unlinked])
+  uploads/                      # Submitted-event image uploads
+  *.html mockups                # Dev-only design mockups (not linked; e.g. modal/map/card mockups)
 
-scripts/
-  scraper.py                    # SC statehouse bill scraper → bills.json
-  validate-bills.py             # Bill data schema validation (runs in CI after scrape)
-  sync-open-civics.mjs          # Prebuild: syncs npm package data into project
-  build-map-style.mjs           # OpenFreeMap dark style customization
+scripts/                        # Node/Python build + data tooling
+  scraper.py, validate-bills.py # SC statehouse bill scraper → bills.json (+ CI schema check)
+  sync-open-civics.mjs          # Prebuild: sync npm package data into project
+  build-map-style.mjs, fetch-camera-data.mjs  # OpenFreeMap style build + Deflock CDN camera fetch
   build-camera-counts.py        # Deflock data → per-jurisdiction camera counts
-  build-county-map-iso.py       # Isometric SC county map SVG generator
-  build-county-map-svg.py       # Flat SC county map SVG generator
-  fetch-camera-data.mjs         # Deflock CDN camera data fetch
-  generate-business-cards.js    # Advocacy business card PNG + PDF generator
-  generate-toolkit-pdfs.js      # FOIA template PDF generator
-  publish.py                    # Obsidian vault → blog post publisher (auto git commit + push)
+  build-county-map-{iso,svg}.py # SC county map SVG generators
+  generate-business-cards.js, generate-toolkit-pdfs.js  # Outreach card + FOIA template PDF generators
+  publish.py                    # Obsidian vault → blog publisher (auto commit + push)
 
 .github/
-  workflows/
-    scrape-bills.yml            # Weekly bill scraping (Jan–Jun), monthly off-session
-    refresh-camera-data.yml     # Camera data refresh
-    lighthouse.yml              # Lighthouse CI on PRs
-  dependabot.yml                # Watches open-civics npm packages for updates
-  pull_request_template.md      # PR checklist with action modal smoke test
+  workflows/scrape-bills.yml    # Weekly bill scraping (Jan–Jun), monthly off-season
+  workflows/refresh-camera-data.yml  # Camera data refresh
+  workflows/fold-events.yml     # Fold council-meetings + submissions into events.json
+  workflows/lighthouse.yml      # Lighthouse CI on PRs
+  dependabot.yml                # Watches open-civics npm packages
+  pull_request_template.md      # PR checklist (action-modal smoke test)
 
 docs/
-  architecture.md               # System architecture overview
-  adapting-scrapers.md          # Adapting data sources for other states
-  research-workflow.md          # Creating localized copy, research, and form letters
-  deployment.md                 # Netlify deployment guide
-  maintainability.md            # Maintainability evaluation
-  plans/                        # Design docs and implementation plans
-  research/                     # Research notes backing site copy (toolkit gap analysis, etc.)
-  handoffs/                     # Session handoff notes for multi-session work (e.g. blog rewrite)
+  architecture.md, deployment.md, maintainability.md, adapting-scrapers.md, research-workflow.md
+  plans/                        # Design docs + implementation plans (one pair per feature)
+  research/                     # Research notes backing site copy
+  handoffs/                     # Multi-session handoff notes
+  reviews/                      # Saved review artifacts
 ```
 
 ## Key Relationships
 
-- **sync-open-civics.mjs (prebuild) → local-councils.json + public/districts/** — assembles npm package data into project formats
-- **ActionModal.astro imports open-civics/sc/state.json** — state legislator data comes directly from npm package
-- **foia-finder.ts imports district-matcher.ts** — reuses geocoder + district matching for agency location lookup
-- **action-modal/ imports district-matcher.ts + geo-utils.ts** — client-side rep lookup, letter rendering, district matching
-- **action-modal honors `data-open-action-filter` on trigger buttons** — when set to `state-senator` (e.g., on the S.447 blog post CTA), the results renderer hides non-senator groups; unfiltered triggers continue to render all groups
-- **camera-map.ts extracted from MapSection** — MapLibre init, layers, popups, cluster handling
-- **carousel.ts extracted from HowItWorks** — auto-advance, navigation, keyboard a11y
-- **toolkit/index.astro hub → toolkit/*.astro subpages** — card grid links + client-side hash redirects for backward compat
-- **BlogPreview.astro ← content/blog/** — homepage carousel pulls latest 5 published posts
-- **scraper.py → bills.json** — GitHub Actions runs scraper, commits updated bill data
-- **publish.py ← Obsidian vault** — pulls blog posts tagged `publish: deflocksc`, auto commits + pushes
-- **dependabot.yml** — watches open-civics packages, opens PRs when new versions are published
-- **netlify.toml + _headers** — both set security headers; _headers has CSP, netlify.toml has the rest (keep in sync)
+- **sync-open-civics.mjs (prebuild) → data + public/districts/** — assembles npm package data into project formats
+- **ActionModal + action-modal/ import district-matcher.ts + geo-utils.ts** — client-side rep lookup, letter rendering, district matching (honors `data-open-action-filter` on triggers)
+- **foia-finder.ts reuses district-matcher.ts** — geocoder + district matching for agency location lookup
+- **map/core.ts + map/layers/** — shared MapLibre init; cameras.ts (camera map) and events.ts (events map) are the two layer sets
+- **CouncilBrief.astro renders cityBrief/countyBrief from council-brief.ts** — one shared component; @media print hides site chrome (nav, footer, `#action-modal`, `.brief-breadcrumb`, `.brief-siblings`) and repaints `.leave-behind` as the light sheet
+- **ToolkitSpeaking.astro → /toolkit/speaking/{city,county}-council-brief** — two leave-behind links replaced the old `council-handout.pdf` (kept on disk, unlinked)
+- **Events pipeline: council-meetings.json + submissions → fold-events (recurrence.ts/fold-events.ts) → events.json → EventsList/Month/Map** — SubmitEventForm posts through sanitize-text/rate-limit into blob-stores.ts (Netlify Blobs); fold-events.yml refreshes events.json
+- **/events + /events/* carry NO analytics beacon** — Base.astro suppresses Umami on those paths (a record of who viewed an event is subpoena-sensitive)
+- **BlogPreview.astro ← content/blog/** — homepage carousel pulls latest published posts
+- **scraper.py → bills.json; publish.py ← Obsidian vault** — GitHub Actions scrapes bills; publisher pulls posts tagged `publish: deflocksc`, auto commits + pushes
+- **netlify.toml + public/_headers** — both set security headers (keep CSP/proxy rules in sync); `/u` proxies Umami
