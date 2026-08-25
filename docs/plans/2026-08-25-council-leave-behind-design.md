@@ -180,8 +180,10 @@ Honor the existing site system (do not invent a new one):
   desc line "Council handout PDF to leave behind") to reflect the two pages.
 - `speaking.astro` `<description>`: update the "Council handout PDF to leave
   behind" phrasing.
-- The superseded `public/toolkit/speaking/council-handout.pdf` and its reference
-  are removed (recoverable via git history).
+- `public/toolkit/speaking/council-handout.pdf` **stays on disk but is
+  unlinked**: every reference to it is removed from the public site (the Speak Up
+  section, the index card copy, and the `speaking.astro` description). The file
+  remains reachable only by direct URL; nothing on the site points to it.
 
 ## Copy / voice
 
