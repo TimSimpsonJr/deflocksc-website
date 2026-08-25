@@ -129,9 +129,52 @@ function lastActiveDate(record: Record<string, unknown>): string {
   return date;
 }
 
-/** Today in UTC as YYYY-MM-DD. An event resolves through the whole of its day. */
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+/**
+ * Today's calendar day in America/New_York as YYYY-MM-DD.
+ *
+ * The /go past-event cutoff is the ONE place in the events system that reasons
+ * about "today" in Eastern rather than UTC (owner decision). An invite link is
+ * meant to stay live through the whole of the event's final day in the local
+ * (Eastern) time its organizer and attendees keep, and to die at the NEXT
+ * Eastern midnight. Comparing against a UTC "today" instead kills the link at
+ * UTC midnight -- 8pm EDT / 7pm EST on the event's own final day -- hours early.
+ *
+ * This shift is scoped to THIS comparison. The recurrence/expiry machinery in
+ * recurrence.ts stays UTC-calendar-day by design (see its header); nothing there
+ * changes.
+ *
+ * Intl.DateTimeFormat with timeZone 'America/New_York' resolves the instant to
+ * its Eastern wall-clock date, DST included (EDT/EST handled by the tz data).
+ * formatToParts avoids any locale ordering assumption. On ANY failure -- a
+ * missing tz database, a malformed part set -- this returns a far-future
+ * sentinel so the caller's `lastActiveDate(record) < easternTodayIso()` is TRUE
+ * for every real event, i.e. /go FAILS CLOSED (refuses "event_passed") rather
+ * than resolving an expired link.
+ */
+function easternTodayIso(): string {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(new Date());
+    let year = '';
+    let month = '';
+    let day = '';
+    for (const part of parts) {
+      if (part.type === 'year') year = part.value;
+      else if (part.type === 'month') month = part.value;
+      else if (part.type === 'day') day = part.value;
+    }
+    if (year.length === 4 && month.length === 2 && day.length === 2) {
+      return `${year}-${month}-${day}`;
+    }
+  } catch {
+    // Fall through to the fail-closed sentinel.
+  }
+  // Later than any real event day, so the caller refuses. Fail closed.
+  return '9999-12-31';
 }
 
 function succeed(signalUrl: string): Response {
@@ -206,7 +249,7 @@ export default async (_req: Request, context: Context): Promise<Response> => {
   if (record.revoked !== false) return refuse('event_revoked');
   if (!isRecord(code)) return refuse('code_missing');
   if (code.revoked !== false) return refuse('code_revoked');
-  if (lastActiveDate(record) < todayIso()) return refuse('event_passed');
+  if (lastActiveDate(record) < easternTodayIso()) return refuse('event_passed');
 
   // Re-validate the stored invite at render (design §196). Only validateSignalUrl
   // guarantees a real signal.group URL; escapeAttr in succeed() is a backstop,

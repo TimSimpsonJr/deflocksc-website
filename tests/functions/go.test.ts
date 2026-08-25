@@ -168,6 +168,69 @@ describe('refusal responses are indistinguishable', () => {
   });
 });
 
+describe('past-event cutoff evaluates in America/New_York, not UTC', () => {
+  // D is the event's final calendar day. The invite must stay live through the
+  // whole of D in Eastern time and die only once Eastern crosses into D+1.
+  const D = '2026-09-10';
+
+  beforeEach(() => {
+    mocks.codesGet.mockResolvedValue({ pseudonym: 'handle-jay', revoked: false });
+  });
+
+  it('resolves at 20:00 UTC on the event day (16:00 EDT — still D Eastern)', async () => {
+    vi.setSystemTime(new Date('2026-09-10T20:00:00Z'));
+    mocks.eventsGet.mockResolvedValueOnce(liveEvent({ date: D }));
+    const res = await go(req, ctx(VALID_ID));
+    expect(res.status).toBe(200);
+  });
+
+  it('still resolves past UTC midnight while it is still the event day in Eastern time', async () => {
+    // 00:00 UTC on D+1 is 20:00 EDT on D. The old UTC cutoff killed the link
+    // here (8pm EDT on the event's own final day); the Eastern cutoff keeps it
+    // live — this is the exact behaviour the fix restores.
+    vi.setSystemTime(new Date('2026-09-11T00:00:00Z'));
+    mocks.eventsGet.mockResolvedValueOnce(liveEvent({ date: D }));
+    const res = await go(req, ctx(VALID_ID));
+    expect(res.status).toBe(200);
+  });
+
+  it('dies at 05:00 UTC on D+1 (01:00 EDT — past Eastern midnight)', async () => {
+    vi.setSystemTime(new Date('2026-09-11T05:00:00Z'));
+    mocks.eventsGet.mockResolvedValueOnce(liveEvent({ date: D }));
+    const res = await go(req, ctx(VALID_ID));
+    expect(res.status).toBe(404);
+    expect(await res.text()).not.toContain('signal.group');
+  });
+
+  it('honours the EST (winter, UTC-5) offset on both sides of Eastern midnight', async () => {
+    const winter = '2026-12-15';
+
+    // 04:59 UTC on D+1 is 23:59 EST on D — still the event day Eastern.
+    vi.setSystemTime(new Date('2026-12-16T04:59:00Z'));
+    mocks.eventsGet.mockResolvedValueOnce(liveEvent({ date: winter }));
+    const live = await go(req, ctx(VALID_ID));
+    expect(live.status).toBe(200);
+
+    // 05:30 UTC on D+1 is 00:30 EST on D+1 — past Eastern midnight.
+    vi.setSystemTime(new Date('2026-12-16T05:30:00Z'));
+    mocks.eventsGet.mockResolvedValueOnce(liveEvent({ date: winter }));
+    const dead = await go(req, ctx(VALID_ID));
+    expect(dead.status).toBe(404);
+    expect(await dead.text()).not.toContain('signal.group');
+  });
+
+  it("applies the Eastern cutoff to a recurring series' final day (recurrence.until)", async () => {
+    // Series ends on D; at 00:00 UTC on D+1 it is still D Eastern, so the final
+    // occurrence remains live — the cutoff composes with lastActiveDate(until).
+    vi.setSystemTime(new Date('2026-09-11T00:00:00Z'));
+    mocks.eventsGet.mockResolvedValueOnce(
+      liveEvent({ date: '2026-03-05', recurrence: { freq: 'weekly', until: D } }),
+    );
+    const res = await go(req, ctx(VALID_ID));
+    expect(res.status).toBe(200);
+  });
+});
+
 describe('fail-closed: a throwing store is indistinguishable from an unknown id', () => {
   it('returns a byte-identical refusal when the events store get() throws', async () => {
     // Baseline: the unknown-id refusal.
