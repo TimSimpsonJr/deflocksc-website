@@ -425,7 +425,13 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
      calendar icon so the field does not offer two pickers side by side. The
      field still displays and accepts the typed date and remains the form's
      value source. On mobile (or if the enhancement never runs) the class is
-     absent, so the native picker keeps its icon and stays fully functional. */
+     absent, so the native picker keeps its icon and stays fully functional.
+
+     `::-webkit-calendar-picker-indicator` is a Blink/WebKit-only pseudo-element:
+     on Firefox desktop this selector matches nothing, so the native calendar
+     icon still shows alongside the Cally button. That is a known, accepted
+     cosmetic limitation — it fails open, both pickers work and write the same
+     value, so no Firefox-specific fallback is warranted. */
   #field-date.native-cal-hidden::-webkit-calendar-picker-indicator {
     display: none;
   }
@@ -492,6 +498,36 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
   // value stays the slug). Read the slug from `citySelect`, never from the input.
   const citySelect = document.getElementById('field-city') as HTMLSelectElement;
   let cityInput: HTMLInputElement | null = null;
+
+  // accessible-autocomplete renders its <input> through Preact, whose VDOM owns
+  // `aria-describedby`: it points the attribute at the widget's own assistive
+  // hint while the query is empty (state.ariaHint === true) and sets it to null
+  // the first time the query goes non-empty. Either way Preact's diff wipes the
+  // `aria-describedby` we set imperatively after enhancement, so a screen-reader
+  // user who starts typing loses the field's association with its hint and error
+  // message. Pin the intended value with a MutationObserver that restores it
+  // whenever a re-render overwrites or removes it; `autocomplete="off"` is pinned
+  // alongside it (belt-and-suspenders — the widget already re-asserts it, but this
+  // survives any future change). apply() no-ops when the attribute already
+  // matches, so re-setting inside the observer callback cannot loop. The
+  // observation registration keeps the observer alive for the page's lifetime.
+  function pinAutocompleteAria(input: HTMLElement, describedBy: string): void {
+    const desired: Array<[string, string]> = [
+      ['aria-describedby', describedBy],
+      ['autocomplete', 'off'],
+    ];
+    const apply = (): void => {
+      for (const [name, value] of desired) {
+        if (input.getAttribute(name) !== value) input.setAttribute(name, value);
+      }
+    };
+    apply();
+    new MutationObserver(apply).observe(input, {
+      attributes: true,
+      attributeFilter: ['aria-describedby', 'autocomplete'],
+    });
+  }
+
   try {
     accessibleAutocomplete.enhanceSelectElement({
       selectElement: citySelect,
@@ -521,8 +557,7 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
     });
     cityInput = document.getElementById('field-city') as HTMLInputElement;
     if (cityInput) {
-      cityInput.setAttribute('aria-describedby', 'hint-city error-city');
-      cityInput.setAttribute('autocomplete', 'off');
+      pinAutocompleteAria(cityInput, 'hint-city error-city');
     }
     // A display:none required control cannot be focused by reportValidity(), so
     // native validation would silently block submit. City is validated by hand
@@ -602,9 +637,11 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
     });
     original.parentNode?.removeChild(original);
     addressInput = document.getElementById('field-address') as HTMLInputElement;
+    // maxlength is not part of the widget's Preact VDOM, so a re-render leaves
+    // it alone — set it once. aria-describedby / autocomplete ARE re-rendered,
+    // so pin them (see pinAutocompleteAria).
     addressInput.setAttribute('maxlength', '120');
-    addressInput.setAttribute('autocomplete', 'off');
-    addressInput.setAttribute('aria-describedby', 'hint-address hint-address-osm error-address');
+    pinAutocompleteAria(addressInput, 'hint-address hint-address-osm error-address');
     // The lookup is live now, so disclose it. Hidden until here so no-JS users
     // are never shown a claim about a lookup they do not get.
     addressOsmHint.hidden = false;
