@@ -3,28 +3,622 @@
     "id": "council-greenville-city",
     "type": "council",
     "title": "Greenville City Council",
-    "description": "Regular council meeting. Public comment sign-up is handled by the City Clerk before the meeting starts; arrive early to add your name. Each speaker gets 3 minutes.",
     "date": "2026-09-14",
     "time": "17:30",
     "city": "greenville",
     "county": "greenville",
-    "address": "206 S Main St, Greenville, SC 29601",
-    "recurrence": { "freq": "monthly_nth", "nths": [2, 4], "until": null },
-    "source": "https://www.greenvillesc.gov/185/City-Council",
+    "address": "Greenville City Hall, Council Chambers (10th Floor), 206 S. Main Street, Greenville, SC 29601",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "To speak during public comment at a City Council formal meeting, contact the City Clerk by 12:00 p.m. on the day of the meeting and provide your contact information and the agenda item you wish to address. Sign up by phone at 864-467-4431 or by email at cpitman@greenvillesc.gov. The published agenda does not state a per-speaker time limit.",
+    "source": "https://greenvillesc.portal.civicclerk.com/",
     "organizer": "Greenville City Council"
+  },
+  {
+    "id": "council-greenville-county",
+    "type": "council",
+    "title": "Greenville County Council",
+    "date": "2026-09-01",
+    "time": "18:00",
+    "city": "greenville",
+    "county": "greenville",
+    "address": "Greenville County Square, Council Chambers, 301 University Ridge, Greenville, SC 29601",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "Public comment is taken during the Public Comments portion of the regular County Council meeting, which begins at 6:00 p.m. To speak, register in person (on-site) at the meeting location between 5:15 and 5:45 p.m. on the evening of the meeting. The county's current published agendas list on-site registration only; no online sign-up option or per-speaker time limit is stated on the agenda.",
+    "source": "https://www.greenvillecounty.org/Council/Information.aspx",
+    "organizer": "Greenville County Council"
   },
   {
     "id": "council-columbia-city",
     "type": "council",
     "title": "Columbia City Council",
-    "description": "Regular council meeting. Sign up with the City Clerk to speak during the public-comment period. Each speaker gets 3 minutes.",
+    "date": "2026-09-01",
+    "time": "16:00",
+    "city": "columbia",
+    "county": "richland",
+    "address": "City Hall - Council Chambers, 1737 Main Street, 3rd Floor, Columbia, SC 29201",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "At each regular meeting, Columbia City Council holds two Public Input periods: one near the start for items on that meeting's agenda and one near the end for matters not on the agenda, with each speaker allotted up to three minutes (items scheduled for a public hearing cannot be addressed during Public Input). The City does not publish an online sign-up form or an advance-registration deadline for Public Input, so confirm the current sign-up procedure with the Office of the City Clerk at (803) 545-3045 or cityclerk@columbiasc.gov before attending.",
+    "source": "https://columbiasc.portal.civicclerk.com/",
+    "organizer": "Columbia City Council"
+  },
+  {
+    "id": "council-richland-county",
+    "type": "council",
+    "title": "Richland County Council",
     "date": "2026-09-01",
     "time": "18:00",
     "city": "columbia",
     "county": "richland",
-    "address": "1737 Main St, Columbia, SC 29201",
-    "recurrence": { "freq": "monthly_nth", "nths": [1, 3], "until": null },
-    "source": "https://www.columbiasc.gov/city-council",
-    "organizer": "Columbia City Council"
+    "address": "Richland County Council Chambers, Richland County Administration Building, 2020 Hampton Street, Columbia, SC 29204",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "To speak during a regular Council meeting, sign the Agenda Items Input List (or, for a concern not on the agenda, the Non-Agenda Items Input List) to address the full Council. Each person who signs up may speak for up to 2 minutes, the total input period is capped at 30 minutes per list, and speakers must state their name and address before their time begins. Anyone speaking on behalf of a group must provide the Clerk of Council written authorization before the meeting. (These sign-up mechanics reflect a drafted reading of the Council Rules and were not independently confirmed.)",
+    "source": "https://www.richlandcountysc.gov/Government/Elected-Offices/County-Council",
+    "organizer": "Richland County Council"
+  },
+  {
+    "id": "council-charleston-city",
+    "type": "council",
+    "title": "Charleston City Council",
+    "date": "2026-09-08",
+    "time": "17:00",
+    "city": "charleston",
+    "county": "charleston",
+    "address": "Charleston City Hall, City Council Chamber, 80 Broad Street, Charleston, SC 29401",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "Sign up for the Citizens' Participation Period either in person at City Hall until 5:00 p.m. on the meeting day, or in advance by 12:00 p.m. (noon) the day before through the City's Public Meeting Portal at innovate.charleston-sc.gov/comments, by voicemail at 843-579-6313, or by mail to the Clerk of Council at 80 Broad Street; no account or registration is required. The Participation Period is limited to 30 minutes and to the first 30 speakers. The presiding officer sets each speaker's time limit at the meeting.",
+    "source": "https://www.charleston-sc.gov/AgendaCenter/City-Council-7",
+    "organizer": "Charleston City Council"
+  },
+  {
+    "id": "council-charleston-county",
+    "type": "council",
+    "title": "Charleston County Council",
+    "date": "2026-09-08",
+    "time": "18:30",
+    "city": "north-charleston",
+    "county": "charleston",
+    "address": "Beverly T. Craven Council Chambers, Lonnie Hamilton, III Public Services Building, 4045 Bridge View Drive, 2nd Floor, North Charleston, SC 29405",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "Charleston County Council holds a public comment period before each regular Council meeting; residents wishing to speak should arrive before the 6:30 PM start. Under the Rules of Council (Rule 2.1.5), any person addressing Council must submit their topic in writing or in person before permission is given to speak, but that requirement does not apply to the general public-comments portion, where the time allowed each speaker is set by the Chairman. For sign-up details contact the County Council Office at 843-958-4030; written comments may be emailed to public-comments@charlestoncounty.org.",
+    "source": "https://www.charlestoncounty.gov/departments/county-council/index.php",
+    "organizer": "Charleston County Council"
+  },
+  {
+    "id": "council-north-charleston-city",
+    "type": "council",
+    "title": "North Charleston City Council",
+    "date": "2026-08-27",
+    "time": "19:00",
+    "city": "north-charleston",
+    "county": "charleston",
+    "address": "North Charleston City Hall, City Council Chambers, 2500 City Hall Lane, North Charleston, SC 29406",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "To speak during public comment at a North Charleston City Council meeting, notify the Clerk of Council in writing with your name and the specific item you wish to address by 12:00 noon on the day of the meeting; you must contact the Clerk yourself, as third-party requests are not accepted. Each speaker is allowed 3 minutes, and total public comment is capped at 30 minutes. Contact the Clerk of Council (Courtnay Fields) at (843) 740-2509 (City Hall, 2500 City Hall Lane, 3rd floor); a \"Request to Address Council\" form is available as a PDF on the city's public-comment page.",
+    "source": "https://www.northcharleston.org/government/city_council/request_to_speak_at_public_meeting.php",
+    "organizer": "North Charleston City Council"
+  },
+  {
+    "id": "council-mount-pleasant-town",
+    "type": "council",
+    "title": "Mount Pleasant Town Council",
+    "date": "2026-09-08",
+    "time": "18:00",
+    "city": "mount-pleasant",
+    "county": "charleston",
+    "address": "Municipal Complex, Council Chambers, 100 Ann Edwards Lane, Mount Pleasant, SC 29464",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "Every regular Town Council agenda includes a public comment opportunity, but the Town does not publish a formal sign-up procedure, deadline, or per-speaker time limit on its official pages or agendas; speakers are simply recognized to address Council from the podium (stating name and address). To confirm exactly how to sign up to speak and any time limit before you attend, contact the Clerk of Council, Christine Barrett, at (843) 884-8517 or cbarrett@tompsc.com.",
+    "source": "https://www.tompsc.com/FAQ.aspx?QID=201",
+    "organizer": "Mount Pleasant Town Council"
+  },
+  {
+    "id": "council-spartanburg-city",
+    "type": "council",
+    "title": "Spartanburg City Council",
+    "date": "2026-09-14",
+    "time": "17:30",
+    "city": "spartanburg",
+    "county": "spartanburg",
+    "address": "Spartanburg County Administration Building, 366 N. Church St., Spartanburg, SC 29303",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "To speak during public comment, submit the City Council Citizen Appearance / Public Comment form online in advance; it must be received by 12 PM (noon) on the day of the meeting you wish to attend. Any City of Spartanburg resident may address Council on matters within its authority (personnel matters excluded), and each approved speaker is limited to a two-minute presentation. The form is at cityofspartanburg.org/FormCenter (City Council Citizen Appearance/Public Comment); questions go to City Clerk Christie Lindsey, (864) 596-2796, clindsey@cityofspartanburg.org.",
+    "source": "https://www.cityofspartanburg.org/316/City-Council",
+    "organizer": "Spartanburg City Council"
+  },
+  {
+    "id": "council-spartanburg-county",
+    "type": "council",
+    "title": "Spartanburg County Council",
+    "date": "2026-09-21",
+    "time": "17:15",
+    "city": "spartanburg",
+    "county": "spartanburg",
+    "address": "Spartanburg County Administration Building, County Council Chambers, 366 N Church St, Spartanburg, SC 29303",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Spartanburg County Council holds a public comment period at its regular meetings, limited to 30 minutes total, with each speaker limited to 3 minutes unless Council authorizes one 3-minute extension. Under the Council Rules and Procedures (Rule 5-1.1), preference is given to persons who have notified the Clerk of Council in advance of their desire to speak. The rules do not publish a fixed deadline or method for that notice, so contact the Clerk to Council, Angela G. Walker, at 864-596-2528 to sign up in advance of the meeting.",
+    "source": "https://www.spartanburgcounty.gov/189/County-Council",
+    "organizer": "Spartanburg County Council"
+  },
+  {
+    "id": "council-rock-hill-city",
+    "type": "council",
+    "title": "Rock Hill City Council",
+    "date": "2026-09-14",
+    "time": "17:30",
+    "city": "rock-hill",
+    "county": "york",
+    "address": "City Hall Council Chambers, 155 Johnston Street, Rock Hill, SC 29730",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ],
+      "skipMonths": [
+        7
+      ]
+    },
+    "description": "To speak on a topic that is NOT on the agenda, call 803-329-7013 in advance to request to speak at the Citizens Hearing, which is held at 5:30 PM immediately before the 6:00 PM Council meeting on the second Monday. Speakers are limited to five minutes total and should approach the podium and state their name and address. To comment on an item already on the agenda, you may address the Council when that item is taken up during the 6:00 PM meeting.",
+    "source": "https://www.cityofrockhill.com/government/city-council/meetings",
+    "organizer": "Rock Hill City Council"
+  },
+  {
+    "id": "council-horry-county",
+    "type": "council",
+    "title": "Horry County Council",
+    "date": "2026-09-01",
+    "time": "18:00",
+    "city": "conway",
+    "county": "horry",
+    "address": "Council Chambers, Horry County Government & Justice Center, 1301 Second Avenue, Conway, SC 29526",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "To speak during public comment (listed on agendas as \"Public Input\"), notify the Clerk to Council of your intent no later than three hours before the meeting's 6:00 p.m. start time (about 3:00 p.m. that day), giving your name, phone number, and the topic you wish to address; speaking slots are allotted first-come, first-served. Each speaker is limited to 5 minutes, and the overall public comment period is capped at 30 minutes. Contact the Clerk to Council at (843) 915-5120 or hcg.clerktocouncil@horrycountysc.gov.",
+    "source": "https://www.sccounties.org/sites/default/files/uploads/services/research/rulesofprocedure/horryrulesofprocedure.pdf",
+    "organizer": "Horry County Council"
+  },
+  {
+    "id": "council-myrtle-beach-city",
+    "type": "council",
+    "title": "Myrtle Beach City Council",
+    "date": "2026-08-25",
+    "time": "10:00",
+    "city": "myrtle-beach",
+    "county": "horry",
+    "address": "Council Chambers, Ted C. Collins Law Enforcement Center, 1101 North Oak Street, Myrtle Beach, SC 29577",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "To speak during public comment, sign in in person before the meeting begins and state your name when called; no advance registration is required. Public comment on non-agenda items is taken at the end of the meeting, limited to 30 minutes total, with each speaker allowed up to 5 minutes (per City Code Sec. 2-43(b)(4)(g), recently amended in early 2026 to raise the per-speaker limit from 3 to 5 minutes). To confirm details or request accommodations, contact the City Clerk's Office (Jennifer Adkins) at (843) 918-1004, ideally at least 48 hours before the meeting.",
+    "source": "https://www.cityofmyrtlebeach.com/government/meeting_schedule.php",
+    "organizer": "Myrtle Beach City Council"
+  },
+  {
+    "id": "council-lexington-county",
+    "type": "council",
+    "title": "Lexington County Council",
+    "date": "2026-09-08",
+    "time": "16:30",
+    "city": "lexington",
+    "county": "lexington",
+    "address": "Dorothy K. Black Council Chambers, 2nd Floor, Lexington County Administration Building, 212 South Lake Drive, Lexington, SC 29072",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "To speak at a regular County Council meeting you must sign up in advance: contact the Clerk to County Council (803-785-8103 or countycouncil@lexingtoncounty.sc.gov) before the meeting and identify the subject you wish to address, so you can be placed on the agenda (the chairperson must approve). Public comment is taken at the end of the meeting and is limited to three minutes per speaker unless the chairperson grants more time. Confirm the exact sign-up deadline with the Clerk, since the codified rule (which lists \"the Monday prior\") predates the move of regular meetings to Tuesdays.",
+    "source": "https://lex-co.sc.gov/county-council",
+    "organizer": "Lexington County Council"
+  },
+  {
+    "id": "council-sumter-city",
+    "type": "council",
+    "title": "Sumter City Council",
+    "date": "2026-09-15",
+    "time": "17:30",
+    "city": "sumter",
+    "county": "sumter",
+    "address": "Sumter Opera House, Council Chambers (4th Floor), 21 N. Main Street, Sumter, SC 29150 (enter via the back parking-lot entrance and take the elevator to the 4th floor)",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Public comment (\"Comments by City Citizens\") is offered only at the third-Tuesday meeting. To speak, City of Sumter residents complete the sign-in sheet in the lobby of the Council Chambers before the meeting begins; the Clerk collects the sheet about ten minutes before the meeting to verify residency within the city. Each speaker is limited to no more than three minutes, and no advance registration is required.",
+    "source": "https://www.sumtersc.gov/council-meetings",
+    "organizer": "Sumter City Council"
+  },
+  {
+    "id": "council-sumter-county",
+    "type": "council",
+    "title": "Sumter County Council",
+    "date": "2026-09-08",
+    "time": "18:00",
+    "city": "sumter",
+    "county": "sumter",
+    "address": "County Administration Building, 3rd Floor, Council Chambers, 13 E. Canal Street, Sumter, SC 29150",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "During the meeting's Public Comment period, citizens may speak for up to three (3) minutes, with all comments directed through the chair; this time is for comments only, not questions or discussion, and personal attacks or negative remarks about Council or staff are not permitted. Sumter County does not publish an advance sign-up or pre-registration procedure for public comment. To confirm how to be recognized to speak, contact the Clerk to Council, Sterling Winn-Mitchum, at (803) 436-2107 or council@sumtercountysc.gov before the meeting.",
+    "source": "https://cms7files.revize.com/sumtercountysc/Council%20Documents/Sumter%20County%20Council%202026%20Meeting%20Calendar%20.pdf",
+    "organizer": "Sumter County Council"
+  },
+  {
+    "id": "council-florence-city",
+    "type": "council",
+    "title": "Florence City Council",
+    "date": "2026-09-14",
+    "time": "13:00",
+    "city": "florence",
+    "county": "florence",
+    "address": "City Council Chambers, City Center, 324 W. Evans Street, Florence, SC 29501",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "To speak on an item already on the agenda, sign the sign-in sheet provided at each Council meeting. To raise a matter not on the agenda, you must pre-register with the Municipal Clerk by 5:00 p.m. on the Wednesday twelve (12) days before the meeting (C.C. Moore, ccmoore@cityofflorencesc.gov or (843) 665-3113). Speakers may be limited to a five (5) minute presentation at the discretion of the presiding officer.",
+    "source": "https://www.cityofflorencesc.gov/city-council/speak-council",
+    "organizer": "Florence City Council"
+  },
+  {
+    "id": "council-florence-county",
+    "type": "council",
+    "title": "Florence County Council",
+    "date": "2026-10-15",
+    "time": "09:00",
+    "city": "florence",
+    "county": "florence",
+    "address": "Florence County Complex, Council Chambers, Room 803, 180 North Irby Street, Florence, SC 29501",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "To speak, submit a written request to the Chair of County Council asking to be placed on the agenda at least 13 days before the meeting; the request must state the reason for the appearance. Send it to the Clerk to County Council, Hope Jones, 180 N. Irby St., MSC-G, Florence, SC 29501 — email hjones@florencecountysc.gov, fax (843) 665-3042, or phone (843) 665-3044. Appearances before Council are limited to three to five minutes; there is no day-of, walk-up public-comment sign-up.",
+    "source": "https://www.florencecountysc.gov/council/",
+    "organizer": "Florence County Council"
+  },
+  {
+    "id": "council-beaufort-county",
+    "type": "council",
+    "title": "Beaufort County Council",
+    "date": "2026-09-14",
+    "time": "18:00",
+    "city": "beaufort",
+    "county": "beaufort",
+    "address": "Beaufort County Council Chambers, Administration Building, Beaufort County Government Robert Smalls Complex, 100 Ribaut Road, Beaufort, SC 29902",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "Sign up in person to speak: citizens attending the meeting add their name to the public comment list upon arrival, with no advance registration required. Public comment is a single 30-minute period held at the start of each meeting, with each speaker limited to three (3) minutes; giving your time to another speaker is not allowed, and Council listens but does not respond during comments. With questions, contact the Clerk to Council, Sarah Brock, at 843-255-2183 or sbrock@bcgov.net.",
+    "source": "https://www.beaufortcountysc.gov/news/2025/12/beaufort-county-council-meeting-schedule-for-2026.html",
+    "organizer": "Beaufort County Council"
+  },
+  {
+    "id": "council-hilton-head-town",
+    "type": "council",
+    "title": "Hilton Head Island Town Council",
+    "date": "2026-10-13",
+    "time": "15:00",
+    "city": "hilton-head",
+    "county": "beaufort",
+    "address": "Benjamin M. Racusin Council Chambers, 1 Town Center Court, Hilton Head Island, SC 29928",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "To speak during public comment you must sign up in advance by submitting the Town's Public Comment form to the Town Clerk: submit the online form no later than two hours before the meeting's start time, or complete a hard-copy form (provided at the meeting) and turn it in no later than 10 minutes before the start. Late forms are not accepted, and each recognized speaker is allowed up to three minutes.",
+    "source": "https://hiltonheadislandsc.gov/government/town_council/meeting_schedule.php",
+    "organizer": "Hilton Head Island Town Council"
+  },
+  {
+    "id": "council-summerville-town",
+    "type": "council",
+    "title": "Summerville Town Council",
+    "date": "2026-09-10",
+    "time": "18:00",
+    "city": "summerville",
+    "county": "dorchester",
+    "address": "Town Council Chambers, Summerville Municipal Complex Annex Building, 200 South Main Street, Summerville, SC 29483",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "Summerville Town Council's order of business includes two public-comment periods at regular meetings, one for items on the agenda and one for any topic, so residents may address Council (both periods appear on the 2026 regular-meeting agendas). The Town does not publish a specific sign-up procedure or per-speaker time limit on its official pages, so confirm how to be recognized to speak with the Town Clerk, Beth Messervy, at bmesservy@summervillesc.gov or (843) 851-4223 before the meeting. Public comments may not be used for political or campaigning purposes (S.C. Code Ann. Sec. 8-13-765).",
+    "source": "https://www.summervillesc.gov/253/Elected-Officials",
+    "organizer": "Summerville Town Council"
+  },
+  {
+    "id": "council-dorchester-county",
+    "type": "council",
+    "title": "Dorchester County Council",
+    "date": "2026-09-21",
+    "time": "18:00",
+    "city": "summerville",
+    "county": "dorchester",
+    "address": "Dorchester County Human Services Building, County Council Chambers, 500 North Main Street, Summerville, SC 29483",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "Public comment is limited to items on the meeting agenda; residents who wish to speak complete the county's online \"Request to Address Council\" form ahead of the meeting. The submission deadline and any per-speaker time limit are not posted on an accessible county page, so confirm both with the Clerk to Council, Lona Conrad, at (843) 832-0196 or lconrad@dorchestercountysc.gov before attending.",
+    "source": "https://www.dorchestercountysc.gov/government/county-council/meeting-schedule",
+    "organizer": "Dorchester County Council"
+  },
+  {
+    "id": "council-aiken-city",
+    "type": "council",
+    "title": "Aiken City Council",
+    "date": "2026-09-14",
+    "time": "19:00",
+    "city": "aiken",
+    "county": "aiken",
+    "address": "Aiken Municipal Building, City Council Chambers (upstairs), 111 Chesterfield St. S, Aiken, SC 29801",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "No pre-registration is required to speak. When the Mayor opens the floor for public comment on an agenda item requiring a Council decision, simply raise your hand to be recognized; comments are limited to a five-minute maximum. You may also submit written comments about agenda items to the City Clerk in advance for Council's consideration. To be added to a future meeting agenda, contact the City Clerk (Sara Ridout) at 803-642-7654. A non-voting City Council Work Session is held at 5:00 PM before the 7:00 PM regular (voting) meeting, which is live-streamed on the City of Aiken YouTube channel.",
+    "source": "https://www.cityofaikensc.gov/event/city-council-meeting/",
+    "organizer": "Aiken City Council"
+  },
+  {
+    "id": "council-aiken-county",
+    "type": "council",
+    "title": "Aiken County Council",
+    "date": "2026-09-15",
+    "time": "19:00",
+    "city": "aiken",
+    "county": "aiken",
+    "address": "Aiken County Government Center, Council Chambers (Suite 3600, 3rd floor), 1930 University Parkway, Aiken, SC 29801",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Public comment is taken during the \"Informal Meeting of the Whole\" at the end of each regular County Council meeting, a standing item on the official agenda. Aiken County does not publish the sign-up procedure or a per-speaker time limit on an accessible official page. Secondary (non-official) sources indicate no advance sign-up is required and each speaker is limited to 3 minutes, but this is not confirmed on any official source. To confirm whether you must sign up in advance and any time limit, contact the Clerk to Council at the County Council office, 803-642-1690, before the meeting.",
+    "source": "https://www.aikencountysc.gov/528/County-Council",
+    "organizer": "Aiken County Council"
+  },
+  {
+    "id": "council-anderson-county",
+    "type": "council",
+    "title": "Anderson County Council",
+    "date": "2026-09-01",
+    "time": "18:30",
+    "city": "anderson",
+    "county": "anderson",
+    "address": "Historic Courthouse, 101 S. Main Street, Anderson, SC 29624",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "Anderson County Council holds its regular meeting at 6:30 p.m. (a separate Special Presentation Meeting is sometimes held at 6:00 p.m. immediately before it). The published agenda includes two \"Citizens Comments\" periods, each with a three-minute-per-speaker limit: one near the start restricted to agenda matters only, and one near the end for non-agenda matters. The county does not publish a public-comment sign-up procedure online; to confirm how to be recognized to speak, contact the Clerk to Council, Renee Watts, at (864) 260-1036 (or rdwatts@andersoncountysc.org) before the meeting.",
+    "source": "https://www.andersoncountysc.org/county-council/",
+    "organizer": "Anderson County Council"
+  },
+  {
+    "id": "council-anderson-city",
+    "type": "council",
+    "title": "Anderson City Council",
+    "date": "2026-09-14",
+    "time": "18:00",
+    "city": "anderson",
+    "county": "anderson",
+    "address": "Council Chambers, City Hall (first floor), 401 S Main St, Anderson, SC 29624",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "The City of Anderson does not publish a public-comment sign-up procedure, and its posted agendas contain no general public-comment period — only formal public hearings tied to specific ordinance or budget items. Before attending to speak, contact the City Council office at (864) 231-1135 to confirm whether a public-comment opportunity exists at the meeting you plan to attend and any sign-up deadline or per-speaker time limit. Regular meetings are held at 6 p.m. in the City Hall Council Chambers (first floor) on the second and fourth Mondays of each month, excluding holidays.",
+    "source": "https://www.cityofandersonsc.com/city-council/",
+    "organizer": "Anderson City Council"
+  },
+  {
+    "id": "council-goose-creek-city",
+    "type": "council",
+    "title": "Goose Creek City Council",
+    "date": "2026-09-08",
+    "time": "18:00",
+    "city": "goose-creek",
+    "county": "berkeley",
+    "address": "Municipal Court, 519 N. Goose Creek Blvd., Building D, Goose Creek, SC 29445 (temporary location March–Dec 2026 during City Hall renovations; confirm the building before attending)",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "Regular City Council meetings include a \"General Public Comments\" period with a 3-minute per-speaker limit (as shown on the city's meeting agendas). Per the City's Code of Ordinances § 31.089, any Goose Creek citizen may address Council on any city matter except personnel issues, but persons wishing to speak must notify the City Clerk before the meeting begins; written comments may be submitted to the City Clerk no later than one hour before the meeting. Attend in person, and to confirm the current procedure or submit comments contact City Clerk Kelly Lovette at 843-797-6220, ext. 1113.",
+    "source": "https://www.goosecreeksc.gov/government/mayor-and-city-council",
+    "organizer": "Goose Creek City Council"
+  },
+  {
+    "id": "council-conway-city",
+    "type": "council",
+    "title": "Conway City Council",
+    "date": "2026-09-21",
+    "time": "16:00",
+    "city": "conway",
+    "county": "horry",
+    "address": "City Hall Council Chambers, 229 Main Street, Conway, SC 29526",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "To speak during public comment, notify the City Clerk at least one business day before the meeting start; you must give your address and state the purpose of your appearance. Any citizen of the municipality is entitled to an appearance before the council at a regular meeting on any municipal matter except personnel matters. Contact City Clerk Alicia Shelley at (843) 248-1760 or ashelley@conwaysc.gov to sign up. No per-speaker time limit is published, so confirm details with the Clerk.",
+    "source": "https://www.conwaysc.gov/city_council/",
+    "organizer": "Conway City Council"
+  },
+  {
+    "id": "council-greenwood-city",
+    "type": "council",
+    "title": "Greenwood City Council",
+    "date": "2026-09-21",
+    "time": "17:30",
+    "city": "greenwood",
+    "county": "greenwood",
+    "address": "Greenwood City Hall, City Council Chambers (Room 207, 2nd floor), 520 Monument Street, Greenwood, SC 29646",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "To address the Greenwood City Council you must be placed on the agenda in advance: submit an \"Application for Appearance Before City Council\" (agenda request form) to the City Clerk by noon on the Wednesday before the meeting. Request the form from City Clerk Tiffany Albert at 864-942-8412 or tiffany.albert@gwdcity.com. No separate open public-comment period or per-speaker time limit is published on official sources; confirm current procedures with the Clerk.",
+    "source": "https://www.cityofgreenwoodsc.com/government/council_meetings.php",
+    "organizer": "Greenwood City Council"
+  },
+  {
+    "id": "council-york-county",
+    "type": "council",
+    "title": "York County Council",
+    "date": "2026-09-21",
+    "time": "18:00",
+    "city": "york",
+    "county": "york",
+    "address": "Council Chambers, 6 South Congress Street, York, SC 29745",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "York County Council offers two ways to speak at a regular meeting. To be placed on the agenda (limited to 2 speakers per meeting at up to 6 minutes each, first come, first served), contact the Clerk to Council at 803-628-3954 at least 10 days before the meeting date. Otherwise, sign up on the sheet at the door of the Council Chambers the evening of the meeting, just before it begins, for 2 minutes of speaking time; this option is first come, first served and capped at 15 speakers.",
+    "source": "https://www.yorkcountysc.gov/375/County-Council",
+    "organizer": "York County Council"
   }
 ]

@@ -152,7 +152,7 @@ describe('parseCouncilEvents — rejected (a bad entry fails the build)', () => 
 describe('loadCouncilEvents — the committed seed', () => {
   it('loads council-meetings.json as valid council PublicEvents', () => {
     const events = loadCouncilEvents();
-    expect(events.length).toBe(2);
+    expect(events.length).toBe(30);
     for (const e of events) {
       expect(e.type).toBe('council');
       expect(e.hasSignalGroup).toBe(false);
@@ -162,7 +162,10 @@ describe('loadCouncilEvents — the committed seed', () => {
   });
 
   it('includes the Greenville and Columbia city councils', () => {
-    const ids = loadCouncilEvents().map((e) => e.id).sort();
-    expect(ids).toEqual(['council-columbia-city', 'council-greenville-city']);
+    const ids = loadCouncilEvents().map((e) => e.id);
+    expect(ids).toContain('council-greenville-city');
+    expect(ids).toContain('council-columbia-city');
+    // Every id is unique (parseCouncilEvents also throws on a duplicate).
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });

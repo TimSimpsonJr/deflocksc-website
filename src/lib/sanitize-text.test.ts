@@ -37,12 +37,12 @@ describe('sanitizeText: exported caps', () => {
     expect(TITLE_LIMITS).toEqual({ maxBytes: 1024, maxGraphemes: 80 });
   });
 
-  it('exports the description caps as 3072 bytes and 300 graphemes', () => {
-    expect(DESCRIPTION_LIMITS).toEqual({ maxBytes: 3072, maxGraphemes: 300 });
+  it('exports the description caps as 3072 bytes and 600 graphemes', () => {
+    expect(DESCRIPTION_LIMITS).toEqual({ maxBytes: 3072, maxGraphemes: 600 });
   });
 
-  it('exports the address caps as 512 bytes and 120 graphemes', () => {
-    expect(ADDRESS_LIMITS).toEqual({ maxBytes: 512, maxGraphemes: 120 });
+  it('exports the address caps as 512 bytes and 200 graphemes', () => {
+    expect(ADDRESS_LIMITS).toEqual({ maxBytes: 512, maxGraphemes: 200 });
   });
 });
 

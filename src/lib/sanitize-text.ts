@@ -25,8 +25,8 @@ export interface SanitizeOptions {
 // invisible. Both axes matter -- bytes bound storage and the work done before
 // normalization, graphemes bound what a reader actually sees.
 export const TITLE_LIMITS: SanitizeOptions = { maxBytes: 1024, maxGraphemes: 80 };
-export const DESCRIPTION_LIMITS: SanitizeOptions = { maxBytes: 3072, maxGraphemes: 300 };
-export const ADDRESS_LIMITS: SanitizeOptions = { maxBytes: 512, maxGraphemes: 120 };
+export const DESCRIPTION_LIMITS: SanitizeOptions = { maxBytes: 3072, maxGraphemes: 600 };
+export const ADDRESS_LIMITS: SanitizeOptions = { maxBytes: 512, maxGraphemes: 200 };
 
 const ENCODER = new TextEncoder();
 
