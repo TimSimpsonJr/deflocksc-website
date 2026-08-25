@@ -395,6 +395,28 @@ export function countyOptions(
     .sort((a, b) => b.count - a.count || (a.county < b.county ? -1 : 1));
 }
 
+/**
+ * Count DISTINCT events per field value (county or city). A recurring event
+ * expands to many occurrences, but a map tally is a count of events, not dates,
+ * so each event.id is counted once — matching the collapseSeries-based dropdown
+ * counts. Each event has one county and one city, so a global id-dedupe is
+ * correct for either field. The choropleth badges and city pins use this.
+ */
+export function countDistinctByField(
+  occurrences: readonly Occurrence[],
+  field: 'county' | 'city',
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  const seen = new Set<string>();
+  for (const o of occurrences) {
+    if (seen.has(o.event.id)) continue;
+    seen.add(o.event.id);
+    const key = o.event[field];
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export interface FilterFacets {
   /** Occurrences per county under the active *type* filter (county ignored). */
   countyCounts: Record<string, number>;

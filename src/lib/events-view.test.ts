@@ -5,6 +5,7 @@ import {
   expandAll,
   splitByToday,
   collapseSeries,
+  countDistinctByField,
   recurrenceLabel,
   monthAbbr,
   dayOfMonth,
@@ -23,7 +24,7 @@ import {
   upcomingOccurrences,
   upcomingFooter,
 } from './events-view.js';
-import type { EventFilter } from './events-view.js';
+import type { EventFilter, Occurrence } from './events-view.js';
 import type { PublicEvent } from './public-event.js';
 
 function ev(over: Partial<PublicEvent> = {}): PublicEvent {
@@ -44,6 +45,31 @@ function ev(over: Partial<PublicEvent> = {}): PublicEvent {
     ...over,
   } as PublicEvent;
 }
+
+describe('countDistinctByField', () => {
+  const occ = (event: PublicEvent, date: string): Occurrence => ({ event, date });
+
+  it('counts each recurring event once per county, not once per occurrence', () => {
+    const weekly = ev({ id: 'e1111111', county: 'greenville', city: 'greenville', recurrence: { freq: 'weekly', until: null } });
+    const oneoff = ev({ id: 'e2222222', county: 'greenville', city: 'greer' });
+    const occs: Occurrence[] = [
+      occ(weekly, '2026-09-07'), occ(weekly, '2026-09-14'), occ(weekly, '2026-09-21'),
+      occ(oneoff, '2026-09-10'),
+    ];
+    expect(countDistinctByField(occs, 'county').get('greenville')).toBe(2);
+  });
+
+  it('counts distinct events per city, not per occurrence', () => {
+    const a = ev({ id: 'e1111111', city: 'greer' });
+    const b = ev({ id: 'e2222222', city: 'greer' });
+    const occs: Occurrence[] = [occ(a, '2026-09-01'), occ(a, '2026-09-08'), occ(b, '2026-09-02')];
+    expect(countDistinctByField(occs, 'city').get('greer')).toBe(2);
+  });
+
+  it('returns an empty map for no occurrences', () => {
+    expect(countDistinctByField([], 'county').size).toBe(0);
+  });
+});
 
 describe('mergeEvents', () => {
   it('returns the baked set unchanged when the overlay is null', () => {
