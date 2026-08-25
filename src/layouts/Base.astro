@@ -84,9 +84,11 @@ const analyticsExcluded =
     <slot name="head" />
 
     {/* Umami Cloud Analytics – proxied through our domain to avoid ad-blocker blocklists.
-        Suppressed on /events/* per design §14. */}
+        Suppressed on /events/* per design §14.
+        data-host-url="/u" makes the beacon POST to our same-origin /u/api/send proxy (see netlify.toml);
+        without it the tracker defaults to gateway.umami.is, which is unproxied and blocked by CSP connect-src 'self'. */}
     {!analyticsExcluded && (
-      <script defer src="/u/script.js" data-website-id="c0ff812f-a062-43e1-8ac1-e5eafd527ffc" />
+      <script defer src="/u/script.js" data-website-id="c0ff812f-a062-43e1-8ac1-e5eafd527ffc" data-host-url="/u" />
     )}
   </head>
   <body class="bg-base-100 text-[#a0a0a0] font-['Instrument_Sans_Variable',sans-serif] leading-[1.7] min-h-screen">
