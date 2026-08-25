@@ -1,0 +1,92 @@
+---
+import type { Occurrence } from '../lib/events-view.js';
+import { monthAbbr, dayOfMonth, formatTime12, sortKey, emptyStateProof, recurrenceLabel, eventTypeLabel, eventTypeSlug } from '../lib/events-view.js';
+
+interface Props {
+  upcoming: Occurrence[];
+  past: Occurrence[];
+  cityNames: Record<string, string>;
+  countyNames: Record<string, string>;
+}
+
+const { upcoming, past, cityNames, countyNames } = Astro.props;
+
+const place = (o: Occurrence) =>
+  `${cityNames[o.event.city] ?? o.event.city} · ${countyNames[o.event.county] ?? o.event.county} County`;
+---
+
+<div class="events-list-wrap">
+  {/* The live region is this short "N upcoming" summary, NOT the list below.
+      applyFilter/syncChrome rewrite #events-count as the filter narrows, so a
+      screen reader hears a concise "5 upcoming" — aria-atomic makes it read the
+      whole line, not the bare number. aria-live used to sit on the <ul>, which
+      re-announced all 30+ cards every time the type radiogroup was arrowed. */}
+  <p class="events-count label-mono text-[#737373]" aria-live="polite" aria-atomic="true">
+    <span id="events-count">{upcoming.length}</span> upcoming
+  </p>
+
+  <ul id="events-list" class="events-list">
+    {upcoming.map((o) => (
+      <li
+        class={`event-card event-card--${eventTypeSlug(o.event.type)}`}
+        data-event-id={o.event.id}
+        data-date={o.date}
+        data-sort={sortKey(o.date, o.event.time, o.event.id)}
+      >
+        <div class="event-date" aria-hidden="true">
+          <span class="event-date-day">{dayOfMonth(o.date)}</span>
+          <span class="event-date-mon">{monthAbbr(o.date)}</span>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">
+            <button type="button" class="event-title-btn" aria-haspopup="dialog">{o.event.title}</button>
+          </h3>
+          <p class="event-meta">
+            <span class="sr-only">{o.date} </span>{formatTime12(o.event.time)} · {place(o)}
+          </p>
+          {o.event.address && <p class="event-address">{o.event.address}</p>}
+          {o.event.description && <p class="event-desc">{o.event.description}</p>}
+          {/* Quiet type/recurrence line — the de-slopped replacement for the old
+              coloured badge row. MUST stay in class-parity with buildCard() in
+              events-page.ts: a single <p class="event-typeline"> with the type
+              label, and " · Repeats …" appended for a collapsed recurring series.
+              The Signal join lives only in the detail popover now, never here. */}
+          <p class="event-typeline">
+            {eventTypeLabel(o.event.type)}{recurrenceLabel(o.event.recurrence) ? ` · ${recurrenceLabel(o.event.recurrence)}` : ''}
+          </p>
+        </div>
+      </li>
+    ))}
+  </ul>
+
+  <!-- One empty state, two leads. A calendar empty to begin with keeps the
+       general lead below (the no-JavaScript default); when the client filters to
+       a specific county with nothing on it, events-page.ts rewrites the lead to
+       name that county ("No events in Greenville County yet"). The proof line and
+       the two ways in are shared, and the proof comes from emptyStateProof() on
+       both render paths. -->
+  <div id="events-empty" class="events-empty" hidden={upcoming.length > 0}>
+    <p class="events-empty-lead" id="events-empty-lead">Nothing on the calendar right now.</p>
+    <p class="events-empty-proof" id="events-empty-proof">{emptyStateProof(past.length)}</p>
+    <p class="events-empty-actions">
+      <a class="event-signal" href="/events/submit">Submit an event</a>
+      <a class="event-signal" href="mailto:deflocksc@proton.me">Email us</a>
+      <button id="intake-open" type="button" class="event-signal event-signal-btn">Join the Signal group</button>
+    </p>
+  </div>
+
+  <details class="events-past" id="events-past" hidden={past.length === 0}>
+    <summary class="label-mono">
+      Past events (<span id="events-past-count">{past.length}</span>)
+    </summary>
+    <ul class="events-past-list" id="events-past-list">
+      {past.map((o) => (
+        <li class="event-past-row">
+          <span class="event-past-date">{monthAbbr(o.date)} {dayOfMonth(o.date)}</span>
+          <span class="event-title event-past-title">{o.event.title}</span>
+          <span class="event-past-place">{place(o)}</span>
+        </li>
+      ))}
+    </ul>
+  </details>
+</div>

@@ -351,6 +351,18 @@
       "notes": "6 ward seats + mayor elected at-large. Council-Manager form since 1915."
     },
     {
+      "id": "place:york",
+      "name": "York City Council",
+      "type": "place",
+      "county": "York",
+      "adapter": "manual",
+      "url": "https://www.yorksc.gov/city-council",
+      "districts": 6,
+      "atLarge": false,
+      "hasBoundary": false,
+      "notes": "6 single-member district seats + mayor elected at-large. Council-Manager form of government."
+    },
+    {
       "id": "county:beaufort",
       "name": "Beaufort County Council",
       "type": "county",

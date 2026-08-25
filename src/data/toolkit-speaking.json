@@ -1,5 +1,9 @@
 {
   "intro": "Most SC city and county councils set aside time for public comment at every regular meeting. You typically get three minutes. Some require you to sign up before the meeting starts, others let you sign up on the spot. Check your council's website or call the clerk's office to confirm the process. You don't need to be an expert. You just need to show up, be specific, and stay under time.",
+  "findMeeting": {
+    "text": "Find your council's next meeting",
+    "href": "/events#type=council"
+  },
   "tips": [
     "Sign up early. Some councils cap public comment at a set number of speakers. Arrive 15 to 30 minutes before the meeting starts.",
     "Bring printed copies of your comment for each council member. Hand them to the clerk before you speak. Council members read handouts after the meeting even if they don't engage during your remarks.",

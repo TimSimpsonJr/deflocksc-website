@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import SubmitEventForm from '../../components/SubmitEventForm.astro';
+---
+
+<Base
+  title="Submit an Event | DeflockSC"
+  description="Vetted organizers post a meetup or public event to the South Carolina calendar."
+>
+  <meta slot="head" name="robots" content="noindex, nofollow" />
+
+  <section class="bg-[#111111] pt-28 pb-10 relative overflow-hidden">
+    <div
+      class="absolute left-4 -top-2 font-bold leading-none text-[rgba(255,255,255,0.025)] pointer-events-none select-none"
+      style="font-size: clamp(5rem, 10vw, 9rem)"
+      aria-hidden="true"
+    >
+      SUBMIT
+    </div>
+    <div class="max-w-4xl mx-auto px-6 relative z-10">
+      <p class="label-mono-heading mb-3">Organizers only</p>
+      <h1 class="text-[#e8e8e8] font-bold text-3xl md:text-5xl tracking-[-0.02em] mb-4">
+        Post an event.
+      </h1>
+      <p class="text-[#a0a0a0] text-lg max-w-2xl">
+        You need an organizer code. Submissions publish immediately with nobody reviewing them
+        first, so read what you wrote before you hit publish.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-[#111111] pb-24">
+    <div class="max-w-4xl mx-auto px-6">
+      <SubmitEventForm />
+    </div>
+  </section>
+</Base>

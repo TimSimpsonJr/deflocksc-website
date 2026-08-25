@@ -24,6 +24,14 @@ function highlightPlaceholders(text: string): string {
     {speakingData.intro}
   </p>
 
+  <a
+    href={speakingData.findMeeting.href}
+    class="inline-flex items-center gap-2 mb-8 label-mono-compact text-[#60a5fa] hover:text-[#93c5fd] border border-[rgba(96,165,250,0.35)] hover:border-[rgba(96,165,250,0.6)] px-4 py-2.5 transition-colors no-underline"
+  >
+    <span aria-hidden="true">→</span>
+    {speakingData.findMeeting.text}
+  </a>
+
   <!-- Numbered tips -->
   <div class="space-y-4">
     {speakingData.tips.map((tip, i) => (

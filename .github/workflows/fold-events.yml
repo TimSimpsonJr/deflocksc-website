@@ -1,0 +1,27 @@
+name: fold-events
+
+# Manual only. This is the ONE place a hook triggers a Netlify deploy (design
+# §15 forbids a build hook near any submission handler). It POSTs the Netlify
+# build hook, starting a production deploy so a freshly folded src/data/events.json
+# reaches the CDN on demand instead of waiting for the Sunday scheduled fold.
+# Never call this from request-handling code.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  trigger-fold-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the Netlify production build hook
+        env:
+          FOLD_BUILD_HOOK: ${{ secrets.NETLIFY_FOLD_BUILD_HOOK }}
+        run: |
+          if [ -z "${FOLD_BUILD_HOOK}" ]; then
+            echo "NETLIFY_FOLD_BUILD_HOOK is not set. Add the Netlify build hook URL" >&2
+            echo "as a repository secret before dispatching this workflow." >&2
+            exit 1
+          fi
+          curl --fail --silent --show-error -X POST -d '{}' "${FOLD_BUILD_HOOK}"

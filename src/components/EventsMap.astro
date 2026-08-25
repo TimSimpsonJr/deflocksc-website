@@ -1,0 +1,271 @@
+---
+---
+
+<div id="events-map-frame" class="events-map-frame">
+  <div class="map-badge" aria-hidden="true">
+    <span class="map-live-dot"></span>
+    SC Events
+  </div>
+  {/* Back-to-state control. Server-rendered once and only toggled (hidden
+      attribute) by events-page.ts, so it is NOT re-emitted client-side and the
+      class-parity double-write contract does not apply. Hidden until a county is
+      selected; syncChrome() flips it, and a click clears the county filter through
+      the same pushHash({ ...filter, county: 'all' }) path the choropleth uses. */}
+  <button id="events-map-back" type="button" class="map-back" aria-label="Clear county, back to all of South Carolina" hidden>
+    <svg class="map-back-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 3 5 8 10 13"></path>
+    </svg>
+    All of SC
+  </button>
+  <div
+    id="events-map"
+    role="application"
+    aria-label="Map of DeflockSC events by county and city"
+  ></div>
+  <noscript>
+    <p class="events-map-noscript">
+      The map needs JavaScript. The List and Month views work without it.
+    </p>
+  </noscript>
+  <p class="events-map-attrib">
+    Tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>
+    · <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a>
+    · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
+    · Pins mark a city center, never a venue.
+  </p>
+</div>
+
+<style>
+  .events-map-frame {
+    position: relative;
+    background: #0d0d0d;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  #events-map {
+    width: 100%;
+    height: 58vh;
+    min-height: 340px;
+    clip-path: inset(0);
+  }
+
+  @media (min-width: 1024px) {
+    #events-map {
+      height: min(68vh, 620px);
+    }
+  }
+
+  .events-map-noscript,
+  .events-map-attrib {
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+    color: #a3a3a3;
+    font-size: 11px;
+    line-height: 1.5;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .events-map-attrib a {
+    color: #a3a3a3;
+  }
+
+  /* Fallback shown by events-page.ts when the map fails to load. Created at
+     runtime, so it carries no scoped attribute and must be styled with :global. */
+  :global(.events-map-error) {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1.5rem;
+    text-align: center;
+    background: rgba(13, 13, 13, 0.92);
+  }
+  :global(.events-map-error-lead) { color: #e8e8e8; font-size: 0.95rem; font-weight: 700; margin: 0; }
+  :global(.events-map-error-note) { color: #a3a3a3; font-size: 0.82rem; margin: 0; max-width: 22rem; }
+
+  .map-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 10;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #e8e8e8;
+    background: rgba(13, 13, 13, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .map-live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #dc2626;
+    flex-shrink: 0;
+    animation: map-dot-blink 2s ease-in-out infinite;
+  }
+
+  @keyframes map-dot-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .map-live-dot { animation: none; }
+  }
+
+  /* Back-to-state control. Same dark-glass pill as .map-badge, but a real button
+     with an amber hairline that ties it to the amber county highlight it clears.
+     Sits just below the SC Events badge in the top-left; the top-right corner is
+     occupied by the MapLibre zoom control. Hidden until a county is selected
+     (events-page.ts toggles the `hidden` attribute via syncChrome). The explicit
+     [hidden] rule is required because this element's own `display` would otherwise
+     beat the user-agent hidden default. */
+  .map-back {
+    position: absolute;
+    top: 46px;
+    left: 12px;
+    z-index: 11;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #e8e8e8;
+    background: rgba(13, 13, 13, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 6px 10px;
+    border: 1px solid rgba(251, 191, 36, 0.5);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .map-back[hidden] { display: none; }
+  .map-back:hover { border-color: #fbbf24; color: #ffffff; }
+  .map-back:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+  .map-back-icon { flex-shrink: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .map-back { transition: none; }
+  }
+
+  /* MapLibre control + popup chrome, scoped to this container. The shared
+     `.map-dark` class in src/styles/global.css carries the same skin for the
+     camera map; these scoped copies keep #events-map self-contained without
+     depending on that class. */
+  #events-map :global(.maplibregl-ctrl-group) {
+    background: rgba(38, 38, 38, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(64, 64, 64, 0.6);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  #events-map :global(.maplibregl-ctrl-group button) {
+    width: 36px;
+    height: 36px;
+  }
+
+  #events-map :global(.maplibregl-ctrl-group button + button) {
+    border-top: 1px solid #404040;
+  }
+
+  #events-map :global(.maplibregl-ctrl-group button .maplibregl-ctrl-icon) {
+    filter: invert(1) brightness(0.7);
+  }
+
+  #events-map :global(.maplibregl-ctrl-group button:hover .maplibregl-ctrl-icon) {
+    filter: invert(1) brightness(0.9);
+  }
+
+  #events-map :global(.maplibregl-popup-content) {
+    background: #262626;
+    border: 1px solid #404040;
+    border-radius: 0.75rem;
+    padding: 12px 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  #events-map :global(.maplibregl-popup-tip) {
+    border-top-color: #262626;
+  }
+
+  #events-map :global(.maplibregl-popup-close-button) {
+    color: #a3a3a3;
+    font-size: 18px;
+    padding: 2px 6px;
+  }
+
+  :global(.events-popup) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  :global(.events-popup strong) { color: #ffffff; font-size: 15px; }
+  :global(.events-popup span)   { color: #a3a3a3; }
+  :global(.events-popup em)     { color: #fbbf24; font-style: normal; font-size: 12px; }
+
+  /* Event rows inside a city pin's popup. Each is a real <button> (built in
+     map/layers/events.ts) that opens the shared detail popover. Styled as a
+     tappable full-width row; built at runtime, so styled with :global. */
+  :global(.events-popup-list) {
+    list-style: none;
+    margin: 2px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  :global(.events-popup-event) {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: 0.25rem;
+    padding: 6px 8px;
+    color: #e8e8e8;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.35;
+    cursor: pointer;
+  }
+  :global(.events-popup-event:hover) { background: rgba(255, 255, 255, 0.06); }
+  :global(.events-popup-event:focus-visible) { outline: 2px solid #fbbf24; outline-offset: -2px; }
+  /* Raised above `.events-popup span` (0,1,1): that broad rule paints every span
+     #a3a3a3, which on specificity would otherwise beat a bare
+     `.events-popup-event-date` (0,1,0) and grey out the red date and the light
+     title. Prefixing with `.events-popup` (0,2,0) restores the intended colours;
+     the title inherits the button's #e8e8e8. The date red is the lighter #f87171
+     (the form-error red, ~5.4:1 on the #262626 popup) rather than #dc2626, which
+     at 10px only reached ~3:1 — under AA for this informational text. */
+  :global(.events-popup .events-popup-event-date) {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #f87171;
+    flex: none;
+  }
+  :global(.events-popup .events-popup-event-title) { min-width: 0; overflow-wrap: anywhere; color: inherit; }
+</style>

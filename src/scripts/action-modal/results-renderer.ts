@@ -1,14 +1,9 @@
 import type { RepGroup, LocalCouncils } from './types.js';
+import { escapeHtml } from '../../lib/escape-html.js';
 
 declare const umami: { track: (event: string) => void } | undefined;
 
 let currentGroups: RepGroup[] | null = null;
-
-function escapeHtml(str: string): string {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
 
 function buildMailto(emails: string[], subject: string, body: string): string {
   if (typeof umami !== 'undefined') umami.track('email-rep-clicked');

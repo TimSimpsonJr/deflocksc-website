@@ -1,0 +1,1089 @@
+---
+import { allCitySlugs } from '../lib/jurisdictions.js';
+import { cityLabel } from '../lib/city-label.js';
+
+// Same allowlist the server validates against, so the select can never offer a
+// value `validateSubmission()` would reject. County is NOT asked for: it is
+// derived server-side via `countyForCity()`, and a submitted county is a
+// validation error (design §6).
+const cityOptions = allCitySlugs()
+  .map((slug) => ({ slug, label: cityLabel(slug) }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const labelClass =
+  "flex items-baseline font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.16em] text-[#a3a3a3] mb-1.5";
+const hintClass = 'text-[13px] text-[#a3a3a3] mt-1.5 leading-[1.5]';
+const errorClass = 'text-[13px] text-[#f87171] mt-1.5 leading-[1.5]';
+// Required = a red asterisk; the `required` attribute already conveys this to
+// assistive tech, so the glyph is aria-hidden. Optional = visible "(optional)".
+const reqClass = 'text-[#f87171] ml-1';
+const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373]";
+---
+
+<div class="max-w-[640px]">
+  <p id="submit-status" class="sr-only" role="status" aria-live="polite"></p>
+
+  <p
+    id="error-summary"
+    tabindex="-1"
+    hidden
+    class="border-l-2 border-[#dc2626] bg-[rgba(220,38,38,0.08)] text-[#fca5a5] text-sm px-4 py-3 mb-6"
+  >
+  </p>
+
+  <form id="submit-event-form" novalidate>
+    <!-- Event type -->
+    <fieldset class="border-0 p-0 m-0 mb-8">
+      <legend class={labelClass}>Event type<span class={reqClass} aria-hidden="true">*</span></legend>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <label class="flex gap-3 items-start rounded border border-[rgba(255,255,255,0.12)] p-4 cursor-pointer transition-colors hover:border-[rgba(255,255,255,0.28)] has-[:checked]:border-[#dc2626] has-[:checked]:bg-[rgba(220,38,38,0.06)]">
+          <input type="radio" name="type" value="meetup" checked class="radio radio-primary mt-0.5" />
+          <span>
+            <span class="block text-[#e8e8e8] text-sm font-bold mb-1">Organizing meetup</span>
+            <span class="block text-[13px] text-[#a3a3a3] leading-[1.5]">
+              Title, date, time, city. No address is published. You share the venue inside the Signal group.
+            </span>
+          </span>
+        </label>
+        <label class="flex gap-3 items-start rounded border border-[rgba(255,255,255,0.12)] p-4 cursor-pointer transition-colors hover:border-[rgba(255,255,255,0.28)] has-[:checked]:border-[#dc2626] has-[:checked]:bg-[rgba(220,38,38,0.06)]">
+          <input type="radio" name="type" value="public" class="radio radio-primary mt-0.5" />
+          <span>
+            <span class="block text-[#e8e8e8] text-sm font-bold mb-1">Public event</span>
+            <span class="block text-[13px] text-[#a3a3a3] leading-[1.5]">
+              Council meetings and public-facing actions. Address is required and published.
+            </span>
+          </span>
+        </label>
+      </div>
+      <p class={errorClass} data-error-for="type" id="error-type" hidden></p>
+    </fieldset>
+
+    <!--
+      Honeypot. Hidden with CSS, never type="hidden" (bots skip hidden inputs).
+      autocomplete="one-time-code" keeps browser autofill from populating it and
+      locking out a real organizer. tabindex="-1" and aria-hidden="true" keep it
+      out of the tab order and the accessibility tree. Design §6.
+      The submit function drops any submission where `website` is non-empty, and
+      strips the (empty) key before validation.
+    -->
+    <div class="hp-field" aria-hidden="true">
+      <label for="field-website">Website</label>
+      <input
+        id="field-website"
+        name="website"
+        type="text"
+        autocomplete="one-time-code"
+        tabindex="-1"
+        aria-hidden="true"
+      />
+    </div>
+
+    <!-- Title -->
+    <div class="mb-6">
+      <label for="field-title" class={labelClass}>Title<span class={reqClass} aria-hidden="true">*</span></label>
+      <input
+        id="field-title"
+        name="title"
+        type="text"
+        required
+        maxlength="80"
+        autocomplete="off"
+        spellcheck="false"
+        class="input w-full"
+        aria-describedby="error-title"
+      />
+      <p class={errorClass} data-error-for="title" id="error-title" hidden></p>
+    </div>
+
+    <!-- Date + time -->
+    <div class="grid gap-6 sm:grid-cols-2 mb-6">
+      <div class="relative">
+        <label for="field-date" class={labelClass}>Date<span class={reqClass} aria-hidden="true">*</span></label>
+        <div class="flex gap-2 items-stretch">
+          <input
+            id="field-date"
+            name="date"
+            type="date"
+            required
+            class="input w-full"
+            aria-describedby="hint-date error-date"
+          />
+          <!-- Desktop-only affordance for the themed Cally calendar. Revealed by
+               the script on wide viewports; the native picker is the fallback. -->
+          <button
+            type="button"
+            id="date-cal-toggle"
+            hidden
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="date-cal-popover"
+            class="btn btn-square bg-[#171717] border-[rgba(255,255,255,0.12)] text-[#e8e8e8] hover:border-[rgba(255,255,255,0.28)] hover:bg-[#1f1f1f]"
+          >
+            <span class="sr-only">Choose the date on a calendar</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+              <path d="M16 2v4M8 2v4M3 10h18"></path>
+            </svg>
+          </button>
+        </div>
+        <div
+          id="date-cal-popover"
+          hidden
+          role="dialog"
+          aria-label="Choose a date"
+          class="absolute z-30 left-0 mt-2 bg-[#171717] border border-[rgba(255,255,255,0.14)] rounded-md p-3 shadow-2xl"
+        >
+          <calendar-date id="date-cally" class="deflock-calendar">
+            <svg slot="previous" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+            <svg slot="next" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18l6-6 6 6"></path>
+            </svg>
+            <calendar-month class="deflock-month"></calendar-month>
+          </calendar-date>
+        </div>
+        <p id="hint-date" class={hintClass}>Within the next 12 months.</p>
+        <p class={errorClass} data-error-for="date" id="error-date" hidden></p>
+      </div>
+      <div>
+        <label for="field-time" class={labelClass}>Start time<span class={reqClass} aria-hidden="true">*</span></label>
+        <input
+          id="field-time"
+          name="time"
+          type="time"
+          step="60"
+          required
+          list="common-times"
+          class="input w-full"
+          aria-describedby="hint-time error-time"
+        />
+        <datalist id="common-times">
+          <option value="09:00"></option>
+          <option value="10:00"></option>
+          <option value="12:00"></option>
+          <option value="17:30"></option>
+          <option value="18:00"></option>
+          <option value="18:30"></option>
+          <option value="19:00"></option>
+        </datalist>
+        <p id="hint-time" class={hintClass}>24-hour clock, Eastern time.</p>
+        <p class={errorClass} data-error-for="time" id="error-time" hidden></p>
+      </div>
+    </div>
+
+    <!-- Recurrence. The schema (Task 11) accepts recurrence = { freq, until }
+         with freq in ('weekly','monthly_nth'); the UI maps monthly ->
+         monthly_nth. The `until` field is revealed only when the event repeats
+         and its key is omitted from the payload otherwise. -->
+    <div class="mb-6">
+      <label for="field-repeats" class={labelClass}>Repeats<span class={optClass}>(optional)</span></label>
+      <select
+        id="field-repeats"
+        name="repeats"
+        class="select w-full"
+        aria-describedby="hint-repeats"
+      >
+        <option value="none" selected>Does not repeat</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly (same weekday each month)</option>
+      </select>
+      <p id="hint-repeats" class={hintClass}>Recurring events run up to 6 months out.</p>
+    </div>
+
+    <div id="recurrence-until-field" class="mb-6" hidden>
+      <label for="field-until" class={labelClass}>Repeat until<span class={reqClass} aria-hidden="true">*</span></label>
+      <input
+        id="field-until"
+        name="recurrence.until"
+        type="date"
+        class="input w-full"
+        aria-describedby="hint-until error-until"
+      />
+      <p id="hint-until" class={hintClass}>Within 6 months of the start date.</p>
+      <p class={errorClass} data-error-for="recurrence.until" id="error-until" hidden></p>
+    </div>
+
+    <!-- City. The wrapper carries an id so the runtime-built combobox's dropdown
+         styling can be scoped in global.css without leaking to the address
+         typeahead, which shares the same `.autocomplete__*` namespace. -->
+    <div id="city-field" class="mb-6">
+      <label for="field-city" class={labelClass}>City<span class={reqClass} aria-hidden="true">*</span></label>
+      <select
+        id="field-city"
+        name="city"
+        required
+        class="select w-full"
+        aria-describedby="hint-city error-city"
+      >
+        <option value="" disabled selected>Select a city</option>
+        {cityOptions.map((option) => <option value={option.slug}>{option.label}</option>)}
+      </select>
+      <p id="hint-city" class={hintClass}>
+        Not on the list?
+        <a href="mailto:deflocksc@proton.me" class="underline hover:text-[#e8e8e8]">Email us</a>
+        and we'll add it.
+      </p>
+      <p class={errorClass} data-error-for="city" id="error-city" hidden></p>
+    </div>
+
+    <!-- Public-event-only fields -->
+    <div id="public-only-fields" hidden>
+      <div class="mb-6">
+        <label for="field-address" class={labelClass}>Address<span class={reqClass} aria-hidden="true">*</span></label>
+        <input
+          id="field-address"
+          name="address"
+          type="text"
+          maxlength="120"
+          autocomplete="off"
+          class="input w-full"
+          aria-describedby="hint-address error-address"
+        />
+        <p id="hint-address" class={hintClass}>Published publicly. Public venues only.</p>
+        <!-- Revealed by the script only once the typeahead is actually wired, so
+             a no-JS visitor (who gets no lookup) never sees a claim that does not
+             apply to them. Honest by design: the query does leave the browser. -->
+        <p id="hint-address-osm" class={hintClass} hidden>
+          Type-ahead suggestions come from OpenStreetMap, relayed through our server. We don't store
+          what you type, and this address gets published either way.
+        </p>
+        <p class={errorClass} data-error-for="address" id="error-address" hidden></p>
+      </div>
+
+      <div class="mb-6">
+        <label for="field-description" class={labelClass}>Description<span class={optClass}>(optional)</span></label>
+        <textarea
+          id="field-description"
+          name="description"
+          rows="4"
+          maxlength="300"
+          class="textarea w-full"
+          aria-describedby="error-description"></textarea>
+        <p class={errorClass} data-error-for="description" id="error-description" hidden></p>
+      </div>
+    </div>
+
+    <!-- Signal group link + the §13 setup checklist -->
+    <div class="mb-6">
+      <label for="field-signal-url" class={labelClass}>
+        Signal group link
+        <span id="signal-marker-req" class={reqClass} aria-hidden="true">*</span>
+        <span id="signal-marker-opt" class={optClass} hidden>(optional)</span>
+      </label>
+      <input
+        id="field-signal-url"
+        name="signalUrl"
+        type="text"
+        required
+        inputmode="url"
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+        placeholder="https://signal.group/#..."
+        class="input w-full"
+        aria-describedby="hint-signal-url error-signal-url"
+      />
+      <p id="hint-signal-url" class={hintClass}>
+        Never published on the site; visitors reach it through a redirect.
+      </p>
+      <p class={errorClass} data-error-for="signalUrl" id="error-signal-url" hidden></p>
+
+      <details id="signal-setup" class="mt-3 border border-[rgba(251,191,36,0.25)] bg-[rgba(251,191,36,0.05)]">
+        <summary class="cursor-pointer px-4 py-3 text-[#fbbf24] text-sm font-bold list-none">
+          Before you paste that link
+        </summary>
+        <div id="signal-setup-panel" class="px-4 pb-4 pt-0">
+          <p class="text-[#a3a3a3] text-sm mb-3">Four things, once per group.</p>
+          <ol class="list-decimal pl-5 space-y-3 text-[#a3a3a3] text-sm leading-[1.6] marker:text-[#fbbf24]">
+            <li>
+              <strong class="text-[#e8e8e8]">Give it a boring name and leave the description blank.</strong>
+              Anyone holding the link can read your group's name, description, and member count without joining.
+              "Thursday group" tells them nothing. "Greenville DeflockSC organizers" tells them your chapter exists
+              and how many of you there are. The address never goes in the description.
+            </li>
+            <li>
+              <strong class="text-[#e8e8e8]">Set disappearing messages before you invite anyone.</strong>
+              Group Settings &#8250; Disappearing Messages. 1 week is a fine default. Do it first, or the early
+              messages stay forever.
+            </li>
+            <li>
+              <strong class="text-[#e8e8e8]">Hide your own number.</strong>
+              Settings &#8250; Privacy &#8250; Phone Number &#8250; Nobody. Set a username instead. You're about to
+              be in a room with strangers.
+            </li>
+            <li>
+              <strong class="text-[#e8e8e8]">Burn the group when the event's over.</strong>
+              Have everyone leave, then delete it. Move the people you trust into a separate group. Don't reuse an
+              event group for anything else, and only keep one alive if the event actually recurs.
+            </li>
+          </ol>
+        </div>
+      </details>
+    </div>
+
+    <!-- Organizer code -->
+    <div class="mb-8">
+      <label for="field-organizer-code" class={labelClass}>Organizer code<span class={reqClass} aria-hidden="true">*</span></label>
+      <input
+        id="field-organizer-code"
+        name="organizerCode"
+        type="text"
+        required
+        maxlength="128"
+        autocomplete="off"
+        autocapitalize="none"
+        autocorrect="off"
+        spellcheck="false"
+        placeholder="drum yoga vivid clay"
+        class="input w-full"
+        aria-describedby="hint-organizer-code error-organizer-code"
+      />
+      <p id="hint-organizer-code" class={hintClass}>
+        Four words. Capitals, spaces, and hyphens do not matter.
+      </p>
+      <p class={errorClass} data-error-for="organizerCode" id="error-organizer-code" hidden></p>
+    </div>
+
+    <button
+      type="submit"
+      id="submit-button"
+      class="btn btn-primary uppercase tracking-[0.08em] text-xs px-8"
+    >
+      Publish event
+    </button>
+
+    <noscript>
+      <p class="text-[#fca5a5] text-sm mt-4">
+        This form needs JavaScript to submit.
+        <a href="mailto:deflocksc@proton.me" class="underline hover:text-[#fecaca]">Email us</a>
+        instead and we'll post it for you.
+      </p>
+    </noscript>
+  </form>
+
+  <!-- Success -->
+  <div id="success-panel" tabindex="-1" hidden class="border-l-2 border-[#16a34a] bg-[rgba(22,163,74,0.06)] px-5 py-5">
+    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.16em] text-[#4ade80] mb-2">Published</p>
+    <h2 class="text-[#e8e8e8] text-xl font-bold mb-2">Your event is live.</h2>
+    <p class="text-[#a3a3a3] text-sm mb-4">
+      This is its permanent link. Save it now: the id is not something we can look up for you later.
+    </p>
+    <div class="flex gap-2 mb-3">
+      <input
+        id="permalink-input"
+        type="text"
+        readonly
+        value=""
+        aria-label="Event permalink"
+        class="input flex-1 min-w-0 font-['DM_Mono',monospace]"
+      />
+      <button
+        type="button"
+        id="copy-permalink"
+        class="btn btn-neutral text-xs uppercase tracking-[0.08em] min-w-[7rem]"
+      >
+        Copy link
+      </button>
+    </div>
+    <p class="text-sm">
+      <a id="success-link" href="/events" class="text-[#fbbf24] hover:text-[#fcd34d] underline">/events</a>
+      <span class="text-[#737373]"> &middot; </span>
+      <a href="/events/submit" class="text-[#fbbf24] hover:text-[#fcd34d] underline">Post another event</a>
+    </p>
+  </div>
+</div>
+
+<style>
+  /* Astro scopes these, so they apply only inside this component. */
+
+  /* Native date/time pickers (and their calendar icons) render dark. The
+     `deflock` daisyUI theme already sets color-scheme: dark at :root, but
+     stating it on the form keeps the guarantee local to this UI. */
+  #submit-event-form {
+    color-scheme: dark;
+  }
+
+  /* daisyUI's .input/.select/.textarea cap their intrinsic width at ~20rem.
+     These fields are meant to fill the column, so pin them to 100%. This is a
+     build-time, component-scoped (unlayered) rule, so it beats the layered
+     daisyUI utilities without !important. The runtime-built city combobox is
+     styled separately in global.css and is not matched here. */
+  #submit-event-form :is(input, select, textarea).input,
+  #submit-event-form .select,
+  #submit-event-form .textarea {
+    width: 100%;
+  }
+
+  /* Explicit, so a utility class can never win over a `hidden` toggle. */
+  [hidden] {
+    display: none !important;
+  }
+
+  /* Desktop-only: when the script reveals the themed Cally button it adds
+     `native-cal-hidden` to the date input, and this hides the input's built-in
+     calendar icon so the field does not offer two pickers side by side. The
+     field still displays and accepts the typed date and remains the form's
+     value source. On mobile (or if the enhancement never runs) the class is
+     absent, so the native picker keeps its icon and stays fully functional.
+
+     `::-webkit-calendar-picker-indicator` is a Blink/WebKit-only pseudo-element:
+     on Firefox desktop this selector matches nothing, so the native calendar
+     icon still shows alongside the Cally button. That is a known, accepted
+     cosmetic limitation — it fails open, both pickers work and write the same
+     value, so no Firefox-specific fallback is warranted. */
+  #field-date.native-cal-hidden::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
+  /* Honeypot: hidden with CSS, off-screen and non-interactive, but a real
+     text input in the DOM so a naive bot fills it. */
+  .hp-field {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #signal-setup summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #signal-setup summary::after {
+    content: ' +';
+  }
+
+  #signal-setup[open] summary::after {
+    content: ' \2212';
+  }
+</style>
+
+<script>
+  import accessibleAutocomplete from 'accessible-autocomplete';
+  import 'cally';
+
+  const form = document.getElementById('submit-event-form') as HTMLFormElement;
+  const publicOnly = document.getElementById('public-only-fields') as HTMLElement;
+  // `let`, not `const`: the plain text input is progressively enhanced into an
+  // accessible-autocomplete combobox below, and this reference is repointed at
+  // the combobox (which keeps the same id/name) once that runs.
+  let addressInput = document.getElementById('field-address') as HTMLInputElement;
+  const descriptionInput = document.getElementById('field-description') as HTMLTextAreaElement;
+  const signalInput = document.getElementById('field-signal-url') as HTMLInputElement;
+  const signalMarkerReq = document.getElementById('signal-marker-req') as HTMLElement;
+  const signalMarkerOpt = document.getElementById('signal-marker-opt') as HTMLElement;
+  const dateInput = document.getElementById('field-date') as HTMLInputElement;
+  const repeatsSelect = document.getElementById('field-repeats') as HTMLSelectElement;
+  const untilField = document.getElementById('recurrence-until-field') as HTMLElement;
+  const untilInput = document.getElementById('field-until') as HTMLInputElement;
+  const honeypot = document.getElementById('field-website') as HTMLInputElement;
+  const statusEl = document.getElementById('submit-status') as HTMLElement;
+  const errorSummary = document.getElementById('error-summary') as HTMLElement;
+  const submitButton = document.getElementById('submit-button') as HTMLButtonElement;
+  const successPanel = document.getElementById('success-panel') as HTMLElement;
+  const successLink = document.getElementById('success-link') as HTMLAnchorElement;
+  const permalinkInput = document.getElementById('permalink-input') as HTMLInputElement;
+  const copyButton = document.getElementById('copy-permalink') as HTMLButtonElement;
+
+  // The city <select> is the value source (a slug from the enum) and the no-JS
+  // fallback. accessibleAutocomplete.enhanceSelectElement() turns it into a
+  // searchable combobox: it hides the <select> (display:none), renames its id to
+  // `field-city-select`, and gives a NEW text input id `field-city`. So after
+  // enhancement getElementById('field-city') is the combobox (whose value is a
+  // display label), and `citySelect` below still points at the <select> (whose
+  // value stays the slug). Read the slug from `citySelect`, never from the input.
+  const citySelect = document.getElementById('field-city') as HTMLSelectElement;
+  let cityInput: HTMLInputElement | null = null;
+
+  // accessible-autocomplete renders its <input> through Preact, whose VDOM owns
+  // `aria-describedby`: it points the attribute at the widget's own assistive
+  // hint while the query is empty (state.ariaHint === true) and sets it to null
+  // the first time the query goes non-empty. Either way Preact's diff wipes the
+  // `aria-describedby` we set imperatively after enhancement, so a screen-reader
+  // user who starts typing loses the field's association with its hint and error
+  // message. Pin the intended value with a MutationObserver that restores it
+  // whenever a re-render overwrites or removes it; `autocomplete="off"` is pinned
+  // alongside it (belt-and-suspenders — the widget already re-asserts it, but this
+  // survives any future change). apply() no-ops when the attribute already
+  // matches, so re-setting inside the observer callback cannot loop. The
+  // observation registration keeps the observer alive for the page's lifetime.
+  function pinAutocompleteAria(input: HTMLElement, describedBy: string): void {
+    const desired: Array<[string, string]> = [
+      ['aria-describedby', describedBy],
+      ['autocomplete', 'off'],
+    ];
+    const apply = (): void => {
+      for (const [name, value] of desired) {
+        if (input.getAttribute(name) !== value) input.setAttribute(name, value);
+      }
+    };
+    apply();
+    new MutationObserver(apply).observe(input, {
+      attributes: true,
+      attributeFilter: ['aria-describedby', 'autocomplete'],
+    });
+  }
+
+  try {
+    accessibleAutocomplete.enhanceSelectElement({
+      selectElement: citySelect,
+      // Start empty rather than pre-filling the placeholder option's label.
+      defaultValue: '',
+      autoselect: true,
+      // confirmOnBlur MUST stay false here. With minLength:0 + showAllValues, a
+      // bare click populates all options and sets selected=0; a confirmOnBlur:true
+      // blur (or an Escape, which blurs with an empty query) would then commit the
+      // first city alphabetically to the hidden <select> even though the organizer
+      // never typed or picked one — an invisible wrong-city publish. The reviewed
+      // events-page county combobox matches (confirmOnBlur:false at
+      // events-page.ts). Blur without an explicit pick leaves the select as-is.
+      confirmOnBlur: false,
+      // Show the whole city list as soon as the field is focused (minLength: 0 +
+      // showAllValues) and float the menu over the following fields, mirroring
+      // the reviewed events-page county combobox. enhanceSelectElement passes
+      // these through, and its option-derived source returns every city on an
+      // empty query.
+      minLength: 0,
+      showAllValues: true,
+      displayMenu: 'overlay',
+      placeholder: 'Search cities',
+      // Empty name keeps the visible input out of any native form submission;
+      // the <select name="city"> remains the single value source.
+      name: '',
+    });
+    cityInput = document.getElementById('field-city') as HTMLInputElement;
+    if (cityInput) {
+      // Keep the widget's OWN operation hint (field-city__assistiveHint, the
+      // always-present visually-hidden span accessible-autocomplete renders) in
+      // the pin, ahead of the field hint and error. Without it, the moment Preact
+      // hands us back the attribute we overwrite its assistiveHint reference and a
+      // screen-reader user loses "When autocomplete results are available…".
+      pinAutocompleteAria(cityInput, 'field-city__assistiveHint hint-city error-city');
+    }
+    // A display:none required control cannot be focused by reportValidity(), so
+    // native validation would silently block submit. City is validated by hand
+    // in the submit handler instead (same error UI). No-JS keeps `required`.
+    citySelect.removeAttribute('required');
+  } catch {
+    // Enhancement failed: the native <select> stays visible and required.
+    cityInput = null;
+  }
+
+  function cityControl(): HTMLElement {
+    return cityInput ?? citySelect;
+  }
+
+  // --- Address typeahead (public events only) --------------------------------
+  // The served plain <input> is the no-JS fallback and the value source. Here it
+  // is progressively enhanced into an accessible-autocomplete combobox backed by
+  // /api/address-suggest, our same-origin Photon/OSM proxy. The combobox is
+  // created with the SAME id and name, and the original node is then removed, so
+  // #field-address stays the single plain-text value source: the submit payload
+  // reads getElementById('field-address').value exactly as before, and the
+  // server contract is untouched. Unlike the city combobox this uses
+  // autoselect/confirmOnBlur = false, because a typed street address that is not
+  // in the suggestion list must survive as-is rather than snap to a match.
+  const addressOsmHint = document.getElementById('hint-address-osm') as HTMLElement;
+  let addressDebounce: number | undefined;
+  let addressAbort: AbortController | null = null;
+
+  function addressSource(query: string, populateResults: (results: string[]) => void): void {
+    window.clearTimeout(addressDebounce);
+    const q = query.trim();
+    if (q.length < 3) {
+      populateResults([]);
+      return;
+    }
+    // Debounce so a burst of keystrokes makes one request, and abort the prior
+    // in-flight call so a slow early response cannot overwrite a newer one.
+    addressDebounce = window.setTimeout(() => {
+      if (addressAbort) addressAbort.abort();
+      addressAbort = new AbortController();
+      fetch('/api/address-suggest?q=' + encodeURIComponent(q), {
+        signal: addressAbort.signal,
+        headers: { accept: 'application/json' },
+      })
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => {
+          const list = Array.isArray(data)
+            ? (data.filter((item) => typeof item === 'string') as string[]).slice(0, 5)
+            : [];
+          populateResults(list);
+        })
+        .catch(() => {
+          // Aborted, offline, or unparseable: degrade to no suggestions.
+          populateResults([]);
+        });
+    }, 250);
+  }
+
+  try {
+    const original = addressInput;
+    const container = document.createElement('div');
+    original.parentNode?.insertBefore(container, original);
+    // Free the id/name first so the combobox can claim them with no duplicate.
+    original.removeAttribute('id');
+    original.removeAttribute('name');
+    accessibleAutocomplete({
+      element: container,
+      id: 'field-address',
+      name: 'address',
+      source: addressSource,
+      defaultValue: original.value,
+      minLength: 3,
+      autoselect: false,
+      confirmOnBlur: false,
+      showNoOptionsFound: false,
+      displayMenu: 'overlay',
+    });
+    original.parentNode?.removeChild(original);
+    addressInput = document.getElementById('field-address') as HTMLInputElement;
+    // maxlength is not part of the widget's Preact VDOM, so a re-render leaves
+    // it alone — set it once. aria-describedby / autocomplete ARE re-rendered,
+    // so pin them (see pinAutocompleteAria).
+    addressInput.setAttribute('maxlength', '120');
+    // Lead with the widget's own operation hint (field-address__assistiveHint,
+    // the always-present visually-hidden span), then the two field hints and the
+    // error, so the typeahead's "results are available" instruction survives every
+    // Preact re-render alongside the field's own descriptions.
+    pinAutocompleteAria(addressInput, 'field-address__assistiveHint hint-address hint-address-osm error-address');
+    // The lookup is live now, so disclose it. Hidden until here so no-JS users
+    // are never shown a claim about a lookup they do not get.
+    addressOsmHint.hidden = false;
+  } catch {
+    // Enhancement failed: the served plain input stays in place, usable, and the
+    // OSM disclosure stays hidden because no lookup happens.
+    addressInput = document.getElementById('field-address') as HTMLInputElement;
+  }
+
+  // Allowlist of field names the server may point an error at. Any other value
+  // in the response is ignored, so a response body can never drive a selector.
+  const FIELD_NAMES = [
+    'type',
+    'title',
+    'description',
+    'date',
+    'time',
+    'city',
+    'address',
+    'signalUrl',
+    'recurrence.until',
+    'organizerCode',
+  ];
+
+  // Keyed by the machine codes the server actually emits (Task 11 event-schema
+  // plus the sanitize-text, signal-url and organizer-code primitives). A code
+  // that is not listed falls through to the generic message in showFailure(),
+  // which still anchors to the right field — an unmapped code degrades to
+  // fail-safe, never to a wrong field or a wrong message.
+  const FIELD_ERROR_MESSAGES: Record<string, string> = {
+    // Text fields (title, description, address) via sanitizeText.
+    empty: 'This is required.',
+    too_many_bytes: 'Too long. Shorten it and try again.',
+    too_many_graphemes: 'Too long. Shorten it and try again.',
+    newline: 'Remove the line breaks and try again.',
+    emoji: 'Remove the emoji and try again.',
+    script_not_allowed: 'Use Latin script only.',
+    control_char: 'Remove unusual characters and try again.',
+    zero_width: 'Remove unusual characters and try again.',
+    bidi_control: 'Remove unusual characters and try again.',
+    combining_run: 'Remove unusual characters and try again.',
+    unassigned_or_private: 'Remove unusual characters and try again.',
+    // Date and time.
+    date_in_past: 'Pick today or a later date.',
+    date_too_far_out: 'Pick a date within the next 12 months.',
+    not_a_real_date: 'That is not a real date.',
+    bad_format: 'That value is not accepted.',
+    // City.
+    unknown_city: 'Pick a city from the list.',
+    // Recurrence end date.
+    until_not_after_date: 'The repeat-until date must be after the start date.',
+    until_too_far_out: 'Recurring events can run at most 6 months out.',
+    // Cross-field requirements (meetup vs public event).
+    required_for_meetup: 'Every meetup needs a Signal group link.',
+    required_for_public: 'A public event needs an address.',
+    not_allowed_for_meetup: 'This field is not accepted for a meetup.',
+    // Signal group link.
+    unparseable: 'Must be a https://signal.group/#... invite link.',
+    bad_protocol: 'Must be a https://signal.group/#... invite link.',
+    bad_host: 'Must be a https://signal.group/#... invite link.',
+    bad_fragment: 'The link is missing its #... invite code.',
+    has_path: 'The link must end at signal.group/#... with nothing extra.',
+    has_query: 'Remove the query string from the link.',
+    has_port: 'Remove the port number from the link.',
+    has_credentials: 'Remove the username or password from the link.',
+    // Organizer code (byte cap emits too_many_bytes, handled above).
+    wrong_shape: 'The code is four words. Check what you were given.',
+  };
+
+  // Keyed by the top-level codes the server actually emits in `body.error`.
+  // server_error is the local fallback for a network fault or any unmapped code.
+  const TOP_LEVEL_MESSAGES: Record<string, string> = {
+    invalid: 'Some fields need fixing. See the notes below.',
+    invalid_code: 'That organizer code is not valid.',
+    rate_limited: 'Too many submissions from your network today. Try again tomorrow.',
+    body_too_large: 'That submission is too large. Shorten the description and try again.',
+    length_required: 'That submission could not be sent. Reload the page and try again.',
+    invalid_json: 'That submission could not be read. Reload the page and try again.',
+    unavailable: 'Submissions are temporarily unavailable. Try again in a minute.',
+    server_error: 'Something broke on our end. Try again in a minute.',
+  };
+
+  function isoDate(value: Date): string {
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${value.getFullYear()}-${month}-${day}`;
+  }
+
+  // Set at load, never baked, so a stale build cannot ship a stale bound.
+  const today = new Date();
+  dateInput.min = isoDate(today);
+  dateInput.max = isoDate(new Date(today.getFullYear(), today.getMonth() + 12, today.getDate()));
+
+  // --- Cally date picker (desktop progressive enhancement) -------------------
+  // The native date <input> stays the form value and the mobile / no-JS
+  // fallback. On desktop a themed Cally <calendar-date> writes back into it.
+  const dateCalToggle = document.getElementById('date-cal-toggle') as HTMLButtonElement;
+  const dateCalPopover = document.getElementById('date-cal-popover') as HTMLElement;
+  const dateCally = document.getElementById('date-cally') as HTMLElement & {
+    value: string;
+    min: string;
+    max: string;
+    focus: () => void;
+  };
+  const desktopMql = window.matchMedia('(min-width: 768px)');
+
+  function closeDateCal(): void {
+    if (dateCalPopover.hidden) return;
+    dateCalPopover.hidden = true;
+    dateCalToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  function openDateCal(): void {
+    dateCally.min = dateInput.min || '';
+    dateCally.max = dateInput.max || '';
+    if (dateInput.value) dateCally.value = dateInput.value;
+    dateCalPopover.hidden = false;
+    dateCalToggle.setAttribute('aria-expanded', 'true');
+    // Move focus into the grid so keyboard users land on a day.
+    try {
+      dateCally.focus();
+    } catch {
+      /* focus is best-effort */
+    }
+  }
+
+  function syncCalToViewport(): void {
+    // The toggle only makes sense where there is room for a popover.
+    if (desktopMql.matches) {
+      dateCalToggle.hidden = false;
+      // Cally is now the calendar picker here, so suppress the native input's
+      // own calendar icon (CSS) to avoid offering two pickers at once. Toggled
+      // in lockstep with the button so the class is present exactly when Cally
+      // is available; on mobile it is removed and the native picker is whole.
+      dateInput.classList.add('native-cal-hidden');
+    } else {
+      closeDateCal();
+      dateCalToggle.hidden = true;
+      dateInput.classList.remove('native-cal-hidden');
+    }
+  }
+  syncCalToViewport();
+  desktopMql.addEventListener('change', syncCalToViewport);
+
+  dateCalToggle.addEventListener('click', () => {
+    if (dateCalPopover.hidden) openDateCal();
+    else closeDateCal();
+  });
+
+  // Cally emits `change` on user selection with an ISO YYYY-MM-DD value.
+  dateCally.addEventListener('change', (event) => {
+    const target = event.target as { value?: unknown } | null;
+    const value = target && typeof target.value === 'string' ? target.value : '';
+    if (value) {
+      dateInput.value = value;
+      // Fire the native change so syncUntilBounds() and any listeners run.
+      dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    closeDateCal();
+    dateInput.focus();
+  });
+
+  // Typing into the native input keeps Cally in sync (silent: setting the
+  // property does not re-emit `change`).
+  dateInput.addEventListener('change', () => {
+    if (dateInput.value) dateCally.value = dateInput.value;
+  });
+
+  // Dismiss the popover on an outside click or Escape.
+  document.addEventListener('click', (event) => {
+    if (dateCalPopover.hidden) return;
+    const target = event.target as Node;
+    if (
+      !dateCalPopover.contains(target) &&
+      target !== dateCalToggle &&
+      !dateCalToggle.contains(target)
+    ) {
+      closeDateCal();
+    }
+  });
+  dateCalPopover.addEventListener('keydown', (event) => {
+    if ((event as KeyboardEvent).key === 'Escape') {
+      closeDateCal();
+      dateCalToggle.focus();
+    }
+  });
+
+  function currentType(): string {
+    const checked = form.querySelector('input[name="type"]:checked') as HTMLInputElement | null;
+    return checked ? checked.value : 'meetup';
+  }
+
+  function applyType(): void {
+    const isPublic = currentType() === 'public';
+    publicOnly.hidden = !isPublic;
+    addressInput.required = isPublic;
+    // Disabled keeps hidden fields out of native validation and out of focus order.
+    addressInput.disabled = !isPublic;
+    descriptionInput.disabled = !isPublic;
+    signalInput.required = !isPublic;
+    // The label marker mirrors the requirement: required for a meetup, optional
+    // for a public event.
+    signalMarkerReq.hidden = isPublic;
+    signalMarkerOpt.hidden = !isPublic;
+  }
+
+  // Keep the `until` bounds pinned to the start date: strictly after it, and no
+  // more than 6 months out. Client-side hint only; the server is authoritative.
+  function syncUntilBounds(): void {
+    const start = dateInput.value;
+    if (!start) {
+      untilInput.removeAttribute('min');
+      untilInput.removeAttribute('max');
+      return;
+    }
+    const parts = start.split('-').map(Number);
+    const y = parts[0];
+    const m = parts[1];
+    const d = parts[2];
+    untilInput.min = isoDate(new Date(y, m - 1, d + 1));
+    untilInput.max = isoDate(new Date(y, m - 1 + 6, d));
+  }
+
+  function applyRepeats(): void {
+    const recurring = repeatsSelect.value !== 'none';
+    untilField.hidden = !recurring;
+    untilInput.required = recurring;
+    // Disabled keeps the hidden `until` out of native validation and focus order.
+    untilInput.disabled = !recurring;
+    if (recurring) syncUntilBounds();
+  }
+
+  form.querySelectorAll('input[name="type"]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      clearErrors();
+      applyType();
+    });
+  });
+  applyType();
+
+  repeatsSelect.addEventListener('change', () => {
+    clearErrors();
+    applyRepeats();
+  });
+  dateInput.addEventListener('change', syncUntilBounds);
+  applyRepeats();
+
+  function fieldValue(id: string): string {
+    const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
+    return el ? el.value.trim() : '';
+  }
+
+  // Build the recurrence object the schema accepts, or null when the event does
+  // not repeat. The UI's "monthly" maps to the schema's `monthly_nth`.
+  function buildRecurrence(): { freq: 'weekly' | 'monthly_nth'; until: string } | null {
+    const repeats = repeatsSelect.value;
+    if (repeats === 'none') return null;
+    const until = untilInput.value.trim();
+    if (!until) return null;
+    return { freq: repeats === 'monthly' ? 'monthly_nth' : 'weekly', until };
+  }
+
+  function clearErrors(): void {
+    form.querySelectorAll('[data-error-for]').forEach((el) => {
+      const node = el as HTMLElement;
+      node.textContent = '';
+      node.hidden = true;
+    });
+    form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+    errorSummary.textContent = '';
+    errorSummary.hidden = true;
+  }
+
+  function showFormError(message: string): void {
+    // textContent only. Nothing from a response body is ever parsed as HTML.
+    errorSummary.textContent = message;
+    errorSummary.hidden = false;
+    statusEl.textContent = message;
+    errorSummary.focus();
+  }
+
+  function setBusy(busy: boolean): void {
+    submitButton.disabled = busy;
+    submitButton.textContent = busy ? 'Publishing...' : 'Publish event';
+    if (busy) statusEl.textContent = 'Publishing your event.';
+  }
+
+  function showFailure(status: number, body: any): void {
+    // The server carries its machine code in `body.error` (e.g. { error:
+    // 'invalid_code' }). `body.code` is accepted only as a defensive fallback.
+    const code =
+      body && typeof body.error === 'string'
+        ? body.error
+        : body && typeof body.code === 'string'
+          ? body.code
+          : 'server_error';
+    const errors = body && Array.isArray(body.errors) ? body.errors : [];
+    let placed = 0;
+
+    for (const item of errors) {
+      if (!item || typeof item.field !== 'string') continue;
+      if (FIELD_NAMES.indexOf(item.field) === -1) continue;
+      const target = form.querySelector(`[data-error-for="${item.field}"]`) as HTMLElement | null;
+      if (!target) continue;
+      target.textContent = FIELD_ERROR_MESSAGES[item.code] || 'That value is not accepted.';
+      target.hidden = false;
+      // City's error anchors to the visible combobox, not the hidden <select>.
+      const input =
+        item.field === 'city' ? cityControl() : form.querySelector(`[name="${item.field}"]`);
+      if (input) input.setAttribute('aria-invalid', 'true');
+      placed += 1;
+    }
+
+    const heading = TOP_LEVEL_MESSAGES[code] || TOP_LEVEL_MESSAGES.server_error;
+    showFormError(placed > 0 ? heading : `${heading} (HTTP ${status})`);
+  }
+
+  // Client-side gate for the enhanced city field: a display:none required
+  // <select> cannot be reported by the browser, so surface the same per-field
+  // error UI (message, aria-invalid, summary, focus) by hand.
+  function showCityRequired(): void {
+    const target = form.querySelector('[data-error-for="city"]') as HTMLElement | null;
+    if (target) {
+      target.textContent = 'Pick a city from the list.';
+      target.hidden = false;
+    }
+    cityControl().setAttribute('aria-invalid', 'true');
+    errorSummary.textContent = TOP_LEVEL_MESSAGES.invalid;
+    errorSummary.hidden = false;
+    statusEl.textContent = TOP_LEVEL_MESSAGES.invalid;
+    cityControl().focus();
+  }
+
+  function showSuccess(id: string): void {
+    form.hidden = true;
+    errorSummary.hidden = true;
+    permalinkInput.value = `${window.location.origin}/events#${id}`;
+    successLink.href = `/events#${id}`;
+    successLink.textContent = `/events#${id}`;
+    successPanel.hidden = false;
+    statusEl.textContent = 'Event published. Copy your permalink.';
+    successPanel.focus();
+  }
+
+  copyButton.addEventListener('click', async () => {
+    permalinkInput.select();
+    try {
+      await navigator.clipboard.writeText(permalinkInput.value);
+      copyButton.textContent = 'Copied';
+    } catch {
+      copyButton.textContent = 'Select and copy';
+    }
+    window.setTimeout(() => {
+      copyButton.textContent = 'Copy link';
+    }, 3000);
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearErrors();
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    // City is validated by hand because its native <select> is enhanced away.
+    if (!citySelect.value) {
+      showCityRequired();
+      return;
+    }
+
+    const type = currentType();
+    const isPublic = type === 'public';
+
+    // Build the payload by OMITTING inapplicable keys rather than sending null.
+    // The server schema is .strict(): an `address` or `description` key on a
+    // meetup is itself the error, and an optional field counts as "not
+    // provided" only when its key is absent, never when it is null (design §6).
+    const payload: Record<string, unknown> = {
+      type,
+      title: fieldValue('field-title'),
+      date: fieldValue('field-date'),
+      time: fieldValue('field-time'),
+      // The slug from the <select>, never the combobox input's display label.
+      city: citySelect.value,
+      organizerCode: fieldValue('field-organizer-code'),
+      // Honeypot. The function reads and drops this before validation, so it is
+      // always sent (empty for a human) and never omitted.
+      website: honeypot.value,
+    };
+
+    if (isPublic) {
+      // Address is required for a public event; description is optional and its
+      // key is added only when the organizer actually filled it.
+      payload.address = fieldValue('field-address');
+      const description = fieldValue('field-description');
+      if (description) payload.description = description;
+    }
+
+    // Signal link: required for a meetup, optional for a public event. The key
+    // is omitted entirely when empty.
+    const signalUrl = fieldValue('field-signal-url');
+    if (signalUrl) payload.signalUrl = signalUrl;
+
+    // Recurrence: the key is present only when the event repeats.
+    const recurrence = buildRecurrence();
+    if (recurrence) payload.recurrence = recurrence;
+
+    setBusy(true);
+
+    let response: Response;
+    let body: any = null;
+    try {
+      response = await fetch('/api/submit-event', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      body = await response.json().catch(() => null);
+    } catch {
+      setBusy(false);
+      showFormError('Could not reach the server. Check your connection and try again.');
+      return;
+    }
+
+    setBusy(false);
+
+    if (response.ok && body && body.ok === true && typeof body.id === 'string') {
+      showSuccess(body.id);
+      return;
+    }
+
+    showFailure(response.status, body);
+  });
+</script>

@@ -6,7 +6,69 @@
 @import "@fontsource/dm-mono/400.css";
 @import "@fontsource/dm-mono/500.css";
 
+/* accessible-autocomplete base stylesheet (city combobox on the submit form).
+   Re-themed to the dark `deflock` palette in the events-form section below;
+   the overrides there are unlayered and later in source order, so they win over
+   these base rules at equal specificity without needing !important. */
+@import "accessible-autocomplete/dist/accessible-autocomplete.min.css";
+
 @import "tailwindcss";
+
+/* ── daisyUI (Tailwind 4 plugin) ──
+   Built-in themes are turned off so no light theme can ever apply; only the
+   custom `deflock` theme below is registered. daisyUI's component classes
+   (btn, card, input, select, …) emit CSS *only where the class is actually
+   used*, so loading the plugin does not restyle any existing markup — it just
+   makes the component vocabulary available to the events-calendar UI. */
+@plugin "daisyui" {
+  themes: false;
+}
+
+/* The brand theme. Maps daisyUI's semantic slots onto the DeflockSC palette
+   (#171717 base, #1a1a1a alt, #0d0d0d deep, #dc2626 red, #fbbf24 amber),
+   squared/small corners, flat surfaces (no depth, no noise). Content colors
+   are chosen for AA contrast against their backgrounds. Marked default +
+   prefersdark so it applies at :root even without an attribute; Base.astro
+   also stamps data-theme="deflock" on <html> for explicitness. */
+@plugin "daisyui/theme" {
+  name: "deflock";
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #171717;
+  --color-base-200: #1a1a1a;
+  --color-base-300: #0d0d0d;
+  --color-base-content: #e8e8e8;
+
+  --color-primary: #dc2626;
+  --color-primary-content: #ffffff;
+  --color-secondary: #fbbf24;
+  --color-secondary-content: #171717;
+  --color-accent: #fbbf24;
+  --color-accent-content: #171717;
+
+  --color-neutral: #1a1a1a;
+  --color-neutral-content: #d4d4d4;
+
+  --color-info: #38bdf8;
+  --color-info-content: #0d0d0d;
+  --color-success: #16a34a;
+  --color-success-content: #0d0d0d;
+  --color-warning: #fbbf24;
+  --color-warning-content: #171717;
+  --color-error: #dc2626;
+  --color-error-content: #ffffff;
+
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.375rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   html {
@@ -66,6 +128,156 @@
   color: #d4d4d4;
 }
 
+/* ── MapLibre dark chrome ──
+   Applied by adding `map-dark` to a MapLibre container element. Global (not
+   scoped to one component) so a second map container gets the same controls
+   and popup skin instead of MapLibre's unstyled defaults. */
+.map-dark .maplibregl-ctrl-group {
+  background: rgba(38, 38, 38, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(64, 64, 64, 0.6);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.map-dark .maplibregl-ctrl-group button {
+  width: 36px;
+  height: 36px;
+}
+
+.map-dark .maplibregl-ctrl-group button + button {
+  border-top: 1px solid #404040;
+}
+
+.map-dark .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(1) brightness(0.7);
+}
+
+.map-dark .maplibregl-ctrl-group button:hover .maplibregl-ctrl-icon {
+  filter: invert(1) brightness(0.9);
+}
+
+.map-dark .maplibregl-ctrl-group button:hover {
+  background: rgba(64, 64, 64, 0.5);
+}
+
+.map-dark .maplibregl-popup-content {
+  background: #262626;
+  border: 1px solid #404040;
+  border-radius: 0.75rem;
+  padding: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+.map-dark .maplibregl-popup-tip {
+  border-top-color: #262626;
+}
+
+.map-dark .maplibregl-popup-close-button {
+  color: #737373;
+  font-size: 18px;
+  padding: 4px 8px;
+  right: 2px;
+  top: 2px;
+}
+
+.map-dark .maplibregl-popup-close-button:hover {
+  color: #d4d4d4;
+  background: transparent;
+}
+
+/* ── Camera popup body (markup built by src/scripts/map/layers/cameras.ts) ── */
+.camera-popup {
+  width: 220px;
+}
+
+.camera-popup-img {
+  position: relative;
+  background: #171717;
+  height: 120px;
+  overflow: hidden;
+}
+
+.camera-popup-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.camera-popup-img-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #d4d4d4;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.camera-popup-img-empty {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-popup-img-empty span {
+  color: #525252;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.camera-popup-mfr {
+  padding: 12px 14px 0;
+  color: #a3a3a3;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.camera-popup-mfr strong {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.camera-popup-op {
+  padding: 6px 14px 0;
+  color: #737373;
+  font-size: 12px;
+}
+
+.camera-popup-dir {
+  padding: 6px 14px 0;
+  color: #737373;
+  font-size: 12px;
+}
+
+.camera-popup-link {
+  display: block;
+  padding: 10px 14px;
+  margin-top: 10px;
+  border-top: 1px solid #404040;
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.camera-popup-link:hover {
+  color: #f87171;
+}
+
 /* Dark scrollbars — matches site background */
 * {
   scrollbar-color: #404040 transparent;
@@ -113,4 +325,136 @@
   [data-reveal-delay="2"] { transition-delay: 160ms; }
   [data-reveal-delay="3"] { transition-delay: 240ms; }
   [data-reveal-delay="4"] { transition-delay: 320ms; }
+}
+
+/* ── Events submit form: enhanced pickers ──
+   The city <select> is progressively enhanced by accessible-autocomplete's
+   enhanceSelectElement() into a searchable combobox, and the date <input> is
+   enhanced on desktop with a Cally calendar. Both build DOM at runtime (Cally
+   inside shadow roots), so the widget skins live here in global CSS rather than
+   in the component's build-scoped <style>. Values mirror the daisyUI `deflock`
+   theme (base-100 #171717, base-content #e8e8e8, primary #dc2626) for AA
+   contrast. These rules are unlayered and follow the imported base stylesheet,
+   so they win over accessible-autocomplete's light defaults by source order. */
+
+/* City combobox (accessible-autocomplete, default `autocomplete__` namespace).
+   Matched to the daisyUI `.input` look: base-100 fill, 20%-content border,
+   field radius, red focus ring consistent with the site's :focus-visible. */
+.autocomplete__wrapper {
+  position: relative;
+}
+.autocomplete__input {
+  background-color: #171717;
+  color: #e8e8e8;
+  border: 1px solid color-mix(in oklab, #e8e8e8 20%, transparent);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.autocomplete__input::placeholder {
+  color: #737373;
+}
+.autocomplete__input--focused,
+.autocomplete__input:focus {
+  outline: 2px solid #dc2626;
+  outline-offset: 2px;
+  border-color: #d4d4d4;
+  box-shadow: none;
+}
+.autocomplete__hint {
+  color: #737373;
+}
+.autocomplete__menu {
+  background-color: #1a1a1a;
+  border: 1px solid color-mix(in oklab, #e8e8e8 20%, transparent);
+  border-top: 0;
+  color: #e8e8e8;
+}
+.autocomplete__option {
+  color: #e8e8e8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.875rem;
+}
+/* The base stylesheet zebra-stripes odd rows to near-white (#f3f2f1), which is
+   unreadable under the dark skin (#e8e8e8 text ≈ 1.08:1). Flatten odd rows to
+   the menu fill so every row matches. Placed before the hover/focused rule so
+   the red active state (equal specificity) still wins via source order. */
+.autocomplete__option--odd {
+  background-color: #1a1a1a;
+}
+.autocomplete__option:hover,
+.autocomplete__option--focused {
+  background-color: #dc2626;
+  color: #ffffff;
+  border-bottom-color: #dc2626;
+}
+.autocomplete__option--no-results {
+  background-color: #1a1a1a;
+  color: #a3a3a3;
+}
+
+/* With showAllValues the widget renders a dropdown arrow; the base stylesheet
+   places it at z-index:-1, where the opaque #171717 input hides it. Lift it
+   above the input and pad the input so text never runs under it — the same
+   treatment the reviewed events-page county combobox uses. Scoped to
+   #city-field so the address typeahead in the same form (no dropdown arrow,
+   showAllValues off) is untouched. */
+#city-field .autocomplete__input {
+  padding-right: 2rem;
+}
+#city-field .autocomplete__dropdown-arrow-down {
+  z-index: 1;
+  fill: #a3a3a3;
+  color: #a3a3a3;
+  pointer-events: none;
+}
+
+/* Cally date picker. Only two custom properties (`--color-accent`,
+   `--color-text-on-accent`) drive the selected-day highlight; everything else
+   is themed through the exposed shadow ::part()s. `calendar-month` and
+   `calendar-date` are light-DOM elements with their own shadow roots, so a
+   single ::part() hop from the document stylesheet reaches their parts. */
+.deflock-calendar {
+  --color-accent: #dc2626;
+  --color-text-on-accent: #ffffff;
+  color: #e8e8e8;
+  font-family: 'Instrument Sans Variable', sans-serif;
+  font-size: 0.875rem;
+}
+.deflock-calendar::part(heading) {
+  color: #e8e8e8;
+  font-weight: 700;
+}
+.deflock-calendar::part(button) {
+  color: #e8e8e8;
+  border-radius: 0.25rem;
+}
+.deflock-calendar::part(button):hover {
+  background-color: #262626;
+}
+calendar-month.deflock-month::part(heading) {
+  color: #e8e8e8;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+}
+calendar-month.deflock-month::part(button) {
+  color: #e8e8e8;
+  border-radius: 0.25rem;
+}
+calendar-month.deflock-month::part(button):hover {
+  background-color: #262626;
+}
+calendar-month.deflock-month::part(today) {
+  outline: 1px solid rgba(251, 191, 36, 0.5);
+  outline-offset: -1px;
+}
+calendar-month.deflock-month::part(outside) {
+  color: #525252;
+}
+calendar-month.deflock-month::part(disallowed) {
+  color: #404040;
+  cursor: not-allowed;
 }
