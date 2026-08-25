@@ -344,6 +344,19 @@ export const publicEventSchema = z
           message: 'nths_requires_council',
         });
       }
+      // Same coupling for `skipMonths`: a full-recess skip list is a curated
+      // council-only field. toPublicEvent never projects it onto a folded
+      // meetup/public record, so its presence here is the same "later bad commit"
+      // signal as a stray `nths`. Without this it passed silently -- the one
+      // council-only field whose sibling checks forgot it -- so a hand-edited
+      // record could smuggle a skip list past the gate. Reject it and fail loud.
+      if (value.recurrence.skipMonths !== undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['recurrence', 'skipMonths'],
+          message: 'skip_months_requires_council',
+        });
+      }
     }
   });
 

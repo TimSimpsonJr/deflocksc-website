@@ -349,6 +349,20 @@ describe('expandOccurrences: monthly_nth with an nths list', () => {
       ),
     ).toThrow(RangeError);
   });
+
+  it('throws on a non-slot anchor even when it is past the horizon', () => {
+    // 2026-09-14 is the 2nd Monday; nths [1, 3] does not include it, so it is not
+    // a slot. The horizon (Aug 1) precedes it, so the series is empty and the
+    // function would early-return []. The is-a-slot check is hoisted ABOVE that
+    // early-return, so a curated anchor pushed past the horizon still fails LOUD.
+    expect(() =>
+      expandOccurrences(
+        '2026-09-14',
+        { freq: 'monthly_nth', nths: [1, 3], until: null },
+        '2026-08-01',
+      ),
+    ).toThrow(RangeError);
+  });
 });
 
 describe('expandOccurrences: monthly_nth with skipMonths (full-recess months)', () => {
@@ -446,6 +460,20 @@ describe('expandOccurrences: monthly_nth with skipMonths (full-recess months)', 
       expandOccurrences(
         '2026-05-12',
         { freq: 'monthly_nth', skipMonths: [13] as unknown as number[], until: '2026-01-01' },
+        '2027-01-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('throws when the anchor falls inside a skipped month', () => {
+    // 2026-07-14 is the 2nd Tuesday of July and a valid slot for nths [2], but
+    // July is skipped -- that month emits none of its slots, so occurrence #1 (and
+    // the rest of the month) would be dropped, silently starting the series late.
+    // The module doc forbids anchoring in a skipped month; the guard rejects it.
+    expect(() =>
+      expandOccurrences(
+        '2026-07-14',
+        { freq: 'monthly_nth', nths: [2], skipMonths: [7], until: null },
         '2027-01-31',
       ),
     ).toThrow(RangeError);

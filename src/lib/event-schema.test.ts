@@ -347,6 +347,23 @@ describe('publicEventSchema — the stored/public shape', () => {
     expect(parsed.error.issues.some((i) => i.message === 'nths_requires_council')).toBe(true);
   });
 
+  // skipMonths is the fourth council-only recurrence field. Like source/null-until/
+  // nths it must be rejected on a folded meetup/public record — its outer coupling
+  // check was the one the siblings forgot, so a skip list would otherwise pass
+  // silently on a non-council record.
+  it('rejects skipMonths on a non-council record', () => {
+    const parsed = publicEventSchema.safeParse(
+      publicEventRecord({
+        recurrence: { freq: 'monthly_nth', until: '2026-12-01', skipMonths: [7, 8] },
+      }),
+    );
+    expect(parsed.success).toBe(false);
+    if (parsed.success) return;
+    expect(
+      parsed.error.issues.some((i) => i.message === 'skip_months_requires_council'),
+    ).toBe(true);
+  });
+
   // Fail-closed on the recurrence sub-object itself: `nths` is monthly_nth-only.
   // A curated { freq: 'weekly', nths: [...] } would otherwise validate and then be
   // silently ignored by expandOccurrences (which reads nths only for monthly_nth).

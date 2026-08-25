@@ -223,6 +223,18 @@ export function expandOccurrences(
   const horizonMs = parseIsoDate(horizonEndIso, 'horizonEndIso');
 
   let endMs = horizonMs;
+
+  // monthly_nth working state. Computed once here (when rec is a monthly_nth
+  // rule) and reused after the bounds early-return, so the startDate-is-a-slot and
+  // skipped-anchor guards below can run BEFORE that early-return -- they need only
+  // startDate + slots, and a curated anchor pushed past the horizon must still
+  // fail LOUD rather than be swallowed by `startMs > endMs`.
+  let weekday = 0;
+  let slots: Array<1 | 2 | 3 | 4 | 5 | 'last'> = [];
+  let skipMonths = new Set<number>();
+  let startYear = 0;
+  let startMonth = 0;
+
   if (rec) {
     if (rec.freq !== 'weekly' && rec.freq !== 'monthly_nth') {
       throw new RangeError('recurrence.freq must be "weekly" or "monthly_nth"');
@@ -248,6 +260,40 @@ export function expandOccurrences(
       rec.until === null
         ? horizonMs
         : Math.min(parseIsoDate(rec.until, 'recurrence.until'), horizonMs);
+
+    if (rec.freq === 'monthly_nth') {
+      // The weekday comes from startDate. The month-slots are rec.nths when
+      // present, else the single nth that startDate itself falls on (the
+      // back-compatible default). rec.nths was validated by isValidNths above.
+      const start = new Date(startMs);
+      weekday = start.getUTCDay();
+      slots =
+        rec.nths ?? [(Math.floor((start.getUTCDate() - 1) / 7) + 1) as 1 | 2 | 3 | 4 | 5];
+      // Calendar month numbers (1-12) the series skips entirely. Validated above;
+      // empty when absent, so the has() checks are a no-op for a normal series.
+      skipMonths = new Set(rec.skipMonths ?? []);
+      startYear = start.getUTCFullYear();
+      startMonth = start.getUTCMonth();
+
+      // startDate must be one of the slots its own month produces, so it is always
+      // occurrence #1. Hoisted ABOVE the bounds early-return (it needs only
+      // startDate + slots): a curated anchor pushed past the horizon must fail LOUD
+      // rather than silently return [] -- matching the nths/skipMonths validity
+      // guards above and council-events.ts's docstring that the build enforces it.
+      const startIsASlot = slots.some(
+        (slot) => resolveSlot(startYear, startMonth, weekday, slot) === startMs,
+      );
+      if (!startIsASlot) {
+        throw new RangeError('recurrence startDate must fall on one of nths');
+      }
+      // The module doc forbids anchoring startDate inside a skipped month: that
+      // month emits none of its slots, so occurrence #1 -- and the rest of the
+      // month -- would be dropped. The is-a-slot check above still passes, so
+      // nothing else catches it. Reject it here and fail loud.
+      if (skipMonths.has(startMonth + 1)) {
+        throw new RangeError('recurrence startDate must not fall in a skipMonths month');
+      }
+    }
   }
 
   if (startMs > endMs) return [];
@@ -263,28 +309,8 @@ export function expandOccurrences(
     return out;
   }
 
-  // monthly_nth. The weekday comes from startDate. The month-slots are rec.nths
-  // when present, else the single nth that startDate itself falls on (the
-  // back-compatible default). startDate must be one of the slots its own month
-  // produces, so it is always occurrence #1. rec.nths was validated by
-  // isValidNths above, before the bounds early-return.
-  const start = new Date(startMs);
-  const weekday = start.getUTCDay();
-  const slots: Array<1 | 2 | 3 | 4 | 5 | 'last'> =
-    rec.nths ?? [(Math.floor((start.getUTCDate() - 1) / 7) + 1) as 1 | 2 | 3 | 4 | 5];
-  // Calendar month numbers (1-12) the series skips entirely. Validated above;
-  // empty when absent, so the has() check below is a no-op for a normal series.
-  const skipMonths = new Set(rec.skipMonths ?? []);
-
-  const startYear = start.getUTCFullYear();
-  const startMonth = start.getUTCMonth();
-  const startIsASlot = slots.some(
-    (slot) => resolveSlot(startYear, startMonth, weekday, slot) === startMs,
-  );
-  if (!startIsASlot) {
-    throw new RangeError('recurrence startDate must fall on one of nths');
-  }
-
+  // monthly_nth. weekday, slots, skipMonths, startYear and startMonth were
+  // computed and guarded above, before the bounds early-return.
   const out: string[] = [];
   let year = startYear;
   let monthIndex = startMonth;

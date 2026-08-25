@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseCouncilEvents, loadCouncilEvents } from './council-events.js';
+import { expandAll, addMonths } from './events-view.js';
 
 function councilEntry(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
@@ -167,5 +168,14 @@ describe('loadCouncilEvents — the committed seed', () => {
     expect(ids).toContain('council-columbia-city');
     // Every id is unique (parseCouncilEvents also throws on a duplicate).
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('expands every seed anchor without throwing (a bad anchor fails npm test, not deploy)', () => {
+    // loadCouncilEvents only validates the schema; the startDate-is-a-slot and
+    // skipped-anchor invariants are enforced by expandOccurrences. Run the same
+    // 12-month expansion the page build runs so a bad anchor (a non-slot date, or
+    // an anchor in a skipMonths month) fails here in `npm test`, not at deploy.
+    const today = new Date().toISOString().slice(0, 10);
+    expect(() => expandAll(loadCouncilEvents(), addMonths(today, 12))).not.toThrow();
   });
 });
