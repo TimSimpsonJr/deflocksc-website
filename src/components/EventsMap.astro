@@ -207,7 +207,7 @@
   }
 
   #events-map :global(.maplibregl-popup-close-button) {
-    color: #737373;
+    color: #a3a3a3;
     font-size: 18px;
     padding: 2px 6px;
   }
@@ -257,12 +257,14 @@
      #a3a3a3, which on specificity would otherwise beat a bare
      `.events-popup-event-date` (0,1,0) and grey out the red date and the light
      title. Prefixing with `.events-popup` (0,2,0) restores the intended colours;
-     the title inherits the button's #e8e8e8. */
+     the title inherits the button's #e8e8e8. The date red is the lighter #f87171
+     (the form-error red, ~5.4:1 on the #262626 popup) rather than #dc2626, which
+     at 10px only reached ~3:1 — under AA for this informational text. */
   :global(.events-popup .events-popup-event-date) {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.08em;
-    color: #dc2626;
+    color: #f87171;
     flex: none;
   }
   :global(.events-popup .events-popup-event-title) { min-width: 0; overflow-wrap: anywhere; color: inherit; }

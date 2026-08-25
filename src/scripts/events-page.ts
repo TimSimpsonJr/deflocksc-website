@@ -568,7 +568,8 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
   // eventTypeSlug maps the type to its data-type through an exhaustive switch
   // (shared with buildCard), so only the known values reach the attribute (amber
   // meetup, green public, blue council); the popover CSS keys the label colour
-  // off it, and the label text always names the type.
+  // off it, and the label text is a distinct per-type signal, so the type is
+  // never carried by colour alone.
   detailDialog.dataset.type = eventTypeSlug(e.type);
   const typeLabel = document.getElementById('event-detail-typelabel');
   if (typeLabel) typeLabel.textContent = eventTypeLabel(e.type);
@@ -625,11 +626,19 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
   }
 
   // Recurring events show a caveat by the upcoming list: the listed dates are the
-  // usual cadence, not a confirmed schedule. Static copy in the markup; only its
-  // visibility is toggled, keyed off recurrence like the upcoming list itself. A
-  // one-off event has an exact date and needs no caveat.
+  // usual cadence, not a confirmed schedule. Visibility is keyed off recurrence
+  // like the upcoming list itself; a one-off event has an exact date and needs no
+  // caveat. The COPY is keyed off `source`, not recurrence: the "official schedule"
+  // it tells the visitor to confirm against is the same source link shown above, so
+  // a recurring event WITHOUT a source (a submitted recurring meetup/public event)
+  // gets the source-agnostic wording rather than pointing at a link that is not there.
   const caveat = document.getElementById('event-detail-caveat');
-  if (caveat) caveat.hidden = !e.recurrence;
+  if (caveat) {
+    caveat.hidden = !e.recurrence;
+    caveat.textContent = e.source
+      ? 'Dates follow the usual schedule; confirm on the official schedule before attending.'
+      : 'Dates follow the usual schedule; confirm before attending.';
+  }
 
   // Description (optional).
   const desc = document.getElementById('event-detail-desc');

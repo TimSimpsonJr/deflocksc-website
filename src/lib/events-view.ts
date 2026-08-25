@@ -169,8 +169,10 @@ export function recurrenceLabel(
  * The human type label shown on the card's quiet type line and in the popover.
  * The single source of truth for the three type labels, shared by the server
  * card (EventsList.astro) and the client card (buildCard) so they cannot drift.
- * The label always NAMES the type, so the type colour is reinforcing, never the
- * sole cue.
+ * The three labels are DISTINCT text signals — meetup "Location in group",
+ * public "Public event", council "Council meeting" — not all of which literally
+ * name the type, but each is unique. Type is therefore always carried by text,
+ * never by colour alone; the per-type colour only reinforces it.
  */
 export function eventTypeLabel(type: PublicEvent['type']): string {
   switch (type) {

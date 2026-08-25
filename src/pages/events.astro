@@ -229,9 +229,13 @@ const island = {
       </div>
 
       {/* Caveat for recurring events: the listed dates follow the usual cadence,
-          not a confirmed schedule. Static copy; openEventPopover only toggles its
-          visibility, keyed off recurrence. Hidden for one-off events. */}
-      <p class="event-pop-caveat" id="event-detail-caveat" hidden>Dates follow the usual schedule; confirm on the official source before attending.</p>
+          not a confirmed schedule. openEventPopover toggles its visibility (keyed
+          off recurrence) AND sets the copy: source-agnostic by default, because a
+          recurring event need not carry a `source` link, and pointing at an
+          "official schedule" that is not shown would be a dead reference. The
+          "…on the official schedule" variant is set only when a source link is
+          rendered above. This static default is the no-source wording. */}
+      <p class="event-pop-caveat" id="event-detail-caveat" hidden>Dates follow the usual schedule; confirm before attending.</p>
 
       <p class="event-pop-desc" id="event-detail-desc" hidden></p>
 
@@ -423,8 +427,9 @@ const island = {
      (uppercase, letter-spaced). This base stays muted grey (#a3a3a3 ~6.9:1 on the
      #1a1a1a card) and is shared with the popover's type label (.event-pop-typeline),
      which keeps the muted treatment. On the CARD the colour is keyed to the event
-     type below. The label text always names the type, so colour is reinforcing,
-     never the sole signal. */
+     type below. The three type labels are distinct text signals (meetup "Location
+     in group", public "Public event", council "Council meeting"), so colour is
+     reinforcing, never the sole signal. */
   .event-typeline {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
@@ -596,10 +601,13 @@ const island = {
     color: #a3a3a3;
     pointer-events: none;
   }
-  /* The per-county event count carried in each option label. */
-  .county-opt-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #737373; }
+  /* The per-county event count carried in each option label. Resting #8a8a8a
+     clears AA on the #1a1a1a menu (10px is small text). On the focused/hover row
+     the menu paints the whole option #dc2626, so the count goes near-white to stay
+     legible against that red, not the pale #fecaca that sat close to it. */
+  .county-opt-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #8a8a8a; }
   .autocomplete__option:hover .county-opt-count,
-  .autocomplete__option--focused .county-opt-count { color: #fecaca; }
+  .autocomplete__option--focused .county-opt-count { color: #ffffff; }
 
   /* Type filter: an ARIA radiogroup that borrows the view-tabs pill VERBATIM. Each
      radio ships `events-tab tab events-type-btn`, the group ships
@@ -661,8 +669,10 @@ const island = {
   /* Type label under the title. Reuses the shared .event-typeline idiom (DM Mono,
      uppercase); only its margins around the title live here. The label is coloured
      by type to match the card — amber meetup, green public, blue council — keyed off
-     the dialog's data-type, which openEventPopover sets via eventTypeSlug. The label
-     text always names the type, so colour is reinforcing, never the sole signal. */
+     the dialog's data-type, which openEventPopover sets via eventTypeSlug. The three
+     type labels are distinct text signals (meetup "Location in group", public
+     "Public event", council "Council meeting"), so colour is reinforcing, never the
+     sole signal. */
   .event-pop-typeline { margin: 0 0 1.1rem; }
   /* Colour the popover type label the same way the card does (event-card--{type}),
      here via the dialog's data-type. Amber #fbbf24 (~11:1), green #4ade80 (~12:1),

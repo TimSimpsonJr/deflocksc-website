@@ -557,7 +557,12 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
     });
     cityInput = document.getElementById('field-city') as HTMLInputElement;
     if (cityInput) {
-      pinAutocompleteAria(cityInput, 'hint-city error-city');
+      // Keep the widget's OWN operation hint (field-city__assistiveHint, the
+      // always-present visually-hidden span accessible-autocomplete renders) in
+      // the pin, ahead of the field hint and error. Without it, the moment Preact
+      // hands us back the attribute we overwrite its assistiveHint reference and a
+      // screen-reader user loses "When autocomplete results are available…".
+      pinAutocompleteAria(cityInput, 'field-city__assistiveHint hint-city error-city');
     }
     // A display:none required control cannot be focused by reportValidity(), so
     // native validation would silently block submit. City is validated by hand
@@ -641,7 +646,11 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
     // it alone — set it once. aria-describedby / autocomplete ARE re-rendered,
     // so pin them (see pinAutocompleteAria).
     addressInput.setAttribute('maxlength', '120');
-    pinAutocompleteAria(addressInput, 'hint-address hint-address-osm error-address');
+    // Lead with the widget's own operation hint (field-address__assistiveHint,
+    // the always-present visually-hidden span), then the two field hints and the
+    // error, so the typeahead's "results are available" instruction survives every
+    // Preact re-render alongside the field's own descriptions.
+    pinAutocompleteAria(addressInput, 'field-address__assistiveHint hint-address hint-address-osm error-address');
     // The lookup is live now, so disclose it. Hidden until here so no-JS users
     // are never shown a claim about a lookup they do not get.
     addressOsmHint.hidden = false;

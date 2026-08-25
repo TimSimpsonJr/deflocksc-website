@@ -58,7 +58,7 @@ const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
               {(byDay.get(iso) ?? []).map((o) => (
                 <a
                   class="month-chip"
-                  href={`#event-${o.event.id}`}
+                  href={`#event-${encodeURIComponent(o.event.id)}`}
                   data-event-id={o.event.id}
                   data-date={o.date}
                   data-sort={sortKey(o.date, o.event.time, o.event.id)}
