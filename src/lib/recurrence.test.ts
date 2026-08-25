@@ -350,3 +350,104 @@ describe('expandOccurrences: monthly_nth with an nths list', () => {
     ).toThrow(RangeError);
   });
 });
+
+describe('expandOccurrences: monthly_nth with skipMonths (full-recess months)', () => {
+  it('omits every July and August occurrence while keeping the rest in order', () => {
+    // 2nd Tuesday of each month, May..Oct 2026: 05-12, 06-09, 07-14, 08-11,
+    // 09-08, 10-13. skipMonths [7, 8] drops the July and August meetings (a
+    // council in full summer recess) and keeps the rest, still date-ordered.
+    expect(
+      expandOccurrences(
+        '2026-05-12',
+        { freq: 'monthly_nth', skipMonths: [7, 8], until: '2026-10-13' },
+        '2027-01-31',
+      ),
+    ).toEqual(['2026-05-12', '2026-06-09', '2026-09-08', '2026-10-13']);
+  });
+
+  it('an empty skipMonths behaves identically to an absent one (back-compat)', () => {
+    const absent = expandOccurrences(
+      '2026-05-12',
+      { freq: 'monthly_nth', until: '2026-10-13' },
+      '2027-01-31',
+    );
+    const empty = expandOccurrences(
+      '2026-05-12',
+      { freq: 'monthly_nth', skipMonths: [], until: '2026-10-13' },
+      '2027-01-31',
+    );
+    expect(empty).toEqual(absent);
+    expect(absent).toEqual([
+      '2026-05-12',
+      '2026-06-09',
+      '2026-07-14',
+      '2026-08-11',
+      '2026-09-08',
+      '2026-10-13',
+    ]);
+  });
+
+  it('walks forward across a run of skipped months without looping forever', () => {
+    // skipMonths covering the whole span but two edges: only May and Sep remain.
+    expect(
+      expandOccurrences(
+        '2026-05-12',
+        { freq: 'monthly_nth', skipMonths: [6, 7, 8], until: '2026-09-08' },
+        '2027-01-31',
+      ),
+    ).toEqual(['2026-05-12', '2026-09-08']);
+  });
+
+  it('throws RangeError on an out-of-range month (0)', () => {
+    expect(() =>
+      expandOccurrences(
+        '2026-05-12',
+        { freq: 'monthly_nth', skipMonths: [0], until: '2026-10-13' },
+        '2027-01-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError on an out-of-range month (13)', () => {
+    expect(() =>
+      expandOccurrences(
+        '2026-05-12',
+        { freq: 'monthly_nth', skipMonths: [13], until: '2026-10-13' },
+        '2027-01-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError on a non-integer month member', () => {
+    expect(() =>
+      expandOccurrences(
+        '2026-05-12',
+        { freq: 'monthly_nth', skipMonths: [7.5] as unknown as number[], until: '2026-10-13' },
+        '2027-01-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError (not TypeError) on a non-array skipMonths', () => {
+    expect(() =>
+      expandOccurrences(
+        '2026-05-12',
+        { freq: 'monthly_nth', skipMonths: 8 as unknown as number[], until: '2026-10-13' },
+        '2027-01-31',
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('fires the hoisted skipMonths guard even when startMs > endMs (empty series)', () => {
+    // until precedes startDate, so the series is empty and the function would
+    // early-return []. The skipMonths validation is hoisted BEFORE that
+    // early-return, mirroring the nths guard, so corruption fails loud.
+    expect(() =>
+      expandOccurrences(
+        '2026-05-12',
+        { freq: 'monthly_nth', skipMonths: [13] as unknown as number[], until: '2026-01-01' },
+        '2027-01-31',
+      ),
+    ).toThrow(RangeError);
+  });
+});

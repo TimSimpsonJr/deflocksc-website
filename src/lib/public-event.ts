@@ -44,6 +44,7 @@ export interface PublicEvent {
     freq: 'weekly' | 'monthly_nth';
     until: string | null;
     nths?: Array<1 | 2 | 3 | 4 | 5 | 'last'>;
+    skipMonths?: number[];
   } | null;
   organizer: string;
   createdAt: string;

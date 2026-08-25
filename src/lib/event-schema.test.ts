@@ -359,6 +359,40 @@ describe('publicEventSchema — the stored/public shape', () => {
     expect(parsed.error.issues.some((i) => i.message === 'nths_requires_monthly_nth')).toBe(true);
   });
 
+  // skipMonths lets a curated council skip full-recess months. Like nths it is a
+  // monthly_nth-only selection: on a weekly recurrence it would validate and then
+  // be silently ignored by expandOccurrences, so reject it at the boundary.
+  it('accepts skipMonths on a monthly_nth council recurrence', () => {
+    const parsed = publicEventSchema.safeParse(
+      councilEventRecord({
+        recurrence: { freq: 'monthly_nth', nths: [2, 4], until: null, skipMonths: [7, 8] },
+      }),
+    );
+    expect(parsed.success).toBe(true);
+  });
+
+  it('rejects skipMonths on a weekly recurrence', () => {
+    const parsed = publicEventSchema.safeParse(
+      councilEventRecord({ recurrence: { freq: 'weekly', until: null, skipMonths: [7, 8] } }),
+    );
+    expect(parsed.success).toBe(false);
+    if (parsed.success) return;
+    expect(
+      parsed.error.issues.some((i) => i.message === 'skip_months_requires_monthly_nth'),
+    ).toBe(true);
+  });
+
+  it('rejects a skipMonths member out of 1..12', () => {
+    for (const bad of [0, 13]) {
+      const parsed = publicEventSchema.safeParse(
+        councilEventRecord({
+          recurrence: { freq: 'monthly_nth', nths: [2], until: null, skipMonths: [bad] },
+        }),
+      );
+      expect(parsed.success, `skipMonths [${bad}] must be rejected`).toBe(false);
+    }
+  });
+
   // The council `source` renders as an href, so the render schema caps its length
   // and requires an http(s) scheme on its own — it is not self-sufficient otherwise.
   it('rejects a source that is not an http(s) URL', () => {

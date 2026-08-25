@@ -58,6 +58,16 @@ export interface Recurrence {
    * merged in date order; startDate must be one of its month's slots.
    */
   nths?: Array<1 | 2 | 3 | 4 | 5 | 'last'>;
+  /**
+   * monthly_nth only. Calendar month numbers (1 = January .. 12 = December)
+   * whose meetings are skipped entirely -- a curated council in a full recess
+   * (e.g. no regular July/August meeting) sets `skipMonths: [7, 8]`. When absent
+   * or empty, no month is skipped (back-compatible). A curator should never set
+   * the anchor `startDate` inside a skipped month: the startDate-is-a-slot check
+   * still passes, but that month emits none of its slots, so occurrence #1 would
+   * be dropped along with the rest of the month.
+   */
+  skipMonths?: number[];
 }
 
 /** Format a UTC millisecond value as a "YYYY-MM-DD" calendar day. */
@@ -164,6 +174,27 @@ function isValidNths(value: unknown): boolean {
 }
 
 /**
+ * A well-formed `skipMonths`: an array (EMPTY IS OK -- "no skip") whose every
+ * member is an integer calendar month number in 1..12. Rejects a non-array, a
+ * sparse array (an indexed scan visits holes as `undefined`), and any non-finite,
+ * fractional, or out-of-range member. Same trust model as `isValidNths`: the
+ * field is trusted from its TypeScript type alone, and a hand-edited or
+ * fold-corrupted events.json is the threat. An out-of-range member fails OPEN
+ * otherwise -- it simply never matches a real month and silently skips nothing,
+ * hiding the curation error -- so reject it here and fail loud.
+ */
+function isValidSkipMonths(value: unknown): boolean {
+  if (!Array.isArray(value)) return false;
+  for (let i = 0; i < value.length; i += 1) {
+    const member = value[i];
+    if (typeof member !== 'number' || !Number.isInteger(member) || member < 1 || member > 12) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
  * Expand a recurrence rule into the calendar days it covers.
  *
  * `startDate` is occurrence #1 and is always included, subject to the bounds.
@@ -205,6 +236,14 @@ export function expandOccurrences(
         "recurrence.nths must be a non-empty array of integers 1-5 or 'last'",
       );
     }
+    // Hoisted next to the nths guard and BEFORE the bounds early-return so a
+    // corrupt skipMonths is detected uniformly, even for an empty series
+    // (startMs > endMs). See isValidSkipMonths for the fail-open shape this closes.
+    if (rec.skipMonths !== undefined && !isValidSkipMonths(rec.skipMonths)) {
+      throw new RangeError(
+        'recurrence.skipMonths must be an array of integer month numbers 1-12',
+      );
+    }
     endMs =
       rec.until === null
         ? horizonMs
@@ -233,6 +272,9 @@ export function expandOccurrences(
   const weekday = start.getUTCDay();
   const slots: Array<1 | 2 | 3 | 4 | 5 | 'last'> =
     rec.nths ?? [(Math.floor((start.getUTCDate() - 1) / 7) + 1) as 1 | 2 | 3 | 4 | 5];
+  // Calendar month numbers (1-12) the series skips entirely. Validated above;
+  // empty when absent, so the has() check below is a no-op for a normal series.
+  const skipMonths = new Set(rec.skipMonths ?? []);
 
   const startYear = start.getUTCFullYear();
   const startMonth = start.getUTCMonth();
@@ -249,29 +291,35 @@ export function expandOccurrences(
   let firstMonth = true;
 
   while (out.length < MAX_OCCURRENCES) {
-    // Every slot's date in this month, ascending and de-duplicated (nths [5,
-    // 'last'] collapse to one date in a five-weekday month).
-    const seen = new Set<number>();
-    const monthDates: number[] = [];
-    for (const slot of slots) {
-      const ms = resolveSlot(year, monthIndex, weekday, slot);
-      if (ms !== null && !seen.has(ms)) {
-        seen.add(ms);
-        monthDates.push(ms);
+    // A full-recess month (its calendar month number, monthIndex + 1, is in
+    // skipMonths) emits none of its slots. The loop still advances below, so a
+    // run of skipped months cannot loop forever -- the "next month past endMs"
+    // guard at the bottom stops it exactly as it does for a slotless month.
+    if (!skipMonths.has(monthIndex + 1)) {
+      // Every slot's date in this month, ascending and de-duplicated (nths [5,
+      // 'last'] collapse to one date in a five-weekday month).
+      const seen = new Set<number>();
+      const monthDates: number[] = [];
+      for (const slot of slots) {
+        const ms = resolveSlot(year, monthIndex, weekday, slot);
+        if (ms !== null && !seen.has(ms)) {
+          seen.add(ms);
+          monthDates.push(ms);
+        }
       }
-    }
-    monthDates.sort((a, b) => a - b);
+      monthDates.sort((a, b) => a - b);
 
-    let stop = false;
-    for (const ms of monthDates) {
-      // Anchor month: a slot before startDate is in the past; startDate itself
-      // is a slot (validated above), so it is always the first emitted date.
-      if (firstMonth && ms < startMs) continue;
-      if (ms > endMs) { stop = true; break; }
-      out.push(formatIsoDate(ms));
-      if (out.length >= MAX_OCCURRENCES) { stop = true; break; }
+      let stop = false;
+      for (const ms of monthDates) {
+        // Anchor month: a slot before startDate is in the past; startDate itself
+        // is a slot (validated above), so it is always the first emitted date.
+        if (firstMonth && ms < startMs) continue;
+        if (ms > endMs) { stop = true; break; }
+        out.push(formatIsoDate(ms));
+        if (out.length >= MAX_OCCURRENCES) { stop = true; break; }
+      }
+      if (stop) break;
     }
-    if (stop) break;
 
     firstMonth = false;
     monthIndex += 1;

@@ -79,6 +79,10 @@ const councilRecurrenceSchema = z
       )
       .min(1)
       .optional(),
+    // Calendar month numbers (1-12) a curated council skips entirely (a full
+    // recess). Empty is allowed ("no skip"); monthly_nth-only, coupled in the
+    // councilEventSchema superRefine the same way `nths` is.
+    skipMonths: z.array(z.number().int().min(1).max(12)).optional(),
   })
   .strict();
 
@@ -122,6 +126,13 @@ export const councilEventSchema = z
         code: 'custom',
         path: ['recurrence', 'nths'],
         message: 'nths_requires_monthly_nth',
+      });
+    }
+    if (value.recurrence?.skipMonths && value.recurrence.freq !== 'monthly_nth') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['recurrence', 'skipMonths'],
+        message: 'skip_months_requires_monthly_nth',
       });
     }
   });

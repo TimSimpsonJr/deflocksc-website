@@ -40,6 +40,20 @@ describe('parseCouncilEvents — accepted', () => {
     ]);
     expect(event.recurrence).toEqual({ freq: 'weekly', until: '2027-02-01' });
   });
+
+  it('accepts and projects skipMonths on a monthly_nth council recurrence', () => {
+    const [event] = parseCouncilEvents([
+      councilEntry({
+        recurrence: { freq: 'monthly_nth', nths: [2, 4], until: null, skipMonths: [7, 8] },
+      }),
+    ]);
+    expect(event.recurrence).toEqual({
+      freq: 'monthly_nth',
+      nths: [2, 4],
+      until: null,
+      skipMonths: [7, 8],
+    });
+  });
 });
 
 describe('parseCouncilEvents — rejected (a bad entry fails the build)', () => {
@@ -64,6 +78,24 @@ describe('parseCouncilEvents — rejected (a bad entry fails the build)', () => 
   it('rejects nths on a weekly recurrence', () => {
     expect(() =>
       parseCouncilEvents([councilEntry({ recurrence: { freq: 'weekly', nths: [1], until: null } })]),
+    ).toThrow();
+  });
+
+  it('rejects skipMonths on a weekly recurrence', () => {
+    expect(() =>
+      parseCouncilEvents([
+        councilEntry({ recurrence: { freq: 'weekly', until: null, skipMonths: [7] } }),
+      ]),
+    ).toThrow();
+  });
+
+  it('rejects a skipMonths member out of 1..12', () => {
+    expect(() =>
+      parseCouncilEvents([
+        councilEntry({
+          recurrence: { freq: 'monthly_nth', nths: [2], until: null, skipMonths: [13] },
+        }),
+      ]),
     ).toThrow();
   });
 

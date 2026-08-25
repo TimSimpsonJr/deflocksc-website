@@ -273,6 +273,10 @@ export const publicEventSchema = z
           )
           .min(1)
           .optional(),
+        // Calendar month numbers (1-12) a curated council skips entirely (a full
+        // summer recess). Empty is allowed ("no skip"); monthly_nth-only, coupled
+        // below the same way `nths` is.
+        skipMonths: z.array(z.number().int().min(1).max(12)).optional(),
       })
       .strict()
       .superRefine((r, ctx) => {
@@ -283,6 +287,16 @@ export const publicEventSchema = z
         // curated slots. Reject it at the boundary so the mistake fails loudly.
         if (r.nths !== undefined && r.freq !== 'monthly_nth') {
           ctx.addIssue({ code: 'custom', path: ['nths'], message: 'nths_requires_monthly_nth' });
+        }
+        // Same fail-closed reasoning for `skipMonths`: expandOccurrences reads it
+        // only in its monthly_nth branch, so a weekly recurrence carrying one
+        // would validate and then skip nothing. Reject it at the boundary.
+        if (r.skipMonths !== undefined && r.freq !== 'monthly_nth') {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['skipMonths'],
+            message: 'skip_months_requires_monthly_nth',
+          });
         }
       })
       .nullable(),
