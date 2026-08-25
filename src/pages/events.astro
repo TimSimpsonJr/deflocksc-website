@@ -49,52 +49,6 @@ const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index
   return toPublicEvent(parsed.data as unknown as StoredEvent);
 });
 
-// DEV-ONLY dummy-event seed. This entire branch is gated on import.meta.env.DEV,
-// which Vite statically replaces with the literal `false` in a production build,
-// so the block — the fs read, the fixture path, everything — is dead-code
-// eliminated and can NEVER ship. The fixture (src/data/events.dev.json) is
-// gitignored, so it also never enters the repo. Records get NO shortcut past the
-// confidentiality boundary: each one runs through the IDENTICAL publicEventSchema
-// strict validation and toPublicEvent projection the baked records use above, so
-// a fixture carrying a server-only field (signalUrl, codeDigest, revoked) is
-// rejected here exactly as a bad events.json commit would be. The read is wrapped
-// in try/catch so a missing fixture is a silent no-op.
-if (import.meta.env.DEV) {
-  try {
-    const fs = await import('node:fs');
-    const path = await import('node:path');
-    const devPath = path.resolve(process.cwd(), 'src/data/events.dev.json');
-    const devRaw = JSON.parse(fs.readFileSync(devPath, 'utf8')) as unknown[];
-    devRaw.forEach((raw, index) => {
-      const parsed = publicEventSchema.safeParse(raw);
-      if (!parsed.success) {
-        const issue = parsed.error.issues[0];
-        const at = issue.path.length > 0 ? issue.path.join('.') : '_record';
-        const detail =
-          issue.code === 'unrecognized_keys' ? 'unexpected_field' : issue.message;
-        throw new Error(
-          `src/data/events.dev.json: record ${index} at "${at}" failed strict validation (${detail})`,
-        );
-      }
-      if (parsed.data.type === 'council') {
-        throw new Error(
-          `src/data/events.dev.json: record ${index} has type "council"; council ` +
-            `meetings load from council-meetings.json, not this submissions fixture`,
-        );
-      }
-      bakedEvents.push(toPublicEvent(parsed.data as unknown as StoredEvent));
-    });
-  } catch (err) {
-    // A missing fixture is the normal case (it is gitignored and optional), so
-    // ENOENT is a no-op. Anything else — malformed JSON, a record that failed
-    // strict validation — is surfaced loudly in the dev console but never fails
-    // the dev server.
-    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
-      console.warn('[events dev seed] skipped:', (err as Error).message);
-    }
-  }
-}
-
 // Curated council meetings (src/data/council-meetings.json), merged into the
 // baked list alongside the folded submissions. loadCouncilEvents() validates each
 // entry with the strict councilEventSchema and throws on a bad one, so an
@@ -251,11 +205,33 @@ const island = {
         <dd class="event-pop-dd" id="event-detail-place"></dd>
       </dl>
 
+      {/* Official-schedule link. Shown only for events carrying a `source`
+          (curated council entries do; submitted meetups/public events do not).
+          The label and icon are static; openEventPopover sets only the href on
+          #event-detail-source-link and unhides the wrapper. Amber, matching the
+          address link's .event-pop-addr treatment. */}
+      <p class="event-pop-source" id="event-detail-source" hidden>
+        <a class="event-pop-addr" id="event-detail-source-link" target="_blank" rel="noopener noreferrer">
+          Official schedule
+          <svg class="event-pop-ext-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          <span class="sr-only"> (opens in a new tab)</span>
+        </a>
+      </p>
+
       <div class="event-pop-upcoming" id="event-detail-upcoming" hidden>
         <p class="event-pop-upcoming-label">Upcoming meetings</p>
         <ul class="event-pop-upcoming-list" id="event-detail-upcoming-list"></ul>
         <p class="event-pop-upcoming-foot" id="event-detail-upcoming-foot"></p>
       </div>
+
+      {/* Caveat for recurring events: the listed dates follow the usual cadence,
+          not a confirmed schedule. Static copy; openEventPopover only toggles its
+          visibility, keyed off recurrence. Hidden for one-off events. */}
+      <p class="event-pop-caveat" id="event-detail-caveat" hidden>Dates follow the usual schedule; confirm on the official source before attending.</p>
 
       <p class="event-pop-desc" id="event-detail-desc" hidden></p>
 
@@ -459,9 +435,10 @@ const island = {
   }
   .event-card .event-typeline { margin: 0.6rem 0 0; }
   /* Option A type cue: the card's type label is coloured by type — amber for a
-     meetup, green for a public event — keyed off the event-card--{type} modifier
-     present on both render paths (EventsList.astro + buildCard). Amber #fbbf24
-     (~11:1) and green #4ade80 (~12:1) on #1a1a1a both clear WCAG AA. Scoped to
+     meetup, green for a public event, blue for a council meeting — keyed off the
+     event-card--{type} modifier present on both render paths (EventsList.astro +
+     buildCard). Amber #fbbf24 (~11:1), green #4ade80 (~12:1), and council blue
+     #60a5fa (≈6.8:1) on #1a1a1a all clear WCAG AA for the 11px label. Scoped to
      .event-card so the shared popover label (.event-pop-typeline) stays muted grey. */
   .event-card--meetup .event-typeline { color: #fbbf24; }
   .event-card--public .event-typeline { color: #4ade80; }
@@ -683,13 +660,14 @@ const island = {
      events-page.ts at runtime (no scoped data-astro-* attribute to match). */
   /* Type label under the title. Reuses the shared .event-typeline idiom (DM Mono,
      uppercase); only its margins around the title live here. The label is coloured
-     by type to match the card — amber meetup, green public — keyed off the dialog's
-     data-type, which openEventPopover sets with a closed ternary. The label text
-     always names the type, so colour is reinforcing, never the sole signal. */
+     by type to match the card — amber meetup, green public, blue council — keyed off
+     the dialog's data-type, which openEventPopover sets via eventTypeSlug. The label
+     text always names the type, so colour is reinforcing, never the sole signal. */
   .event-pop-typeline { margin: 0 0 1.1rem; }
   /* Colour the popover type label the same way the card does (event-card--{type}),
-     here via the dialog's data-type. Amber #fbbf24 (~11:1) and green #4ade80 (~12:1)
-     both clear WCAG AA on the popover's dark base-200 background. */
+     here via the dialog's data-type. Amber #fbbf24 (~11:1), green #4ade80 (~12:1),
+     and council blue #60a5fa (≈6.8:1) all clear WCAG AA on the popover's dark
+     base-200 background. */
   #event-detail[data-type="meetup"] .event-pop-typeline { color: #fbbf24; }
   #event-detail[data-type="public"] .event-pop-typeline { color: #4ade80; }
   #event-detail[data-type="council"] .event-pop-typeline { color: #60a5fa; }
@@ -724,6 +702,15 @@ const island = {
   .event-pop-addr:hover { color: #fcd34d; border-bottom-color: #fbbf24; }
   .event-pop-addr:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
   .event-pop-ext-icon { flex: none; }
+  /* Official-schedule link wrapper: the amber .event-pop-addr treatment reused
+     from the address link, spaced like the dl above it. Hidden (explicit rule so
+     it beats any class display) when the event carries no source. */
+  .event-pop-source { margin: 0 0 1.1rem; }
+  .event-pop-source[hidden] { display: none; }
+  /* Recurring-event caveat by the upcoming list. Muted, at the upcoming-footer
+     scale. Hidden for one-off events. */
+  .event-pop-caveat { color: #8a8a8a; font-size: 0.8125rem; line-height: 1.5; margin: 0 0 1.25rem; }
+  .event-pop-caveat[hidden] { display: none; }
   .event-pop-desc { color: #a3a3a3; font-size: 0.9rem; line-height: 1.6; margin: 0 0 1.25rem; overflow-wrap: anywhere; }
   .event-pop-desc[hidden] { display: none; }
   .event-pop-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; }

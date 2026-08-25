@@ -191,6 +191,32 @@ export function eventTypeLabel(type: PublicEvent['type']): string {
 }
 
 /**
+ * The class/attribute suffix for an event type: the value that goes into the
+ * `event-card--{suffix}` modifier and the popover's `data-type`. The single
+ * source of truth shared by the client card (buildCard) and the popover
+ * (openEventPopover), replacing the closed ternary each used to inline, so the
+ * colour-cue keying cannot drift between them. Exhaustive: adding a member to
+ * PublicEvent['type'] without a case here fails the build (the unhandled type is
+ * no longer `never`) instead of silently falling through to 'public'.
+ */
+export function eventTypeSlug(
+  type: PublicEvent['type'],
+): 'meetup' | 'public' | 'council' {
+  switch (type) {
+    case 'meetup':
+      return 'meetup';
+    case 'public':
+      return 'public';
+    case 'council':
+      return 'council';
+    default: {
+      const unhandled: never = type;
+      return unhandled;
+    }
+  }
+}
+
+/**
  * The next `limit` occurrence dates on or after `todayIso` for an event, bounded
  * by `horizonEndIso`. Built on expandOccurrences, so it inherits the UTC
  * calendar-day discipline and the MAX_OCCURRENCES cap. A one-off event yields
@@ -220,7 +246,10 @@ export function upcomingFooter(
 ): string {
   if (!recurrence) return '';
   if (recurrence.until === null) return `Recurs indefinitely · showing the next ${shown}`;
-  return recurrence.freq === 'weekly' ? 'Repeats weekly' : 'Repeats monthly';
+  // A bounded series states its cadence in the same words the card's type line
+  // uses; delegate to recurrenceLabel so that copy lives in one place. recurrence
+  // is non-null here, so the label is never null, but coalesce to satisfy the type.
+  return recurrenceLabel(recurrence) ?? '';
 }
 
 /** 'AUG' for '2026-08-22'. */

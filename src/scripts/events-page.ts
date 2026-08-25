@@ -53,6 +53,7 @@ import {
   parseFilterHash,
   emptyStateProof,
   eventTypeLabel,
+  eventTypeSlug,
   upcomingOccurrences,
   upcomingFooter,
 } from '../lib/events-view.js';
@@ -401,13 +402,13 @@ function placeLabel(e: PublicEvent): string {
 
 function buildCard(o: Occurrence): HTMLLIElement {
   const e = o.event;
-  // Closed ternary, not `--${e.type}`, so only the three known type suffixes can
-  // ever reach a class name (amber meetup, green public, blue council).
-  const typeSuffix = e.type === 'meetup' ? 'meetup' : e.type === 'council' ? 'council' : 'public';
+  // eventTypeSlug maps the type to its class suffix through an exhaustive switch
+  // (shared with the popover's data-type), so only the three known suffixes can
+  // ever reach a class name and a new type fails the build rather than defaulting.
+  const typeSuffix = eventTypeSlug(e.type);
   const li = document.createElement('li');
   // The event-card--{type} modifier keys the typeline colour (amber = meetup,
-  // green = public) in events.astro. Closed ternary via typeSuffix, so only the
-  // two known suffixes can reach a class name.
+  // green = public, blue = council) in events.astro.
   li.className = `event-card event-card--${typeSuffix}`;
   li.dataset.eventId = e.id;
   li.dataset.date = o.date;
@@ -564,10 +565,11 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
   const e = o.event;
   const meetup = e.type === 'meetup';
 
-  // Closed three-way, so only the known values reach the attribute (amber
+  // eventTypeSlug maps the type to its data-type through an exhaustive switch
+  // (shared with buildCard), so only the known values reach the attribute (amber
   // meetup, green public, blue council); the popover CSS keys the label colour
   // off it, and the label text always names the type.
-  detailDialog.dataset.type = e.type === 'meetup' ? 'meetup' : e.type === 'council' ? 'council' : 'public';
+  detailDialog.dataset.type = eventTypeSlug(e.type);
   const typeLabel = document.getElementById('event-detail-typelabel');
   if (typeLabel) typeLabel.textContent = eventTypeLabel(e.type);
 
@@ -605,6 +607,29 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
       place.textContent = 'Shared in the Signal group.';
     }
   }
+
+  // Official-schedule link. Council entries carry a `source` (the county/city's
+  // own agenda page); submitted meetup/public events do not. The label and icon
+  // are static in the markup; only the href is event data, set on the property
+  // (never innerHTML). Hidden when there is no source.
+  const sourceWrap = document.getElementById('event-detail-source');
+  const sourceLink = document.getElementById('event-detail-source-link') as HTMLAnchorElement | null;
+  if (sourceWrap && sourceLink) {
+    if (e.source) {
+      sourceLink.href = e.source;
+      sourceWrap.hidden = false;
+    } else {
+      sourceLink.removeAttribute('href');
+      sourceWrap.hidden = true;
+    }
+  }
+
+  // Recurring events show a caveat by the upcoming list: the listed dates are the
+  // usual cadence, not a confirmed schedule. Static copy in the markup; only its
+  // visibility is toggled, keyed off recurrence like the upcoming list itself. A
+  // one-off event has an exact date and needs no caveat.
+  const caveat = document.getElementById('event-detail-caveat');
+  if (caveat) caveat.hidden = !e.recurrence;
 
   // Description (optional).
   const desc = document.getElementById('event-detail-desc');
@@ -726,8 +751,9 @@ function applyMerge(merged: PublicEvent[]) {
 // the page ships is empty and hidden, so a no-JavaScript visitor sees the complete
 // list and no dead control. Here we build a searchable COUNTY combobox
 // (accessible-autocomplete — the same widget and dark `.autocomplete__*` skin the
-// submit form's city picker uses) and a 3-way TYPE filter (an ARIA radiogroup
-// styled as daisyUI tabs-box pills), filter the
+// submit form's city picker uses) and a 4-way TYPE filter (an ARIA radiogroup
+// styled as daisyUI tabs-box pills: All / Meetups / Public events / Council
+// meetings), filter the
 // list in place, and keep the choice in the URL hash so a filtered view is
 // shareable and the back button works. `el`, `buildCard`, `buildChip`, and
 // `placeLabel` already exist in this module; they are used, not redefined.
@@ -855,7 +881,7 @@ function renderCountyCombobox(): void {
   comboboxCounty = filter.county;
 }
 
-/** One button in the 3-way type filter (an ARIA radiogroup styled as a tabs-box
+/** One button in the 4-way type filter (an ARIA radiogroup styled as a tabs-box
  *  pill). Roving tabindex and aria-checked are maintained by syncChrome; this
  *  only builds it. */
 function typeRadio(value: EventTypeFilter, label: string): HTMLButtonElement {
@@ -957,7 +983,7 @@ function syncChrome(): void {
   // Type filter: the faceted count on each option, the checked radio,
   // and the roving tabindex (only the checked radio is a tab stop).
   for (const btn of document.querySelectorAll<HTMLButtonElement>('.events-type-btn')) {
-    const value = (btn.dataset.filterValue ?? 'all') as 'all' | 'meetup' | 'public' | 'council';
+    const value = (btn.dataset.filterValue ?? 'all') as EventTypeFilter;
     const active = filter.type === value;
     // is-selected is the same active-pill hook the view tabs use; aria-checked is
     // the radiogroup state. The shared pill rule keys on both, so they agree.
