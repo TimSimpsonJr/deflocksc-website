@@ -118,23 +118,29 @@ function highlightPlaceholders(text: string): string {
   </div>
 </div>
 
-<!-- Council Handout Download -->
+<!-- Leave-behind briefs -->
 <div class="border-t border-[rgba(255,255,255,0.07)] pt-10">
-  <h2 class="text-[#e8e8e8] font-bold text-lg mb-4">Council Handout</h2>
-  <p class="text-[#a3a3a3] text-base leading-[1.7] mb-4">
-    A one-page PDF with key facts and sources. Print copies for each council member
-    and hand them to the clerk before you speak.
+  <h2 class="text-[#e8e8e8] font-bold text-lg mb-4">Leave one behind</h2>
+  <p class="text-[#a3a3a3] text-base leading-[1.7] mb-6">
+    A one-page brief with the case, the Oconee model, and the sources. Print copies
+    for each member and hand them to the clerk before you speak.
   </p>
-  <a
-    href="/toolkit/speaking/council-handout.pdf"
-    class="inline-flex items-center bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 transition-colors"
-    download
-  >
-    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-    Download Council Handout
-  </a>
+  <div class="flex flex-wrap gap-3">
+    <a
+      href="/toolkit/speaking/city-council-brief"
+      class="inline-flex items-center gap-2 label-mono-compact text-[#a3a3a3] hover:text-[#e8e8e8] border border-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] px-4 py-2.5 transition-colors no-underline"
+    >
+      City council
+      <span aria-hidden="true">→</span>
+    </a>
+    <a
+      href="/toolkit/speaking/county-council-brief"
+      class="inline-flex items-center gap-2 label-mono-compact text-[#a3a3a3] hover:text-[#e8e8e8] border border-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] px-4 py-2.5 transition-colors no-underline"
+    >
+      County council
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
 </div>
 
 <script>

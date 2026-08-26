@@ -1,0 +1,629 @@
+---
+import type { CouncilBrief } from '../data/council-brief';
+
+interface Props {
+  brief: CouncilBrief;
+}
+
+const { brief } = Astro.props;
+// Jurisdiction noun for the one heading that swaps (model section).
+const noun = brief.variant === 'city' ? 'city' : 'county';
+
+// Per-card Tabler icon inner markup (keyed by BriefCard.icon).
+const ICONS: Record<string, string> = {
+  scan: '<path d="M5 12h14"/><path d="M3 7v-2a2 2 0 0 1 2 -2h2"/><path d="M3 17v2a2 2 0 0 0 2 2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2 -2v-2"/>',
+  'money-off': '<path d="M13 9h6a2 2 0 0 1 2 2v6m-2 2h-10a2 2 0 0 1 -2 -2v-6a2 2 0 0 1 2 -2"/><path d="M12.582 12.59a2 2 0 0 0 2.83 2.826"/><path d="M17 9v-2a2 2 0 0 0 -2 -2h-6m-4 0a2 2 0 0 0 -2 2v6a2 2 0 0 0 2 2h2"/><path d="M3 3l18 18"/>',
+  clock: '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 12l3 2"/><path d="M12 7v5"/>',
+  clipboard: '<path d="M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697"/><path d="M18 14v4h4"/><path d="M18 11v-4a2 2 0 0 0 -2 -2h-2"/><path d="M8 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2"/><path d="M8 11h4"/><path d="M8 15h3"/>',
+  'file-search': '<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M12 21h-5a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v4.5"/><path d="M14 17.5a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0"/><path d="M18.5 19.5l2.5 2.5"/>',
+  door: '<path d="M14 12v.01"/><path d="M3 21h18"/><path d="M6 21v-16a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v16"/>',
+};
+---
+
+<article class="leave-behind">
+  <header>
+    <div class="head-top">
+      <span class="lockup"><span class="dot" aria-hidden="true"></span>DEFLOCK<span class="slash">/</span>SC</span>
+      <span class="filed">Constituent brief · Aug 2026</span>
+    </div>
+    <h1>Public rules for public cameras</h1>
+    <p class="standfirst">{brief.standfirst}</p>
+  </header>
+
+  <!-- The ask -->
+  <section>
+    <h2>The ask</h2>
+    <p class="lede">{brief.ask.lede}</p>
+    {brief.ask.paras.map((para) => <p>{para}</p>)}
+  </section>
+
+  <!-- Authority -->
+  <section>
+    <h2>Why this is your council's call</h2>
+    <p>{brief.authority.intro}</p>
+    <div class="grounds">
+      {brief.authority.grounds.map((g) => (
+        <div class="g">
+          <span class="mark" aria-hidden="true"></span>
+          <p><strong>{g.lead}</strong>{g.rest}</p>
+        </div>
+      ))}
+    </div>
+    <p class="lede lede-close">{brief.authority.ledeClose}</p>
+  </section>
+
+  <!-- Precedent -->
+  <section>
+    <h2>You wouldn't be first, or alone</h2>
+    <p>{brief.precedent.intro}</p>
+    <figure class="pull">
+      <span class="qmark" aria-hidden="true">&ldquo;</span>
+      <blockquote>{brief.precedent.quote.text}</blockquote>
+      <figcaption>{brief.precedent.quote.attribution}</figcaption>
+    </figure>
+    <p>{brief.precedent.close}</p>
+  </section>
+
+  <!-- Model -->
+  <section>
+    <h2>What a {noun} ordinance could include</h2>
+    <p>{brief.model.intro}</p>
+    <div class="prov">
+      {brief.model.cards.map((card) => (
+        <div class:list={['pcard', card.span && 'span']}>
+          <div class="pcard-h">
+            <span class:list={['picon', card.accent === 'amber' && 'amber']}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONS[card.icon]} /></span>
+            <span class="ptitle">{card.title}</span>
+          </div>
+          <p class="pdesc">{card.body}</p>
+          {card.cite && <div class="psec">{card.cite}</div>}
+        </div>
+      ))}
+    </div>
+    <p class="model-note">{brief.model.note}</p>
+  </section>
+
+  <!-- FAQ (county only) -->
+  {brief.faq && (
+    <section>
+      <h2>{brief.faq.heading}</h2>
+      <div class="faq">
+        {brief.faq.items.map((item) => (
+          <div class="faq-item">
+            <h3>{item.q}</h3>
+            <p>{item.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Sources -->
+  <section>
+    <h2>See it for yourself</h2>
+    <p>{brief.sources.intro}</p>
+    <div class="sources">
+      {brief.sources.items.map((s) => (
+        <div class="src">
+          <span class="who">
+            <a href={s.href} target="_blank" rel="noopener">
+              {s.label}<span class="sr-only"> (opens in new tab)</span>
+            </a>
+          </span>
+          <span class="tag">{s.tag}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <div class="contact">
+    <p class="who">{brief.contact.heading}</p>
+    <p class="detail">{brief.contact.body} Contact: <a href={`mailto:${brief.contact.email}`}>{brief.contact.email}</a></p>
+  </div>
+
+  <!-- Paper footer (print only; site Footer is hidden on paper) -->
+  <div class="brief-footer" aria-hidden="true">
+    <span>DEFLOCK/SC · A constituent brief</span>
+    <span>Home rule, applied at home.</span>
+  </div>
+
+  <!-- Print action (screen only) -->
+  <div class="printcta no-print">
+    <div class="txt">
+      <div class="h">Leave one behind</div>
+      <p>Print this brief and hand a copy to each council member.</p>
+    </div>
+    <button id="print-brief" class="printbtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+      Print / save as PDF
+    </button>
+  </div>
+</article>
+
+<style is:global>
+  /* ============================================================
+     SCREEN — dark, site-integrated. Ported from the approved
+     mockup's `.web` rules; scoped under `.leave-behind` (the
+     component is used only on the two council-brief pages).
+     ============================================================ */
+  .leave-behind {
+    color: #a3a3a3;
+    font-size: 16px;
+    line-height: 1.7;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .leave-behind .head-top {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0 4px;
+  }
+  .leave-behind .lockup {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    color: #e8e8e8;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 13px;
+  }
+  .leave-behind .lockup .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #dc2626;
+    margin-right: 8px;
+    box-shadow: 0 0 7px #dc2626;
+    flex: none;
+  }
+  .leave-behind .lockup .slash { color: #dc2626; margin: 0 1px; }
+  .leave-behind .filed {
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: #737373;
+    margin-left: 12px;
+  }
+  .leave-behind h1 {
+    color: #e8e8e8;
+    font-weight: 700;
+    font-size: clamp(1.9rem, 5.4vw, 2.5rem);
+    line-height: 1.06;
+    letter-spacing: -0.022em;
+    margin: 14px 0 0;
+    text-wrap: balance;
+    max-width: 15ch;
+  }
+  .leave-behind .standfirst {
+    color: #d4d4d4;
+    font-size: clamp(1.02rem, 2.4vw, 1.14rem);
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 14px 0 0;
+    max-width: 58ch;
+  }
+  .leave-behind section { padding-top: 38px; }
+  .leave-behind h2 {
+    color: #e8e8e8;
+    font-weight: 700;
+    font-size: clamp(1.24rem, 2.8vw, 1.42rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .leave-behind h2::before {
+    content: "";
+    width: 24px;
+    height: 3px;
+    background: #dc2626;
+    flex: none;
+  }
+  .leave-behind p { margin: 14px 0 0; max-width: 66ch; }
+  .leave-behind .lede {
+    color: #e8e8e8;
+    font-size: 1.12rem;
+    font-weight: 500;
+    line-height: 1.45;
+  }
+  .leave-behind .lede-close { margin-top: 16px; }
+  .leave-behind strong { color: #e8e8e8; font-weight: 600; }
+
+  .leave-behind .grounds {
+    margin-top: 16px;
+    display: grid;
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .leave-behind .grounds .g {
+    background: #141414;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    padding: 16px 2px;
+  }
+  .leave-behind .grounds .mark {
+    width: 8px;
+    height: 8px;
+    background: #dc2626;
+    margin-top: 8px;
+    flex: none;
+  }
+  .leave-behind .grounds .g p { margin: 0; max-width: 62ch; }
+
+  .leave-behind figure.pull {
+    position: relative;
+    margin: 30px 0 6px;
+    padding: 24px 0 0 46px;
+  }
+  .leave-behind figure.pull .qmark {
+    position: absolute;
+    top: -2px;
+    left: -4px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 120px;
+    line-height: 0.72;
+    color: rgba(220, 38, 38, 0.2);
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+  }
+  .leave-behind figure.pull blockquote {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    color: #e8e8e8;
+    font-size: clamp(1.16rem, 3vw, 1.36rem);
+    font-weight: 500;
+    line-height: 1.38;
+    letter-spacing: -0.01em;
+    max-width: 48ch;
+  }
+  .leave-behind figure.pull figcaption {
+    position: relative;
+    z-index: 1;
+    margin-top: 14px;
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8a8a8a;
+  }
+
+  .leave-behind .prov {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .leave-behind .pcard {
+    background: #111111;
+    padding: 18px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+  .leave-behind .pcard.span { grid-column: 1 / -1; }
+  .leave-behind .pcard-h { display: flex; align-items: center; gap: 12px; }
+  .leave-behind .picon {
+    width: 40px;
+    height: 40px;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 7px;
+    color: #dc2626;
+    background: #161616;
+  }
+  .leave-behind .picon svg { width: 21px; height: 21px; }
+  .leave-behind .picon.amber { color: #fbbf24; border-color: rgba(251, 191, 36, 0.28); }
+  .leave-behind .ptitle {
+    color: #e8e8e8;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .leave-behind .pdesc {
+    margin: 0;
+    color: #a3a3a3;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    max-width: none;
+  }
+  .leave-behind .psec {
+    margin-top: auto;
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    padding: 3px 6px;
+    align-self: flex-start;
+  }
+
+  .leave-behind .model-note { margin-top: 18px; }
+
+  .leave-behind .faq { margin-top: 8px; }
+  .leave-behind .faq-item { margin-top: 24px; }
+  .leave-behind .faq-item h3 {
+    color: #e8e8e8;
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    margin: 0;
+  }
+  .leave-behind .faq-item p { margin-top: 8px; }
+
+  .leave-behind .sources {
+    margin-top: 16px;
+    display: grid;
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .leave-behind .src {
+    background: #141414;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 16px;
+    align-items: baseline;
+    padding: 12px 2px;
+  }
+  .leave-behind .src .who a {
+    color: #e8e8e8;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: rgba(255, 255, 255, 0.2);
+    font-size: 0.98rem;
+  }
+  .leave-behind .src .who a:hover { text-decoration-color: rgba(255, 255, 255, 0.5); }
+  .leave-behind .src .tag {
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #737373;
+    white-space: nowrap;
+  }
+
+  .leave-behind .contact {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-top: 22px;
+  }
+  .leave-behind .contact .who { color: #e8e8e8; font-weight: 600; font-size: 1.05rem; }
+  .leave-behind .contact .detail { margin-top: 6px; color: #a3a3a3; max-width: 52ch; }
+  .leave-behind .contact .detail a {
+    color: #fbbf24;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: rgba(251, 191, 36, 0.4);
+  }
+
+  .leave-behind .brief-footer { display: none; }
+
+  .leave-behind .printcta {
+    margin-top: 30px;
+    display: flex;
+    gap: 22px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .leave-behind .printcta .txt { max-width: 48ch; }
+  .leave-behind .printcta .txt .h { color: #e8e8e8; font-weight: 600; font-size: 1.02rem; }
+  .leave-behind .printcta .txt p { margin: 4px 0 0; font-size: 0.94rem; color: #a3a3a3; }
+  .leave-behind .printbtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: #dc2626;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .leave-behind .printbtn:hover { background: #b91c1c; }
+  .leave-behind .printbtn:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+  .leave-behind .printbtn svg { width: 16px; height: 16px; }
+
+  /* ============================================================
+     PRINT — light one-page paper dossier. Hides site chrome and
+     repaints `.leave-behind` with the mockup's `.paper` palette.
+     Scoped so the dark `deflock` theme cannot invert the sheet.
+     ============================================================ */
+  @media print {
+    /* Hide site chrome + on-screen-only bits. */
+    nav[aria-label="Main navigation"],
+    body > footer,
+    #action-modal,
+    .brief-breadcrumb,
+    .brief-siblings,
+    a[href="#main-content"],
+    .no-print { display: none !important; }
+
+    html, body {
+      background: #ffffff !important;
+      color: #1b1b1e !important;
+    }
+    body { min-height: 0 !important; }
+    main { padding: 0 !important; }
+    /* Neutralize the page wrapper around the brief so the dark
+       bg-[#141414] band and its px-6 pb-20 padding don't print
+       behind/after the light sheet. Sibling sections are already
+       display:none above, so the surviving section is the brief's. */
+    main section { background: #ffffff !important; }
+    main section > div { padding: 0 !important; max-width: none !important; }
+
+    .leave-behind {
+      --ink: #1b1b1e;
+      --muted: #4f4f57;
+      --dim: #64646c;
+      --line: rgba(0, 0, 0, 0.11);
+      --line-strong: rgba(0, 0, 0, 0.16);
+      --brand: #dc2626;
+      --accent: #b45309;
+      --panel2: #fafafa;
+      color-scheme: light;
+      color: var(--ink);
+      max-width: none;
+      margin: 0;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-top: 5px solid var(--brand);
+      border-radius: 3px;
+      padding: 22px 26px 20px;
+      font-size: 10.5pt;
+      line-height: 1.5;
+    }
+    .leave-behind * { animation: none !important; transition: none !important; }
+
+    .leave-behind header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+    }
+    .leave-behind .head-top { justify-content: space-between; }
+    .leave-behind .lockup { color: var(--ink); }
+    .leave-behind .lockup .dot { background: var(--brand); box-shadow: none; width: 8px; height: 8px; }
+    .leave-behind .lockup .slash { color: var(--brand); }
+    .leave-behind .filed { color: var(--dim); margin-left: 0; }
+    .leave-behind h1 { color: var(--ink); margin: 16px 0 0; }
+    .leave-behind .standfirst { color: var(--muted); margin: 11px 0 0; }
+
+    .leave-behind section { padding-top: 20px; }
+    .leave-behind h2 {
+      color: var(--ink);
+      font-weight: 600;
+      break-after: avoid;
+    }
+    .leave-behind h1, .leave-behind h3 { break-after: avoid; }
+    .leave-behind h2::before { background: var(--brand); }
+    .leave-behind p { color: var(--ink); max-width: 66ch; margin-top: 11px; }
+    .leave-behind .lede { color: var(--ink); }
+    .leave-behind strong { color: var(--ink); }
+    .leave-behind a { color: var(--accent); text-decoration-color: rgba(180, 83, 9, 0.45); }
+    .leave-behind .sr-only { display: none; }
+
+    .leave-behind .grounds {
+      margin-top: 12px;
+      background: none;
+      border-top: 1px solid var(--line);
+      gap: 0;
+    }
+    .leave-behind .grounds .g {
+      background: none;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+      break-inside: avoid;
+    }
+    .leave-behind .grounds .mark { background: var(--brand); }
+    .leave-behind .grounds .g p { color: var(--ink); }
+
+    .leave-behind figure.pull { break-inside: avoid; margin: 18px 0 4px; padding-left: 44px; }
+    .leave-behind figure.pull .qmark { color: rgba(220, 38, 38, 0.17); font-size: 96px; }
+    .leave-behind figure.pull blockquote { color: var(--ink); }
+    .leave-behind figure.pull figcaption { color: var(--dim); }
+
+    .leave-behind .prov {
+      margin-top: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      background: none;
+      border: none;
+    }
+    .leave-behind .pcard {
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px 15px;
+      gap: 8px;
+      break-inside: avoid;
+    }
+    .leave-behind .picon {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--line);
+      color: var(--brand);
+      background: #fff;
+    }
+    .leave-behind .picon.amber { color: var(--brand); border-color: var(--line); }
+    .leave-behind .picon svg { width: 19px; height: 19px; }
+    .leave-behind .ptitle { color: var(--ink); }
+    .leave-behind .pdesc { color: var(--muted); font-size: 9.5pt; }
+    .leave-behind .psec {
+      color: var(--dim);
+      border: none;
+      padding: 0;
+      font-size: 8pt;
+    }
+
+    .leave-behind .model-note { color: var(--muted); }
+
+    .leave-behind .faq-item { break-inside: avoid; margin-top: 16px; }
+    .leave-behind .faq-item h3 { color: var(--ink); }
+    .leave-behind .faq-item p { color: var(--muted); }
+
+    .leave-behind .sources { margin-top: 12px; background: none; gap: 0; }
+    .leave-behind .src {
+      background: none;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+      break-inside: avoid;
+    }
+    .leave-behind .src:first-child { border-top: none; }
+    .leave-behind .src .who a { color: var(--accent); text-decoration-color: rgba(180, 83, 9, 0.45); font-size: 10pt; }
+    .leave-behind .src .tag { color: var(--dim); }
+
+    .leave-behind .contact {
+      margin-top: 14px;
+      border-top: 1px solid var(--line-strong);
+      padding-top: 16px;
+      break-inside: avoid;
+    }
+    .leave-behind .contact .who { color: var(--ink); }
+    .leave-behind .contact .detail { color: var(--muted); max-width: none; }
+    .leave-behind .contact .detail a { color: var(--accent); }
+
+    .leave-behind .brief-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      font-family: 'DM Mono', ui-monospace, monospace;
+      font-size: 8.5pt;
+      letter-spacing: 0.06em;
+      color: var(--dim);
+    }
+
+    @page { margin: 1.2cm; }
+  }
+</style>
+
+<script>
+  function initPrintBrief() {
+    const btn = document.getElementById('print-brief');
+    if (btn) btn.addEventListener('click', () => window.print());
+  }
+  initPrintBrief();
+  document.addEventListener('astro:after-swap', initPrintBrief);
+</script>

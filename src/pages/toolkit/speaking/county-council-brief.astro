@@ -1,29 +1,29 @@
 ---
-import Base from '../../layouts/Base.astro';
-import ToolkitSpeaking from '../../components/ToolkitSpeaking.astro';
-
-const title = "How to Speak at a Council Meeting About Surveillance Cameras | DeflockSC";
-const description = "Full talk track for public comment on ALPR surveillance. Rebuttals for common pushback. Printable leave-behind briefs for city and county councils.";
+import Base from '../../../layouts/Base.astro';
+import CouncilBrief from '../../../components/CouncilBrief.astro';
+import { countyBrief } from '../../../data/council-brief';
 
 const siblings = [
+  { href: '/toolkit/speaking/city-council-brief', label: 'City Council Brief' },
   { href: '/toolkit/foia', label: 'Request Records' },
   { href: '/toolkit/outreach', label: 'Spread the Word' },
   { href: '/toolkit/legal', label: 'Know Your Rights' },
 ];
 ---
 
-<Base title={title} description={description}>
+<Base title={countyBrief.pageTitle} description={countyBrief.pageDescription}>
   <script slot="head" type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://deflocksc.org/" },
       { "@type": "ListItem", "position": 2, "name": "Toolkit", "item": "https://deflocksc.org/toolkit" },
-      { "@type": "ListItem", "position": 3, "name": "Speak Up", "item": "https://deflocksc.org/toolkit/speaking" }
+      { "@type": "ListItem", "position": 3, "name": "Speak Up", "item": "https://deflocksc.org/toolkit/speaking" },
+      { "@type": "ListItem", "position": 4, "name": "County Council Brief", "item": "https://deflocksc.org/toolkit/speaking/county-council-brief" }
     ]
   })} />
 
-  <section class="bg-[#111111] pt-24 pb-6">
+  <section class="brief-breadcrumb bg-[#111111] pt-24 pb-6">
     <div class="max-w-4xl mx-auto px-6">
       <nav aria-label="Breadcrumb" class="mb-6">
         <ol class="flex items-center gap-2 label-mono-nav">
@@ -31,7 +31,9 @@ const siblings = [
           <li class="text-[#525252]">/</li>
           <li><a href="/toolkit" class="text-[#737373] hover:text-[#a3a3a3] transition-colors">Toolkit</a></li>
           <li class="text-[#525252]">/</li>
-          <li class="text-[#e8e8e8]">Speak Up</li>
+          <li><a href="/toolkit/speaking" class="text-[#737373] hover:text-[#a3a3a3] transition-colors">Speak Up</a></li>
+          <li class="text-[#525252]">/</li>
+          <li class="text-[#e8e8e8]">{countyBrief.breadcrumbLabel}</li>
         </ol>
       </nav>
     </div>
@@ -39,12 +41,16 @@ const siblings = [
 
   <section class="bg-[#141414]">
     <div class="max-w-4xl mx-auto px-6 pb-20 md:pb-28">
-      <ToolkitSpeaking />
+      <CouncilBrief brief={countyBrief} />
     </div>
   </section>
 
-  <section class="bg-[#111111] border-t border-[rgba(255,255,255,0.07)]">
+  <section class="brief-siblings bg-[#111111] border-t border-[rgba(255,255,255,0.07)]">
     <div class="max-w-4xl mx-auto px-6 py-12">
+      <a href="/toolkit/speaking" class="inline-flex items-center gap-2 label-mono-compact text-[#a3a3a3] hover:text-[#e8e8e8] transition-colors no-underline mb-8">
+        <span aria-hidden="true">&larr;</span>
+        Back to Speak Up
+      </a>
       <p class="label-mono text-[#737373] mb-4">More from the Toolkit</p>
       <div class="flex flex-wrap gap-3">
         {siblings.map((s) => (
