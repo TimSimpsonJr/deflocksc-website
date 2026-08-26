@@ -153,7 +153,8 @@ describe('parseCouncilEvents — rejected (a bad entry fails the build)', () => 
 describe('loadCouncilEvents — the committed seed', () => {
   it('loads council-meetings.json as valid council PublicEvents', () => {
     const events = loadCouncilEvents();
-    expect(events.length).toBe(30);
+    // 30 original big-city/county councils + 53 metro-satellite city councils.
+    expect(events.length).toBe(83);
     for (const e of events) {
       expect(e.type).toBe('council');
       expect(e.hasSignalGroup).toBe(false);

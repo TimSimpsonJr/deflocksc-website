@@ -407,7 +407,6 @@
       "hasBoundary": false,
       "notes": "4 council members + mayor, all elected at-large. Council-Manager form of government."
     },
-
     {
       "id": "county:abbeville",
       "name": "Abbeville County Council",
@@ -439,7 +438,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:aiken",
       "name": "Aiken County Council",
@@ -476,7 +474,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:allendale",
       "name": "Allendale County Council",
@@ -508,7 +505,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:bamberg",
       "name": "Bamberg County Council",
@@ -540,7 +536,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:barnwell",
       "name": "Barnwell County Council",
@@ -577,7 +572,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:berkeley",
       "name": "Berkeley County Council",
@@ -621,7 +615,6 @@
       "hasBoundary": false,
       "notes": "6 council members + mayor, all elected at-large. Pop. ~46k."
     },
-
     {
       "id": "county:calhoun",
       "name": "Calhoun County Council",
@@ -653,7 +646,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:cherokee",
       "name": "Cherokee County Council",
@@ -685,7 +677,6 @@
       "hasBoundary": false,
       "notes": "6 district seats + mayor."
     },
-
     {
       "id": "county:chester",
       "name": "Chester County Council",
@@ -717,7 +708,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:chesterfield",
       "name": "Chesterfield County Council",
@@ -749,7 +739,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:clarendon",
       "name": "Clarendon County Council",
@@ -781,7 +770,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:colleton",
       "name": "Colleton County Council",
@@ -813,7 +801,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:darlington",
       "name": "Darlington County Council",
@@ -845,7 +832,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:dillon",
       "name": "Dillon County Council",
@@ -877,7 +863,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:dorchester",
       "name": "Dorchester County Council",
@@ -926,7 +911,6 @@
       "hasBoundary": false,
       "notes": "6 single-member districts + mayor. CivicPlus website. Pop. ~55k."
     },
-
     {
       "id": "county:edgefield",
       "name": "Edgefield County Council",
@@ -958,7 +942,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:fairfield",
       "name": "Fairfield County Council",
@@ -990,7 +973,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:florence",
       "name": "Florence County Council",
@@ -1022,7 +1004,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:georgetown",
       "name": "Georgetown County Council",
@@ -1059,7 +1040,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:greenwood",
       "name": "Greenwood County Council",
@@ -1091,7 +1071,6 @@
       "hasBoundary": false,
       "notes": "6 district seats + mayor elected at-large."
     },
-
     {
       "id": "county:hampton",
       "name": "Hampton County Council",
@@ -1128,7 +1107,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:jasper",
       "name": "Jasper County Council",
@@ -1160,7 +1138,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:kershaw",
       "name": "Kershaw County Council",
@@ -1192,7 +1169,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:lancaster",
       "name": "Lancaster County Council",
@@ -1234,7 +1210,6 @@
       "hasBoundary": false,
       "notes": "CivicPlus website. District count unverified."
     },
-
     {
       "id": "county:lee",
       "name": "Lee County Council",
@@ -1266,7 +1241,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:marion",
       "name": "Marion County Council",
@@ -1298,7 +1272,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:marlboro",
       "name": "Marlboro County Council",
@@ -1330,7 +1303,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:mccormick",
       "name": "McCormick County Council",
@@ -1362,7 +1334,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:newberry",
       "name": "Newberry County Council",
@@ -1394,7 +1365,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:oconee",
       "name": "Oconee County Council",
@@ -1426,7 +1396,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:orangeburg",
       "name": "Orangeburg County Council",
@@ -1463,7 +1432,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:saluda",
       "name": "Saluda County Council",
@@ -1495,7 +1463,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:sumter",
       "name": "Sumter County Council",
@@ -1527,7 +1494,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:union",
       "name": "Union County Council",
@@ -1559,7 +1525,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "county:williamsburg",
       "name": "Williamsburg County Council",
@@ -1591,7 +1556,6 @@
       "hasBoundary": false,
       "notes": "District count unverified."
     },
-
     {
       "id": "place:mount-pleasant",
       "name": "Mount Pleasant Town Council",
@@ -1608,6 +1572,375 @@
       "atLarge": true,
       "hasBoundary": false,
       "notes": "8 council members + mayor, all elected at-large. CivicPlus website. Pop. ~91k."
+    },
+    {
+      "id": "place:greer",
+      "name": "Greer City Council",
+      "type": "place",
+      "county": "Greenville",
+      "adapter": "manual",
+      "url": "https://www.cityofgreersc.gov/page/addressing-city-council",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:mauldin",
+      "name": "Mauldin City Council",
+      "type": "place",
+      "county": "Greenville",
+      "adapter": "manual",
+      "url": "https://cityofmauldin.org/your-government/meeting-minutes-agendas/",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:simpsonville",
+      "name": "Simpsonville City Council",
+      "type": "place",
+      "county": "Greenville",
+      "adapter": "manual",
+      "url": "https://www.simpsonville.com/citycouncil/",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:fountain-inn",
+      "name": "Fountain Inn City Council",
+      "type": "place",
+      "county": "Greenville",
+      "adapter": "manual",
+      "url": "https://www.fountaininn.org/205/City-Council",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:travelers-rest",
+      "name": "Travelers Rest City Council",
+      "type": "place",
+      "county": "Greenville",
+      "adapter": "manual",
+      "url": "https://travelersrestsc.com/government/attend-a-city-council-meeting/",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:easley",
+      "name": "Easley City Council",
+      "type": "place",
+      "county": "Pickens",
+      "adapter": "manual",
+      "url": "https://www.cityofeasley.com/entities/city-council",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:clemson",
+      "name": "Clemson City Council",
+      "type": "place",
+      "county": "Pickens",
+      "adapter": "manual",
+      "url": "https://www.clemsoncity.org/181/City-Council",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:seneca",
+      "name": "Seneca City Council",
+      "type": "place",
+      "county": "Oconee",
+      "adapter": "manual",
+      "url": "https://seneca.sc.us/city-council-home",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:laurens",
+      "name": "Laurens City Council",
+      "type": "place",
+      "county": "Laurens",
+      "adapter": "manual",
+      "url": "https://www.cityoflaurenssc.com/government",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:clinton",
+      "name": "Clinton City Council",
+      "type": "place",
+      "county": "Laurens",
+      "adapter": "manual",
+      "url": "https://www.cityofclintonsc.com/1200/Mayor-and-Council",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:duncan",
+      "name": "Duncan Town Council",
+      "type": "place",
+      "county": "Spartanburg",
+      "adapter": "manual",
+      "url": "https://www.townofduncansc.com/town_council.php",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:west-columbia",
+      "name": "West Columbia City Council",
+      "type": "place",
+      "county": "Lexington",
+      "adapter": "manual",
+      "url": "https://westcolumbiasc.gov/city-council/",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:cayce",
+      "name": "Cayce City Council",
+      "type": "place",
+      "county": "Lexington",
+      "adapter": "manual",
+      "url": "https://caycesc.gov/government.php",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:irmo",
+      "name": "Irmo Town Council",
+      "type": "place",
+      "county": "Lexington",
+      "adapter": "manual",
+      "url": "https://www.townofirmosc.com/government/town_council_update.php",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:forest-acres",
+      "name": "Forest Acres City Council",
+      "type": "place",
+      "county": "Richland",
+      "adapter": "manual",
+      "url": "https://www.forestacres.net/event/city-council-meeting",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:blythewood",
+      "name": "Blythewood Town Council",
+      "type": "place",
+      "county": "Richland",
+      "adapter": "manual",
+      "url": "https://townofblythewoodsc.gov/governments/agendas_and_minutes.php",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:chapin",
+      "name": "Chapin Town Council",
+      "type": "place",
+      "county": "Lexington",
+      "adapter": "manual",
+      "url": "https://www.chapinsc.com/AgendaCenter/ViewFile/Agenda/_06172025-584",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:batesburg-leesville",
+      "name": "Batesburg-Leesville Town Council",
+      "type": "place",
+      "county": "Lexington",
+      "adapter": "manual",
+      "url": "https://www.batesburg-leesville.org/media/12101",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:springdale",
+      "name": "Springdale Town Council",
+      "type": "place",
+      "county": "Lexington",
+      "adapter": "manual",
+      "url": "https://springdalesc.com/government.php",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:elgin",
+      "name": "Elgin Town Council",
+      "type": "place",
+      "county": "Kershaw",
+      "adapter": "manual",
+      "url": "https://townofelginsc.com/government/",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:james-island",
+      "name": "James Island Town Council",
+      "type": "place",
+      "county": "Charleston",
+      "adapter": "manual",
+      "url": "https://www.jamesislandsc.us/faq/when-are-town-council-meetings-held",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:hanahan",
+      "name": "Hanahan City Council",
+      "type": "place",
+      "county": "Berkeley",
+      "adapter": "manual",
+      "url": "https://www.cityofhanahan.com/citycouncil/page/meeting-information",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:folly-beach",
+      "name": "Folly Beach City Council",
+      "type": "place",
+      "county": "Charleston",
+      "adapter": "manual",
+      "url": "https://cityoffollybeach.com/government/meetings_agendas/index.php",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:isle-of-palms",
+      "name": "Isle of Palms City Council",
+      "type": "place",
+      "county": "Charleston",
+      "adapter": "manual",
+      "url": "https://www.isleofpalms.gov/event/city-council-meeting-0",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:sullivans-island",
+      "name": "Sullivan's Island Town Council",
+      "type": "place",
+      "county": "Charleston",
+      "adapter": "manual",
+      "url": "https://sullivansisland.sc.gov/government/meetings-and-agendas",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:kiawah-island",
+      "name": "Kiawah Island Town Council",
+      "type": "place",
+      "county": "Charleston",
+      "adapter": "manual",
+      "url": "https://kiawahisland.gov/agendas___minutes/town_council.php",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:ravenel",
+      "name": "Ravenel Town Council",
+      "type": "place",
+      "county": "Charleston",
+      "adapter": "manual",
+      "url": "https://www.townofravenel.com/town-council",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:seabrook-island",
+      "name": "Seabrook Island Town Council",
+      "type": "place",
+      "county": "Charleston",
+      "adapter": "manual",
+      "url": "https://www.townofseabrookisland.org/tc-am.html",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:hollywood",
+      "name": "Hollywood Town Council",
+      "type": "place",
+      "county": "Charleston",
+      "adapter": "manual",
+      "url": "https://www.townofhollywood.org/meetings",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:north-myrtle-beach",
+      "name": "North Myrtle Beach City Council",
+      "type": "place",
+      "county": "Horry",
+      "adapter": "manual",
+      "url": "https://www.nmb.us/259/City-Council",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:aynor",
+      "name": "Aynor Town Council",
+      "type": "place",
+      "county": "Horry",
+      "adapter": "manual",
+      "url": "https://townofaynor.gov/agendas",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:loris",
+      "name": "Loris City Council",
+      "type": "place",
+      "county": "Horry",
+      "adapter": "manual",
+      "url": "https://cityoflorissc.com/regular-council-meeting-schedule",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:andrews",
+      "name": "Andrews Town Council",
+      "type": "place",
+      "county": "Georgetown",
+      "adapter": "manual",
+      "url": "https://files-backend.assets.thrillshare.com/documents/asset/uploaded_file/4221/Andrews/790527e0-ab81-4385-912e-8920b46be700/5-21-26--Town-Council-Agenda.pdf?disposition=inline",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:atlantic-beach",
+      "name": "Atlantic Beach Town Council",
+      "type": "place",
+      "county": "Horry",
+      "adapter": "manual",
+      "url": "http://www.townofatlanticbeachsc.com/page/council.agendas-minutes",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:briarcliffe-acres",
+      "name": "Briarcliffe Acres Town Council",
+      "type": "place",
+      "county": "Horry",
+      "adapter": "manual",
+      "url": "https://www.townofbriarcliffe.us/meetings",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:hartsville",
+      "name": "Hartsville City Council",
+      "type": "place",
+      "county": "Darlington",
+      "adapter": "manual",
+      "url": "https://www.hartsvillesc.gov/about-us/government/mayor-city-council",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:mullins",
+      "name": "Mullins City Council",
+      "type": "place",
+      "county": "Marion",
+      "adapter": "manual",
+      "url": "https://www.mullinssc.us/mayor-city-council",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:latta",
+      "name": "Latta Town Council",
+      "type": "place",
+      "county": "Dillon",
+      "adapter": "manual",
+      "url": "https://townoflatta.sc.gov/government",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:cheraw",
+      "name": "Cheraw Town Council",
+      "type": "place",
+      "county": "Chesterfield",
+      "adapter": "manual",
+      "url": "https://www.cheraw.com/government/cheraw_town_council_meeting_minutes.php",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:pageland",
+      "name": "Pageland Town Council",
+      "type": "place",
+      "county": "Chesterfield",
+      "adapter": "manual",
+      "url": "https://townofpageland.com/index.php/town-hall/council-agenda-and-minutes/",
+      "hasBoundary": false
+    },
+    {
+      "id": "place:lake-city",
+      "name": "Lake City City Council",
+      "type": "place",
+      "county": "Florence",
+      "adapter": "manual",
+      "url": "https://www.lakecitysc.gov/187/City-Council",
+      "hasBoundary": false
     }
   ]
 }

@@ -620,5 +620,1069 @@
     "description": "York County Council offers two ways to speak at a regular meeting. To be placed on the agenda (limited to 2 speakers per meeting at up to 6 minutes each, first come, first served), contact the Clerk to Council at 803-628-3954 at least 10 days before the meeting date. Otherwise, sign up on the sheet at the door of the Council Chambers the evening of the meeting, just before it begins, for 2 minutes of speaking time; this option is first come, first served and capped at 15 speakers.",
     "source": "https://www.yorkcountysc.gov/375/County-Council",
     "organizer": "York County Council"
+  },
+  {
+    "id": "council-greer-city",
+    "type": "council",
+    "title": "Greer City Council",
+    "date": "2026-09-08",
+    "time": "18:30",
+    "city": "greer",
+    "county": "greenville",
+    "address": "Greer City Hall, 2nd Floor, 301 East Poinsett Street, Greer, SC 29651",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2,
+        4
+      ]
+    },
+    "description": "The City does not publish its public-comment sign-up procedure online. Contact the Greer City Clerk's office at City Hall (301 East Poinsett Street) before the meeting to confirm how to sign up to speak during the Public Forum.",
+    "source": "https://www.cityofgreersc.gov/page/addressing-city-council",
+    "organizer": "Greer City Council"
+  },
+  {
+    "id": "council-mauldin-city",
+    "type": "council",
+    "title": "Mauldin City Council",
+    "date": "2026-09-21",
+    "time": "19:00",
+    "city": "mauldin",
+    "county": "greenville",
+    "address": "City Hall - Council Chambers, 5 East Butler Road, Mauldin, SC 29662",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Mauldin City Council includes public comment at its regular meetings, split into a period for agenda items near the start of the meeting and a period for non-agenda items near the end. The city does not publish a formal sign-up procedure or a per-speaker time limit; in practice, residents state their name and address when recognized to speak. To confirm how to sign up to speak, contact Municipal Clerk Cindy Miller at (864) 289-8894 or cmiller@mauldincitysc.com before the meeting.",
+    "source": "https://cityofmauldin.org/your-government/meeting-minutes-agendas/",
+    "organizer": "Mauldin City Council"
+  },
+  {
+    "id": "council-simpsonville-city",
+    "type": "council",
+    "title": "Simpsonville City Council",
+    "date": "2026-09-08",
+    "time": "18:00",
+    "city": "simpsonville",
+    "county": "greenville",
+    "address": "Council Chambers, Simpsonville City Hall, 425 E. Curtis St., Simpsonville, SC 29681",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "To speak during Citizen Comments at a regular meeting, a citizen of the City (or others with standing in the City, such as business owners) must add their name, address, and topic to the public comments sign-up list maintained by the City Clerk at least 10 minutes before the meeting's scheduled 6 p.m. start (by 5:50 p.m.). Comments are limited to three minutes per person and must concern matters within the City's jurisdiction; personnel matters are excluded. (Code of Ordinances Sec. 2-69.b.1.) City Clerk contact: 864-967-9526, info@simpsonville.com.",
+    "source": "https://www.simpsonville.com/citycouncil/",
+    "organizer": "Simpsonville City Council"
+  },
+  {
+    "id": "council-fountain-inn-city",
+    "type": "council",
+    "title": "Fountain Inn City Council",
+    "date": "2026-09-10",
+    "time": "18:00",
+    "city": "fountain-inn",
+    "county": "greenville",
+    "address": "City of Fountain Inn Council Chambers, 300 Wall Street, Fountain Inn, SC 29644",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "Public comment is heard during the Public Forum near the start of each regular meeting. To speak, sign up in person up to 15 minutes before the meeting begins; sign-ups are taken on a first-come, first-served basis. Each speaker is limited to 3 minutes.",
+    "source": "https://www.fountaininn.org/205/City-Council",
+    "organizer": "Fountain Inn City Council"
+  },
+  {
+    "id": "council-travelers-rest-city",
+    "type": "council",
+    "title": "Travelers Rest City Council",
+    "date": "2026-09-17",
+    "time": "18:00",
+    "city": "travelers-rest",
+    "county": "greenville",
+    "address": "City Hall Council Chambers, 125 Trailblazer Drive, Travelers Rest, SC 29690",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "To speak during the public-comment portion of a meeting, complete the city's Citizen Participation form and return it to the City Clerk at least 24 hours before the meeting; the form may be emailed to City Clerk Carson Ruffrage at carson@travelersrestsc.com or mailed to City Hall, 125 Trailblazer Drive, Travelers Rest, SC 29690. City ordinance limits each approved speaker to no more than five minutes.",
+    "source": "https://travelersrestsc.com/government/attend-a-city-council-meeting/",
+    "organizer": "Travelers Rest City Council"
+  },
+  {
+    "id": "council-easley-city",
+    "type": "council",
+    "title": "Easley City Council",
+    "date": "2026-11-09",
+    "time": "19:00",
+    "city": "easley",
+    "county": "pickens",
+    "address": "Law Enforcement Center, Courtroom 1, 220 NW Main Street, Easley, SC 29640",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "Easley City Council holds a \"Citizens Wishing to Address City Council\" public-comment period at its regular monthly meetings, but the City does not publish the sign-up steps or any per-speaker time limit on its website or agendas. To confirm how to be added to speak, contact the Clerk to Council at Easley City Hall, (864) 855-7900, before the meeting. Note: the City has cancelled its September 14, 2026 and October 12, 2026 regular meetings; the next regular meeting is November 9, 2026.",
+    "source": "https://www.cityofeasley.com/entities/city-council",
+    "organizer": "Easley City Council"
+  },
+  {
+    "id": "council-clemson-city",
+    "type": "council",
+    "title": "Clemson City Council",
+    "date": "2026-09-21",
+    "time": "18:30",
+    "city": "clemson",
+    "county": "pickens",
+    "address": "Council Chambers, Clemson City Hall, 1250 Tiger Boulevard, Clemson, SC 29631",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "Speak during the \"Public Session\" near the start of each regular meeting — 3 minutes per speaker, on any topic not already on the agenda. You can also submit comments through the City's online \"Make Public Comment\" form on the City Council page. No pre-registration is published; confirm the procedure with Municipal Clerk Jeremiah Jackson at (864) 653-2031. Meetings are posted for 6:30 PM but start at 5:30 PM when a public hearing is scheduled first, so check the agenda (posted 24 hours ahead) for the exact start time.",
+    "source": "https://www.clemsoncity.org/181/City-Council",
+    "organizer": "Clemson City Council"
+  },
+  {
+    "id": "council-seneca-city",
+    "type": "council",
+    "title": "Seneca City Council",
+    "date": "2026-09-08",
+    "time": "18:00",
+    "city": "seneca",
+    "county": "oconee",
+    "address": "Seneca City Hall, Council Chambers, 221 E North 1st St., Seneca, SC 29678",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "To speak during public comment, complete the sign-in sheet in person at the meeting; no advance registration is required. Speakers are limited to five minutes each, and comments must relate to items on the agenda. Eligible speakers are city residents, business owners within city limits, or city utility customers; to confirm details, contact Municipal Clerk Kathy Wilkes at 864-200-2229.",
+    "source": "https://seneca.sc.us/city-council-home",
+    "organizer": "Seneca City Council"
+  },
+  {
+    "id": "council-gaffney-city",
+    "type": "council",
+    "title": "Gaffney City Council",
+    "date": "2026-10-05",
+    "time": "18:00",
+    "city": "gaffney",
+    "county": "cherokee",
+    "address": "Gaffney City Hall, City Council Chambers, 201 N. Limestone Street, Gaffney, SC 29340",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "Public comment is taken during the \"Public Forum\" portion of the regular City Council meeting. The City does not publish an online sign-up procedure, registration deadline, or per-speaker time limit, so contact the City Clerk, Rosina Parker, at 864-487-6247 or cityclerk@cityofgaffney-sc.gov before the meeting to confirm how to be recognized to speak.",
+    "source": "https://www.cityofgaffney-sc.gov/184/City-Council",
+    "organizer": "Gaffney City Council"
+  },
+  {
+    "id": "council-laurens-city",
+    "type": "council",
+    "title": "Laurens City Council",
+    "date": "2026-09-15",
+    "time": "17:30",
+    "city": "laurens",
+    "county": "laurens",
+    "address": "Municipal Building, 250 West Laurens Street, Laurens, SC 29360",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "To speak during the Public Participation portion of a regular meeting, submit a Council Request Form to the City Clerk no less than 24 hours before the meeting; the form is available on the city website (cityoflaurenssc.com) and at City Hall. Remarks must relate directly to items on the published agenda and are limited to three (3) minutes, at the Chair's discretion. Only individuals whose issue appears on the published agenda are invited to speak. Questions: call the City at (864) 984-3933 or email lmattison@cityoflaurenssc.com.",
+    "source": "https://www.cityoflaurenssc.com/government",
+    "organizer": "Laurens City Council"
+  },
+  {
+    "id": "council-clinton-city",
+    "type": "council",
+    "title": "Clinton City Council",
+    "date": "2026-10-05",
+    "time": "18:00",
+    "city": "clinton",
+    "county": "laurens",
+    "address": "P.S. Bailey City Council Chambers, 2nd floor, M.S. Bailey Municipal Center, 211 N. Broad Street, Clinton, SC 29325",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "To speak during public comment you must register in advance: the official meeting agenda recognizes only \"citizens regarding agenda items who have registered to address City Council,\" and each speaker is limited to two minutes. The agenda does not publish how or by when to register, so contact the Clerk to Council before the meeting to sign up — call the Mayor and Council office at 864-200-4501 or email info@cityofclintonsc.com. Comments are directed to items on the published meeting agenda.",
+    "source": "https://www.cityofclintonsc.com/1200/Mayor-and-Council",
+    "organizer": "Clinton City Council"
+  },
+  {
+    "id": "council-duncan-city",
+    "type": "council",
+    "title": "Duncan Town Council",
+    "date": "2026-09-08",
+    "time": "18:00",
+    "city": "duncan",
+    "county": "spartanburg",
+    "address": "Duncan Event Center, 119 S Spencer Street, Duncan, SC 29334",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "The regular council meeting agenda includes a public comment period, but the Town of Duncan does not publish a sign-up procedure, registration deadline, or per-speaker time limit on its website or its meeting agendas. Before attending, call Duncan Town Hall at 864-439-2664 to confirm how to be recognized to speak and whether any time limit applies.",
+    "source": "https://www.townofduncansc.com/town_council.php",
+    "organizer": "Duncan Town Council"
+  },
+  {
+    "id": "council-west-columbia-city",
+    "type": "council",
+    "title": "West Columbia City Council",
+    "date": "2026-09-01",
+    "time": "18:00",
+    "city": "west-columbia",
+    "county": "lexington",
+    "address": "Council Chambers, City Hall, 200 N. 12th Street, West Columbia, SC 29169",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "The agenda's \"Requests for Appearances / Citizen Comment\" period appears only when a resident has arranged to appear in advance, and the City does not publish the sign-up procedure, deadline, or a per-speaker time limit — so you likely must ask to be placed on the agenda before the meeting rather than signing up at the door. Confirm how and when to sign up with the City Clerk's office beforehand at (803) 791-1880 or info@westcolumbiasc.gov.",
+    "source": "https://westcolumbiasc.gov/city-council/",
+    "organizer": "West Columbia City Council"
+  },
+  {
+    "id": "council-cayce-city",
+    "type": "council",
+    "title": "Cayce City Council",
+    "date": "2026-09-01",
+    "time": "18:00",
+    "city": "cayce",
+    "county": "lexington",
+    "address": "Cayce City Hall, Council Chambers, 1800 12th Street Extension, Cayce, SC 29033",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "To speak during the public comment period on an item that appears on the meeting agenda, sign the speakers list maintained by the City Clerk before the public comment period begins (no advance registration required; personnel matters excepted). To address Council on a general municipal matter that is not on the agenda, notify the office of the City Manager at least five working days before the meeting, stating your subject and purpose. Each speaker is limited to a maximum of five minutes, and the number of speakers may be limited at the presiding officer's discretion.",
+    "source": "https://caycesc.gov/government.php",
+    "organizer": "Cayce City Council"
+  },
+  {
+    "id": "council-lexington-city",
+    "type": "council",
+    "title": "Lexington Town Council",
+    "date": "2026-10-05",
+    "time": "18:00",
+    "city": "lexington",
+    "county": "lexington",
+    "address": "Council Chambers, Lexington Town Hall, 111 Maiden Lane, Lexington, SC 29072",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "To speak, submit your request to the Municipal Clerk (Laura Hinson, 803-996-3765, lhinson@lexsc.gov) before the meeting; at the meeting, speakers are recognized by the Chair and state their name and address. Comments are limited to 3 minutes per speaker, and the general comment period (COMMENTS/QUESTIONS) is for agenda items only. No firm advance-registration deadline is published, so contact the Clerk to confirm details.",
+    "source": "https://www.lexsc.gov/990/Town-Council-Meeting-Schedule",
+    "organizer": "Lexington Town Council"
+  },
+  {
+    "id": "council-irmo-city",
+    "type": "council",
+    "title": "Irmo Town Council",
+    "date": "2026-09-15",
+    "time": "18:00",
+    "city": "irmo",
+    "county": "lexington",
+    "address": "Irmo Municipal Building, 7300 Woodrow Street, Irmo, SC 29063",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "To speak during the \"Presentation by Citizens\" period, either contact the Municipal Clerk before 3:00 p.m. on the day of the meeting at (803) 781-7050 or lhancock@townofirmosc.com, or fill out the sign-in sheet in the foyer of the Municipal Building just before the meeting. One citizen-comment period on the agenda is limited to agenda items only; a separate general citizen-comment period is also held. The agenda does not state a per-speaker time limit.",
+    "source": "https://www.townofirmosc.com/government/town_council_update.php",
+    "organizer": "Irmo Town Council"
+  },
+  {
+    "id": "council-forest-acres-city",
+    "type": "council",
+    "title": "Forest Acres City Council",
+    "date": "2026-09-08",
+    "time": "18:00",
+    "city": "forest-acres",
+    "county": "richland",
+    "address": "City Council Chambers, City Hall, 5205 N Trenholm Rd, Columbia, SC 29206",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "To speak on an item specifically listed on the meeting agenda, call City Hall at (803) 782-9475 by 5:00 p.m. the day before the meeting to be added to the list of speakers. Each meeting also includes a general \"Community Forum\" period; no separate published sign-up procedure or per-speaker time limit is listed for it, so contact the City at (803) 782-9475 to confirm details before attending for general comments.",
+    "source": "https://www.forestacres.net/event/city-council-meeting",
+    "organizer": "Forest Acres City Council"
+  },
+  {
+    "id": "council-blythewood-city",
+    "type": "council",
+    "title": "Blythewood Town Council",
+    "date": "2026-09-28",
+    "time": "18:00",
+    "city": "blythewood",
+    "county": "richland",
+    "address": "Doko Manor, 100 Alvina Hagood Circle, Blythewood, SC 29016",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        4
+      ]
+    },
+    "description": "Public comment at Blythewood Town Council meetings is limited to items on the meeting agenda, and each speaker has up to three (3) minutes to address Council. The Town does not publish a sign-up or pre-registration procedure on its agendas or website; to confirm how to sign up to speak, contact the Municipal Clerk at (803) 754-0501. Note: an ordinance to amend the Town's public-comment rules was under first reading as of August 2026, so this procedure may change.",
+    "source": "https://townofblythewoodsc.gov/governments/agendas_and_minutes.php",
+    "organizer": "Blythewood Town Council"
+  },
+  {
+    "id": "council-chapin-city",
+    "type": "council",
+    "title": "Chapin Town Council",
+    "date": "2026-09-15",
+    "time": "18:00",
+    "city": "chapin",
+    "county": "lexington",
+    "address": "Chapin Town Hall (Council Chambers), 157 NW Columbia Avenue, Chapin, SC 29036",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Sign in with the Municipal Clerk before the meeting begins and give your name, address, contact information, your topic, and whether you're a Chapin resident or water/sewer customer. Public comment covers items on the current agenda (excluding personnel and contractual matters), 3 minutes per speaker. To have an item placed on the agenda, notify the Clerk in writing at least one week ahead. Questions: Chapin Town Hall, 803-345-2444.",
+    "source": "https://www.chapinsc.com/AgendaCenter/ViewFile/Agenda/_06172025-584",
+    "organizer": "Chapin Town Council"
+  },
+  {
+    "id": "council-batesburg-leesville-city",
+    "type": "council",
+    "title": "Batesburg-Leesville Town Council",
+    "date": "2026-09-14",
+    "time": "19:00",
+    "city": "batesburg-leesville",
+    "county": "lexington",
+    "address": "Batesburg-Leesville Town Hall Complex, Building B, 120 West Church Street, Batesburg-Leesville, SC 29006",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "Public comment at the regular council meeting is limited to items on that meeting's posted agenda (the agenda lists it as \"Public Comment Regarding Items on the Agenda\"). The Town does not publish a sign-up procedure or a per-speaker time limit on its agendas or website, so confirm how to be recognized to speak before you go: contact the Batesburg-Leesville Municipal Clerk at (803) 532-4601 (option 6). Arrive before the 7:00 PM start.",
+    "source": "https://www.batesburg-leesville.org/media/12101",
+    "organizer": "Batesburg-Leesville Town Council"
+  },
+  {
+    "id": "council-newberry-city",
+    "type": "council",
+    "title": "Newberry City Council",
+    "date": "2026-09-08",
+    "time": "19:00",
+    "city": "newberry",
+    "county": "newberry",
+    "address": "Newberry City Hall, Council Chambers, 1330 College Street, Newberry, SC 29108",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "Public comments are limited to three minutes per speaker. The City does not publish a public-comment sign-up procedure online, so contact the Municipal Clerk at City Hall before the meeting to confirm how to be recognized to speak (verified phone: 803-321-1000; the City's published FOIA/Clerk email is FOIA@cityofnewberry.com). The printed regular agenda has no standing open-comment period, so confirming in advance is recommended. Agendas are normally posted by 4:00 p.m. on the Friday preceding each meeting.",
+    "source": "https://cityofnewberry.com/government/index.php",
+    "organizer": "Newberry City Council"
+  },
+  {
+    "id": "council-camden-city",
+    "type": "council",
+    "title": "Camden City Council",
+    "date": "2026-09-01",
+    "time": "17:30",
+    "city": "camden",
+    "county": "kershaw",
+    "address": "Council Chambers, 2nd Floor, City Hall, 1000 Lyttleton Street, Camden, SC 29020",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "Sign up to speak at the City Clerk's office in City Hall, or sign up in person up to 10 minutes before the regular Council meeting begins; no advance registration is required. Each speaker is allowed 5 minutes when there are six or fewer speakers, or 3 minutes when there are more than six, within a 30-minute total public comment period. Anyone who cannot be heard because the 30-minute limit is reached is given the first opportunity to speak at the next meeting.",
+    "source": "https://experiencecamdensc.com/government/mayor-and-city-council/meeting-agendas-and-minutes/",
+    "organizer": "Camden City Council"
+  },
+  {
+    "id": "council-springdale-city",
+    "type": "council",
+    "title": "Springdale Town Council",
+    "date": "2026-09-01",
+    "time": "18:00",
+    "city": "springdale",
+    "county": "lexington",
+    "address": "Springdale Town Hall (Council Chambers), 2909 Platt Springs Road, Springdale, SC 29170",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "Springdale Town Council regular meetings include a Public Comment period, but the Town does not publish a written sign-up procedure, deadline, or per-speaker time limit on its agendas or website. To confirm how to sign up to speak and any time limit before attending, contact Municipal Clerk Leeann Kelly at lkelly@springdalesc.gov or Town Hall at 803-794-0408.",
+    "source": "https://springdalesc.com/government.php",
+    "organizer": "Springdale Town Council"
+  },
+  {
+    "id": "council-elgin-city",
+    "type": "council",
+    "title": "Elgin Town Council",
+    "date": "2026-09-01",
+    "time": "18:00",
+    "city": "elgin",
+    "county": "kershaw",
+    "address": "Elgin Town Hall, 2469 Main Street, Elgin, SC 29045",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "Elgin Town Council meets on the 1st Tuesday of every month at 6:00 PM at Elgin Town Hall (2469 Main Street). Meetings are open to the public and are also streamed on the Town's Facebook page. The agenda includes a Public Forum for public comment, but the Town does not publish the public-comment procedure (whether you sign up in advance or at the meeting) or any speaker time limits on its website or its meeting agendas. To be safe, plan to arrive before the 6:00 PM start and contact Town Hall to confirm how to be added to the Public Forum: (803) 438-2362 or elgin.clerk@townofelginsc.com.",
+    "source": "https://townofelginsc.com/government/",
+    "organizer": "Elgin Town Council"
+  },
+  {
+    "id": "council-james-island-city",
+    "type": "council",
+    "title": "James Island Town Council",
+    "date": "2026-09-17",
+    "time": "19:00",
+    "city": "james-island",
+    "county": "charleston",
+    "address": "Town Hall (Council Chamber), 1122 Dills Bluff Road, James Island, SC 29412",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Public comment is taken near the start of each regular Town Council meeting. Speakers must sign in to speak (in person at the meeting) and are limited to three (3) minutes each. Written comments may be submitted in advance by emailing info@jamesislandsc.us, mailing to P.O. Box 12240, Charleston, SC 29422, or placing them in the drop box outside Town Hall at 1122 Dills Bluff Rd.",
+    "source": "https://www.jamesislandsc.us/faq/when-are-town-council-meetings-held",
+    "organizer": "James Island Town Council"
+  },
+  {
+    "id": "council-hanahan-city",
+    "type": "council",
+    "title": "Hanahan City Council",
+    "date": "2026-09-08",
+    "time": "18:00",
+    "city": "hanahan",
+    "county": "berkeley",
+    "address": "Debbie Lewis Municipal Chambers, City Hall, 1255 Yeamans Hall Road, Hanahan, SC 29410",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "Sign up to speak by submitting the City's online Public Comment Signup form (linked from the City Council page): give your name, address, contact information, and topic, and indicate whether it's an agenda item, non-agenda item, or public hearing. Speakers get about three minutes each, and submitting the form doesn't guarantee time if the comment period is already full. Questions: City Clerk, (843) 576-5251.",
+    "source": "https://www.cityofhanahan.com/citycouncil/page/meeting-information",
+    "organizer": "Hanahan City Council"
+  },
+  {
+    "id": "council-folly-beach-city",
+    "type": "council",
+    "title": "Folly Beach City Council",
+    "date": "2026-09-08",
+    "time": "19:00",
+    "city": "folly-beach",
+    "county": "charleston",
+    "address": "Council Chambers, 21 Center Street, Folly Beach, SC 29439",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "Regular City Council meetings include a \"Citizens' Comments\" period on the agenda, but the City does not publish an online sign-up procedure or per-speaker time limit. To confirm how to be heard, contact the Municipal Clerk, Wes Graham, at wgraham@follybeach.gov or 843-459-3520 before the meeting.",
+    "source": "https://cityoffollybeach.com/government/meetings_agendas/index.php",
+    "organizer": "Folly Beach City Council"
+  },
+  {
+    "id": "council-isle-of-palms-city",
+    "type": "council",
+    "title": "Isle of Palms City Council",
+    "date": "2026-09-22",
+    "time": "18:00",
+    "city": "isle-of-palms",
+    "county": "charleston",
+    "address": "Isle of Palms City Hall, Council Chambers, 1207 Palm Boulevard, Isle of Palms, SC 29451",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        4
+      ]
+    },
+    "description": "To speak during public comment, email your first and last name, address, and topic to City Clerk Nicole DeNeane at nicoled@iop.net no later than 3:00 p.m. the day before the meeting; you may alternatively submit a written comment through the city's online public comment form at isleofpalms.gov/public-comment-form. Verbal comments are limited to three (3) minutes, and speakers must state their name and address.",
+    "source": "https://www.isleofpalms.gov/event/city-council-meeting-0",
+    "organizer": "Isle of Palms City Council"
+  },
+  {
+    "id": "council-moncks-corner-city",
+    "type": "council",
+    "title": "Moncks Corner Town Council",
+    "date": "2026-09-15",
+    "time": "18:00",
+    "city": "moncks-corner",
+    "county": "berkeley",
+    "address": "Town Council Chambers, Moncks Corner Municipal Complex, 118 Carolina Avenue, Moncks Corner, SC 29461",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Town Council agendas provide for public input, with each speaker limited to 3 minutes; no advance sign-up or registration procedure is published on the Town's official meeting materials. To confirm whether you must register in advance or simply attend and address Council, contact the Town Clerk at Moncks Corner Town Hall, (843) 719-7900, before the meeting.",
+    "source": "https://monckscornersc.gov/events/category/public-meetings",
+    "organizer": "Moncks Corner Town Council"
+  },
+  {
+    "id": "council-walterboro-city",
+    "type": "council",
+    "title": "Walterboro City Council",
+    "date": "2026-09-01",
+    "time": "18:00",
+    "city": "walterboro",
+    "county": "colleton",
+    "address": "City Hall (Council Chambers), 242 Hampton Street, Walterboro, SC 29488",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "Walterboro City Council meetings include agenda-item and presentation segments, but the City does not publish a public-comment sign-up procedure or per-speaker time limit on any official source. Before attending, contact the Clerk to Council, Adrienne Nettles, at 843-782-1010 or anettles@walterborosc.org to confirm how to be recognized to speak and whether you must be placed on the agenda in advance. Meetings are held at City Hall, 242 Hampton Street, and agendas are posted at City Hall and online at least 24 hours beforehand.",
+    "source": "https://www.walterborosc.org/city-council",
+    "organizer": "Walterboro City Council"
+  },
+  {
+    "id": "council-sullivans-island-city",
+    "type": "council",
+    "title": "Sullivan's Island Town Council",
+    "date": "2026-09-15",
+    "time": "18:00",
+    "city": "sullivans-island",
+    "county": "charleston",
+    "address": "Council Chambers, Town Hall, 2056 Middle Street, Sullivan's Island, SC 29482",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Sign up in advance to speak during public comment by emailing Town Clerk Bridget Welch at bwelch@sullivansisland.sc.gov with your name, home street address, and the topic you wish to address; the email sign-up deadline is 1:00 p.m. the day of the meeting. You may also sign up in person before the meeting begins. Each public comment is limited to three minutes.",
+    "source": "https://sullivansisland.sc.gov/government/meetings-and-agendas",
+    "organizer": "Sullivan's Island Town Council"
+  },
+  {
+    "id": "council-st-george-city",
+    "type": "council",
+    "title": "St. George Town Council",
+    "date": "2026-09-14",
+    "time": "19:00",
+    "city": "st-george",
+    "county": "dorchester",
+    "address": "St. George Civic Center, 303 Ridge Street, St. George, SC 29477",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "The Town does not publish a public-comment sign-up procedure, so confirm before attending. Contact the Clerk to Council, Annette L. Moore, at (843) 563-7161 or amoore@townofstgeorgesc.org (Town Hall: (843) 563-3032) to ask whether you must sign up in advance and whether there's a time limit. Note: sources differ on the meeting building — the Civic Center at 303 Ridge Street vs Town Hall at 305 Ridge Street, both in the same Ridge Street complex; confirm with the Clerk.",
+    "source": "https://saintgeorgesc.org/council-meeting-agenda",
+    "organizer": "St. George Town Council"
+  },
+  {
+    "id": "council-kiawah-island-city",
+    "type": "council",
+    "title": "Kiawah Island Town Council",
+    "date": "2026-09-01",
+    "time": "13:00",
+    "city": "kiawah-island",
+    "county": "charleston",
+    "address": "Municipal Center Council Chambers, Kiawah Island Town Hall, 4475 Betsy Kerrison Parkway, Kiawah Island, SC 29455",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "Public comment is taken during the meeting's two \"Citizen Comments\" periods (one limited to agenda items, one general); no pre-registration form or deadline is published, so speakers are recognized at the meeting. Per the posted agenda, each speaker is limited to five minutes, and total citizen comment is capped at 30 minutes divided equally among those requesting to speak. To confirm exactly how to be recognized to speak, contact Town Clerk Petra Reynolds at preynolds@kiawahisland.gov or 843-768-9166 before the meeting.",
+    "source": "https://kiawahisland.gov/agendas___minutes/town_council.php",
+    "organizer": "Kiawah Island Town Council"
+  },
+  {
+    "id": "council-ravenel-city",
+    "type": "council",
+    "title": "Ravenel Town Council",
+    "date": "2026-09-29",
+    "time": "18:00",
+    "city": "ravenel",
+    "county": "charleston",
+    "address": "Council Chambers, Ravenel Town Hall, 5962 Highway 165, Ravenel, SC 29470",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        "last"
+      ]
+    },
+    "description": "Every regular meeting includes a Public Comments period with a 3-minute-per-speaker limit (item 10 on the official agenda), and the Town's overview page notes there is opportunity for public input at any meeting. The Town does not publish an advance sign-up or pre-registration procedure for public comment; the current agenda simply directs residents with a comment on an agenda item to contact Ravenel Town Hall at (843) 889-8732. Contact the Clerk-Treasurer's office at (843) 889-8732 to confirm whether you must sign up in advance or in person before speaking.",
+    "source": "https://www.townofravenel.com/town-council",
+    "organizer": "Ravenel Town Council"
+  },
+  {
+    "id": "council-seabrook-island-city",
+    "type": "council",
+    "title": "Seabrook Island Town Council",
+    "date": "2026-09-22",
+    "time": "14:30",
+    "city": "seabrook-island",
+    "county": "charleston",
+    "address": "Seabrook Island Town Hall, Council Chambers, 2001 Seabrook Island Road, Seabrook Island, SC 29455",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        4
+      ]
+    },
+    "description": "Public comment is taken as \"Citizen Comments\" during the meeting (the agenda provides two citizen-comment periods). Each speaker is limited to three minutes, and Town Council allows no more than 30 minutes total per comment period; preference is given to people who have signed up or otherwise notified the Town Clerk of a desire to speak before the meeting begins. To reserve a spot in advance, contact Town Clerk Peter Wiggins at (843) 768-9121.",
+    "source": "https://www.townofseabrookisland.org/tc-am.html",
+    "organizer": "Seabrook Island Town Council"
+  },
+  {
+    "id": "council-hollywood-city",
+    "type": "council",
+    "title": "Hollywood Town Council",
+    "date": "2026-09-28",
+    "time": "18:30",
+    "city": "hollywood",
+    "county": "charleston",
+    "address": "Council Chambers, Hollywood Town Hall, 5150 Highway 165, Hollywood, SC 29449",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        4
+      ]
+    },
+    "description": "The Town does not publish a public-comment sign-up procedure, deadline, or time limit on its reachable pages. To speak or confirm how to submit a comment, contact the Town Clerk, Crystal Jackson, at 843-889-3222 (ext. 113) or through the contact form at townofhollywood.org before the meeting.",
+    "source": "https://www.townofhollywood.org/meetings",
+    "organizer": "Hollywood Town Council"
+  },
+  {
+    "id": "council-north-myrtle-beach-city",
+    "type": "council",
+    "title": "North Myrtle Beach City Council",
+    "date": "2026-09-21",
+    "time": "18:00",
+    "city": "north-myrtle-beach",
+    "county": "horry",
+    "address": "Council Chambers, North Myrtle Beach City Hall, 1018 2nd Avenue South, North Myrtle Beach, SC 29582",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1,
+        3
+      ]
+    },
+    "description": "The public comment period is capped at 30 minutes total, with up to 3 minutes per speaker (speakers are timed, with a 30-second warning). The City does not publish how to sign up, so contact the City Clerk, Allison Galbreath, at 843-280-5604 or akgalbreath@nmb.us before the meeting to confirm the sign-up procedure. In busy summer or holiday months the Council may hold only one regular meeting, so confirm the date on the City's agenda.",
+    "source": "https://www.nmb.us/259/City-Council",
+    "organizer": "North Myrtle Beach City Council"
+  },
+  {
+    "id": "council-georgetown-city",
+    "type": "council",
+    "title": "Georgetown City Council",
+    "date": "2026-09-17",
+    "time": "17:30",
+    "city": "georgetown",
+    "county": "georgetown",
+    "address": "Municipal Courtroom, 2222 Highmarket Street, Georgetown, SC 29440",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Georgetown City Council holds a public comment period near the start of each regular meeting, where it appears as a standing agenda item. The City does not publish an official sign-up procedure or a per-speaker time limit online, so confirm how to be recognized to speak before you attend by contacting the City Clerk's office at 843-545-4002. If you cannot attend in person, ask the Clerk's office whether written comments may be submitted to be read into the record.",
+    "source": "https://www.georgetownsc.gov/governmental_services/city_council.php",
+    "organizer": "Georgetown City Council"
+  },
+  {
+    "id": "council-aynor-city",
+    "type": "council",
+    "title": "Aynor Town Council",
+    "date": "2026-09-29",
+    "time": "18:30",
+    "city": "aynor",
+    "county": "horry",
+    "address": "Aynor Town Hall, 600 S Main St, Aynor, SC 29511",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        "last"
+      ]
+    },
+    "description": "The Aynor Town Council holds a public comment period (\"Public Comments\") at each regular meeting, but the Town does not publish a sign-up procedure, registration deadline, or per-speaker time limit on its agendas or website. To confirm how to be recognized to speak, contact the Aynor Town Clerk, Linda Johnson, at 843-358-6231 or ljohnson@townofaynor.gov before the meeting.",
+    "source": "https://townofaynor.gov/agendas",
+    "organizer": "Aynor Town Council"
+  },
+  {
+    "id": "council-loris-city",
+    "type": "council",
+    "title": "Loris City Council",
+    "date": "2026-10-05",
+    "time": "18:00",
+    "city": "loris",
+    "county": "horry",
+    "address": "Loris City Hall, Council Chambers, 4101 Walnut Street, Loris, SC 29569",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "Loris City Council meets in the Council Chambers at City Hall; meetings are open to the public. The City does not publish public-comment sign-up procedures, a registration deadline, or a per-speaker time limit on its website. To ask how to be recognized to speak at a meeting, contact Loris City Clerk Melinda T. Price at (843) 716-6503 or MPrice@CityofLoris.org before the meeting.",
+    "source": "https://cityoflorissc.com/regular-council-meeting-schedule",
+    "organizer": "Loris City Council"
+  },
+  {
+    "id": "council-andrews-city",
+    "type": "council",
+    "title": "Andrews Town Council",
+    "date": "2026-09-17",
+    "time": "18:00",
+    "city": "andrews",
+    "county": "georgetown",
+    "address": "Sheriff's Department Sub-Station Courtroom, 110 North Morgan Avenue, Andrews, SC 29510",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Citizens' comments may be submitted in advance by email to townhall@townofandrews.sc.gov no later than 4:00 PM on the day of the meeting. The regular meeting also includes an in-person \"Citizens' Comments\" period, limited to three minutes per speaker. For questions about speaking, contact Andrews Town Hall at (843) 264-8666.",
+    "source": "https://files-backend.assets.thrillshare.com/documents/asset/uploaded_file/4221/Andrews/790527e0-ab81-4385-912e-8920b46be700/5-21-26--Town-Council-Agenda.pdf?disposition=inline",
+    "organizer": "Andrews Town Council"
+  },
+  {
+    "id": "council-atlantic-beach-city",
+    "type": "council",
+    "title": "Atlantic Beach Town Council",
+    "date": "2026-10-05",
+    "time": "17:00",
+    "city": "atlantic-beach",
+    "county": "horry",
+    "address": "Atlantic Beach Community Center, 1010 32nd Avenue South, Atlantic Beach, SC 29582",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "To speak during public comment, sign in and fill out a speaker's card in person before the meeting is called to order at 5:00 p.m.; no pre-registration is required or offered. Each speaker is limited to 3 minutes, and multiple speakers on the same subject may be consolidated. Public comment is taken during the General Session, which begins at 6:30 p.m., so plan to arrive by 5:00 p.m. to sign in and stay through the start of the General Session.",
+    "source": "http://www.townofatlanticbeachsc.com/page/council.agendas-minutes",
+    "organizer": "Atlantic Beach Town Council"
+  },
+  {
+    "id": "council-briarcliffe-acres-city",
+    "type": "council",
+    "title": "Briarcliffe Acres Town Council",
+    "date": "2026-09-21",
+    "time": "17:00",
+    "city": "briarcliffe-acres",
+    "county": "horry",
+    "address": "Briarcliffe Acres Town Hall, 121 North Gate Road, Myrtle Beach, SC 29572",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "The regular Town Meeting agenda includes a \"Public Input\" period, but the Town of Briarcliffe Acres does not publish a public-comment sign-up procedure or a per-speaker time limit on its website or on its agendas. Residents who want to speak should contact the Town Clerk at 843-272-8863 or info@townofbriarcliffe.us beforehand to confirm how to be recognized. Anyone who needs an accommodation to participate must contact the Town Clerk at least 48 hours before the meeting.",
+    "source": "https://www.townofbriarcliffe.us/meetings",
+    "organizer": "Briarcliffe Acres Town Council"
+  },
+  {
+    "id": "council-hartsville-city",
+    "type": "council",
+    "title": "Hartsville City Council",
+    "date": "2026-09-08",
+    "time": "17:30",
+    "city": "hartsville",
+    "county": "darlington",
+    "address": "Hartsville City Council Chambers (first floor), Hartsville City Hall, 100 East Carolina Avenue, Hartsville, SC 29550",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "At each regular Hartsville City Council meeting there is a Public Comments period open to any person, and no advance sign-up or pre-registration is required. When the Public Comments period is called, come forward, state your name and address for the record, and keep your remarks to the two-minute per-speaker limit. To instead be placed on the meeting agenda as a scheduled presenter, contact the City Clerk's Office at (843) 383-3018.",
+    "source": "https://www.hartsvillesc.gov/about-us/government/mayor-city-council",
+    "organizer": "Hartsville City Council"
+  },
+  {
+    "id": "council-darlington-city",
+    "type": "council",
+    "title": "Darlington City Council",
+    "date": "2026-09-01",
+    "time": "18:00",
+    "city": "darlington",
+    "county": "darlington",
+    "address": "Old Council Chambers, City Hall, 400 Pearl Street, Darlington, SC 29532",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "Public comment is taken during the \"Citizens Wishing to Appear Before Council\" item at each regular meeting. To speak, sign in at the meeting; no advance registration or deadline is published. Each speaker may talk for up to 5 minutes, with a maximum of 30 minutes total for all public comments.",
+    "source": "https://www.cityofdarlington.com/city-council-agendas-meeting-minutes/",
+    "organizer": "Darlington City Council"
+  },
+  {
+    "id": "council-marion-city",
+    "type": "council",
+    "title": "Marion City Council",
+    "date": "2026-09-08",
+    "time": "18:30",
+    "city": "marion",
+    "county": "marion",
+    "address": "City Hall Council Chambers, 107 South Main Street, Marion, SC 29571",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "Marion City Council's published regular-meeting agendas do not list a formal public-comment period or a sign-up procedure; the meeting opens by welcoming citizens, guests, and press. Before attending, contact the City Clerk (Lakesha Shannon) at City Hall, 843-423-5961, to confirm whether and how you may address the council and any per-speaker time limit.",
+    "source": "https://marionsc.gov/city-council-marion-sc/",
+    "organizer": "Marion City Council"
+  },
+  {
+    "id": "council-mullins-city",
+    "type": "council",
+    "title": "Mullins City Council",
+    "date": "2026-09-08",
+    "time": "17:30",
+    "city": "mullins",
+    "county": "marion",
+    "address": "Raymond Pridgen Auditorium, Municipal Complex, 151 East Front Street, Mullins, SC 29574",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "To address the Council, sign in with the City in person before the meeting begins; no advance-registration deadline is published. Each speaker is allowed 3 to 5 minutes, and groups are asked to appoint one speaker to represent them. The Council does not take questions during public comment; to confirm details, call City Hall at (843) 464-9583.",
+    "source": "https://www.mullinssc.us/mayor-city-council",
+    "organizer": "Mullins City Council"
+  },
+  {
+    "id": "council-latta-city",
+    "type": "council",
+    "title": "Latta Town Council",
+    "date": "2026-09-10",
+    "time": "19:00",
+    "city": "latta",
+    "county": "dillon",
+    "address": "Municipal Complex, 107 NE Railroad Avenue, Latta, SC 29565",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "To speak during a Town Council meeting, you must call Town Hall at (843) 752-5115 before the meeting to be added to the agenda. Each citizen is allowed ten (10) minutes to speak, and groups should designate one representative. Note the town states no questions are answered during this portion.",
+    "source": "https://townoflatta.sc.gov/government",
+    "organizer": "Latta Town Council"
+  },
+  {
+    "id": "council-bennettsville-city",
+    "type": "council",
+    "title": "Bennettsville City Council",
+    "date": "2026-09-15",
+    "time": "18:30",
+    "city": "bennettsville",
+    "county": "marlboro",
+    "address": "Bennettsville Public Safety Complex, 254 Highway 15-401 Bypass East, Bennettsville, SC 29512",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        3
+      ]
+    },
+    "description": "Under the city's published Public Comment Policy, anyone wishing to speak at a regular meeting must make a written request to notify the City Clerk before the deadline, then sign in to speak at the meeting; each speaker is limited to no more than 3 minutes. The agenda provides two public-comment periods: one for agenda items only and one for non-agenda items only. The written-request deadline is not stated on the agenda, so confirm it in advance with City Hall at (843) 479-9001 (City of Bennettsville, 501 East Main St., Bennettsville, SC 29512).",
+    "source": "https://www.bennettsvillesc.com/sites/default/files/uploads/agendas/regular-council-meeting-agenda-revised-8-18-29.pdf",
+    "organizer": "Bennettsville City Council"
+  },
+  {
+    "id": "council-cheraw-city",
+    "type": "council",
+    "title": "Cheraw Town Council",
+    "date": "2026-09-08",
+    "time": "17:30",
+    "city": "cheraw",
+    "county": "chesterfield",
+    "address": "Cheraw Town Hall, 200 Market Street, Cheraw, SC 29520",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "To speak at a Cheraw Town Council meeting you must get on the agenda in advance: contact the Town Manager or Town Clerk by 12:00 PM on the Friday before the regularly scheduled meeting and provide your name and a brief description of your item. Direct questions about Town Council meetings to Town Hall at 843-537-7283 or pnorris@cheraw.com. The town's official page does not publish a per-speaker time limit or a separate walk-up public-comment sign-up.",
+    "source": "https://www.cheraw.com/government/cheraw_town_council_meeting_minutes.php",
+    "organizer": "Cheraw Town Council"
+  },
+  {
+    "id": "council-pageland-city",
+    "type": "council",
+    "title": "Pageland Town Council",
+    "date": "2026-09-01",
+    "time": "19:00",
+    "city": "pageland",
+    "county": "chesterfield",
+    "address": "Pageland Town Hall, 307 E. McGregor Street, Pageland, SC 29728",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        1
+      ]
+    },
+    "description": "Regular Town Council meetings include a public-comment agenda item, \"Persons Appearing Before Council,\" but the Town does not publish a sign-up procedure, deadline, or per-speaker time limit for it. To confirm how to sign up to speak or be placed on the agenda, contact Pageland Town Hall at (843) 672-7292 ahead of the meeting.",
+    "source": "https://townofpageland.com/index.php/town-hall/council-agenda-and-minutes/",
+    "organizer": "Pageland Town Council"
+  },
+  {
+    "id": "council-chesterfield-city",
+    "type": "council",
+    "title": "Chesterfield Town Council",
+    "date": "2026-09-10",
+    "time": "17:30",
+    "city": "chesterfield",
+    "county": "chesterfield",
+    "address": "Town Hall, Olde Towne Centre, 112 Main Street, Chesterfield, SC 29709",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "The Town of Chesterfield does not publish a public-comment sign-up procedure or per-speaker time limit online. Before attending, contact the Town Clerk, Betty Lynn Watson, at 843-623-9104 or cftmclerk@shtc.net to confirm whether you must sign up in advance to speak during public comment and what time limit applies. Seating is limited, so groups should notify the office clerk ahead of time (843-623-2131, ext. 9104).",
+    "source": "https://www.chesterfield-sc.com/meetings",
+    "organizer": "Chesterfield Town Council"
+  },
+  {
+    "id": "council-lake-city-city",
+    "type": "council",
+    "title": "Lake City City Council",
+    "date": "2026-09-08",
+    "time": "18:00",
+    "city": "lake-city",
+    "county": "florence",
+    "address": "City Council Chambers, Lake City Judicial Center, 202 Kelley Street, Lake City, SC 29560",
+    "recurrence": {
+      "until": null,
+      "freq": "monthly_nth",
+      "nths": [
+        2
+      ]
+    },
+    "description": "During the meeting's Public Comment Period, sign in with the City Clerk, giving your name and address, in order to speak; each speaker is limited to two minutes on matters within the City's business or on that meeting's agenda. There is no published advance-registration deadline, so you sign in at the meeting itself. For questions beforehand, visit City Hall (8:30 a.m. to 5:00 p.m.) or call the city administrative offices at 843-374-5421.",
+    "source": "https://www.lakecitysc.gov/187/City-Council",
+    "organizer": "Lake City City Council"
   }
 ]
