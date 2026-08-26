@@ -81,6 +81,13 @@ const island: Island = JSON.parse(islandEl.textContent || '{}');
 
 const bakedIds = new Set(island.events.map((e) => e.id));
 
+// The shared "council attendees" Signal group linked from every council popover.
+// One open group for all council meetings (not per-event), so it lives as a lone
+// constant rather than in each council record. Public by design; the "Before you
+// join" warning still gates it. Set on window.location at click time (never a
+// static href) to match the organizer intake path's anti-scrape posture.
+const COUNCIL_SIGNAL_URL = 'https://signal.group/#CjQKIA_uJV4h7QAWyjqAUiyntTFDhB3AP06DptOuN0iB8m5GEhD5z3IHoRiSVqqMMjPTgLF3';
+
 /** Every event the page knows about. Baked at build, replaced by the overlay merge. */
 let allEvents: PublicEvent[] = island.events;
 
@@ -661,7 +668,7 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
       dates.forEach((d, i) => {
         const row = el('li', 'event-pop-upcoming-item');
         row.append(el('span', 'event-pop-upcoming-date', `${upcomingDateLabel(d)} · ${formatTime12(e.time)}`));
-        if (i === 0) row.append(el('span', 'event-pop-upcoming-next', 'Next'));
+        if (i === 0) row.append(el('span', 'event-pop-upcoming-next badge badge-sm badge-outline', 'Next'));
         upcomingList.append(row);
       });
       upcomingFoot.textContent = upcomingFooter(e.recurrence, dates.length);
@@ -683,6 +690,13 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
     }
   }
 
+  // Council meetings carry no per-event Signal group (hasSignalGroup is false, so
+  // the meetup CTA above stays hidden); instead they share one open "find others
+  // attending" group. Show that CTA only for council events. It opens the same
+  // "Before you join" warning as the organizer intake, pointed at COUNCIL_SIGNAL_URL.
+  const councilSignal = document.getElementById('event-detail-council-signal');
+  if (councilSignal) councilSignal.hidden = e.type !== 'council';
+
   popoverInvoker = invoker ?? (document.activeElement as HTMLElement | null);
   detailDialog.showModal();
 }
@@ -694,6 +708,16 @@ detailDialog?.addEventListener('close', () => {
   const invoker = popoverInvoker;
   popoverInvoker = null;
   if (invoker && invoker.isConnected) invoker.focus();
+});
+
+// Council popover CTA: close the popover (its close handler above returns focus to
+// the invoking card and clears popoverInvoker), then open the shared "Before you
+// join" warning pointed at the council attendees group. Capture the invoker first
+// so the warning's cancel path can still return focus to it.
+document.getElementById('event-detail-council-signal')?.addEventListener('click', () => {
+  const returnEl = popoverInvoker;
+  detailDialog?.close();
+  openIntake(COUNCIL_SIGNAL_URL, returnEl);
 });
 
 // Sidebar cards: the title button opens the popover. Delegated on the stable
@@ -1183,26 +1207,39 @@ void loadOverlay();
 // --- Intake dialog ------------------------------------------------------
 
 const dialog = document.getElementById('intake-dialog');
-document.getElementById('intake-open')?.addEventListener('click', () => {
+
+// The warning gate is shared: the organizer intake path (/go/intake) and the
+// council "find others attending" group both open this same dialog. openIntake
+// records where confirm should navigate and where cancel/Esc should return focus,
+// so the copy lives in one place and serves both.
+let intakeDestination = '/go/intake';
+let intakeReturnFocus: HTMLElement | null = null;
+
+function openIntake(destination: string, returnFocus: HTMLElement | null): void {
   if (!dialog) return;
+  intakeDestination = destination;
+  intakeReturnFocus = returnFocus;
   dialog.hidden = false;
   document.getElementById('intake-confirm')?.focus();
-});
-// The confirm control carries no href in the markup. Navigation to /go/intake is
-// injected here, at click time, so the path is absent from view-source and a
-// scraper that never clicks the button never harvests the intake redirect.
-document.getElementById('intake-confirm')?.addEventListener('click', () => {
-  window.location.href = '/go/intake';
-});
-document.getElementById('intake-cancel')?.addEventListener('click', () => {
+}
+
+function closeIntake(): void {
   if (dialog) dialog.hidden = true;
-  document.getElementById('intake-open')?.focus();
+  (intakeReturnFocus ?? document.getElementById('intake-open'))?.focus();
+}
+
+document.getElementById('intake-open')?.addEventListener('click', () => {
+  openIntake('/go/intake', document.getElementById('intake-open') as HTMLElement | null);
 });
+// The confirm control carries no href in the markup. Navigation is injected here,
+// at click time, so the destination is absent from view-source and a scraper that
+// never clicks the button never harvests it.
+document.getElementById('intake-confirm')?.addEventListener('click', () => {
+  window.location.href = intakeDestination;
+});
+document.getElementById('intake-cancel')?.addEventListener('click', closeIntake);
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && dialog && !dialog.hidden) {
-    dialog.hidden = true;
-    document.getElementById('intake-open')?.focus();
-  }
+  if (e.key === 'Escape' && dialog && !dialog.hidden) closeIntake();
 });
 // Focus trap: an aria-modal dialog must keep Tab focus inside while open, or Tab
 // escapes to the page behind the overlay. Mirrors the action-modal trap in

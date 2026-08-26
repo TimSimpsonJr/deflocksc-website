@@ -11,7 +11,7 @@
       class-parity double-write contract does not apply. Hidden until a county is
       selected; syncChrome() flips it, and a click clears the county filter through
       the same pushHash({ ...filter, county: 'all' }) path the choropleth uses. */}
-  <button id="events-map-back" type="button" class="map-back" aria-label="Clear county, back to all of South Carolina" hidden>
+  <button id="events-map-back" type="button" class="btn btn-sm btn-neutral map-back" aria-label="Clear county, back to all of South Carolina" hidden>
     <svg class="map-back-icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M10 3 5 8 10 13"></path>
     </svg>
@@ -126,43 +126,21 @@
     .map-live-dot { animation: none; }
   }
 
-  /* Back-to-state control. Same dark-glass pill as .map-badge, but a real button
-     with an amber hairline that ties it to the amber county highlight it clears.
-     Sits just below the SC Events badge in the top-left; the top-right corner is
-     occupied by the MapLibre zoom control. Hidden until a county is selected
-     (events-page.ts toggles the `hidden` attribute via syncChrome). The explicit
-     [hidden] rule is required because this element's own `display` would otherwise
-     beat the user-agent hidden default. */
+  /* Back-to-state control: a daisyUI btn (btn-sm btn-neutral) placed at the map's
+     top-left, below the SC Events badge (the top-right corner is the MapLibre zoom
+     control). Only position + the [hidden] toggle live here; daisyUI owns the
+     fill, border, radius, type, hover and focus. Hidden until a county is selected
+     (events-page.ts toggles the `hidden` attribute via syncChrome); the explicit
+     [hidden] rule beats daisyUI's own `display`. */
   .map-back {
     position: absolute;
     top: 46px;
     left: 12px;
     z-index: 11;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #e8e8e8;
-    background: rgba(13, 13, 13, 0.85);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    padding: 6px 10px;
-    border: 1px solid rgba(251, 191, 36, 0.5);
-    cursor: pointer;
-    transition: border-color 0.15s ease, color 0.15s ease;
   }
 
   .map-back[hidden] { display: none; }
-  .map-back:hover { border-color: #fbbf24; color: #ffffff; }
-  .map-back:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
   .map-back-icon { flex-shrink: 0; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .map-back { transition: none; }
-  }
 
   /* MapLibre control + popup chrome, scoped to this container. The shared
      `.map-dark` class in src/styles/global.css carries the same skin for the

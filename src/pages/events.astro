@@ -242,6 +242,10 @@ const island = {
       <div class="modal-action event-pop-foot">
         <form method="dialog" class="mr-auto"><button class="btn btn-ghost btn-sm" type="submit">Close</button></form>
         <a class="btn btn-primary btn-sm" id="event-detail-signal" rel="noreferrer" hidden>Join Signal group</a>
+        {/* Council meetings only: opens the shared "Before you join" warning
+            (events-page.ts), then the open council-attendees Signal group. A real
+            button, not an <a>, since navigation happens after the warning. */}
+        <button type="button" class="btn btn-primary btn-sm" id="event-detail-council-signal" hidden>Find others attending</button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">
@@ -752,15 +756,13 @@ const island = {
     border-top: 1px solid rgba(255, 255, 255, 0.07);
   }
   .event-pop-upcoming-item:first-child { border-top: 0; }
-  .event-pop-upcoming-next {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  /* The "Next" tag on the first upcoming row is a daisyUI badge (badge-sm
+     badge-outline) recoloured to the amber highlight — amber, not the red Signal
+     CTA colour. daisyUI owns the pill shape; only the colour is overridden here,
+     at .badge specificity so it beats the plugin's own badge rules. */
+  .event-pop-upcoming-next.badge {
     color: #fbbf24;
-    border: 1px solid rgba(251, 191, 36, 0.5);
-    border-radius: 2px;
-    padding: 1px 5px;
+    border-color: #fbbf24;
   }
   .event-pop-upcoming-foot { color: #8a8a8a; font-size: 0.8125rem; margin: 0.5rem 0 0; }
 

@@ -17,7 +17,7 @@
  */
 
 import maplibregl from 'maplibre-gl';
-import { collapseSeries, monthAbbr, dayOfMonth } from '../../../lib/events-view.js';
+import { collapseSeries, countDistinctByField, monthAbbr, dayOfMonth } from '../../../lib/events-view.js';
 import type { Occurrence } from '../../../lib/events-view.js';
 // Defined in events-constants.ts (a maplibre-free module) so the events-page composer
 // can import it WITHOUT statically pulling maplibre-gl into the page's eager chunk.
@@ -202,20 +202,11 @@ function normalizeCentroids(raw: Record<string, unknown>): Centroids {
   return out;
 }
 
-function countBy(occurrences: readonly Occurrence[], field: 'county' | 'city'): Map<string, number> {
-  const counts = new Map<string, number>();
-  for (const o of occurrences) {
-    const k = o.event[field];
-    counts.set(k, (counts.get(k) ?? 0) + 1);
-  }
-  return counts;
-}
-
 function cityFeatureCollection(
   state: EventLayerState,
   occurrences: readonly Occurrence[],
 ): GeoJSON.FeatureCollection {
-  const counts = countBy(occurrences, 'city');
+  const counts = countDistinctByField(occurrences, 'city');
   const features: GeoJSON.Feature[] = [];
   for (const [slug, count] of counts) {
     const coords = state.centroids[slug];
@@ -239,7 +230,7 @@ function applyCountyCounts(
 ): void {
   const source = map.getSource('sc-counties') as maplibregl.GeoJSONSource | undefined;
   if (!source) return;
-  const counts = countBy(occurrences, 'county');
+  const counts = countDistinctByField(occurrences, 'county');
   for (const f of state.counties.features) {
     const slug = String(f.properties?.county ?? '');
     (f.properties as Record<string, unknown>).count = counts.get(slug) ?? 0;
