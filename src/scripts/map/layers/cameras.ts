@@ -177,7 +177,7 @@ export function addCameraLayers(map: maplibregl.Map, geojson: GeoJSON.FeatureCol
     type: 'geojson',
     data: geojson,
     cluster: true,
-    clusterMaxZoom: 15,
+    clusterMaxZoom: 12, // individual dots/cones from zoom 13 (was 15)
     clusterRadius: 50,
   });
 
