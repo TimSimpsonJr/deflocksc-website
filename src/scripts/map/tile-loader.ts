@@ -117,7 +117,7 @@ export function visibleTileKeys(
  */
 export function proxiedTileTemplate(tileUrl: string, proxyPrefix: string): string {
   const usable =
-    tileUrl.startsWith(CDN_REGIONS_PREFIX) &&
+    tileUrl.startsWith(CDN_REGIONS_PREFIX + '/') &&
     tileUrl.includes('{lat}') &&
     tileUrl.includes('{lon}');
   return usable
@@ -129,10 +129,11 @@ export function proxiedTileTemplate(tileUrl: string, proxyPrefix: string): strin
  * Contract validation for the CDN index, run on every fetched index BEFORE it
  * is stored. A malformed index must never make the loader throw or hang: a
  * zero/negative/missing tile_size_degrees would make visibleTileKeys
- * non-terminating (or NaN math) without this gate. tile_url must carry both
- * the {lat} and {lon} placeholders — a template without them would aim every
- * tile fetch at the same URL, so it is rejected here (the loader falls back
- * to the snapshot) instead of a bad template ever being stored.
+ * non-terminating (or NaN math) without this gate. tile_url must carry the
+ * contiguous {lat}/{lon} token — the exact substring fetchTile replaces; a
+ * template without it (missing, or with the placeholders non-adjacent) would
+ * aim every tile fetch at the same URL, so it is rejected here (the loader
+ * falls back to the snapshot) instead of a bad template ever being stored.
  */
 function isValidTileIndex(value: unknown): value is TileIndex {
   if (typeof value !== 'object' || value === null) return false;
@@ -143,8 +144,7 @@ function isValidTileIndex(value: unknown): value is TileIndex {
     Array.isArray(idx.regions) &&
     idx.regions.every((r) => typeof r === 'string') &&
     typeof idx.tile_url === 'string' &&
-    idx.tile_url.includes('{lat}') &&
-    idx.tile_url.includes('{lon}') &&
+    idx.tile_url.includes('{lat}/{lon}') &&
     typeof idx.tile_size_degrees === 'number' &&
     Number.isFinite(idx.tile_size_degrees) &&
     idx.tile_size_degrees > 0

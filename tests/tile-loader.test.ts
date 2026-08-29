@@ -57,6 +57,14 @@ describe('proxiedTileTemplate', () => {
     expect(
       proxiedTileTemplate('https://cdn.deflock.me/regions/all.json?v=123', '/deflock-tiles')
     ).toBe('/deflock-tiles/{lat}/{lon}.json');
+    // A sibling path that merely shares the "regions" prefix (no trailing
+    // slash boundary) must NOT be treated as the CDN regions root — degrade.
+    expect(
+      proxiedTileTemplate(
+        'https://cdn.deflock.me/regions-other/{lat}/{lon}.json?v=123',
+        '/deflock-tiles'
+      )
+    ).toBe('/deflock-tiles/{lat}/{lon}.json');
   });
 });
 
@@ -349,6 +357,13 @@ describe('createTileLoader', () => {
     [
       'tile_url missing its {lat}/{lon} placeholders',
       { ...makeIndex(), tile_url: 'https://cdn.deflock.me/regions/all.json?v=123' },
+    ],
+    [
+      // Both placeholders present but NOT contiguous — fetchTile only replaces
+      // the literal '{lat}/{lon}' token, so a non-adjacent template would aim
+      // every tile fetch at the same URL. Must be rejected, not accepted.
+      'tile_url with non-contiguous {lat} and {lon} placeholders',
+      { ...makeIndex(), tile_url: 'https://cdn.deflock.me/regions/{lat}/x/{lon}.json?v=123' },
     ],
   ])('falls back and resolves when the index is malformed: %s', async (_name, badIndex) => {
     // JSON.stringify drops undefined-valued keys, so the "missing" cases
