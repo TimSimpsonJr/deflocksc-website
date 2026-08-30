@@ -11,7 +11,7 @@ const cityOptions = allCitySlugs()
   .sort((a, b) => a.label.localeCompare(b.label));
 
 const labelClass =
-  "flex items-baseline font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.16em] text-[#a3a3a3] mb-1.5";
+  "flex items-baseline font-['Instrument_Sans_Variable',sans-serif] font-semibold text-[10px] uppercase tracking-[0.16em] text-[#a3a3a3] mb-1.5";
 const hintClass = 'text-[13px] text-[#a3a3a3] mt-1.5 leading-[1.5]';
 const errorClass = 'text-[13px] text-[#f87171] mt-1.5 leading-[1.5]';
 // Required = a red asterisk; the `required` attribute already conveys this to
@@ -364,7 +364,7 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
 
   <!-- Success -->
   <div id="success-panel" tabindex="-1" hidden class="border-l-2 border-[#16a34a] bg-[rgba(22,163,74,0.06)] px-5 py-5">
-    <p class="font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.16em] text-[#4ade80] mb-2">Published</p>
+    <p class="font-['Instrument_Sans_Variable',sans-serif] font-semibold text-[10px] uppercase tracking-[0.16em] text-[#4ade80] mb-2">Published</p>
     <h2 class="text-[#e8e8e8] text-xl font-bold mb-2">Your event is live.</h2>
     <p class="text-[#a3a3a3] text-sm mb-4">
       This is its permanent link. Save it now: the id is not something we can look up for you later.
@@ -376,7 +376,7 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
         readonly
         value=""
         aria-label="Event permalink"
-        class="input flex-1 min-w-0 font-['DM_Mono',monospace]"
+        class="input flex-1 min-w-0 font-[ui-monospace,SFMono-Regular,Menlo,Consolas,monospace]"
       />
       <button
         type="button"

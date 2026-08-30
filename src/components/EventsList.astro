@@ -21,7 +21,7 @@ const place = (o: Occurrence) =>
       screen reader hears a concise "5 upcoming" — aria-atomic makes it read the
       whole line, not the bare number. aria-live used to sit on the <ul>, which
       re-announced all 30+ cards every time the type radiogroup was arrowed. */}
-  <p class="events-count label-mono text-[#737373]" aria-live="polite" aria-atomic="true">
+  <p class="events-count label-mono tabular-nums text-[#737373]" aria-live="polite" aria-atomic="true">
     <span id="events-count">{upcoming.length}</span> upcoming
   </p>
 
@@ -76,7 +76,7 @@ const place = (o: Occurrence) =>
   </div>
 
   <details class="events-past" id="events-past" hidden={past.length === 0}>
-    <summary class="label-mono">
+    <summary class="label-mono tabular-nums">
       Past events (<span id="events-past-count">{past.length}</span>)
     </summary>
     <ul class="events-past-list" id="events-past-list">

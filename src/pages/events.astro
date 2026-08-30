@@ -395,9 +395,9 @@ const island = {
     background: #0d0d0d;
     border-right: 1px solid rgba(255, 255, 255, 0.07);
   }
-  .event-date-day { color: #e8e8e8; font-size: 1.7rem; font-weight: 800; line-height: 1; }
+  .event-date-day { color: #e8e8e8; font-size: 1.7rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
   .event-date-mon {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Instrument Sans Variable', sans-serif;
     font-size: 10px;
     letter-spacing: 0.14em;
     color: #8a8a8a;
@@ -427,7 +427,7 @@ const island = {
   .event-address { color: #a3a3a3; font-size: 0.8125rem; margin: 0 0 0.35rem; }
   .event-desc { color: #a3a3a3; font-size: 0.875rem; margin: 0 0 0.5rem; overflow-wrap: anywhere; }
   /* Quiet type/recurrence line ("PUBLIC EVENT · REPEATS MONTHLY"). The de-slopped
-     replacement for the old coloured pill badges: the site's DM Mono label idiom
+     replacement for the old coloured pill badges: the site's label idiom
      (uppercase, letter-spaced). This base stays muted grey (#a3a3a3 ~6.9:1 on the
      #1a1a1a card) and is shared with the popover's type label (.event-pop-typeline),
      which keeps the muted treatment. On the CARD the colour is keyed to the event
@@ -435,7 +435,8 @@ const island = {
      in group", public "Public event", council "Council meeting"), so colour is
      reinforcing, never the sole signal. */
   .event-typeline {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-weight: 600;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -500,7 +501,7 @@ const island = {
   .events-past summary { color: #a3a3a3; cursor: pointer; }
   .events-past-list { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
   .event-past-row { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0.75rem; color: #a3a3a3; font-size: 0.85rem; }
-  .event-past-date { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; }
+  .event-past-date { font-family: 'Instrument Sans Variable', sans-serif; font-size: 11px; letter-spacing: 0.1em; font-variant-numeric: tabular-nums; }
   .event-past-title { color: #a3a3a3; font-size: 0.9rem; font-weight: 600; margin: 0; }
   .event-past-place { grid-column: 2; }
 
@@ -509,7 +510,7 @@ const island = {
   .month-title { color: #e8e8e8; font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; }
   .month-dow, .month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
   .month-dow span {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Instrument Sans Variable', sans-serif;
     font-size: 10px;
     color: #525252;
     text-align: center;
@@ -524,7 +525,7 @@ const island = {
   }
   .month-cell-empty { background: transparent; border-color: transparent; }
   .month-cell-today { border-color: #dc2626; }
-  .month-daynum { font-family: 'DM Mono', monospace; font-size: 10px; color: #737373; }
+  .month-daynum { font-family: 'Instrument Sans Variable', sans-serif; font-size: 10px; color: #737373; font-variant-numeric: tabular-nums; }
   .month-chips { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
   /* De-slopped to match the cards: no red left bar. A neutral fill with a hairline
      border keeps each chip legible and obviously clickable in the dense grid; the
@@ -609,7 +610,7 @@ const island = {
      clears AA on the #1a1a1a menu (10px is small text). On the focused/hover row
      the menu paints the whole option #dc2626, so the count goes near-white to stay
      legible against that red, not the pale #fecaca that sat close to it. */
-  .county-opt-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #8a8a8a; }
+  .county-opt-count { font-family: 'Instrument Sans Variable', sans-serif; font-size: 10px; color: #8a8a8a; font-variant-numeric: tabular-nums; }
   .autocomplete__option:hover .county-opt-count,
   .autocomplete__option--focused .county-opt-count { color: #ffffff; }
 
@@ -621,7 +622,7 @@ const island = {
      aria-selected; the shared active rule matches both. Only the per-option count
      needs its own styling here. */
   .events-type-btn { gap: 0.4rem; }
-  .seg-count { font-family: 'DM Mono', monospace; font-size: 10px; color: #8a8a8a; }
+  .seg-count { font-family: 'Instrument Sans Variable', sans-serif; font-size: 10px; color: #8a8a8a; font-variant-numeric: tabular-nums; }
   .events-tab[aria-checked="true"] .seg-count { color: #c9c9c9; }
 
   .filter-clear {
@@ -670,8 +671,8 @@ const island = {
      deflock theme; only the popover-specific type scale lives here, ported from
      the approved mockup. Global because the dialog's contents are filled by
      events-page.ts at runtime (no scoped data-astro-* attribute to match). */
-  /* Type label under the title. Reuses the shared .event-typeline idiom (DM Mono,
-     uppercase); only its margins around the title live here. The label is coloured
+  /* Type label under the title. Reuses the shared .event-typeline idiom (uppercase,
+     letter-spaced); only its margins around the title live here. The label is coloured
      by type to match the card — amber meetup, green public, blue council — keyed off
      the dialog's data-type, which openEventPopover sets via eventTypeSlug. The three
      type labels are distinct text signals (meetup "Location in group", public
@@ -696,7 +697,8 @@ const island = {
   }
   .event-pop-dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.4rem 1rem; margin: 0 0 1.1rem; }
   .event-pop-dt {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-weight: 600;
     font-size: 10px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -738,7 +740,8 @@ const island = {
   .event-pop-upcoming { margin: 0 0 1.25rem; }
   .event-pop-upcoming[hidden] { display: none; }
   .event-pop-upcoming-label {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-weight: 600;
     font-size: 10px;
     letter-spacing: 0.1em;
     text-transform: uppercase;

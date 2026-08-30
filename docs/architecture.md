@@ -200,7 +200,7 @@ Flow: user coordinates --> load GeoJSON boundary file --> point-in-polygon test 
 
 ### Typography
 
-**Instrument Sans Variable** + **DM Mono**, self-hosted via @fontsource. Body line-height is 1.7.
+**Instrument Sans Variable**, self-hosted via @fontsource. Body line-height is 1.7.
 
 ### Visual Effects
 

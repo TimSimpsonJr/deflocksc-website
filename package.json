@@ -21,7 +21,6 @@
     "@astrojs/rss": "^4.0.15",
     "@astrojs/sitemap": "^3.7.1",
     "@fontsource-variable/instrument-sans": "^5.2.8",
-    "@fontsource/dm-mono": "^5.2.7",
     "@netlify/blobs": "10.7.9",
     "@tailwindcss/vite": "^4.2.1",
     "@tinacms/cli": "^2.1.9",
