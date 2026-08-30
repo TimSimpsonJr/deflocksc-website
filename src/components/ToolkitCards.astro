@@ -1,0 +1,177 @@
+---
+// Shared 4-card row linking to the /toolkit/* sub-pages. Self-contained and
+// prop-free: rendered inside TakeActionZone on the homepage (§2.6a) and reused
+// on the toolkit index page. It renders only the card row (no section wrapper
+// or heading), so each consumer supplies its own surrounding context. The row
+// carries its own data-reveal so it animates in wherever it is placed.
+//
+// Copy is verbatim from the approved mockup
+// (docs/plans/assets/2026-08-30-homepage-mockup.html). Each card is a real <a>
+// (the mockup's inert tabindex articles are mockup-only); the cards are a list
+// of links, so they live in a <ul>.
+
+interface ToolkitCard {
+  title: string;
+  href: string;
+  desc: string;
+  badge: string;
+}
+
+const cards: ToolkitCard[] = [
+  {
+    title: 'FOIA templates',
+    href: '/toolkit/foia',
+    desc: 'Ready-to-send public-records letters for any SC agency running Flock.',
+    badge: 'Templates',
+  },
+  {
+    title: 'Public-comment scripts',
+    href: '/toolkit/speaking',
+    desc: 'Three-minute remarks you can adapt and read straight from the podium.',
+    badge: 'Scripts',
+  },
+  {
+    title: 'Outreach materials',
+    href: '/toolkit/outreach',
+    desc: 'Flyers, briefs, and social graphics to rally your neighbors before the vote.',
+    badge: 'Print + social',
+  },
+  {
+    title: 'Know your rights',
+    href: '/toolkit/legal',
+    desc: "What SC law does and doesn't allow, and what to say when you're recording in public.",
+    badge: 'Legal',
+  },
+];
+---
+
+<ul class="toolkit-row" data-reveal="up">
+  {
+    cards.map((card) => (
+      <li class="min-w-0">
+        <a href={card.href} class="tk-card">
+          <span class="tk-head">
+            <span class="tk-title">{card.title}</span>
+            <span class="tk-arrow" aria-hidden="true">&rarr;</span>
+          </span>
+          <span class="tk-desc">{card.desc}</span>
+          <span class="tk-badges">
+            <span class="tk-badge">{card.badge}</span>
+          </span>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  /* 4 columns, collapsing to 2 below 900px and 1 below 480px (mockup §2.6a). */
+  .toolkit-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.9rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (max-width: 900px) {
+    .toolkit-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 480px) {
+    .toolkit-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .tk-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    height: 100%;
+    min-width: 0;
+    padding: 1.05rem 1.1rem;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.3rem;
+    color: inherit;
+    text-decoration: none;
+    /* Border brighten + background lift on hover (any pointer); the translate
+       and arrow slide below are gated to hover-capable pointers only. */
+    transition:
+      border-color 0.18s cubic-bezier(0.23, 1, 0.32, 1),
+      background 0.18s cubic-bezier(0.23, 1, 0.32, 1),
+      transform 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .tk-card:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: #1e1e1e;
+  }
+
+  .tk-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+  }
+  .tk-title {
+    color: #e8e8e8;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1.25;
+  }
+  .tk-arrow {
+    flex: none;
+    color: #dc2626;
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .tk-desc {
+    color: #a3a3a3;
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+  .tk-badges {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: auto;
+    padding-top: 0.15rem;
+  }
+  .tk-badge {
+    display: inline-flex;
+    align-items: center;
+    height: 1.55rem;
+    padding: 0 0.55rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 0.3rem;
+    color: #a3a3a3;
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  @media (hover: hover) {
+    .tk-card:hover {
+      transform: translateY(-2px);
+    }
+    .tk-card:hover .tk-arrow {
+      transform: translateX(4px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tk-card,
+    .tk-arrow {
+      transition: none;
+    }
+    .tk-card:hover,
+    .tk-card:hover .tk-arrow {
+      transform: none;
+    }
+  }
+</style>

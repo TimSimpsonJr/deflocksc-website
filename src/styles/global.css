@@ -291,25 +291,6 @@
   scrollbar-width: thin;
 }
 
-/* Sidebar + panel pattern (homepage FAQ only — toolkit consumers migrated to .rail-tab; delete with the homepage rebuild) */
-.sidebar-btn {
-  color: #a3a3a3;
-  background: transparent;
-  transition: color 0.15s, background 0.15s;
-}
-.sidebar-btn:hover {
-  color: #e8e8e8;
-  background: #1a1a1a;
-}
-.sidebar-active {
-  color: #e8e8e8 !important;
-  background: #1a1a1a !important;
-  border-left: 2px solid #dc2626;
-}
-/* offset padding for the 2px border */
-.sidebar-active.px-6 { padding-left: calc(1.5rem - 2px); }
-.sidebar-active.px-8 { padding-left: calc(2rem - 2px); }
-
 /* ── DaisyUI migration shared primitives (2026-08 site-wide pass) ──
    Unlayered on purpose: these win over daisyUI's @layer rules at equal
    specificity. Runtime renderers (toast.ts, foia-finder.ts,
@@ -374,18 +355,24 @@
 }
 
 /* ── Scroll-reveal entrance animations ── */
+/* The hidden/offset initial state is gated behind `.has-js` (stamped on <html>
+   by an inline head script in Base.astro) so it only applies when the
+   IntersectionObserver in Base.astro exists to add `.revealed`. With JS off,
+   `.has-js` is absent, these rules never match, and reveal content renders
+   visible in its final position — content is never hidden behind a class that
+   only JS can toggle (§7/§8 no-JS fix). */
 @media (prefers-reduced-motion: no-preference) {
-  [data-reveal] {
+  .has-js [data-reveal] {
     opacity: 0;
     transition: opacity 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94),
                 transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
-  [data-reveal="up"]    { transform: translateY(24px); }
-  [data-reveal="down"]  { transform: translateY(-24px); }
-  [data-reveal="left"]  { transform: translateX(-24px); }
-  [data-reveal="right"] { transform: translateX(24px); }
+  .has-js [data-reveal="up"]    { transform: translateY(24px); }
+  .has-js [data-reveal="down"]  { transform: translateY(-24px); }
+  .has-js [data-reveal="left"]  { transform: translateX(-24px); }
+  .has-js [data-reveal="right"] { transform: translateX(24px); }
 
-  [data-reveal].revealed {
+  .has-js [data-reveal].revealed {
     opacity: 1;
     transform: translate(0, 0);
   }

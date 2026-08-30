@@ -1,5 +1,8 @@
 ---
 import type { CouncilBrief } from '../data/council-brief';
+// Per-card Tabler icon inner markup (keyed by BriefCard.icon), now shared with
+// the homepage legislation asks. See src/data/brief-icons.ts.
+import { ICONS } from '../data/brief-icons';
 
 interface Props {
   brief: CouncilBrief;
@@ -8,16 +11,6 @@ interface Props {
 const { brief } = Astro.props;
 // Jurisdiction noun for the one heading that swaps (model section).
 const noun = brief.variant === 'city' ? 'city' : 'county';
-
-// Per-card Tabler icon inner markup (keyed by BriefCard.icon).
-const ICONS: Record<string, string> = {
-  scan: '<path d="M5 12h14"/><path d="M3 7v-2a2 2 0 0 1 2 -2h2"/><path d="M3 17v2a2 2 0 0 0 2 2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2 -2v-2"/>',
-  'money-off': '<path d="M13 9h6a2 2 0 0 1 2 2v6m-2 2h-10a2 2 0 0 1 -2 -2v-6a2 2 0 0 1 2 -2"/><path d="M12.582 12.59a2 2 0 0 0 2.83 2.826"/><path d="M17 9v-2a2 2 0 0 0 -2 -2h-6m-4 0a2 2 0 0 0 -2 2v6a2 2 0 0 0 2 2h2"/><path d="M3 3l18 18"/>',
-  clock: '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 12l3 2"/><path d="M12 7v5"/>',
-  clipboard: '<path d="M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697"/><path d="M18 14v4h4"/><path d="M18 11v-4a2 2 0 0 0 -2 -2h-2"/><path d="M8 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2"/><path d="M8 11h4"/><path d="M8 15h3"/>',
-  'file-search': '<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M12 21h-5a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v4.5"/><path d="M14 17.5a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0"/><path d="M18.5 19.5l2.5 2.5"/>',
-  door: '<path d="M14 12v.01"/><path d="M3 21h18"/><path d="M6 21v-16a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v16"/>',
-};
 ---
 
 <article class="leave-behind">

@@ -17,9 +17,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      # Atomic camera refresh (design §4.1): fetch the snapshot, then derive the
+      # SC total + per-jurisdiction counts + impact stats from that one snapshot
+      # so the artifacts can never disagree. Both generators are dependency-free
+      # (plain Node, no npm ci), so no install step is needed.
       - run: node scripts/fetch-camera-data.mjs
-      - name: Commit if changed
+      - run: node scripts/build-impact-stats.mjs
+      - name: Commit if data changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --quiet public/camera-data.json || (git add public/camera-data.json && git commit -m "chore: refresh camera data from Deflock CDN" && git push)
+          if git diff --quiet public/camera-data.json public/camera-counts.json; then
+            echo "No camera data changes; skipping commit."
+          else
+            git add public/camera-data.json public/camera-counts.json src/data/impact-stats.json
+            git commit -m "chore: refresh camera data + impact stats"
+            git push
+          fi

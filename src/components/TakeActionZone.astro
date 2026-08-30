@@ -1,0 +1,95 @@
+---
+// Take Action zone — the primary conversion band (§2.6a). The emphasis is
+// speaking at city/county council meetings; the CTA opens the UNCHANGED general
+// action modal (Rev 2 decision D2), so the copy promises "find who represents
+// you", never a council-only result. The toolkit row lives in its own component.
+import ToolkitCards from './ToolkitCards.astro';
+---
+
+<section id="act" class="hp-band b3" aria-labelledby="act-heading">
+  <div class="hp-shell">
+    <div class="sec-head-wrap" data-reveal="up">
+      <h2 id="act-heading" class="sec-title">
+        The most powerful thing you can do: speak at your city and county council.
+      </h2>
+      <p class="sec-lead">
+        A camera contract is decided in a room you're allowed to stand up in. Find
+        who represents you, then show up: three minutes of public comment moves
+        more than a thousand clicks.
+      </p>
+    </div>
+
+    <div class="action-hero" data-reveal="up">
+      <div class="cta-row">
+        <button type="button" data-open-action class="btn btn-primary btn-lg">
+          Find your representatives
+        </button>
+        <a href="/toolkit/speaking" class="btn btn-outline btn-lg">
+          Grab the one-page council brief
+        </a>
+      </div>
+      <p class="brief-note">
+        The Contact Your Reps flow matches your address to everyone who represents
+        you, including your city and county council, in seconds. Print the
+        one-page brief and hand it across the dais: it's plain-language, sourced,
+        and stands on its own.
+      </p>
+    </div>
+
+    <ToolkitCards />
+  </div>
+</section>
+
+<style>
+  /* Band skeleton + shell (shared homepage rhythm, §1). Literal palette values
+     match the deflock theme tokens, following the CouncilBrief.astro convention
+     of hardcoding brand hex in component-scoped styles. */
+  .hp-band {
+    position: relative;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+  }
+  .hp-band.b3 { background: #0d0d0d; }
+  .hp-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-inline: clamp(1rem, 4vw, 2.25rem);
+  }
+
+  .sec-head-wrap { max-width: 62ch; margin-bottom: 2.4rem; }
+  .sec-title {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.5rem, 3.4vw, 2.15rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.12;
+    color: #e8e8e8;
+    text-wrap: balance;
+  }
+  .sec-lead {
+    margin: 0;
+    color: #a3a3a3;
+    font-size: 1.02rem;
+    max-width: 60ch;
+  }
+
+  .action-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    margin-bottom: 2.8rem;
+  }
+  .cta-row {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .brief-note {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: #a3a3a3;
+    max-width: 64ch;
+  }
+</style>

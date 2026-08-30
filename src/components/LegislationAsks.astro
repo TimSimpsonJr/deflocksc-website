@@ -1,0 +1,310 @@
+---
+// Legislation / ordinance asks (§2.5). Replaces the old BillTracker: the ask is
+// now the local ordinance patterned on Oconee County's "Protection from Mass
+// Surveillance," not stalled statehouse bills.
+//
+// Structure: heading -> Oconee callout -> six ask cards (from homepage-asks.ts,
+// glyphs from brief-icons.ts) -> closing two-stat ask-frame. Copy is verbatim
+// from the approved mockup (docs/plans/assets/2026-08-30-homepage-mockup.html).
+//
+// The section keeps the legacy `bill-tracker` anchor (a zero-height target) so
+// existing /#bill-tracker deep links from published blog posts keep resolving
+// (design §1). Its semantic id is `legislation`.
+import { ICONS } from '../data/brief-icons';
+import { homepageAsks, askFrameStats } from '../data/homepage-asks';
+---
+
+<section
+  id="legislation"
+  aria-labelledby="legislation-heading"
+  class="relative border-t border-[rgba(255,255,255,0.10)] bg-base-200 py-[clamp(3rem,7vw,5.5rem)] scroll-mt-20"
+>
+  {/* Legacy anchor target: /#bill-tracker still lands here (design §1). */}
+  <span id="bill-tracker" class="block scroll-mt-20" aria-hidden="true"></span>
+
+  <div class="mx-auto max-w-[1120px] px-[clamp(1rem,4vw,2.25rem)]">
+    <div class="mb-[2.4rem] max-w-[62ch]" data-reveal="up">
+      <h2
+        id="legislation-heading"
+        class="m-0 text-balance text-[clamp(1.5rem,3.4vw,2.15rem)] font-semibold leading-[1.12] tracking-[-0.015em] text-[#e8e8e8]"
+      >
+        What we're asking every SC council to pass.
+      </h2>
+    </div>
+
+    {/* Oconee callout — PRE-VOTE variant (in use until the Sept 15, 2026 vote). */}
+    <div class="oconee" data-reveal="up" data-reveal-delay="1">
+      <span class="k-badge">First in SC</span>
+      <p>
+        Oconee County is advancing South Carolina's first ordinance of its kind: "Protection from
+        Mass Surveillance." It cleared its first reading 4&ndash;1 on Aug 18, 2026, with the final
+        vote set for Sept 15. Here are the provisions we've modeled on it for every SC council, two
+        of them tailored to city or county authority.
+      </p>
+    </div>
+    {/*
+      POST-VOTE variant (OQ#7) — swap the paragraph above for the matching
+      outcome the day after the Sept 15, 2026 final reading:
+
+      IF ADOPTED:
+        Oconee County has adopted South Carolina's first ordinance of its kind:
+        "Protection from Mass Surveillance," passing it on final reading Sept 15,
+        2026. Here are the provisions we've modeled on it for every SC council,
+        two of them tailored to city or county authority.
+
+      IF REJECTED OR DEFERRED (also change the "First in SC" badge, since the
+      first-in-state framing no longer holds):
+        Oconee County came within one vote of South Carolina's first ordinance of
+        its kind: "Protection from Mass Surveillance," and the fight there is not
+        over. Here are the provisions we've modeled on it for every SC council,
+        two of them tailored to city or county authority.
+    */}
+
+    <ul class="demands">
+      {
+        homepageAsks.map((ask, i) => (
+          <li class="demand" data-reveal="up" data-reveal-delay={Math.floor(i / 2) + 1}>
+            <div class="dhead">
+              <span class="dicon-box">
+                <svg
+                  class="dicon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  set:html={ICONS[ask.icon]}
+                />
+              </span>
+              <h3 class="dtitle">{ask.title}</h3>
+              {ask.scope && <span class="scope-badge">{ask.scope}</span>}
+            </div>
+            <p class="ddesc">{ask.body}</p>
+            <div class="dcite">{ask.cite + (ask.displaySuffix ?? '')}</div>
+          </li>
+        ))
+      }
+    </ul>
+
+    {/* Closing framing stats, relocated from the impact band (§2.3). Values
+        count up on first view (shared src/scripts/count-up.ts). The visible
+        number is aria-hidden and animated; a stable sr-only node carries the
+        final value so assistive tech never reads a partial/zero count. */}
+    <div class="ask-frame" data-reveal="up">
+      {
+        askFrameStats.map((stat) => (
+          <div class:list={['istat', stat.zero && 'zero']}>
+            <div class="v">
+              <span class="sr-only">{stat.srValue}</span>
+              <span aria-hidden="true" data-count-up>{stat.value}</span>
+            </div>
+            <div class="t">{stat.caption}</div>
+            {stat.note && <div class="cite">{stat.note}</div>}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import { observeCountUps } from '../scripts/count-up';
+
+  // Scope to this component's ask-frame so it never double-observes the
+  // [data-count-up] elements owned by the impact band in a sibling section.
+  const frame = document.querySelector('.ask-frame');
+  if (frame) observeCountUps(frame.querySelectorAll<HTMLElement>('[data-count-up]'));
+</script>
+
+<style>
+  /* ===== Oconee callout ===== */
+  .oconee {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.1rem;
+    margin-bottom: 2.2rem;
+    padding: 1.3rem 1.4rem;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.45rem;
+  }
+  .oconee p {
+    margin: 0;
+    font-size: 0.98rem;
+    color: #e8e8e8;
+  }
+  .k-badge {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    height: 1.55rem;
+    padding: 0 0.55rem;
+    background: #fbbf24;
+    color: #171717;
+    border-radius: 0.3rem;
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  @media (max-width: 720px) {
+    .oconee {
+      flex-direction: column;
+    }
+  }
+
+  /* ===== Ask cards ===== */
+  .demands {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (max-width: 720px) {
+    .demands {
+      grid-template-columns: 1fr;
+    }
+  }
+  .demand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    min-width: 0;
+    padding: 1.15rem 1.3rem;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.45rem;
+  }
+  .dhead {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .dicon-box {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: #171717;
+    color: #dc2626;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.45rem;
+  }
+  .dicon {
+    flex: none;
+    width: 23px;
+    height: 23px;
+  }
+  .dtitle {
+    min-width: 0;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1.25;
+    color: #e8e8e8;
+  }
+  .ddesc {
+    margin: 0;
+    color: #a3a3a3;
+    font-size: 0.86rem;
+    line-height: 1.4;
+  }
+  .dcite {
+    margin-top: 0.15rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.03em;
+    color: #a3a3a3;
+  }
+  .scope-badge {
+    flex: none;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    height: 1.55rem;
+    padding: 0 0.55rem;
+    color: #a3a3a3;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 0.3rem;
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ===== Closing ask-frame stats =====
+     Class names (.ask-frame .istat .v, .t) match the shared count-up util's
+     selector contract so the values animate on first view. Columns hold at 2 at
+     every width; type and padding shrink below 560px rather than wrapping, so
+     the dividers can never mis-stack (the iPad-divider fix, §2.3). */
+  .ask-frame {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 2.4rem;
+    background: #171717;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.45rem;
+    overflow: hidden;
+  }
+  .ask-frame .istat {
+    padding: 1.5rem 1.4rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .ask-frame .istat:first-child {
+    border-left: 0;
+  }
+  .istat .v {
+    display: block;
+    font-size: clamp(1.5rem, 4.6vw, 2.7rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #dc2626;
+    font-variant-numeric: tabular-nums;
+  }
+  .istat.zero .v {
+    color: #fbbf24;
+  }
+  .istat .t {
+    display: block;
+    margin-top: 0.7rem;
+    font-size: 0.63rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.5;
+    color: #a3a3a3;
+  }
+  .istat .cite {
+    display: block;
+    margin-top: 0.55rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.03em;
+    line-height: 1.4;
+    /* Dimmer than the caption but still AA on #171717 (#737373 would be 3.8:1). */
+    color: #8a8a8a;
+  }
+  @media (max-width: 560px) {
+    .ask-frame .istat {
+      padding: 1.2rem 0.9rem;
+    }
+    .istat .v {
+      font-size: clamp(1.15rem, 5.4vw, 1.7rem);
+    }
+    .istat .t {
+      margin-top: 0.5rem;
+      font-size: 0.55rem;
+      letter-spacing: 0.06em;
+    }
+    .istat .cite {
+      font-size: 0.55rem;
+    }
+  }
+</style>

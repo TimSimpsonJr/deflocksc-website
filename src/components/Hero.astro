@@ -1,4 +1,11 @@
 ---
+import impactStats from '../data/impact-stats.json';
+
+// Statewide camera floor for the support line. The exact SC total is computed
+// at build into impact-stats.json (design §4.1); the hero shows a rounded
+// "more than N" floor so the prose stays true between data refreshes. Never
+// hardcode a camera number in markup (§4.1).
+const cameraFloor = (Math.floor(impactStats.scTotal / 100) * 100).toLocaleString('en-US');
 ---
 
 <section aria-labelledby="hero-heading" class="bg-[#0d0d0d] min-h-[680px] md:min-h-[720px] flex flex-col pt-4 pb-16 relative overflow-hidden">
@@ -55,22 +62,6 @@
     </div>
   </div>
 
-  <!-- Top metadata bar -->
-  <div class="hidden md:flex relative z-10 px-6 md:px-12 justify-between items-start pointer-events-none" aria-hidden="true">
-    <div class="text-[11px] uppercase tracking-[0.12em] leading-[1.8]">
-      <div class="text-[#a3a3a3]">Subject</div>
-      <div class="text-[#c8c8c8]">Automated License Plate Readers</div>
-      <div class="text-[#a3a3a3] mt-1">Jurisdiction</div>
-      <div class="text-[#c8c8c8]">State of South Carolina</div>
-    </div>
-    <div class="text-[11px] uppercase tracking-[0.12em] leading-[1.8] text-right">
-      <div class="text-[#a3a3a3]">Status</div>
-      <div class="text-[#dc2626]">Unregulated · Active Deployment</div>
-      <div class="text-[#a3a3a3] mt-1">Record Count</div>
-      <div class="text-[#c8c8c8]">422,000,000+ Reads</div>
-    </div>
-  </div>
-
   <!-- Spacer: pushes content to bottom, minimum 3rem gap -->
   <div class="flex-grow min-h-[3rem]"></div>
 
@@ -79,18 +70,24 @@
     <div class="max-w-[680px]">
       <div class="w-8 h-[2px] bg-[#dc2626] mb-8" data-reveal="up" aria-hidden="true"></div>
       <h1 id="hero-heading" data-reveal="up" data-reveal-delay="1" class="text-white font-bold text-3xl md:text-5xl lg:text-6xl tracking-[-0.02em] leading-[1.1] mb-4">
-        In 1984, the Thought Police weren't looking for criminals. Neither is <span class="text-[#dc2626]">Flock Safety</span>
+        In 1984, the Thought Police weren't looking for criminals. Neither is <span class="text-[#dc2626]">Flock Safety</span>.
       </h1>
       <p data-reveal="up" data-reveal-delay="2" class="text-[#d4d4d4] font-semibold text-[22px] md:text-[26px] mb-4 leading-snug">
         99% of the plates they scan belong to people suspected of nothing.
       </p>
       <p data-reveal="up" data-reveal-delay="3" class="text-[#909090] text-[18px] md:text-[17px] leading-[1.65] max-w-[540px] mb-8" style="text-shadow: 0 1px 12px rgba(0,0,0,0.95), 0 4px 32px rgba(0,0,0,0.85);">
-        242 cameras are watching Upstate South Carolina right now. Every car that passes gets photographed. That data goes into a national network. And nobody voted on any of it.
+        South Carolina has more than {cameraFloor} of these cameras logging your daily movements, and not one state law that says who can look, or for how long they keep it.
       </p>
-      <button type="button" data-open-action data-reveal="up" data-reveal-delay="4"
-        class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.08em] px-8 py-3.5 transition-colors cursor-pointer">
-        Contact Your Reps
-      </button>
+      <div data-reveal="up" data-reveal-delay="4" class="flex flex-wrap items-center gap-4">
+        <button type="button" data-open-action
+          class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-xs uppercase tracking-[0.08em] px-8 py-3.5 transition-colors cursor-pointer">
+          Contact Your Reps
+        </button>
+        <a href="#map"
+          class="inline-flex items-center justify-center border border-[rgba(255,255,255,0.22)] hover:border-white text-[#e8e8e8] hover:bg-white/[0.06] font-bold text-xs uppercase tracking-[0.08em] px-8 py-3.5 transition-colors">
+          See the map
+        </a>
+      </div>
     </div>
   </div>
 </section>
