@@ -12,7 +12,6 @@ function highlightPlaceholders(text: string): string {
 
 <!-- Zone 1: Agency Finder -->
 <div class="mb-12">
-  <p class="label-mono text-[#a3a3a3] mb-3">FOIA Templates</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-4">
     Find Your Agency &amp; Request Records
   </h2>
@@ -25,28 +24,19 @@ function highlightPlaceholders(text: string): string {
   <!-- Finder input -->
   <div id="foia-finder-input" class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] p-6 mb-6">
     <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-4 mb-4">
-      <button
-        id="foia-geo"
-        type="button"
-        class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold px-6 py-3 text-sm uppercase tracking-[0.08em] transition-colors cursor-pointer whitespace-nowrap min-h-[48px]"
-      >
+      <button id="foia-geo" type="button" class="btn btn-primary text-sm uppercase tracking-[0.08em] min-h-12 whitespace-nowrap">
         Use My Location
       </button>
       <div class="flex-1">
-        <form id="foia-address-form" class="flex gap-2">
+        <form id="foia-address-form" class="join w-full">
           <input
             id="foia-address"
             type="text"
             placeholder="Or enter your address..."
-            class="flex-1 bg-[#0a0a0a] border border-[rgba(255,255,255,0.12)] text-white placeholder-[#525252] px-4 py-3 text-sm focus:border-[#dc2626] focus:outline-none min-h-[48px]"
+            class="input join-item flex-1 min-h-12"
             autocomplete="street-address"
           />
-          <button
-            type="submit"
-            class="bg-[#262626] hover:bg-[#333] text-white font-semibold px-5 py-3 text-sm transition-colors cursor-pointer whitespace-nowrap min-h-[48px]"
-          >
-            Find
-          </button>
+          <button type="submit" class="btn btn-neutral join-item min-h-12">Find</button>
         </form>
       </div>
     </div>
@@ -57,16 +47,17 @@ function highlightPlaceholders(text: string): string {
 
   <!-- Loading state (hidden by default) -->
   <div id="foia-finder-loading" class="hidden text-center py-8">
-    <div class="inline-block w-6 h-6 border-2 border-[#525252] border-t-[#dc2626] rounded-full animate-spin" role="status">
-      <span class="sr-only">Finding agencies...</span>
-    </div>
-    <p class="text-[#a3a3a3] text-sm mt-3">Finding agencies near you...</p>
+    <span class="loading loading-spinner loading-md text-primary" aria-hidden="true"></span>
+    <p class="text-[#a3a3a3] text-sm mt-3" role="status">Finding agencies near you...</p>
   </div>
 
   <!-- Error state (hidden by default) -->
-  <div id="foia-finder-error" class="hidden bg-[rgba(220,38,38,0.1)] border border-[rgba(220,38,38,0.3)] p-4 mb-6" role="alert">
-    <p id="foia-finder-error-msg" class="text-[#fca5a5] text-sm"></p>
-    <button id="foia-finder-retry" type="button" class="text-[#fbbf24] text-sm underline mt-2 cursor-pointer">Try again</button>
+  <div id="foia-finder-error" class="hidden mb-6">
+    <div class="alert alert-error" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true" class="h-6 w-6 shrink-0 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <span id="foia-finder-error-msg"></span>
+      <button id="foia-finder-retry" type="button" class="btn btn-outline btn-sm min-h-11">Try again</button>
+    </div>
   </div>
 
   <!-- Results state (hidden by default) -->
@@ -88,18 +79,13 @@ function highlightPlaceholders(text: string): string {
     </button>
     <div id="foia-browse-panel" class="hidden mt-4">
       <div class="flex flex-wrap gap-2 mb-4">
-        <input
-          id="foia-search"
-          type="text"
-          placeholder="Search agencies..."
-          class="flex-1 min-w-[200px] bg-[#0a0a0a] border border-[rgba(255,255,255,0.12)] text-white placeholder-[#525252] px-4 py-2.5 text-sm focus:border-[#dc2626] focus:outline-none"
-        />
-        <div class="flex gap-1" role="group" aria-label="Filter by agency type">
-          <button type="button" class="foia-type-chip bg-[#dc2626] text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="all">All</button>
-          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="police">Police</button>
-          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="sheriff">Sheriff</button>
-          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="clerk">Clerk</button>
-          <button type="button" class="foia-type-chip bg-[#262626] text-[#a3a3a3] hover:text-white px-3 py-1.5 min-h-[44px] text-xs font-semibold uppercase tracking-[0.05em] cursor-pointer" data-type="state">State</button>
+        <input id="foia-search" type="text" placeholder="Search agencies..." class="input flex-1 min-w-[200px] min-h-12" />
+        <div class="flex gap-1 flex-wrap" role="radiogroup" aria-label="Filter by agency type">
+          <input type="radio" name="foia-type" value="all" aria-label="All" checked class="filter-chip foia-type-chip btn btn-sm min-h-11 text-xs uppercase tracking-[0.05em]" />
+          <input type="radio" name="foia-type" value="police" aria-label="Police" class="filter-chip foia-type-chip btn btn-sm min-h-11 text-xs uppercase tracking-[0.05em]" />
+          <input type="radio" name="foia-type" value="sheriff" aria-label="Sheriff" class="filter-chip foia-type-chip btn btn-sm min-h-11 text-xs uppercase tracking-[0.05em]" />
+          <input type="radio" name="foia-type" value="clerk" aria-label="Clerk" class="filter-chip foia-type-chip btn btn-sm min-h-11 text-xs uppercase tracking-[0.05em]" />
+          <input type="radio" name="foia-type" value="state" aria-label="State" class="filter-chip foia-type-chip btn btn-sm min-h-11 text-xs uppercase tracking-[0.05em]" />
         </div>
       </div>
       <div id="foia-browse-list" class="space-y-3 max-h-[60vh] overflow-y-auto"></div>
@@ -108,27 +94,28 @@ function highlightPlaceholders(text: string): string {
 </div>
 
 <!-- Pre-fill banner (hidden by default, shown when agency selected) -->
-<div id="foia-prefill-banner" class="hidden bg-[rgba(251,191,36,0.1)] border border-[rgba(251,191,36,0.3)] px-4 py-3 mb-6 flex items-center justify-between">
-  <p class="text-[#fbbf24] text-sm">
-    Templates pre-filled for <strong id="foia-prefill-name"></strong>
-  </p>
-  <button id="foia-prefill-clear" type="button" class="text-[#a3a3a3] hover:text-white text-xs underline cursor-pointer">Clear</button>
+<div id="foia-prefill-banner" class="hidden mb-6">
+  <div class="alert alert-warning" role="status">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true" class="h-6 w-6 shrink-0 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+    <span>Templates pre-filled for <strong id="foia-prefill-name"></strong></span>
+    <button id="foia-prefill-clear" type="button" class="btn btn-outline btn-sm min-h-11">Clear</button>
+  </div>
 </div>
 
 <!-- Sidebar + panel (replaces card grid) -->
 <div class="foia-layout md:grid md:grid-cols-[280px_1fr] bg-[rgba(255,255,255,0.07)] mb-16" style="gap:1px">
 
   <!-- Template list (sidebar) -->
-  <div class="bg-[#111111]">
-    <div class="label-mono text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
-      Templates
-    </div>
+  <div class="bg-base-100" role="tablist" aria-label="FOIA templates" id="foia-rail">
     {foiaTemplates.map((tmpl: any, i: number) => (
       <button
         type="button"
-        class:list={['foia-btn sidebar-btn w-full text-left px-6 py-4 text-sm font-medium leading-[1.35] border-b border-[rgba(255,255,255,0.04)] cursor-pointer', i === 0 ? 'sidebar-active' : '']}
-        data-foia={i}
+        role="tab"
+        id={`foia-tab-${i}`}
+        aria-controls={`foia-panel-${i}`}
         aria-selected={i === 0 ? 'true' : 'false'}
+        tabindex={i === 0 ? 0 : -1}
+        class="rail-tab px-6 py-4 text-sm font-medium leading-[1.35]"
       >
         {tmpl.title}
       </button>
@@ -136,16 +123,21 @@ function highlightPlaceholders(text: string): string {
   </div>
 
   <!-- Template panel -->
-  <div class="bg-[#111111] p-8 md:p-10">
+  <div class="bg-base-100 p-8 md:p-10">
     {foiaTemplates.map((tmpl: any, i: number) => (
-      <div class:list={['foia-panel', i !== 0 && 'hidden']} data-foia-panel={i}>
-        <p class="label-mono-tight text-[#a3a3a3] mb-2">Template {String(i + 1).padStart(2, '0')}</p>
+      <div
+        class="foia-panel"
+        id={`foia-panel-${i}`}
+        role="tabpanel"
+        aria-labelledby={`foia-tab-${i}`}
+        hidden={i !== 0}
+      >
         <h3 class="text-[#e8e8e8] font-bold text-lg mb-3">{tmpl.title}</h3>
         <p class="text-[#a3a3a3] text-sm leading-[1.6] mb-4">{tmpl.description}</p>
 
         <!-- Why this matters (inline, no accordion) -->
-        <div class="border-l-2 border-[#dc2626] pl-4 mb-6">
-          <p class="label-mono text-[#a3a3a3] mb-1">Why this matters</p>
+        <div class="rounded-[var(--radius-field)] border border-[rgba(255,255,255,0.09)] bg-[rgba(255,255,255,0.03)] p-3 mb-6">
+          <p class="font-semibold text-sm text-[#a3a3a3] mb-1">Why this matters</p>
           <p class="text-[#a3a3a3] text-sm leading-[1.6]">{tmpl.why}</p>
         </div>
 
@@ -159,11 +151,10 @@ function highlightPlaceholders(text: string): string {
         <div class="flex flex-wrap gap-3">
           <button
             type="button"
-            class="copy-btn bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.1em] px-5 py-2.5 transition-colors cursor-pointer"
+            class="copy-btn btn btn-primary min-h-11 text-xs uppercase tracking-[0.1em]"
             data-template-id={tmpl.id}
           >
-            <span class="copy-label">Copy Template</span>
-            <span class="copy-success hidden" role="status">Copied!</span>
+            Copy Template
           </button>
           <a
             href={`/toolkit/foia/${tmpl.id}.pdf`}
@@ -212,24 +203,11 @@ function highlightPlaceholders(text: string): string {
 <script type="application/json" id="foia-contacts-data" set:html={JSON.stringify(foiaContacts)}></script>
 
 <script>
-  function initFoiaTab() {
-    // Sidebar selection
-    const foiaBtns = document.querySelectorAll<HTMLButtonElement>('.foia-btn');
-    const foiaPanels = document.querySelectorAll<HTMLElement>('.foia-panel');
+  import { initTabRail } from '../scripts/tab-rail';
+  import { showToast } from '../scripts/toast';
 
-    foiaBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = btn.getAttribute('data-foia');
-        foiaBtns.forEach(b => {
-          b.classList.remove('sidebar-active');
-          b.setAttribute('aria-selected', 'false');
-        });
-        foiaPanels.forEach(p => p.classList.add('hidden'));
-        btn.classList.add('sidebar-active');
-        btn.setAttribute('aria-selected', 'true');
-        document.querySelector(`.foia-panel[data-foia-panel="${idx}"]`)?.classList.remove('hidden');
-      });
-    });
+  function initFoiaTab() {
+    initTabRail('foia-rail');
 
     // Copy-to-clipboard
     document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
@@ -255,16 +233,7 @@ function highlightPlaceholders(text: string): string {
           document.body.removeChild(ta);
         }
 
-        const label = btn.querySelector('.copy-label');
-        const success = btn.querySelector('.copy-success');
-        if (label && success) {
-          label.classList.add('hidden');
-          success.classList.remove('hidden');
-          setTimeout(() => {
-            label.classList.remove('hidden');
-            success.classList.add('hidden');
-          }, 2000);
-        }
+        showToast('Template copied to clipboard');
       });
     });
   }

@@ -19,15 +19,13 @@ const registry = {
      style="-webkit-overflow-scrolling: touch;">
 
   <!-- Backdrop + centering wrapper -->
-  <div id="action-modal-backdrop" class="min-h-full bg-[#171717] md:bg-black/70 md:backdrop-blur-sm md:flex md:items-start md:justify-center md:py-12">
+  <div id="action-modal-backdrop" class="min-h-full bg-base-100 md:bg-black/70 md:backdrop-blur-sm md:flex md:items-start md:justify-center md:py-12">
 
     <!-- Modal card (full-screen mobile, centered card desktop) -->
-    <div id="action-modal-card" class="md:bg-[#0d0d0d] md:border md:border-[rgba(255,255,255,0.1)] md:w-full md:max-w-2xl md:max-h-[85dvh] md:overflow-y-auto md:relative" style="border-top: 2px solid #dc2626;">
+    <div id="action-modal-card" class="md:bg-base-300 md:border md:border-white/10 md:rounded-box md:w-full md:max-w-2xl md:max-h-[85dvh] md:overflow-y-auto md:relative" style="border-top: 2px solid #dc2626;">
       <!-- Close button -->
       <button id="action-modal-close" type="button"
-        class="fixed top-4 right-4 z-10 w-10 h-10 bg-transparent hover:bg-[#262626]
-               text-[#a3a3a3] hover:text-white flex items-center justify-center transition-colors cursor-pointer
-               md:absolute md:top-3 md:right-3"
+        class="fixed top-4 right-4 z-10 btn btn-ghost btn-square min-h-11 min-w-11 text-[#a3a3a3] hover:text-white md:absolute md:top-3 md:right-3"
         aria-label="Close">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -53,7 +51,7 @@ const registry = {
           <button
             id="action-geo"
             type="button"
-            class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold px-8 py-4 text-lg min-h-[56px] transition-colors cursor-pointer w-full max-w-xs"
+            class="btn btn-primary btn-lg w-full max-w-xs min-h-14"
           >
             Find My Reps
           </button>
@@ -79,11 +77,11 @@ const registry = {
               autocomplete="street-address"
               placeholder="123 Main St, Greenville, SC"
               required
-              class="flex-1 bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-4 py-3 text-base placeholder-[#888] focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4] transition-colors"
+              class="input flex-1 text-base min-h-12"
             />
             <button
               type="submit"
-              class="bg-[#262626] hover:bg-[#333333] text-white font-medium px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer whitespace-nowrap"
+              class="btn btn-neutral min-h-11 whitespace-nowrap"
             >
               Find My Reps
             </button>
@@ -94,21 +92,21 @@ const registry = {
         </form>
 
         <!-- 3. Manual selection (tertiary) -->
-        <details id="action-manual-details" class="w-full">
-          <summary class="text-[#a3a3a3] hover:text-[#d4d4d4] text-sm font-medium cursor-pointer transition-colors text-center">
+        <details id="action-manual-details" class="collapse collapse-arrow bg-base-100 border border-white/10 w-full">
+          <summary class="collapse-title text-[#a3a3a3] text-sm font-medium min-h-11">
             I already know my district
           </summary>
-          <div class="mt-4 space-y-3">
+          <div class="collapse-content space-y-3">
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="manual-senate" class="text-[#a3a3a3] text-xs block mb-1">Senate District</label>
-                <select id="manual-senate" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-senate" class="select select-sm min-h-11 w-full">
                   <option value="">Select...</option>
                 </select>
               </div>
               <div>
                 <label for="manual-house" class="text-[#a3a3a3] text-xs block mb-1">House District</label>
-                <select id="manual-house" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-house" class="select select-sm min-h-11 w-full">
                   <option value="">Select...</option>
                 </select>
               </div>
@@ -116,7 +114,7 @@ const registry = {
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="manual-county" class="text-[#a3a3a3] text-xs block mb-1">County</label>
-                <select id="manual-county" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-county" class="select select-sm min-h-11 w-full">
                   <option value="">Select...</option>
                   {registry.jurisdictions.filter(j => j.type === 'county').map(j => (
                     <option value={j.county.toLowerCase()}>{j.county}</option>
@@ -125,7 +123,7 @@ const registry = {
               </div>
               <div>
                 <label for="manual-county-district" class="text-[#a3a3a3] text-xs block mb-1">County District</label>
-                <select id="manual-county-district" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-county-district" class="select select-sm min-h-11 w-full">
                   <option value="">Select county first</option>
                 </select>
               </div>
@@ -133,13 +131,13 @@ const registry = {
             <div id="manual-city-row" class="grid grid-cols-2 gap-3 hidden">
               <div>
                 <label for="manual-city" class="text-[#a3a3a3] text-xs block mb-1">City</label>
-                <select id="manual-city" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-city" class="select select-sm min-h-11 w-full">
                   <option value="">None</option>
                 </select>
               </div>
               <div>
                 <label for="manual-city-district" class="text-[#a3a3a3] text-xs block mb-1">City District</label>
-                <select id="manual-city-district" class="w-full bg-[#111111] border border-[rgba(255,255,255,0.1)] text-white px-3 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]">
+                <select id="manual-city-district" class="select select-sm min-h-11 w-full">
                   <option value="">Select city first</option>
                 </select>
               </div>
@@ -150,7 +148,7 @@ const registry = {
             <button
               id="action-manual-submit"
               type="button"
-              class="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-medium px-5 py-3 text-sm min-h-[44px] transition-colors cursor-pointer w-full"
+              class="btn btn-primary w-full min-h-11"
             >
               Find My Reps
             </button>
@@ -163,7 +161,7 @@ const registry = {
     <!-- Loading State -->
     <div id="action-loading" class="hidden" aria-live="polite">
       <div class="flex flex-col items-center justify-center py-12 gap-4">
-        <div class="w-10 h-10 border-4 border-[#404040] border-t-[#dc2626] rounded-full animate-spin"></div>
+        <span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span>
         <p class="text-[#a3a3a3] text-sm">Finding your representatives...</p>
       </div>
     </div>
@@ -185,11 +183,14 @@ const registry = {
     <!-- Error State -->
     <div id="action-error" class="hidden">
       <div class="flex flex-col items-center justify-center py-8 gap-4">
-        <p id="action-error-msg" class="text-red-400 text-sm text-center" role="alert"></p>
+        <div class="alert alert-error" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true" class="h-6 w-6 shrink-0 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span id="action-error-msg"></span>
+        </div>
         <button
           id="action-retry"
           type="button"
-          class="bg-[#404040] hover:bg-[#475569] text-[#e2e8f0] font-medium px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer"
+          class="btn btn-neutral btn-sm min-h-11"
         >
           Start Over
         </button>
@@ -200,26 +201,6 @@ const registry = {
     </div>
   </div>
 </div>
-
-<style>
-  /* Fix iOS Safari rendering disclosure triangles as emoji */
-  #action-modal summary {
-    list-style: none;
-  }
-  #action-modal summary::-webkit-details-marker {
-    display: none;
-  }
-  #action-modal summary::before {
-    content: '\25B8';
-    display: inline-block;
-    margin-right: 0.4em;
-    transition: transform 200ms;
-    font-family: system-ui, sans-serif;
-  }
-  #action-modal details[open] > summary::before {
-    transform: rotate(90deg);
-  }
-</style>
 
 <script type="application/json" id="action-modal-data" set:html={JSON.stringify({ actionLetters, stateLegislators, localCouncils, registry, cameraCounts })}></script>
 <script>

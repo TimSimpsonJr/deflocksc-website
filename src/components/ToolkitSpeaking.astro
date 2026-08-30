@@ -16,7 +16,6 @@ function highlightPlaceholders(text: string): string {
 
 <!-- Intro + Tips -->
 <div class="mb-12">
-  <p class="label-mono text-[#a3a3a3] mb-3">Public Comment</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-4">
     Speak at a Council Meeting
   </h2>
@@ -24,7 +23,7 @@ function highlightPlaceholders(text: string): string {
     {speakingData.intro}
   </p>
 
-  <a href={speakingData.findMeeting.href} class="btn btn-sm btn-outline mb-8">
+  <a href={speakingData.findMeeting.href} class="btn btn-sm btn-outline min-h-11 mb-8">
     <span aria-hidden="true">→</span>
     {speakingData.findMeeting.text}
   </a>
@@ -42,7 +41,6 @@ function highlightPlaceholders(text: string): string {
 
 <!-- Talk Track -->
 <div class="mb-16">
-  <p class="label-mono text-[#a3a3a3] mb-3">Talk Track</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-2">
     {speakingData.talkTrack.title}
   </h2>
@@ -53,14 +51,12 @@ function highlightPlaceholders(text: string): string {
   <!-- 1px-gap vertical grid -->
   <div class="bg-[rgba(255,255,255,0.07)]" style="display:grid;gap:1px">
     {speakingData.talkTrack.sections.map((section, i) => (
-      <div class="bg-[#111111] p-6 relative overflow-hidden">
-        <!-- DM Mono overline: dot + label + timing -->
-        <div class="flex items-center gap-3 mb-4">
-          <span class="w-[5px] h-[5px] rounded-full bg-[#fbbf24] flex-shrink-0" aria-hidden="true"></span>
-          <span class="label-mono-tight text-[#a3a3a3]">
+      <div class="bg-base-100 p-6 relative overflow-hidden">
+        <div class="flex items-baseline gap-3 mb-4">
+          <span class="text-[#e8e8e8] font-semibold text-sm">
             {section.label}
           </span>
-          <span class="label-mono-tight text-[#fbbf24]">
+          <span class="text-xs text-[#a3a3a3]">
             {section.timing}
           </span>
         </div>
@@ -79,7 +75,6 @@ function highlightPlaceholders(text: string): string {
 
 <!-- Rebuttals — sidebar + panel -->
 <div class="mb-16">
-  <p class="label-mono text-[#a3a3a3] mb-3">Rebuttals</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-2">
     If They Push Back
   </h2>
@@ -89,16 +84,16 @@ function highlightPlaceholders(text: string): string {
 
   <div class="rebuttal-layout md:grid md:grid-cols-[280px_1fr] bg-[rgba(255,255,255,0.07)]" style="gap:1px">
     <!-- Claims sidebar -->
-    <div class="bg-[#111111]">
-      <div class="label-mono text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
-        Claims
-      </div>
+    <div class="bg-base-100" role="tablist" aria-label="Rebuttal claims" id="rebuttal-rail">
       {speakingData.rebuttals.map((r, i) => (
         <button
           type="button"
-          class:list={['rebuttal-btn sidebar-btn w-full text-left px-6 py-4 text-sm font-medium leading-[1.35] border-b border-[rgba(255,255,255,0.04)] cursor-pointer', i === 0 ? 'sidebar-active' : '']}
-          data-rebuttal={i}
+          role="tab"
+          id={`rebuttal-tab-${i}`}
+          aria-controls={`rebuttal-panel-${i}`}
           aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+          class="rail-tab px-6 py-4 text-sm font-medium leading-[1.35]"
         >
           &ldquo;{r.claim}&rdquo;
         </button>
@@ -106,10 +101,15 @@ function highlightPlaceholders(text: string): string {
     </div>
 
     <!-- Response panel -->
-    <div class="bg-[#111111] p-8 md:p-10">
+    <div class="bg-base-100 p-8 md:p-10">
       {speakingData.rebuttals.map((r, i) => (
-        <div class:list={['rebuttal-panel', i !== 0 && 'hidden']} data-rebuttal-panel={i}>
-          <p class="label-mono-tight text-[#a3a3a3] mb-2">Rebuttal {String(i + 1).padStart(2, '0')}</p>
+        <div
+          class="rebuttal-panel"
+          id={`rebuttal-panel-${i}`}
+          role="tabpanel"
+          aria-labelledby={`rebuttal-tab-${i}`}
+          hidden={i !== 0}
+        >
           <h3 class="text-[#e8e8e8] font-bold text-lg mb-4">&ldquo;{r.claim}&rdquo;</h3>
           <p class="text-[#a3a3a3] text-base leading-[1.7]">{r.response}</p>
         </div>
@@ -128,14 +128,14 @@ function highlightPlaceholders(text: string): string {
   <div class="flex flex-wrap gap-3">
     <a
       href="/toolkit/speaking/city-council-brief"
-      class="inline-flex items-center gap-2 label-mono-compact text-[#a3a3a3] hover:text-[#e8e8e8] border border-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] px-4 py-2.5 transition-colors no-underline"
+      class="btn btn-outline min-h-11 label-mono-compact font-medium"
     >
       City council
       <span aria-hidden="true">→</span>
     </a>
     <a
       href="/toolkit/speaking/county-council-brief"
-      class="inline-flex items-center gap-2 label-mono-compact text-[#a3a3a3] hover:text-[#e8e8e8] border border-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] px-4 py-2.5 transition-colors no-underline"
+      class="btn btn-outline min-h-11 label-mono-compact font-medium"
     >
       County council
       <span aria-hidden="true">→</span>
@@ -144,24 +144,10 @@ function highlightPlaceholders(text: string): string {
 </div>
 
 <script>
-  function initSpeakingTab() {
-    // Rebuttal sidebar selection
-    const rebuttalBtns = document.querySelectorAll<HTMLButtonElement>('.rebuttal-btn');
-    const rebuttalPanels = document.querySelectorAll<HTMLElement>('.rebuttal-panel');
+  import { initTabRail } from '../scripts/tab-rail';
 
-    rebuttalBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = btn.getAttribute('data-rebuttal');
-        rebuttalBtns.forEach(b => {
-          b.classList.remove('sidebar-active');
-          b.setAttribute('aria-selected', 'false');
-        });
-        rebuttalPanels.forEach(p => p.classList.add('hidden'));
-        btn.classList.add('sidebar-active');
-        btn.setAttribute('aria-selected', 'true');
-        document.querySelector(`.rebuttal-panel[data-rebuttal-panel="${idx}"]`)?.classList.remove('hidden');
-      });
-    });
+  function initSpeakingTab() {
+    initTabRail('rebuttal-rail');
   }
 
   initSpeakingTab();

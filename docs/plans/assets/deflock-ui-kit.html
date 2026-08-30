@@ -1,0 +1,965 @@
+<title>DeflockSC UI Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+  /* ===== DEFLOCK "deflock" THEME TOKENS — single dark theme, squared ===== */
+  :root {
+    --b3:#0d0d0d;          /* base-300 · deepest / page frame */
+    --b2:#1a1a1a;          /* base-200 · elevated cards / nav */
+    --b1:#171717;          /* base-100 · main surface / recessed wells */
+    --bc:#e8e8e8;          /* base-content */
+    --muted:#9ca3af;       /* muted text */
+    --primary:#dc2626;     /* red CTA */
+    --primary-h:#b91c1c;   /* hover */
+    --pc:#ffffff;          /* text on primary */
+    --amber:#fbbf24;       /* accent / warning */
+    --amber-c:#171717;     /* text on amber */
+    --success:#16a34a;     /* muted success green */
+    --success-c:#0d0d0d;   /* text on success (deflock success-content) */
+    --info:#38bdf8;        /* info (deflock --color-info) */
+    --info-c:#0d0d0d;      /* text on info */
+    --error:#dc2626;
+    --bord:rgba(255,255,255,0.10);
+    --bord-strong:rgba(255,255,255,0.22);
+    --neutral:#262626;     /* improvised neutral surface for btn-neutral */
+
+    --ff-ui:"Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --ff-mono:"DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+    --pad: clamp(1rem, 4vw, 2.25rem);
+    --r-field:0.3rem;     /* slight rounding on controls */
+    --r-box:0.45rem;      /* slight rounding on frames/cards */
+  }
+
+  * { box-sizing:border-box; }
+
+  body {
+    margin:0;
+    background:var(--b3);
+    color:var(--bc);
+    font-family:var(--ff-ui);
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline:2px solid var(--amber);
+    outline-offset:2px;
+  }
+
+  /* ===== label-mono idiom ===== */
+  .label-mono {
+    font-family:var(--ff-mono);
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    font-size:0.68rem;
+    font-weight:500;
+    color:var(--muted);
+  }
+
+  /* ===== page shell ===== */
+  .page {
+    max-width:1080px;
+    margin:0 auto;
+    padding:var(--pad);
+    display:flex;
+    flex-direction:column;
+    gap:1.15rem;
+  }
+
+  /* ===== header band ===== */
+  .masthead {
+    background:var(--b2);
+    border:1px solid var(--bord);
+    padding:0;
+  }
+  .masthead-strip {
+    display:flex;
+    flex-wrap:wrap;
+    gap:0.4rem 1.4rem;
+    align-items:center;
+    padding:0.5rem 1.1rem;
+    border-bottom:1px solid var(--bord);
+    background:var(--b1);
+  }
+  .masthead-strip .label-mono { font-size:0.63rem; }
+  .masthead-strip .sep { color:var(--bord-strong); }
+  .masthead-body { padding:1.25rem 1.35rem 1.4rem; }
+  .masthead-body .eyebrow { color:var(--amber); font-size:0.63rem; margin-bottom:0.55rem; }
+  .masthead-body h1 {
+    margin:0 0 0.5rem;
+    font-size:clamp(1.5rem, 3.6vw, 2rem);
+    font-weight:600;
+    letter-spacing:-0.01em;
+    text-wrap:balance;
+  }
+  .masthead-body .sub {
+    margin:0;
+    color:var(--muted);
+    font-size:0.95rem;
+    max-width:62ch;
+  }
+  .masthead-body .sub b { color:var(--bc); font-weight:500; }
+  .note-chip {
+    display:inline-flex;
+    align-items:center;
+    gap:0.5rem;
+    margin-top:1rem;
+    padding:0.4rem 0.7rem;
+    background:var(--b1);
+    border:1px solid var(--bord);
+    color:var(--muted);
+    font-family:var(--ff-mono);
+    font-size:0.68rem;
+    letter-spacing:0.03em;
+  }
+  .note-chip .dot { width:6px; height:6px; border-radius:50%; background:var(--amber); flex:none; }
+
+  /* ===== section frame ===== */
+  .section {
+    background:var(--b2);
+    border:1px solid var(--bord);
+    padding:1.1rem 1.15rem 1.25rem;
+  }
+  .section-head {
+    display:flex;
+    align-items:baseline;
+    gap:0.7rem;
+    padding-bottom:0.85rem;
+    margin-bottom:1.05rem;
+    border-bottom:1px solid var(--bord);
+  }
+  .sec-num {
+    font-family:var(--ff-mono);
+    font-size:0.72rem;
+    color:var(--primary);
+    letter-spacing:0.1em;
+  }
+  .sec-title { margin:0; font-size:1.02rem; font-weight:600; letter-spacing:-0.005em; }
+  .sec-tag { margin-left:auto; }
+
+  /* specimen stage = base-100 recessed well */
+  .stage {
+    background:var(--b1);
+    border:1px solid var(--bord);
+    padding:1.1rem;
+  }
+  .stage + .stage { margin-top:0.8rem; }
+  .row { display:flex; flex-wrap:wrap; gap:0.65rem; align-items:center; }
+  .row-label {
+    display:block;
+    margin-bottom:0.7rem;
+    color:var(--muted);
+    font-family:var(--ff-mono);
+    font-size:0.63rem;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+  }
+  .stack { display:flex; flex-direction:column; gap:1.1rem; }
+
+  /* ===== buttons ===== */
+  .btn {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:0.5rem;
+    height:2.7rem;
+    padding:0 1.1rem;
+    border:1px solid transparent;
+    border-radius:var(--r-field);
+    font-family:var(--ff-ui);
+    font-size:0.9rem;
+    font-weight:600;
+    letter-spacing:0.005em;
+    line-height:1;
+    color:var(--bc);
+    background:transparent;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .btn-primary { background:var(--primary); border-color:var(--primary); color:var(--pc); }
+  .btn-primary:hover { background:var(--primary-h); border-color:var(--primary-h); }
+  .btn-neutral { background:var(--neutral); border-color:var(--bord-strong); color:var(--bc); }
+  .btn-neutral:hover { background:#303030; }
+  .btn-outline { background:transparent; border-color:var(--bord-strong); color:var(--bc); }
+  .btn-outline:hover { background:rgba(255,255,255,0.06); border-color:var(--bc); }
+  .btn-ghost { background:transparent; border-color:transparent; color:var(--bc); }
+  .btn-ghost:hover { background:rgba(255,255,255,0.07); }
+  .btn-sm { height:2.2rem; padding:0 0.8rem; font-size:0.8rem; }
+  .btn-xs { height:1.75rem; padding:0 0.62rem; font-size:0.72rem; gap:0.35rem; }
+  .btn[disabled], .btn:disabled { opacity:0.42; cursor:not-allowed; }
+
+  .loading-spinner {
+    width:0.95em; height:0.95em; flex:none;
+    border:2px solid rgba(255,255,255,0.35);
+    border-top-color:var(--pc);
+    border-radius:50%;
+    animation:spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* ===== badges ===== */
+  .badge {
+    display:inline-flex;
+    align-items:center;
+    gap:0.35rem;
+    height:1.55rem;
+    padding:0 0.55rem;
+    border:1px solid transparent;
+    border-radius:var(--r-field);
+    font-family:var(--ff-mono);
+    font-size:0.66rem;
+    font-weight:500;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .badge-primary { background:var(--primary); color:var(--pc); border-color:var(--primary); }
+  .badge-warning { background:var(--amber); color:var(--amber-c); border-color:var(--amber); }
+  .badge-outline { background:transparent; color:var(--muted); border-color:var(--bord-strong); }
+
+  /* status dot (round — allowed exception) */
+  .status {
+    display:inline-flex;
+    align-items:center;
+    gap:0.55rem;
+    font-family:var(--ff-mono);
+    font-size:0.72rem;
+    letter-spacing:0.06em;
+    color:var(--bc);
+  }
+  .status-dot {
+    position:relative;
+    width:9px; height:9px;
+    border-radius:50%;
+    background:var(--primary);
+    flex:none;
+  }
+  .status-dot::after {
+    content:"";
+    position:absolute; inset:-4px;
+    border-radius:50%;
+    border:1px solid var(--primary);
+    animation:ping 1.6s cubic-bezier(0,0,0.2,1) infinite;
+  }
+  .status-dot.amber { background:var(--amber); }
+  @keyframes ping {
+    0% { transform:scale(0.6); opacity:0.9; }
+    80%,100% { transform:scale(1.5); opacity:0; }
+  }
+
+  /* ===== cards ===== */
+  .card-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:0.9rem;
+  }
+  .card {
+    background:var(--b2);
+    border:1px solid var(--bord);
+    border-radius:var(--r-field);
+    padding:1.05rem 1.1rem;
+    display:flex;
+    flex-direction:column;
+    gap:0.7rem;
+  }
+  .card h3 { margin:0; font-size:1rem; font-weight:600; letter-spacing:-0.005em; }
+  .card .meta { font-family:var(--ff-mono); font-size:0.68rem; color:var(--muted); letter-spacing:0.03em; }
+  .card .desc { margin:0; color:var(--muted); font-size:0.88rem; }
+  .card-row { display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
+
+  /* toolkit link card w/ hover arrow */
+  .card-link { cursor:pointer; transition:border-color .15s ease, background .15s ease; }
+  .card-link:hover { border-color:var(--bord-strong); background:#1e1e1e; }
+  .card-link .link-head { display:flex; align-items:center; justify-content:space-between; gap:0.6rem; }
+  .card-link .arrow { color:var(--primary); font-size:1.1rem; transition:transform .18s ease; }
+  .card-link:hover .arrow { transform:translateX(4px); }
+  .chip-row { display:flex; gap:0.4rem; flex-wrap:wrap; }
+
+  /* ===== navbar ===== */
+  .navbar {
+    display:flex;
+    align-items:center;
+    gap:0.4rem 1.4rem;
+    flex-wrap:wrap;
+    background:var(--b2);
+    border:1px solid var(--bord);
+    padding:0.55rem 1rem;
+  }
+  .brand { display:flex; align-items:center; gap:0.55rem; font-weight:600; letter-spacing:0.01em; }
+  .brand .logo-dot { width:11px; height:11px; border-radius:50%; background:var(--primary); flex:none; box-shadow:0 0 0 3px rgba(220,38,38,0.18); }
+  .nav-links { display:flex; gap:1.15rem; flex-wrap:wrap; }
+  .nav-links a { color:var(--muted); text-decoration:none; font-size:0.88rem; transition:color .15s ease; }
+  .nav-links a:hover, .nav-links a.active { color:var(--bc); }
+  .navbar .spacer { flex:1 1 auto; }
+
+  /* breadcrumbs */
+  .breadcrumbs {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:0.5rem;
+    margin-top:0.8rem;
+    font-family:var(--ff-mono);
+    font-size:0.72rem;
+    letter-spacing:0.04em;
+  }
+  .breadcrumbs a { color:var(--muted); text-decoration:none; }
+  .breadcrumbs a:hover { color:var(--bc); }
+  .breadcrumbs .crumb-sep { color:var(--bord-strong); }
+  .breadcrumbs .current { color:var(--bc); }
+
+  /* ===== alerts (daisyUI 5 default .alert, deflock palette) =====
+     Structure/values transcribed from daisyui/components/alert.css (v5.6.18):
+     a CSS grid (icon | content | actions), place-items:center start, gap 1rem,
+     padding .75rem/1rem, font-size .875rem/line-height 1.25rem, border-radius =
+     theme box radius, border + solid fill = the semantic colour, text = that
+     colour's content token. The deflock theme sets --depth:0 and --noise:0, so
+     daisyUI's inset/elevation box-shadow and fx-noise background collapse to
+     nothing — hence the flat solid bar (no shadow, no texture) reproduced here. */
+  .alert {
+    display:grid;
+    grid-auto-flow:column;
+    grid-template-columns:auto;
+    justify-content:start;
+    place-items:center start;
+    gap:1rem;
+    padding-block:0.75rem;
+    padding-inline:1rem;
+    font-size:0.875rem;
+    line-height:1.25rem;
+    text-align:start;
+    border:1px solid var(--alert-border-color, var(--b2));
+    border-radius:var(--r-box);            /* daisyUI: --radius-box */
+    color:var(--bc);
+    background-color:var(--alert-color, var(--b2));
+  }
+  /* daisyUI: a second child promotes the content column to minmax(auto,1fr),
+     which pushes any third child (the actions) to the end. */
+  .alert:has(:nth-child(2)) { grid-template-columns:auto minmax(auto,1fr); }
+  /* daisyUI docs icons: h-6 w-6 shrink-0 stroke-current. */
+  .alert > svg { width:1.5rem; height:1.5rem; flex-shrink:0; stroke:currentColor; }
+
+  .alert-info    { color:var(--info-c);    --alert-border-color:var(--info);    --alert-color:var(--info); }
+  .alert-success { color:var(--success-c); --alert-border-color:var(--success); --alert-color:var(--success); }
+  .alert-warning { color:var(--amber-c);   --alert-border-color:var(--amber);   --alert-color:var(--amber); }
+  .alert-error   { color:var(--pc);        --alert-border-color:var(--error);   --alert-color:var(--error); }
+
+  /* ===== toast (daisyUI 5 .toast container + an .alert chip) =====
+     daisyui/components/toast.css: a fixed, transparent flex-column stack pinned
+     to a corner (default toast-end + toast-bottom = bottom-right), children fade
+     in via @keyframes toast. Scoped to the .toast-demo stage below with
+     position:absolute so it demonstrates the placement without floating over the
+     whole kit. The visible chip is a real .alert. */
+  .toast-demo {
+    position:relative;
+    min-height:118px;
+    background:var(--b1);
+    border:1px solid var(--bord);
+    padding:0.9rem;
+    overflow:hidden;
+  }
+  .toast-demo .hint {
+    color:var(--muted);
+    font-family:var(--ff-mono);
+    font-size:0.63rem;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+  }
+  .toast {
+    position:absolute;             /* daisyUI: fixed (to the viewport); contained here for the demo */
+    inset-inline:auto 1rem;        /* toast-end */
+    bottom:1rem;
+    top:auto;
+    display:flex;
+    flex-direction:column;
+    gap:0.5rem;
+    width:max-content;
+    max-width:calc(100% - 2rem);
+    background-color:transparent;
+  }
+  @media (prefers-reduced-motion:no-preference) {
+    .toast > * { animation:toast 0.25s ease-out; }
+  }
+  @keyframes toast { 0% { opacity:0; scale:0.9; } to { opacity:1; scale:1; } }
+  /* neutral copy-toast: readable elevation on the dark stage (no green success fill) */
+  .toast .alert { border-color:var(--bord-strong); }
+
+  /* ===== tabs (daisyUI `tabs tabs-box` — matched to the events page) =====
+     Reproduces src/pages/events.astro's re-themed tabs-box (its scoped
+     .events-tabs / .events-tab rules, verified against daisyui/components/tab.css
+     v5.6.18): a base-200 tray (padding .25rem, daisyUI's computed ~0.5rem radius),
+     tabs shrink-to-fit as pills. daisyUI paints the active pill base-100 (darker
+     than the tray) with an elevation shadow the theme's --depth:0 zeroes out, so
+     the events page repairs it to a clearly-lighter #3d3d3d chip with a hairline
+     edge, resets inactive text to an AA #a3a3a3, and swaps daisyUI's thin
+     currentColor focus outline for the page's amber ring. Active state keys on
+     .active + aria-selected="true" (both toggled together by the demo script). */
+  .tabs-box {
+    display:flex;
+    flex-wrap:wrap;
+    width:fit-content;
+    max-width:100%;
+    background:var(--b2);            /* base-200 tray */
+    border-radius:0.5rem;            /* daisyUI tabs-box computed radius */
+    padding:0.25rem;
+  }
+  .tab {
+    appearance:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:44px;                 /* WCAG touch target (events page) */
+    padding:0 0.75rem;               /* daisyUI --tab-p */
+    border:1px solid transparent;    /* reserve the pill border so activating adds no shift */
+    border-radius:var(--r-field);    /* daisyUI: pill = --radius-field */
+    background:transparent;
+    color:#a3a3a3;                   /* inactive: AA on the base-200 tray */
+    font-family:var(--ff-ui);
+    font-size:0.875rem;
+    font-weight:500;
+    line-height:1;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .tab:hover { color:var(--bc); }
+  .tab.active,
+  .tab[aria-selected="true"] {
+    background:#3d3d3d;
+    color:var(--bc);
+    border-color:rgba(255,255,255,0.36);
+  }
+  .tab:focus-visible { outline:2px solid var(--amber); outline-offset:2px; z-index:1; }
+
+  /* master-detail vertical tabs */
+  .master-detail {
+    display:grid;
+    grid-template-columns:190px 1fr;
+    gap:0.8rem;
+    margin-top:0.8rem;
+  }
+  .rail { display:flex; flex-direction:column; gap:0.25rem; }
+  .rail-btn {
+    text-align:left;
+    appearance:none;
+    background:transparent;
+    border:0;
+    border-left:2px solid transparent;
+    color:var(--muted);
+    font-family:var(--ff-ui);
+    font-size:0.9rem;
+    padding:0.6rem 0.8rem;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .rail-btn:hover { background:rgba(255,255,255,0.04); color:var(--bc); }
+  .rail-btn.active {
+    background:var(--b1);
+    border-left-color:var(--primary);
+    color:var(--bc);
+    font-weight:600;
+  }
+  .detail {
+    background:var(--b1);
+    border:1px solid var(--bord);
+    padding:1.05rem 1.1rem;
+    min-height:150px;
+  }
+  .detail h4 { margin:0 0 0.6rem; font-size:0.95rem; font-weight:600; }
+  .detail p { margin:0 0 0.6rem; color:var(--muted); font-size:0.88rem; }
+  .detail ul { margin:0; padding-left:1.1rem; color:var(--muted); font-size:0.88rem; }
+  .detail li { margin-bottom:0.4rem; }
+  .detail li b { color:var(--bc); font-weight:600; }
+  .panel[hidden] { display:none; }
+
+  /* ===== forms ===== */
+  .field { display:flex; flex-direction:column; gap:0.45rem; }
+  .field label { font-size:0.85rem; font-weight:500; color:var(--bc); }
+  .input, .select {
+    width:100%;
+    height:2.7rem;
+    background:var(--b1);
+    border:1px solid var(--bord-strong);
+    border-radius:var(--r-field);
+    color:var(--bc);
+    font-family:var(--ff-ui);
+    font-size:0.9rem;
+    padding:0 0.75rem;
+    transition:border-color .15s ease;
+  }
+  .input::placeholder { color:#6b7280; }
+  .input:focus, .select:focus { outline:none; border-color:var(--primary); }
+  .select {
+    appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%239ca3af' stroke-width='1.5'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 0.75rem center;
+    padding-right:2rem;
+  }
+  .form-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    gap:1rem;
+  }
+
+  /* join group (squared, shared seam) */
+  .join { display:flex; }
+  .join .input { border-right:0; }
+  .join .btn { flex:none; }
+  .join .input:focus { position:relative; z-index:1; }
+
+  /* filter chips */
+  .chips { display:flex; flex-wrap:wrap; gap:0.4rem; }
+  .filter-chip {
+    appearance:none;
+    background:transparent;
+    border:1px solid var(--bord-strong);
+    border-radius:var(--r-field);
+    color:var(--muted);
+    font-family:var(--ff-ui);
+    font-size:0.8rem;
+    font-weight:500;
+    padding:0.4rem 0.75rem;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .filter-chip:hover { color:var(--bc); border-color:var(--bc); }
+  .filter-chip.active { background:var(--primary); border-color:var(--primary); color:var(--pc); }
+
+  /* radios (squared, per dossier aesthetic) */
+  .radios { display:flex; flex-direction:column; gap:0.65rem; }
+  .radio-opt { display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.9rem; }
+  .radio {
+    appearance:none;
+    -webkit-appearance:none;
+    width:18px; height:18px; flex:none;
+    background:var(--b1);
+    border:1.5px solid var(--bord-strong);
+    border-radius:var(--r-field);
+    display:inline-grid;
+    place-content:center;
+    cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .radio:checked { border-color:var(--primary); }
+  .radio:checked::before { content:""; width:8px; height:8px; background:var(--primary); }
+
+  /* ===== stats ===== */
+  .stats {
+    display:flex;
+    flex-wrap:wrap;
+    background:var(--b1);
+    border:1px solid var(--bord);
+  }
+  .stat {
+    flex:1 1 150px;
+    padding:1rem 1.2rem;
+    border-left:1px solid var(--bord);
+  }
+  .stat:first-child { border-left:0; }
+  .stat .stat-value {
+    font-size:1.9rem;
+    font-weight:600;
+    line-height:1;
+    color:var(--primary);
+    font-variant-numeric:tabular-nums;
+  }
+  .stat .stat-title {
+    margin-top:0.45rem;
+    font-family:var(--ff-mono);
+    font-size:0.63rem;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:var(--muted);
+  }
+
+  /* ===== rep card ===== */
+  .rep-card {
+    background:var(--b2);
+    border:1px solid var(--bord);
+    padding:1.1rem 1.15rem;
+    max-width:420px;
+    display:flex;
+    flex-direction:column;
+    gap:0.9rem;
+  }
+  .rep-top { display:flex; gap:0.85rem; align-items:flex-start; }
+  .avatar {
+    width:46px; height:46px; flex:none;
+    border-radius:50%;
+    background:var(--neutral);
+    border:1px solid var(--bord-strong);
+    display:grid;
+    place-content:center;
+    font-family:var(--ff-mono);
+    font-size:0.85rem;
+    color:var(--bc);
+    letter-spacing:0.02em;
+  }
+  .rep-info { display:flex; flex-direction:column; gap:0.25rem; min-width:0; }
+  .rep-name { display:flex; align-items:center; gap:0.55rem; flex-wrap:wrap; font-weight:600; font-size:0.98rem; }
+  .rep-dist { color:var(--muted); font-size:0.85rem; }
+  .rep-phone { font-family:var(--ff-mono); font-size:0.82rem; color:var(--bc); letter-spacing:0.03em; }
+  .rep-actions { display:flex; gap:0.55rem; flex-wrap:wrap; }
+  .rep-actions .btn { flex:1 1 auto; }
+
+  /* ===== responsive ===== */
+  @media (max-width:620px) {
+    .master-detail { grid-template-columns:1fr; }
+    .rail { flex-direction:row; flex-wrap:wrap; }
+    .rail-btn { border-left:0; border-bottom:2px solid transparent; }
+    .rail-btn.active { border-left:0; border-bottom-color:var(--primary); }
+    .stat { border-left:0; border-top:1px solid var(--bord); }
+    .stat:first-child { border-top:0; }
+  }
+
+  @media (prefers-reduced-motion:reduce) {
+    *, *::before, *::after { animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+  }
+
+  /* ===== rounded variant: frame corners ===== */
+  .masthead, .section, .stats, .rep-card, .detail, .toast-demo { border-radius:var(--r-box); }
+  .masthead, .stats { overflow:hidden; }
+  .stage, .navbar { border-radius:var(--r-field); }
+</style>
+
+<div class="page">
+
+  <!-- ============ HEADER BAND ============ -->
+  <header class="masthead">
+    <div class="masthead-strip">
+      <span class="label-mono">FILE · UI-KIT-01</span>
+      <span class="sep">·</span>
+      <span class="label-mono">CLASSIFICATION · DESIGN REFERENCE</span>
+      <span class="sep">·</span>
+      <span class="label-mono">STATUS · AWAITING APPROVAL</span>
+    </div>
+    <div class="masthead-body">
+      <div class="label-mono eyebrow">DaisyUI · deflock theme</div>
+      <h1>DeflockSC — UI Kit</h1>
+      <p class="sub">DaisyUI <b>"deflock"</b> theme · squared · the target for the site-wide component migration. Every surface collapses to three greys, every corner to zero — a deliberate dossier / surveillance-file look.</p>
+      <div class="note-chip"><span class="dot"></span>Reference mockup for approval — not the live site.</div>
+    </div>
+  </header>
+
+  <!-- ============ 02 · BUTTONS ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">02</span>
+      <h2 class="sec-title">Buttons</h2>
+      <span class="label-mono sec-tag">.btn</span>
+    </div>
+    <div class="stage">
+      <span class="row-label">Variants</span>
+      <div class="row">
+        <button class="btn btn-primary">Contact Your Reps</button>
+        <button class="btn btn-neutral">Browse all</button>
+        <button class="btn btn-outline">Copy letter</button>
+        <button class="btn btn-ghost">Cancel</button>
+      </div>
+    </div>
+    <div class="stage">
+      <span class="row-label">Sizes · states</span>
+      <div class="row">
+        <button class="btn btn-primary btn-sm">Small</button>
+        <button class="btn btn-primary btn-xs">Extra small</button>
+        <button class="btn btn-outline" disabled>Disabled</button>
+        <button class="btn btn-primary"><span class="loading-spinner" aria-hidden="true"></span>Finding your reps…</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 · BADGES & STATUS ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">03</span>
+      <h2 class="sec-title">Badges &amp; status</h2>
+      <span class="label-mono sec-tag">.badge</span>
+    </div>
+    <div class="stage">
+      <div class="row" style="gap:0.9rem;">
+        <span class="badge badge-primary">Primary</span>
+        <span class="badge badge-warning">In Committee</span>
+        <span class="badge badge-outline">FOIA · Template</span>
+        <span class="status"><span class="status-dot" aria-hidden="true"></span>ALPR Network — live</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 · CARDS ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">04</span>
+      <h2 class="sec-title">Cards</h2>
+      <span class="label-mono sec-tag">.card</span>
+    </div>
+    <div class="stage">
+      <div class="card-grid">
+        <!-- bill card -->
+        <article class="card">
+          <div class="card-row">
+            <span class="status-dot amber" aria-hidden="true" style="width:9px;height:9px;"></span>
+            <span class="badge badge-warning">In Committee</span>
+          </div>
+          <h3>S. 447 — ALPR Data Regulation</h3>
+          <div class="meta">Senate Judiciary · Last action Mar 2026</div>
+        </article>
+        <!-- toolkit link card -->
+        <article class="card card-link" tabindex="0">
+          <div class="link-head">
+            <h3>FOIA Request Templates</h3>
+            <span class="arrow" aria-hidden="true">→</span>
+          </div>
+          <p class="desc">Ready-to-send public-records letters for any SC agency running Flock.</p>
+          <div class="chip-row">
+            <span class="badge badge-outline">Templates</span>
+            <span class="badge badge-outline">Upstate SC</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · NAVIGATION ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">05</span>
+      <h2 class="sec-title">Navigation &amp; breadcrumbs</h2>
+      <span class="label-mono sec-tag">.navbar</span>
+    </div>
+    <div class="stage">
+      <nav class="navbar">
+        <span class="brand"><span class="logo-dot" aria-hidden="true"></span>DeflockSC</span>
+        <span class="nav-links">
+          <a href="#" class="active">Map</a>
+          <a href="#">Toolkit</a>
+          <a href="#">Bills</a>
+        </span>
+        <span class="spacer"></span>
+        <button class="btn btn-primary btn-sm">Take Action</button>
+      </nav>
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="#">Home</a>
+        <span class="crumb-sep">/</span>
+        <a href="#">Toolkit</a>
+        <span class="crumb-sep">/</span>
+        <span class="current">FOIA</span>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ============ 06 · ALERTS & TOAST ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">06</span>
+      <h2 class="sec-title">Alerts &amp; toast</h2>
+      <span class="label-mono sec-tag">.alert · .toast</span>
+    </div>
+    <div class="stage stack">
+      <div class="alert alert-error" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span>We couldn't match your address to a district.</span>
+        <button class="btn btn-outline btn-xs">Retry</button>
+      </div>
+      <div class="alert alert-warning" role="status">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        <span>Your FOIA request has been pre-filled below.</span>
+      </div>
+    </div>
+    <div class="toast-demo" aria-hidden="true">
+      <span class="hint">Appears fixed at bottom-right of the viewport</span>
+      <div class="toast">
+        <div class="alert" role="status">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span>Letter copied to clipboard</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 07 · TABS / MASTER-DETAIL ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">07</span>
+      <h2 class="sec-title">Tabs &amp; master-detail</h2>
+      <span class="label-mono sec-tag">.tabs-box</span>
+    </div>
+    <div class="stage">
+      <span class="row-label">Horizontal · tabs-box</span>
+      <div class="tabs-box" role="tablist" aria-label="Events view">
+        <button class="tab active" role="tab" aria-selected="true">List</button>
+        <button class="tab" role="tab" aria-selected="false">Month</button>
+        <button class="tab" role="tab" aria-selected="false">Map</button>
+      </div>
+    </div>
+    <div class="stage">
+      <span class="row-label">Vertical · master-detail (replaces hand-rolled sidebars)</span>
+      <div class="master-detail">
+        <div class="rail" role="tablist" aria-label="Council brief sections">
+          <button class="rail-btn active" role="tab" aria-selected="true" data-target="md-overview">Overview</button>
+          <button class="rail-btn" role="tab" aria-selected="false" data-target="md-talk">Talk Track</button>
+          <button class="rail-btn" role="tab" aria-selected="false" data-target="md-rebut">Rebuttals</button>
+        </div>
+        <div class="detail">
+          <div class="panel" id="md-overview" role="tabpanel">
+            <h4>Overview</h4>
+            <p>A one-page leave-behind for city and county council members: what an ALPR network is, what your jurisdiction has already deployed, and the three questions to ask before the next contract renewal.</p>
+            <p>Print-ready, plain-language, and sourced — hand it across the dais and it stands on its own.</p>
+          </div>
+          <div class="panel" id="md-talk" role="tabpanel" hidden>
+            <h4>Talk Track</h4>
+            <ul>
+              <li><b>Open:</b> "These cameras log every car that passes, not just suspects."</li>
+              <li><b>Cost:</b> Annual Flock fees vs. clearance-rate evidence.</li>
+              <li><b>Ask:</b> A public retention-and-access policy before renewal.</li>
+            </ul>
+          </div>
+          <div class="panel" id="md-rebut" role="tabpanel" hidden>
+            <h4>Rebuttals</h4>
+            <ul>
+              <li><b>"It only catches criminals."</b> Every plate is stored — 99% belong to no case.</li>
+              <li><b>"We don't share the data."</b> Audit logs show out-of-state and federal queries.</li>
+              <li><b>"There's oversight."</b> SC has no statute governing ALPR retention or access.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 08 · FORMS ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">08</span>
+      <h2 class="sec-title">Forms</h2>
+      <span class="label-mono sec-tag">.input · .select · .join</span>
+    </div>
+    <div class="stage">
+      <div class="form-grid">
+        <div class="field">
+          <label for="addr">Enter your South Carolina address</label>
+          <input class="input" id="addr" type="text" placeholder="123 Main St, Greenville, SC 29601">
+        </div>
+        <div class="field">
+          <label for="county">County</label>
+          <select class="select" id="county">
+            <option>Greenville</option>
+            <option>Richland</option>
+            <option>Charleston</option>
+            <option>Spartanburg</option>
+            <option>Anderson</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="stage">
+      <span class="row-label">Join group</span>
+      <div class="join" style="max-width:440px;">
+        <input class="input" type="text" placeholder="Search by city or agency" aria-label="Search cameras">
+        <button class="btn btn-primary">Search</button>
+      </div>
+    </div>
+    <div class="stage">
+      <span class="row-label">Filter chips · vendor</span>
+      <div class="chips">
+        <button class="filter-chip active">All</button>
+        <button class="filter-chip">Flock Safety</button>
+        <button class="filter-chip">Motorola</button>
+        <button class="filter-chip">Genetec</button>
+        <button class="filter-chip">Leonardo</button>
+      </div>
+    </div>
+    <div class="stage">
+      <span class="row-label">Radio · preferred contact</span>
+      <div class="radios">
+        <label class="radio-opt"><input class="radio" type="radio" name="contact" checked>Email my representative</label>
+        <label class="radio-opt"><input class="radio" type="radio" name="contact">Print a letter to mail</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 09 · STATS ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">09</span>
+      <h2 class="sec-title">Stats</h2>
+      <span class="label-mono sec-tag">.stats</span>
+    </div>
+    <div class="stage">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">242</div>
+          <div class="stat-title">Cameras tracked</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">46</div>
+          <div class="stat-title">Counties</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">0</div>
+          <div class="stat-title">State laws</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 10 · REP CARD ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="sec-num">10</span>
+      <h2 class="sec-title">Rep card</h2>
+      <span class="label-mono sec-tag">action-modal preview</span>
+    </div>
+    <div class="stage">
+      <div class="rep-card">
+        <div class="rep-top">
+          <div class="avatar" aria-hidden="true">JD</div>
+          <div class="rep-info">
+            <div class="rep-name">Rep. Jane Q. Doe (R)<span class="badge badge-warning">Your district</span></div>
+            <div class="rep-dist">SC House District 22</div>
+            <div class="rep-phone">(803) 555-0100</div>
+          </div>
+        </div>
+        <div class="rep-actions">
+          <button class="btn btn-primary">Send email</button>
+          <button class="btn btn-outline">Copy letter</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // Fake master-detail tab switch (demo only)
+  (function () {
+    var rail = document.querySelectorAll('.rail-btn');
+    rail.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        rail.forEach(function (b) {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        document.querySelectorAll('.detail .panel').forEach(function (p) { p.hidden = true; });
+        var target = document.getElementById(btn.dataset.target);
+        if (target) target.hidden = false;
+      });
+    });
+
+    // Fake horizontal tab switch (visual only)
+    var tabs = document.querySelectorAll('.tabs-box .tab');
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (x) { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
+        t.classList.add('active');
+        t.setAttribute('aria-selected', 'true');
+      });
+    });
+  })();
+</script>

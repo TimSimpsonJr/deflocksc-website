@@ -45,7 +45,7 @@ const hashRedirects: Record<string, string> = {
 ---
 
 <Base title="ALPR Surveillance Toolkit — FOIA Templates & Action Guides | DeflockSC" description="FOIA request templates, council meeting prep, outreach materials, and legal resources for South Carolina residents fighting license plate surveillance.">
-  <section class="bg-[#111111] pt-28 pb-12 relative overflow-hidden">
+  <section class="bg-base-100 pt-28 pb-12 relative overflow-hidden">
     <div class="absolute left-4 -top-2 font-bold leading-none text-[rgba(255,255,255,0.025)] pointer-events-none select-none" style="font-size: clamp(5rem, 10vw, 9rem)" aria-hidden="true">TOOLKIT</div>
     <div class="max-w-4xl mx-auto px-6 relative z-10">
       <p class="label-mono-heading mb-3">Citizen Toolkit</p>
@@ -58,7 +58,7 @@ const hashRedirects: Record<string, string> = {
     </div>
   </section>
 
-  <section class="bg-[#111111] pb-20">
+  <section class="bg-base-100 pb-20">
     <div class="max-w-4xl mx-auto px-6">
       <div class="hub-grid bg-[rgba(255,255,255,0.07)]" style="display:grid;gap:1px;">
         {cards.map((card) => (
@@ -67,7 +67,7 @@ const hashRedirects: Record<string, string> = {
             class="hub-card group"
             style={card.span === 2 ? 'grid-column:span 2;' : ''}
           >
-            <div class="p-7 flex flex-col h-full bg-[#111111] group-hover:bg-[#1a1a1a] transition-colors relative border-t-2 border-[#dc2626] overflow-hidden">
+            <div class="p-7 flex flex-col h-full bg-base-100 group-hover:bg-base-200 transition-colors relative border-t-2 border-[#dc2626] overflow-hidden">
               <p class="font-['DM_Mono',monospace] text-[9px] uppercase tracking-[0.2em] text-[#737373] mb-3 flex items-center gap-2 relative z-10">
                 <span class="w-[5px] h-[5px] rounded-full bg-[#dc2626] flex-shrink-0" style="box-shadow: 0 0 4px rgba(220,38,38,0.6);" aria-hidden="true"></span>
                 {card.title}
@@ -76,7 +76,7 @@ const hashRedirects: Record<string, string> = {
               <p class="text-[14px] text-[#a3a3a3] leading-[1.6] flex-1 mb-6 relative z-10">{card.desc}</p>
               <div class="flex flex-wrap gap-1 mb-0 relative z-10">
                 {card.tags.map((tag) => (
-                  <span class="font-['DM_Mono',monospace] text-[9px] tracking-[0.1em] uppercase text-[#fbbf24] border border-[rgba(251,191,36,0.2)] px-2 py-[3px]">{tag}</span>
+                  <span class="badge badge-outline font-['DM_Mono',monospace] text-[9px] tracking-[0.1em] uppercase">{tag}</span>
                 ))}
               </div>
               <div class="absolute bottom-5 right-5 z-10 text-[#737373] group-hover:text-[#dc2626] transition-colors">

@@ -1,5 +1,6 @@
 import type { RepGroup, LocalCouncils } from './types.js';
 import { escapeHtml } from '../../lib/escape-html.js';
+import { showToast } from '../toast.js';
 
 declare const umami: { track: (event: string) => void } | undefined;
 
@@ -11,13 +12,10 @@ function buildMailto(emails: string[], subject: string, body: string): string {
   return 'mailto:' + to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 }
 
-async function copyToClipboard(text: string, button: HTMLElement): Promise<void> {
+async function copyToClipboard(text: string): Promise<void> {
   if (typeof umami !== 'undefined') umami.track('letter-copied');
   try {
     await navigator.clipboard.writeText(text);
-    const original = button.textContent;
-    button.textContent = 'Copied!';
-    setTimeout(() => { button.textContent = original; }, 2000);
   } catch {
     const textarea = document.createElement('textarea');
     textarea.value = text;
@@ -25,10 +23,8 @@ async function copyToClipboard(text: string, button: HTMLElement): Promise<void>
     textarea.select();
     document.execCommand('copy');
     document.body.removeChild(textarea);
-    const original = button.textContent;
-    button.textContent = 'Copied!';
-    setTimeout(() => { button.textContent = original; }, 2000);
   }
+  showToast('Letter copied to clipboard');
 }
 
 function replaceGreeting(body: string, name: string): string {
@@ -73,24 +69,30 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
 
     if (cityCount > 0 || countyCount > 0) {
       const statDiv = document.createElement('div');
-      statDiv.className = 'text-[#a3a3a3] text-base mb-6 pb-4 border-b border-[#404040]';
+      statDiv.className = 'stats stats-vertical sm:stats-horizontal w-full bg-base-100 border border-white/10 mb-6';
 
-      const parts: string[] = [];
+      function buildStat(count: number, title: string): HTMLElement {
+        const stat = document.createElement('div');
+        stat.className = 'stat py-3';
+        const value = document.createElement('div');
+        value.className = 'stat-value text-primary text-3xl';
+        value.setAttribute('data-count', String(count));
+        value.textContent = '0';
+        const label = document.createElement('div');
+        label.className = 'stat-title label-mono-compact whitespace-normal';
+        label.textContent = title;
+        stat.append(value, label);
+        return stat;
+      }
 
       if (cityCount > 0) {
         const cityName = cityKey!.split(':')[1];
-        parts.push('<span class="text-[#ef4444] font-semibold" data-count="' + cityCount + '">0</span> cameras in City of ' + titleCase(cityName));
+        statDiv.appendChild(buildStat(cityCount, 'Cameras \u00b7 City of ' + titleCase(cityName)));
       }
-
       if (countyCount > 0) {
         const countyName = countyKey!.split(':')[1];
-        const label = cityCount > 0
-          ? ' in ' + titleCase(countyName) + ' County'
-          : ' cameras in ' + titleCase(countyName) + ' County';
-        parts.push('<span class="text-[#ef4444] font-semibold" data-count="' + countyCount + '">0</span>' + label);
+        statDiv.appendChild(buildStat(countyCount, 'Cameras \u00b7 ' + titleCase(countyName) + ' County'));
       }
-
-      statDiv.innerHTML = parts.join(' <span class="mx-1">\u00b7</span> ');
 
       container.appendChild(statDiv);
 
@@ -106,7 +108,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
     const groupId = 'action-group-' + gi;
 
     const groupDiv = document.createElement('div');
-    groupDiv.className = gi > 0 ? 'mt-8 pt-8 border-t border-[#404040]' : '';
+    groupDiv.className = gi > 0 ? 'mt-8 pt-8 border-t border-white/15' : '';
 
     // Header
     const headerLabel = group.category === 'state'
@@ -135,7 +137,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
     for (let ri = 0; ri < group.reps.length; ri++) {
       const rep = group.reps[ri];
       const repDiv = document.createElement('div');
-      repDiv.className = 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-2';
+      repDiv.className = 'card bg-base-200 border border-white/10 p-4 flex-col sm:flex-row sm:items-center sm:justify-between gap-2';
 
       const infoDiv = document.createElement('div');
       infoDiv.className = 'flex items-start gap-3';
@@ -180,7 +182,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
 
       if (rep.isMatchedDistrict) {
         const badge = document.createElement('span');
-        badge.className = 'text-[#a3a3a3] text-xs font-medium block';
+        badge.className = 'badge badge-warning badge-sm mt-1 w-fit';
         badge.textContent = 'Your district';
         textDiv.appendChild(badge);
       }
@@ -202,7 +204,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
       if (rep.email) {
         const sendBtn = document.createElement('button');
         sendBtn.type = 'button';
-        sendBtn.className = 'bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer inline-flex items-center';
+        sendBtn.className = 'btn btn-primary btn-sm min-h-11';
         sendBtn.textContent = 'Send Email';
         sendBtn.setAttribute('aria-label', 'Send email to ' + rep.name);
         sendBtn.setAttribute('data-group', String(gi));
@@ -232,7 +234,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
     // Group-level buttons for local councils
     if (group.category === 'local') {
       const groupBtnRow = document.createElement('div');
-      groupBtnRow.className = 'flex gap-2 mt-4 pt-4 border-t border-[#404040]';
+      groupBtnRow.className = 'flex gap-2 mt-4 pt-4 border-t border-white/15';
 
       const emailSet = new Set<string>();
       const allEmails: string[] = [];
@@ -246,7 +248,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
       if (allEmails.length > 1) {
         const sendAllBtn = document.createElement('button');
         sendAllBtn.type = 'button';
-        sendAllBtn.className = 'bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer inline-flex items-center';
+        sendAllBtn.className = 'btn btn-primary btn-sm min-h-11';
         sendAllBtn.textContent = 'Email All Members';
         sendAllBtn.setAttribute('aria-label', 'Send email to all ' + group.label + ' members');
         sendAllBtn.setAttribute('data-group', String(gi));
@@ -255,7 +257,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
       }
 
       const copyGroupBtn = document.createElement('button');
-      copyGroupBtn.className = 'bg-[#404040] hover:bg-[#475569] text-[#e2e8f0] font-medium rounded px-4 py-2 text-sm min-h-[44px] transition-colors cursor-pointer';
+      copyGroupBtn.className = 'btn btn-outline btn-sm min-h-11';
       copyGroupBtn.textContent = 'Copy Letter';
       copyGroupBtn.setAttribute('data-group', String(gi));
       copyGroupBtn.setAttribute('data-action', 'copy-local');
@@ -284,7 +286,7 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
 
     const textarea = document.createElement('textarea');
     textarea.id = groupId + '-body';
-    textarea.className = 'bg-[#171717] border border-[#404040] text-[#d4d4d4] rounded p-4 w-full text-sm min-h-[200px] focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4] transition-colors resize-y';
+    textarea.className = 'textarea w-full text-sm min-h-[200px] resize-y';
 
     let prefilledBody = group.body;
     if ((group.category === 'state' || group.category === 'local-matched') && group.reps.length > 0) {
@@ -349,7 +351,7 @@ export function initResultsEventDelegation(localCouncils: LocalCouncils): void {
       window.location.href = buildMailto(allEmails, group.subject, currentBody);
     } else if (action === 'copy-local') {
       const copyText = 'Subject: ' + group.subject + '\n\n' + currentBody;
-      copyToClipboard(copyText, target);
+      copyToClipboard(copyText);
     } else if (action === 'wrong-district') {
       const existingDropdown = target.parentElement?.querySelector('.wrong-district-dropdown');
       if (existingDropdown) {
@@ -364,7 +366,7 @@ export function initResultsEventDelegation(localCouncils: LocalCouncils): void {
       dropdownDiv.className = 'wrong-district-dropdown mt-2 mb-3 flex items-center gap-2';
 
       const sel = document.createElement('select');
-      sel.className = 'bg-[#262626] border border-[#404040] text-white rounded px-3 py-1 text-sm focus:outline-none focus:border-[#d4d4d4] focus:ring-2 focus:ring-[#d4d4d4]';
+      sel.className = 'select select-sm min-h-11 w-fit';
       sel.setAttribute('aria-label', 'Select your district');
       sel.innerHTML = '<option value="">Select district...</option>';
 
