@@ -1,0 +1,790 @@
+<title>DeflockSC Homepage (Rebuild Mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<script>document.documentElement.classList.add('has-js');</script>
+<style>
+  /* ========================================================================
+     DEFLOCK "deflock" THEME TOKENS — inherited verbatim from the locked UI kit.
+     Single dark theme, squared, dossier / surveillance-file look.
+     ===================================================================== */
+  :root {
+    --b3:#0d0d0d;          /* base-300 · deepest / page frame */
+    --b2:#1a1a1a;          /* base-200 · elevated cards / nav */
+    --b1:#171717;          /* base-100 · main surface / recessed wells */
+    --bc:#e8e8e8;          /* base-content */
+    --muted:#9ca3af;       /* muted text */
+    --primary:#dc2626;     /* red CTA */
+    --primary-h:#b91c1c;   /* hover */
+    --pc:#ffffff;          /* text on primary */
+    --amber:#fbbf24;       /* accent / warning */
+    --amber-c:#171717;     /* text on amber */
+    --success:#16a34a;
+    --success-c:#0d0d0d;
+    --info:#38bdf8;
+    --info-c:#0d0d0d;
+    --error:#dc2626;
+    --bord:rgba(255,255,255,0.10);
+    --bord-strong:rgba(255,255,255,0.22);
+    --neutral:#262626;
+
+    --ff-ui:"Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --ff-mono:var(--ff-ui);   /* monospace face fully removed — the "mono" role now maps to Instrument Sans (uppercase + letter-spacing carries the small-label feel) */
+
+    --pad:clamp(1rem, 4vw, 2.25rem);
+    --r-field:0.3rem;
+    --r-box:0.45rem;
+
+    --shell:1120px;        /* homepage content width */
+
+    /* motion — Emil Kowalski "animate" skill curves (transform/opacity only) */
+    --ease-out:cubic-bezier(0.23, 1, 0.32, 1);      /* strong ease-out for UI + entrances */
+    --ease-in-out:cubic-bezier(0.77, 0, 0.175, 1);  /* strong ease-in-out for on-screen movement */
+  }
+
+  * { box-sizing:border-box; }
+
+  html { scroll-behavior:smooth; }
+
+  body {
+    margin:0;
+    background:var(--b3);
+    color:var(--bc);
+    font-family:var(--ff-ui);
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+
+  :focus-visible { outline:2px solid var(--amber); outline-offset:2px; }
+
+  h1,h2,h3,h4 { text-wrap:balance; }
+
+  a { color:var(--amber); text-decoration-thickness:1px; text-underline-offset:2px; }
+
+  .label-mono {
+    font-family:var(--ff-mono);
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    font-size:0.68rem;
+    font-weight:500;
+    color:var(--muted);
+  }
+
+  /* ===== shared component CSS (from kit) ===== */
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:0.5rem;
+    height:2.7rem; padding:0 1.1rem;
+    border:1px solid transparent; border-radius:var(--r-field);
+    font-family:var(--ff-ui); font-size:0.9rem; font-weight:600; letter-spacing:0.005em;
+    line-height:1; color:var(--bc); background:transparent; cursor:pointer; white-space:nowrap;
+    transition:background .15s var(--ease-out), border-color .15s var(--ease-out), color .15s var(--ease-out), transform .16s var(--ease-out);
+  }
+  /* Emil: scale() on press scales the label + icon too, so it reads as a physical press */
+  .btn:active { transform:scale(0.97); }
+  .btn-primary { background:var(--primary); border-color:var(--primary); color:var(--pc); }
+  .btn-primary:hover { background:var(--primary-h); border-color:var(--primary-h); }
+  .btn-neutral { background:var(--neutral); border-color:var(--bord-strong); color:var(--bc); }
+  .btn-neutral:hover { background:#303030; }
+  .btn-outline { background:transparent; border-color:var(--bord-strong); color:var(--bc); }
+  .btn-outline:hover { background:rgba(255,255,255,0.06); border-color:var(--bc); }
+  .btn-ghost { background:transparent; border-color:transparent; color:var(--bc); }
+  .btn-ghost:hover { background:rgba(255,255,255,0.07); }
+  .btn-lg { height:3.1rem; padding:0 1.5rem; font-size:1rem; }
+  .btn-sm { height:2.2rem; padding:0 0.8rem; font-size:0.8rem; }
+  .btn-block { width:100%; }
+
+  .badge {
+    display:inline-flex; align-items:center; gap:0.35rem;
+    height:1.55rem; padding:0 0.55rem;
+    border:1px solid transparent; border-radius:var(--r-field);
+    font-family:var(--ff-mono); font-size:0.66rem; font-weight:500;
+    letter-spacing:0.08em; text-transform:uppercase; white-space:nowrap;
+  }
+  .badge-primary { background:var(--primary); color:var(--pc); border-color:var(--primary); }
+  .badge-warning { background:var(--amber); color:var(--amber-c); border-color:var(--amber); }
+  .badge-outline { background:transparent; color:var(--muted); border-color:var(--bord-strong); }
+
+  .status { display:inline-flex; align-items:center; gap:0.55rem; font-family:var(--ff-mono); font-size:0.72rem; letter-spacing:0.06em; color:var(--bc); }
+  .status-dot { position:relative; width:9px; height:9px; border-radius:50%; background:var(--primary); flex:none; }
+  .status-dot::after { content:""; position:absolute; inset:-4px; border-radius:50%; border:1px solid var(--primary); animation:ping 1.6s cubic-bezier(0,0,0.2,1) infinite; }
+  @keyframes ping { 0% { transform:scale(0.6); opacity:0.9; } 80%,100% { transform:scale(1.5); opacity:0; } }
+
+  .card {
+    background:var(--b2); border:1px solid var(--bord); border-radius:var(--r-field);
+    padding:1.05rem 1.1rem; display:flex; flex-direction:column; gap:0.7rem;
+  }
+  .card h3 { margin:0; font-size:1rem; font-weight:600; letter-spacing:-0.005em; }
+  .card .meta { font-family:var(--ff-mono); font-size:0.68rem; color:var(--muted); letter-spacing:0.03em; }
+  .card .desc { margin:0; color:var(--muted); font-size:0.88rem; }
+  .card-link { cursor:pointer; transition:border-color .18s var(--ease-out), background .18s var(--ease-out), transform .18s var(--ease-out); }
+  .card-link:hover { border-color:var(--bord-strong); background:#1e1e1e; }
+  .card-link .link-head { display:flex; align-items:center; justify-content:space-between; gap:0.6rem; }
+  .card-link .arrow { color:var(--primary); font-size:1.1rem; transition:transform .18s var(--ease-out); }
+  /* Emil: gate the lift + arrow slide to hover-capable pointers so touch devices don't get a stuck hover state */
+  @media (hover:hover) {
+    .card-link:hover { transform:translateY(-2px); }
+    .card-link:hover .arrow { transform:translateX(4px); }
+  }
+  .chip-row { display:flex; gap:0.4rem; flex-wrap:wrap; }
+
+  /* ===== homepage skeleton ===== */
+  .shell { max-width:var(--shell); margin:0 auto; padding-inline:var(--pad); }
+
+  /* review banner */
+  .review-banner {
+    background:var(--b2);
+    border-bottom:1px solid var(--bord);
+    color:var(--muted);
+  }
+  .review-banner .inner {
+    max-width:var(--shell); margin:0 auto; padding:0.55rem var(--pad);
+    display:flex; align-items:center; gap:0.7rem; flex-wrap:wrap;
+    font-family:var(--ff-mono); font-size:0.68rem; letter-spacing:0.03em;
+  }
+  .review-banner .dot { width:7px; height:7px; border-radius:50%; background:var(--amber); flex:none; box-shadow:0 0 0 3px rgba(251,191,36,0.15); }
+  .review-banner b { color:var(--bc); font-weight:500; }
+
+  /* nav */
+  .nav {
+    position:sticky; top:0; z-index:40;
+    background:rgba(13,13,13,0.82);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--bord);
+  }
+  .nav .inner {
+    max-width:var(--shell); margin:0 auto; padding:0.7rem var(--pad);
+    display:flex; align-items:center; gap:1rem;
+  }
+  .brand { display:flex; align-items:center; gap:0.55rem; font-weight:600; letter-spacing:0.01em; font-size:1.02rem; }
+  .brand .logo-dot { width:11px; height:11px; border-radius:50%; background:var(--primary); flex:none; box-shadow:0 0 0 3px rgba(220,38,38,0.18); }
+  .nav-links { display:flex; gap:1.3rem; margin-left:1.4rem; }
+  .nav-links a { color:var(--muted); text-decoration:none; font-size:0.88rem; transition:color .15s ease; }
+  .nav-links a:hover { color:var(--bc); }
+  .nav .spacer { flex:1 1 auto; }
+  @media (max-width:760px){ .nav-links { display:none; } }
+
+  /* generic section rhythm */
+  section.band { padding-block:clamp(3rem, 7vw, 5.5rem); border-top:1px solid var(--bord); position:relative; }
+  section.band.b1 { background:var(--b1); }
+  section.band.b2 { background:var(--b2); }
+  section.band.b3 { background:var(--b3); }
+  .sec-title { margin:0 0 0.75rem; font-size:clamp(1.5rem, 3.4vw, 2.15rem); font-weight:600; letter-spacing:-0.015em; line-height:1.12; }
+  .sec-lead { margin:0; color:var(--muted); font-size:1.02rem; max-width:60ch; }
+  .sec-head-wrap { max-width:62ch; margin-bottom:2.4rem; }
+
+  /* ===== 1 · HERO ===== */
+  .hero { position:relative; overflow:hidden; background:var(--b3); border-bottom:1px solid var(--bord); }
+  .hero-scene { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+  /* faux light-cone sweep */
+  .cone {
+    position:absolute; top:-14%; width:44vw; height:150%;
+    background:linear-gradient(180deg, rgba(220,38,38,0.16), rgba(220,38,38,0.02) 55%, transparent 72%);
+    filter:blur(6px);
+    transform-origin:top center;
+    mix-blend-mode:screen;
+    opacity:0.9;
+  }
+  .cone.c1 { left:8%;  transform:rotate(9deg);  animation:sweepA 11s ease-in-out infinite alternate; }
+  .cone.c2 { right:6%; transform:rotate(-11deg); animation:sweepB 13s ease-in-out infinite alternate; }
+  .cone.c3 { left:38%; width:34vw; background:linear-gradient(180deg, rgba(251,191,36,0.08), transparent 60%); transform:rotate(-3deg); animation:sweepA 16s ease-in-out infinite alternate; }
+  @keyframes sweepA { from { transform:rotate(6deg); } to { transform:rotate(13deg); } }
+  @keyframes sweepB { from { transform:rotate(-8deg); } to { transform:rotate(-15deg); } }
+  .hero-grid-lines {
+    position:absolute; inset:0;
+    background-image:linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:46px 46px;
+    mask-image:radial-gradient(120% 90% at 70% 0%, #000 20%, transparent 75%);
+    -webkit-mask-image:radial-gradient(120% 90% at 70% 0%, #000 20%, transparent 75%);
+  }
+  @media (max-width:760px){ .cone { width:70vw; } }
+
+  .hero-inner { position:relative; z-index:2; max-width:var(--shell); margin:0 auto; padding:clamp(4rem,10vw,7.5rem) var(--pad) clamp(3.5rem,7vw,5.5rem); }
+  /* unobtrusive note that the on-screen hero art is a stand-in for the live animated scene */
+  .hero-standin { position:absolute; z-index:2; right:var(--pad); bottom:0.85rem; max-width:26ch; text-align:right;
+    font-size:0.62rem; line-height:1.4; letter-spacing:0.02em; color:var(--muted); opacity:0.72; }
+  @media (max-width:760px){ .hero-standin { position:static; margin-top:1.6rem; text-align:left; max-width:46ch; opacity:0.66; } }
+  .hero h1 {
+    margin:0 0 1.3rem; max-width:20ch;
+    font-size:clamp(2.05rem, 5.4vw, 3.5rem);
+    font-weight:700; letter-spacing:-0.025em; line-height:1.06;
+  }
+  .hero h1 .flock { color:var(--primary); }
+  .hero-sub { margin:0 0 0.7rem; font-size:clamp(1.1rem,2.3vw,1.4rem); font-weight:500; max-width:34ch; }
+  .hero-sub .n { color:var(--primary); font-variant-numeric:tabular-nums; }
+  .hero-support { margin:0 0 2.1rem; color:var(--muted); font-size:1.02rem; max-width:52ch; }
+  .hero-cta { display:flex; gap:0.8rem; flex-wrap:wrap; align-items:center; }
+  .hero-cta .aside { font-family:var(--ff-mono); font-size:0.7rem; color:var(--muted); letter-spacing:0.04em; }
+
+  /* ===== 3 · IMPACT band ===== */
+  .impact { background:var(--b3); }
+  /* three stats, one row, iPad-clean: 3 columns held from desktop through phone.
+     Type shrinks rather than wrapping to a new column count, so there is no
+     2-col iPad divider bug — the vertical dividers stay correct at every width. */
+  .impact .impact-grid {
+    display:grid; grid-template-columns:repeat(3, 1fr);
+    border:1px solid var(--bord); background:var(--b1);
+  }
+  .istat { padding:1.8rem 1.4rem; border-left:1px solid var(--bord); }
+  .istat:first-child { border-left:0; }
+  .istat .v { font-size:clamp(1.5rem,4.6vw,2.7rem); font-weight:700; line-height:1.05; color:var(--primary); font-variant-numeric:tabular-nums; letter-spacing:-0.02em; }
+  .istat .t { margin-top:0.7rem; font-family:var(--ff-mono); font-size:0.63rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); line-height:1.5; }
+  .istat.zero .v { color:var(--amber); }
+  /* framing stats closing the ask section: why councils must act */
+  .ask-frame {
+    display:grid; grid-template-columns:repeat(2,1fr);
+    border:1px solid var(--bord); background:var(--b1);
+    border-radius:var(--r-box); overflow:hidden; margin-top:2.4rem;
+  }
+  .ask-frame .istat { padding:1.5rem 1.4rem; }
+  /* phone: keep both bands from wrapping — shrink type + padding, hold the columns */
+  @media (max-width:560px){
+    .istat { padding:1.15rem 0.7rem; }
+    .istat .v { font-size:clamp(1.15rem,5.4vw,1.7rem); }
+    .istat .t { font-size:0.55rem; letter-spacing:0.06em; margin-top:0.5rem; }
+    .ask-frame .istat { padding:1.2rem 0.9rem; }
+  }
+
+  /* ===== 4 · MAP ===== */
+  .map-layout { display:grid; grid-template-columns:1fr; gap:1.6rem; }
+  .map-frame {
+    position:relative; border:1px solid var(--bord-strong); border-radius:var(--r-box); overflow:hidden;
+    /* width:100% keeps the width definite (= grid track) so aspect-ratio derives the
+       HEIGHT from it. Without this, aspect-ratio + min-height derive WIDTH from the
+       forced 320px height (~569px), overflowing narrow tracks and scrolling the body. */
+    width:100%; min-width:0; aspect-ratio:16/9; min-height:320px;
+    background:
+      radial-gradient(120% 130% at 30% 20%, #1c1c1c 0%, #141414 55%, var(--b3) 100%);
+  }
+  .map-frame .basemap-lines { position:absolute; inset:0; opacity:0.5;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size:38px 38px; }
+  .map-frame .roads { position:absolute; inset:0; }
+  .map-frame .road { position:absolute; background:rgba(255,255,255,0.08); height:2px; }
+  .map-label { position:absolute; left:18px; bottom:14px; font-family:var(--ff-mono); font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
+  .map-badge { position:absolute; right:14px; top:14px; }
+  .dot-cam { position:absolute; width:9px; height:9px; border-radius:50%; background:var(--primary); box-shadow:0 0 0 3px rgba(220,38,38,0.18), 0 0 8px rgba(220,38,38,0.6); }
+  .dot-cluster { position:absolute; width:30px; height:30px; border-radius:50%; background:rgba(220,38,38,0.9); color:#fff; display:grid; place-content:center; font-family:var(--ff-mono); font-size:0.72rem; box-shadow:0 0 0 5px rgba(220,38,38,0.18); }
+  .cone-mark { position:absolute; width:0; height:0; }
+  .cone-mark::before { content:""; position:absolute; left:0; top:0; width:0; height:0;
+    border-left:14px solid transparent; border-right:14px solid transparent; border-bottom:26px solid rgba(220,38,38,0.28); transform-origin:center; }
+  .cone-mark::after { content:""; position:absolute; left:-3px; top:20px; width:6px; height:6px; border-radius:50%; background:var(--primary); box-shadow:0 0 6px rgba(220,38,38,0.8); }
+  .map-side { display:flex; flex-direction:column; gap:0.9rem; }
+  .map-statline { font-family:var(--ff-mono); font-size:0.8rem; color:var(--bc); letter-spacing:0.03em; }
+  .map-statline .n { color:var(--primary); font-variant-numeric:tabular-nums; }
+  .map-caption { font-size:0.85rem; color:var(--muted); }
+  @media (min-width:900px){ .map-layout { grid-template-columns:1.7fr 1fr; align-items:center; } }
+
+  /* ===== 5 · LEGISLATION (deck card styling) ===== */
+  .oconee {
+    background:var(--b2); border:1px solid var(--bord);
+    border-radius:var(--r-box); padding:1.3rem 1.4rem; margin-bottom:2.2rem;
+    display:flex; gap:1.1rem; align-items:flex-start;
+  }
+  .oconee .k { flex:none; }
+  .oconee p { margin:0; font-size:0.98rem; color:var(--bc); }
+  .demands { display:grid; grid-template-columns:repeat(2,1fr); gap:0.9rem; }
+  /* demand cards mirror the deck's provisions cards: the Tabler icon sits in a
+     bordered well (leading visual, where the number used to hang), the title
+     beside it, and the description below spanning the card. */
+  .demand { display:flex; flex-direction:column; gap:0.7rem; padding:1.15rem 1.3rem; background:var(--b2); border:1px solid var(--bord); border-radius:var(--r-box); }
+  .demand .dhead { display:flex; align-items:center; gap:0.85rem; }
+  .demand .dicon-box { display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; border:1px solid var(--bord); border-radius:var(--r-box); background:var(--b1); color:var(--primary); }
+  .demand .dicon { flex:none; width:23px; height:23px; }
+  .demand h4 { margin:0; font-size:1rem; font-weight:600; letter-spacing:-0.005em; color:var(--bc); line-height:1.25; }
+  .demand p { margin:0; color:var(--muted); font-size:0.86rem; line-height:1.4; }
+  .demand .demand-cite { font-family:var(--ff-mono); font-size:0.68rem; color:var(--muted); letter-spacing:0.03em; margin-top:0.15rem; }
+  .demand .scope { margin-left:auto; flex:none; }
+  @media (max-width:720px){ .demands { grid-template-columns:1fr; } .oconee { flex-direction:column; } }
+
+  /* ===== 6 · TAKE ACTION ===== */
+  .action-hero { display:grid; grid-template-columns:1fr; gap:1.4rem; margin-bottom:2.8rem; }
+  .action-hero .cta-row { display:flex; gap:0.8rem; flex-wrap:wrap; align-items:center; }
+  .action-hero .brief-note { font-size:0.9rem; color:var(--muted); }
+
+  .toolkit-row { display:grid; grid-template-columns:repeat(4,1fr); gap:0.9rem; margin-top:0.4rem; }
+  @media (max-width:900px){ .toolkit-row { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:480px){ .toolkit-row { grid-template-columns:1fr; } }
+
+  /* ===== 7 · EVENTS ===== */
+  .events-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  @media (max-width:840px){ .events-grid { grid-template-columns:1fr; } }
+  .event-card { display:flex; flex-direction:column; gap:0.85rem; }
+  .event-date { display:flex; align-items:baseline; gap:0.5rem; font-family:var(--ff-mono); }
+  .event-date .d { font-size:1.5rem; color:var(--primary); font-weight:500; letter-spacing:-0.01em; }
+  .event-date .m { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); }
+  .event-card .loc { font-size:0.82rem; color:var(--muted); display:flex; align-items:center; gap:0.4rem; }
+
+  /* ===== 8 · BLOG ===== */
+  .post-card { display:flex; flex-direction:column; gap:0.7rem; min-height:100%; }
+  .post-thumb { aspect-ratio:16/10; border-radius:var(--r-field); border:1px solid var(--bord);
+    background:linear-gradient(135deg, #201414, #171717 60%);
+    display:grid; place-content:center; position:relative; overflow:hidden; }
+  .post-thumb::after { content:""; position:absolute; inset:0;
+    background-image:linear-gradient(rgba(220,38,38,0.05) 1px, transparent 1px); background-size:100% 8px; }
+  .post-thumb .lens { width:34px; height:34px; border-radius:50%; border:2px solid rgba(220,38,38,0.6); position:relative; z-index:1; }
+  .post-thumb .lens::after { content:""; position:absolute; inset:8px; border-radius:50%; background:rgba(220,38,38,0.4); }
+  .post-card h3 { margin:0; font-size:1rem; font-weight:600; letter-spacing:-0.005em; line-height:1.25; }
+  .post-card .read { margin-top:auto; font-family:var(--ff-mono); font-size:0.7rem; color:var(--primary); letter-spacing:0.06em; text-transform:uppercase; }
+
+  .carousel-wrap { position:relative; }
+  .carousel { display:flex; gap:1rem; overflow-x:auto; padding-bottom:0.8rem; scroll-snap-type:x mandatory; scrollbar-width:thin; }
+  .carousel::-webkit-scrollbar { height:8px; }
+  .carousel::-webkit-scrollbar-thumb { background:var(--bord-strong); border-radius:4px; }
+  .carousel .post-card { flex:0 0 280px; scroll-snap-align:start; }
+  .carousel-hint { font-family:var(--ff-mono); font-size:0.66rem; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-top:0.6rem; display:flex; align-items:center; gap:0.5rem; }
+
+  /* ===== 9 · SIGNAL ===== */
+  .signal { background:var(--b1); border:1px solid var(--bord); border-radius:var(--r-box); padding:clamp(1.8rem,4vw,2.8rem); text-align:center; max-width:640px; margin:0 auto; }
+  .signal h2 { margin:0 0 0.7rem; font-size:clamp(1.5rem,3vw,2rem); font-weight:600; letter-spacing:-0.015em; }
+  .signal p.lead { margin:0 auto 1.6rem; color:var(--muted); max-width:46ch; }
+  .signal .safety { margin-top:1.5rem; padding:0.9rem 1rem; background:var(--b2); border:1px solid var(--bord); border-radius:var(--r-field); text-align:left; font-size:0.85rem; color:var(--muted); }
+  .signal .safety .lead-in { color:var(--amber); }
+
+  /* footer */
+  .foot { background:var(--b3); border-top:1px solid var(--bord); }
+  .foot .inner { max-width:var(--shell); margin:0 auto; padding:2.4rem var(--pad); display:flex; gap:1.2rem; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+  .foot .brand { font-size:0.95rem; }
+  .foot .cols { display:flex; gap:2rem; flex-wrap:wrap; }
+  .foot a { color:var(--muted); text-decoration:none; font-size:0.85rem; }
+  .foot a:hover { color:var(--bc); }
+  .foot .fine { width:100%; font-family:var(--ff-mono); font-size:0.63rem; color:var(--muted); letter-spacing:0.03em; padding-top:1.2rem; border-top:1px solid var(--bord); }
+
+  .see-all { margin-top:1.6rem; }
+
+  /* ===== MOTION: scroll-reveal entrances (Emil: transform + opacity only, ease-out, fire once) =====
+     Only hidden when JS is present (.has-js), so content never stays invisible if the observer never runs. */
+  .has-js .reveal {
+    opacity:0; transform:translateY(16px);
+    transition:opacity .6s var(--ease-out), transform .6s var(--ease-out);
+    will-change:opacity, transform;
+  }
+  .reveal.is-visible { opacity:1; transform:none; }
+
+  /* staggered group entrance — children rise in sequence (Emil: 30–80ms stagger) */
+  .has-js .reveal-group > * {
+    opacity:0; transform:translateY(16px);
+    transition:opacity .55s var(--ease-out), transform .55s var(--ease-out);
+    will-change:opacity, transform;
+  }
+  .reveal-group.is-visible > * { opacity:1; transform:none; }
+  .reveal-group.is-visible > *:nth-child(1) { transition-delay:0ms; }
+  .reveal-group.is-visible > *:nth-child(2) { transition-delay:60ms; }
+  .reveal-group.is-visible > *:nth-child(3) { transition-delay:120ms; }
+  .reveal-group.is-visible > *:nth-child(4) { transition-delay:180ms; }
+  .reveal-group.is-visible > *:nth-child(5) { transition-delay:240ms; }
+  .reveal-group.is-visible > *:nth-child(6) { transition-delay:300ms; }
+
+  /* hero page-load entrance — one orchestrated moment, gentle rise + fade, staggered */
+  .hero-inner > * { animation:heroIn .62s var(--ease-out) both; }
+  .hero-inner > h1 { animation-delay:.05s; }
+  .hero-inner > .hero-sub { animation-delay:.13s; }
+  .hero-inner > .hero-support { animation-delay:.21s; }
+  .hero-inner > .hero-cta { animation-delay:.29s; }
+  @keyframes heroIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+
+  @media (prefers-reduced-motion:reduce) {
+    html { scroll-behavior:auto; }
+    *, *::before, *::after { animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+    /* all new motion is disabled/instant: reveals land at their final state, the hero shows immediately,
+       count-ups are set to their final value in JS, and the flow-dot trains are removed entirely. */
+    .has-js .reveal, .has-js .reveal-group > *, .hero-inner > * { opacity:1 !important; transform:none !important; }
+  }
+</style>
+
+<!-- ============ REVIEW BANNER ============ -->
+<div class="review-banner">
+  <div class="inner">
+    <span class="dot" aria-hidden="true"></span>
+    <span><b>Rebuild mockup for review</b>, not the live site.</span>
+  </div>
+</div>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" aria-label="Primary">
+  <div class="inner">
+    <span class="brand"><span class="logo-dot" aria-hidden="true"></span>DeflockSC</span>
+    <span class="nav-links">
+      <a href="#blog">Blog</a>
+      <a href="#map">Map</a>
+      <a href="#legislation">The ask</a>
+      <a href="#events">Events</a>
+    </span>
+    <span class="spacer"></span>
+    <button class="btn btn-primary btn-sm">Contact Your Reps</button>
+  </div>
+</nav>
+
+<!-- ============ 1 · HERO ============ -->
+<header class="hero">
+  <div class="hero-scene" aria-hidden="true">
+    <div class="hero-grid-lines"></div>
+    <div class="cone c1"></div>
+    <div class="cone c3"></div>
+    <div class="cone c2"></div>
+  </div>
+  <div class="hero-inner">
+    <h1>In 1984, the Thought Police weren't looking for criminals. Neither is <span class="flock">Flock Safety</span>.</h1>
+    <p class="hero-sub"><span class="n">99%</span> of the plates they scan belong to people suspected of nothing.</p>
+    <p class="hero-support">South Carolina has more than 1,600 of these cameras logging your daily movements, and not one state law that says who can look, or for how long they keep it.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary btn-lg">Contact Your Reps</button>
+      <button class="btn btn-outline btn-lg">See the map</button>
+    </div>
+  </div>
+  <p class="hero-standin">Stand-in: the live hero keeps its animated camera + light-cone effect.</p>
+</header>
+
+<!-- ============ 8 · BLOG ============ -->
+<section class="band b2" id="blog">
+  <div class="shell">
+    <div class="sec-head-wrap reveal">
+      <h2 class="sec-title">From the blog</h2>
+    </div>
+
+    <div class="carousel-wrap reveal">
+        <div class="carousel" tabindex="0" aria-label="Blog posts, horizontal scroller">
+          <article class="card post-card">
+            <div class="post-thumb" aria-hidden="true"><div class="lens"></div></div>
+            <span class="label-mono" style="font-size:0.6rem;">Investigation</span>
+            <h3>Greenville's Flock Contracts</h3>
+            <span class="read">Read →</span>
+          </article>
+          <article class="card post-card">
+            <div class="post-thumb" aria-hidden="true"><div class="lens"></div></div>
+            <span class="label-mono" style="font-size:0.6rem;">Courts</span>
+            <h3>SCPIF v. SLED</h3>
+            <span class="read">Read →</span>
+          </article>
+          <article class="card post-card">
+            <div class="post-thumb" aria-hidden="true"><div class="lens"></div></div>
+            <span class="label-mono" style="font-size:0.6rem;">Law</span>
+            <h3>SC Has No License Plate Camera Law</h3>
+            <span class="read">Read →</span>
+          </article>
+          <article class="card post-card">
+            <div class="post-thumb" aria-hidden="true"><div class="lens"></div></div>
+            <span class="label-mono" style="font-size:0.6rem;">Legislation</span>
+            <h3>H4675: SC's Strongest ALPR Bill</h3>
+            <span class="read">Read →</span>
+          </article>
+          <article class="card post-card">
+            <div class="post-thumb" aria-hidden="true"><div class="lens"></div></div>
+            <span class="label-mono" style="font-size:0.6rem;">Guide</span>
+            <h3>How to Fight ALPR Surveillance</h3>
+            <span class="read">Read →</span>
+          </article>
+        </div>
+        <div class="carousel-hint"><span aria-hidden="true">↔</span> Scroll for more</div>
+      </div>
+  </div>
+</section>
+
+<!-- ============ 3 · IMPACT BAND ============ -->
+<section class="band b3 impact">
+  <div class="shell">
+    <div class="sec-head-wrap reveal">
+      <h2 class="sec-title">The scale of it, in South Carolina</h2>
+    </div>
+    <div class="impact-grid reveal-group">
+      <div class="istat">
+        <div class="v">1,676</div>
+        <div class="t">ALPR cameras tracked in SC</div>
+      </div>
+      <div class="istat">
+        <div class="v">110+</div>
+        <div class="t">SC agencies running them</div>
+      </div>
+      <div class="istat">
+        <div class="v">422M+</div>
+        <div class="t">Plate reads · SLED, 2019–22</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4 · MAP ============ -->
+<section class="band b1" id="map">
+  <div class="shell">
+    <div class="sec-head-wrap reveal">
+      <h2 class="sec-title">These cameras are watching your South Carolina town right now.</h2>
+    </div>
+    <div class="map-layout reveal">
+      <div class="map-frame" role="img" aria-label="Stand-in for the live South Carolina camera map: red camera clusters scattered across the state.">
+        <div class="basemap-lines"></div>
+        <div class="roads" aria-hidden="true">
+          <div class="road" style="left:6%; top:34%; width:52%; transform:rotate(-8deg);"></div>
+          <div class="road" style="left:30%; top:20%; width:60%; transform:rotate(14deg);"></div>
+          <div class="road" style="left:12%; top:66%; width:70%; transform:rotate(4deg);"></div>
+          <div class="road" style="left:44%; top:8%; width:3px; height:74%; transform:rotate(6deg);"></div>
+        </div>
+        <!-- clusters + cams -->
+        <div class="dot-cluster" style="left:20%; top:30%;">214</div>
+        <div class="dot-cluster" style="left:56%; top:52%;">88</div>
+        <div class="dot-cluster" style="left:70%; top:70%; width:24px; height:24px; font-size:0.62rem;">41</div>
+        <div class="dot-cam" style="left:33%; top:44%;"></div>
+        <div class="dot-cam" style="left:41%; top:58%;"></div>
+        <div class="dot-cam" style="left:48%; top:36%;"></div>
+        <div class="dot-cam" style="left:62%; top:40%;"></div>
+        <div class="dot-cam" style="left:28%; top:62%;"></div>
+        <div class="dot-cam" style="left:78%; top:54%;"></div>
+        <div class="dot-cam" style="left:15%; top:48%;"></div>
+        <div class="cone-mark" style="left:52%; top:64%; transform:rotate(30deg);"></div>
+        <div class="cone-mark" style="left:38%; top:28%; transform:rotate(-40deg);"></div>
+        <span class="map-badge badge badge-primary">Stand-in</span>
+        <div class="map-label">South Carolina</div>
+      </div>
+      <div class="map-side">
+        <div class="map-statline"><span class="n">1,676</span> cameras · <span class="n">37</span> jurisdictions</div>
+        <p class="map-caption">On the real site this is the live, interactive MapLibre map: pan across the state, tap any dot to see the vendor, operating agency, and direction each camera faces.</p>
+        <div><button class="btn btn-outline">Open the full map</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 · LEGISLATION / ORDINANCE WISHLIST ============ -->
+<section class="band b2" id="legislation">
+  <div class="shell">
+    <div class="sec-head-wrap reveal">
+      <h2 class="sec-title">What we're asking every SC council to pass.</h2>
+    </div>
+    <div class="oconee reveal">
+      <span class="k badge badge-warning">First in SC</span>
+      <p>Oconee County is advancing South Carolina's first ordinance of its kind: "Protection from Mass Surveillance." It cleared its first reading 4–1 on Aug 18, 2026, with the final vote set for Sept 15. Here are the provisions we've modeled on it for every SC council, two of them tailored to city or county authority.</p>
+    </div>
+    <div class="demands reveal-group">
+      <div class="demand">
+        <div class="dhead"><span class="dicon-box"><svg class="dicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4z" /><path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5" /></svg></span><h4>Define the problem by capability</h4></div><p>It never names Flock: a system is covered when it logs people or vehicles in public and can build a searchable location history, track across places, run facial recognition, or share to an outside network, while a basic hot-list plate check is carved out.</p>
+        <span class="demand-cite">Oconee § 2-502</span>
+      </div>
+      <div class="demand">
+        <div class="dhead"><span class="dicon-box"><svg class="dicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9.88 9.878a3 3 0 1 0 4.242 4.243m.58 -3.425a3.012 3.012 0 0 0 -1.412 -1.405" /><path d="M10 6h9a2 2 0 0 1 2 2v8c0 .294 -.064 .574 -.178 .825m-2.822 1.175h-13a2 2 0 0 1 -2 -2v-8a2 2 0 0 1 2 -2h1" /><path d="M18 12l.01 0" /><path d="M6 12l.01 0" /><path d="M3 3l18 18" /></svg></span><h4>Keep public money and property out of it</h4></div><p>No public funds, subscriptions, power, or communications may support a covered system, and none of it may sit on public property or road rights-of-way.</p>
+        <span class="demand-cite">Oconee §§ 2-504 to 506</span>
+      </div>
+      <div class="demand">
+        <div class="dhead"><span class="dicon-box"><svg class="dicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M12 16m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg></span><h4>Set a firm removal timeline</h4></div><p>For a system already in place, outside data-sharing and funded connections stop within 10 business days of notice and the equipment comes down within 30, turning a pause into a removal on a fixed schedule.</p>
+        <span class="demand-cite">Oconee § 2-507</span>
+      </div>
+      <div class="demand">
+        <div class="dhead"><span class="dicon-box"><svg class="dicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697" /><path d="M18 14v4h4" /><path d="M18 11v-4a2 2 0 0 0 -2 -2h-2" /><path d="M8 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2" /><path d="M14 18a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M8 11h4" /><path d="M8 15h3" /></svg></span><h4>Report publicly, and enforce it</h4></div><p>The policy is administered, reported in public once a year, and backed by defined remedies when the rules are broken, so it stays accountable to the people it covers.</p>
+        <span class="demand-cite">Oconee §§ 2-514 to 515</span>
+      </div>
+      <div class="demand">
+        <div class="dhead"><span class="dicon-box"><svg class="dicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M12 21h-5a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v4.5" /><path d="M16.5 17.5m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0" /><path d="M18.5 19.5l2.5 2.5" /></svg></span><h4>Publish the audit logs</h4><span class="badge badge-outline scope">City</span></div><p>Post a plain public record of every search on a regular schedule, who ran it, when, and the reason they gave, so audits catch misuse without waiting for a complaint.</p>
+        <span class="demand-cite">A city addition, beyond Oconee</span>
+      </div>
+      <div class="demand">
+        <div class="dhead"><span class="dicon-box"><svg class="dicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21h18" /><path d="M6 21v-15" /><path d="M7.18 3.175c.25 -.112 .528 -.175 .82 -.175h8a2 2 0 0 1 2 2v9" /><path d="M18 18v3" /><path d="M3 3l18 18" /></svg></span><h4>Close the side doors</h4><span class="badge badge-outline scope">County</span></div><p>The county can condition its discretionary money to towns, its accommodations-tax funds, and its sponsored events on the same rule, and bar anyone from routing the system through a nonprofit or festival committee to dodge it.</p>
+        <span class="demand-cite">Oconee §§ 2-508 to 510, 2-513</span>
+      </div>
+    </div>
+    <div class="ask-frame reveal">
+      <div class="istat zero">
+        <div class="v">0</div>
+        <div class="t">State laws regulating ALPR</div>
+      </div>
+      <div class="istat">
+        <div class="v">80+</div>
+        <div class="t">Communities have removed or rejected Flock nationwide</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6 · TAKE ACTION ============ -->
+<section class="band b3" id="act">
+  <div class="shell">
+    <div class="sec-head-wrap reveal">
+      <h2 class="sec-title">The most powerful thing you can do: speak at your city and county council.</h2>
+      <p class="sec-lead">A camera contract is decided in a room you're allowed to stand up in. Find who represents you, then show up: three minutes of public comment moves more than a thousand clicks.</p>
+    </div>
+
+    <div class="action-hero reveal">
+      <div class="cta-row">
+        <button class="btn btn-primary btn-lg">Find your council</button>
+        <button class="btn btn-outline btn-lg">Grab the one-page council brief</button>
+      </div>
+      <p class="brief-note">The Contact Your Reps flow matches your address to your city and county council in seconds. Print the one-page brief and hand it across the dais: it's plain-language, sourced, and stands on its own.</p>
+    </div>
+
+    <!-- TOOLKIT: four action cards -->
+    <div class="toolkit-row reveal">
+        <article class="card card-link" tabindex="0">
+          <div class="link-head"><h3>FOIA templates</h3><span class="arrow" aria-hidden="true">→</span></div>
+          <p class="desc">Ready-to-send public-records letters for any SC agency running Flock.</p>
+          <div class="chip-row"><span class="badge badge-outline">Templates</span></div>
+        </article>
+        <article class="card card-link" tabindex="0">
+          <div class="link-head"><h3>Public-comment scripts</h3><span class="arrow" aria-hidden="true">→</span></div>
+          <p class="desc">Three-minute remarks you can adapt and read straight from the podium.</p>
+          <div class="chip-row"><span class="badge badge-outline">Scripts</span></div>
+        </article>
+        <article class="card card-link" tabindex="0">
+          <div class="link-head"><h3>Outreach materials</h3><span class="arrow" aria-hidden="true">→</span></div>
+          <p class="desc">Flyers, briefs, and social graphics to rally your neighbors before the vote.</p>
+          <div class="chip-row"><span class="badge badge-outline">Print + social</span></div>
+        </article>
+        <article class="card card-link" tabindex="0">
+          <div class="link-head"><h3>Know your rights</h3><span class="arrow" aria-hidden="true">→</span></div>
+          <p class="desc">What SC law does and doesn't allow, and what to say when you're recording in public.</p>
+          <div class="chip-row"><span class="badge badge-outline">Legal</span></div>
+        </article>
+      </div>
+  </div>
+</section>
+
+<!-- ============ 7 · EVENTS ============ -->
+<section class="band b1" id="events">
+  <div class="shell">
+    <div class="sec-head-wrap reveal">
+      <h2 class="sec-title">Upcoming events: show up.</h2>
+      <p class="sec-lead">The room is where it's decided. Here's where to be next.</p>
+    </div>
+    <div class="events-grid reveal-group">
+      <article class="card event-card">
+        <div class="event-date"><span class="d">15</span><span class="m">Sep 2026</span></div>
+        <span class="badge badge-warning">Council vote</span>
+        <h3 style="margin:0;font-size:1.05rem;">Oconee County Council: final reading</h3>
+        <p class="desc" style="margin:0;">The decisive vote on SC's first "Protection from Mass Surveillance" ordinance. Public comment before the vote.</p>
+        <span class="loc" aria-hidden="true">📍 Walhalla, SC · 6:00 PM</span>
+      </article>
+      <article class="card event-card">
+        <div class="event-date"><span class="d">22</span><span class="m">Sep 2026</span></div>
+        <span class="badge badge-outline">Public hearing</span>
+        <h3 style="margin:0;font-size:1.05rem;">Greenville City: camera contract hearing</h3>
+        <p class="desc" style="margin:0;">Renewal of the city's Flock agreement is on the agenda. Sign up to speak at the clerk's desk.</p>
+        <span class="loc" aria-hidden="true">📍 Greenville City Hall · 5:30 PM</span>
+      </article>
+      <article class="card event-card">
+        <div class="event-date"><span class="d">04</span><span class="m">Oct 2026</span></div>
+        <span class="badge badge-outline">Tabling</span>
+        <h3 style="margin:0;font-size:1.05rem;">DeflockSC table: Saturday Market</h3>
+        <p class="desc" style="margin:0;">Come learn the map, grab a brief, and sign up to get notified before your council votes.</p>
+        <span class="loc" aria-hidden="true">📍 Main St, Greenville · 9 AM–1 PM</span>
+      </article>
+    </div>
+    <div class="see-all"><a href="#events">See all events →</a></div>
+  </div>
+</section>
+
+<!-- ============ 9 · SIGNAL ============ -->
+<section class="band b2" id="stay">
+  <div class="shell">
+    <div class="signal reveal">
+      <h2>Stay in the loop.</h2>
+      <p class="lead">Organizing happens fast, and votes get scheduled with little notice. Join the DeflockSC Signal group to hear about hearings and actions before they happen.</p>
+      <button id="signal-cta" class="btn btn-primary btn-lg">Join the Signal group</button>
+      <div class="safety">
+        <span class="lead-in">Heads up:</span> this group is open and unvetted: anyone can be inside it. Join with a pseudonym, not your real name, and share only what you'd be comfortable seeing made public.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+  <div class="inner">
+    <span class="brand"><span class="logo-dot" aria-hidden="true"></span>DeflockSC</span>
+    <div class="cols">
+      <a href="#map">Map</a>
+      <a href="#legislation">The ask</a>
+      <a href="#act">Take action</a>
+      <a href="#blog">Blog</a>
+      <a href="#stay">Signal</a>
+    </div>
+    <div class="fine">Rebuild mockup · dossier theme · not the live site. Figures shown are the campaign's working numbers for review.</div>
+  </div>
+</footer>
+
+<script>
+  // Motion — scroll-reveal entrances + count-up on stats.
+  // Everything here honors prefers-reduced-motion: reduced users get final states instantly.
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var hasIO = 'IntersectionObserver' in window;
+
+    /* ---- scroll-reveal entrances (Emil: fire once, transform + opacity only) ---- */
+    var revealEls = document.querySelectorAll('.reveal, .reveal-group');
+    if (reduce || !hasIO) {
+      revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+    } else {
+      var revObs = new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('is-visible'); obs.unobserve(e.target); }
+        });
+      }, { rootMargin: '0px 0px -80px 0px', threshold: 0.12 });
+      revealEls.forEach(function (el) { revObs.observe(el); });
+    }
+
+    /* ---- count-up on stat numbers (formatting preserved exactly) ---- */
+    var stats = document.querySelectorAll('.impact .impact-grid .istat .v, .ask-frame .istat .v, .map-statline .n');
+
+    function parseStat(text) {
+      var m = String(text).trim().match(/^([\d,]+)(.*)$/);
+      if (!m) return null;
+      var value = parseInt(m[1].replace(/,/g, ''), 10);
+      if (isNaN(value)) return null;
+      return { value: value, suffix: m[2] || '', comma: m[1].indexOf(',') !== -1 };
+    }
+    function fmt(n, info) {
+      var v = Math.round(n);
+      return (info.comma ? v.toLocaleString('en-US') : String(v)) + info.suffix;
+    }
+
+    var tracked = [];
+    stats.forEach(function (el) {
+      var info = parseStat(el.textContent);
+      if (!info) return;
+      el.__stat = info;
+      tracked.push(el);
+      if (!reduce) el.textContent = fmt(0, info); // reset while off-screen — no visible flash
+    });
+
+    if (reduce || !hasIO) return; // reduced-motion: leave the final values already in the markup
+
+    function animateStat(el) {
+      var info = el.__stat, start = null, dur = 1200;
+      function step(ts) {
+        if (start === null) start = ts;
+        var p = Math.min((ts - start) / dur, 1);
+        var eased = 1 - Math.pow(1 - p, 3); // cubic ease-out
+        el.textContent = fmt(info.value * eased, info);
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = fmt(info.value, info);
+      }
+      requestAnimationFrame(step);
+    }
+
+    var statObs = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { animateStat(e.target); obs.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -40px 0px', threshold: 0.4 });
+    tracked.forEach(function (el) { statObs.observe(el); });
+  })();
+</script>
+
+<script>
+  // Signal CTA — reproduces the events-page scraper countermeasure.
+  // The button carries no href and no data-* URL, and the redirect path is
+  // never written as a literal in the markup: it is decoded at click time so
+  // a scraper reading this HTML can't grep the destination out of the page.
+  (function () {
+    var btn = document.getElementById('signal-cta');
+    if (!btn) return;
+    var dest = function () { return atob('L2dvL2ludGFrZQ=='); }; // -> internal redirect path
+    btn.addEventListener('click', function () {
+      // Mockup: inert — confirm instead of navigating away.
+      var go = window.confirm('Mockup only: on the live site this opens the Signal intake via an internal redirect. Continue?');
+      if (go) {
+        window.location.href = dest();
+      }
+    });
+  })();
+</script>
