@@ -21,23 +21,10 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 
       {/* Tag filter bar */}
       {allTags.length > 0 && (
-        <div class="flex flex-wrap items-center gap-x-1 gap-y-2 mb-10 label-mono-compact" id="tag-bar" role="group" aria-label="Filter posts by tag">
-          <button
-            type="button"
-            class="tag-filter tag-active px-3 py-2 transition-colors cursor-pointer"
-            data-tag="all"
-            aria-pressed="true"
-          >All</button>
+        <div class="flex flex-wrap items-center gap-2 mb-10" id="tag-bar" role="radiogroup" aria-label="Filter posts by tag">
+          <input type="radio" name="blog-tag" value="all" aria-label="All" checked class="filter-chip tag-filter btn btn-sm min-h-11" />
           {allTags.map((tag) => (
-            <>
-              <span class="text-[rgba(255,255,255,0.15)] select-none" aria-hidden="true">/</span>
-              <button
-                type="button"
-                class="tag-filter px-3 py-2 transition-colors cursor-pointer"
-                data-tag={tag}
-                aria-pressed="false"
-              >{tag}</button>
-            </>
+            <input type="radio" name="blog-tag" value={tag} aria-label={tag} class="filter-chip tag-filter btn btn-sm min-h-11" />
           ))}
         </div>
       )}
@@ -49,17 +36,17 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
       {/* Featured hero (latest post) */}
       {posts.length > 0 && (
         <a href={`/blog/${posts[0].id}`} class="block group mb-8 blog-card" data-tags={(posts[0].data.tags ?? []).join(',')}>
-          <article class="bg-[#111111] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.07)] group-hover:border-[rgba(255,255,255,0.12)] transition-all duration-200">
+          <article class="card bg-base-100 border border-white/10 overflow-hidden group-hover:border-white/20 transition-all duration-200">
             {posts[0].data.featuredImage && (
               <img
                 src={posts[0].data.featuredImage}
                 alt={posts[0].data.featuredImageAlt ?? posts[0].data.title}
                 width="900"
                 height="450"
-                class="w-full object-contain bg-[#0a0a0a]"
+                class="w-full object-contain bg-base-300"
               />
             )}
-            <div class="p-7 md:p-8">
+            <div class="card-body p-7 md:p-8 gap-0">
               <div class="flex items-center gap-3 label-mono-compact text-[#737373]">
                 <time datetime={new Date(posts[0].data.date).toISOString()}>
                   {new Date(posts[0].data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
@@ -92,7 +79,7 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
         <div class="grid md:grid-cols-2 gap-6" id="post-grid">
           {posts.slice(1).map((post) => (
             <a href={`/blog/${post.id}`} class="block group blog-card min-w-0" data-tags={(post.data.tags ?? []).join(',')}>
-              <article class="bg-[#111111] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.07)] group-hover:border-[rgba(255,255,255,0.12)] transition-all duration-200 group-hover:-translate-y-0.5 h-full">
+              <article class="card bg-base-100 border border-white/10 overflow-hidden group-hover:border-white/20 transition-all duration-200 group-hover:-translate-y-0.5 h-full">
                 {post.data.featuredImage && (
                   <img
                     src={post.data.featuredImage}
@@ -100,10 +87,10 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
                     width="440"
                     height="220"
                     loading="lazy"
-                    class="w-full object-contain bg-[#0a0a0a]"
+                    class="w-full object-contain bg-base-300"
                   />
                 )}
-                <div class="p-5">
+                <div class="card-body p-5 gap-0">
                   <div class="flex items-center gap-3 label-mono-compact text-[#737373]">
                     <time datetime={new Date(post.data.date).toISOString()}>
                       {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
@@ -141,41 +128,22 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 </Base>
 
 <style>
-  .tag-filter {
-    color: #737373;
-    background: transparent;
-  }
-  .tag-filter:hover {
-    color: #e8e8e8;
-    background: #161616;
-  }
-  .tag-filter.tag-active {
-    color: #e8e8e8;
-    background: #1a1a1a;
-    border-left: 2px solid #dc2626;
-    padding-left: calc(0.75rem - 2px);
-  }
   .blog-card.hidden-by-filter {
     display: none;
   }
 </style>
 
 <script>
-  const pills = document.querySelectorAll<HTMLButtonElement>('.tag-filter');
+  const pills = document.querySelectorAll<HTMLInputElement>('.tag-filter');
   const cards = document.querySelectorAll<HTMLElement>('.blog-card');
 
   function filterByTag(tag: string) {
-    // Update URL hash
     window.location.hash = tag === 'all' ? '' : tag;
 
-    // Update pill active state
     pills.forEach((p) => {
-      const isActive = p.dataset.tag === tag;
-      p.classList.toggle('tag-active', isActive);
-      p.setAttribute('aria-pressed', String(isActive));
+      p.checked = p.value === tag;
     });
 
-    // Show/hide cards
     cards.forEach((card) => {
       const cardTags = (card.dataset.tags ?? '').split(',').filter(Boolean);
       const show = tag === 'all' || cardTags.includes(tag);
@@ -187,17 +155,16 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
     if (noResults) noResults.classList.toggle('hidden', anyVisible);
   }
 
-  // Pill click handlers
   pills.forEach((pill) => {
-    pill.addEventListener('click', () => filterByTag(pill.dataset.tag ?? 'all'));
+    pill.addEventListener('change', () => {
+      if (pill.checked) filterByTag(pill.value);
+    });
   });
 
-  // Restore from URL hash on load
   const hashTag = decodeURIComponent(window.location.hash.slice(1));
   if (hashTag) filterByTag(hashTag);
 
   window.addEventListener('hashchange', () => {
-    const tag = decodeURIComponent(window.location.hash.slice(1)) || 'all';
-    filterByTag(tag);
+    filterByTag(decodeURIComponent(window.location.hash.slice(1)) || 'all');
   });
 </script>
