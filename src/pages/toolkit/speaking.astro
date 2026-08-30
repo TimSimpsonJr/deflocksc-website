@@ -23,32 +23,30 @@ const siblings = [
     ]
   })} />
 
-  <section class="bg-[#111111] pt-24 pb-6">
+  <section class="bg-base-100 pt-24 pb-6">
     <div class="max-w-4xl mx-auto px-6">
-      <nav aria-label="Breadcrumb" class="mb-6">
-        <ol class="flex items-center gap-2 label-mono-nav">
+      <nav aria-label="Breadcrumb" class="breadcrumbs label-mono-nav py-0 mb-6">
+        <ul>
           <li><a href="/" class="text-[#737373] hover:text-[#a3a3a3] transition-colors">Home</a></li>
-          <li class="text-[#525252]">/</li>
           <li><a href="/toolkit" class="text-[#737373] hover:text-[#a3a3a3] transition-colors">Toolkit</a></li>
-          <li class="text-[#525252]">/</li>
           <li class="text-[#e8e8e8]">Speak Up</li>
-        </ol>
+        </ul>
       </nav>
     </div>
   </section>
 
-  <section class="bg-[#141414]">
+  <section class="bg-base-100">
     <div class="max-w-4xl mx-auto px-6 pb-20 md:pb-28">
       <ToolkitSpeaking />
     </div>
   </section>
 
-  <section class="bg-[#111111] border-t border-[rgba(255,255,255,0.07)]">
+  <section class="bg-base-100 border-t border-[rgba(255,255,255,0.07)]">
     <div class="max-w-4xl mx-auto px-6 py-12">
       <p class="label-mono text-[#737373] mb-4">More from the Toolkit</p>
       <div class="flex flex-wrap gap-3">
         {siblings.map((s) => (
-          <a href={s.href} class="label-mono-compact text-[#a3a3a3] hover:text-[#e8e8e8] border border-[rgba(255,255,255,0.07)] hover:border-[rgba(255,255,255,0.15)] px-4 py-2.5 transition-colors">
+          <a href={s.href} class="btn btn-outline min-h-11 label-mono-compact font-medium">
             {s.label}
           </a>
         ))}

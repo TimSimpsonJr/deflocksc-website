@@ -1,3 +1,5 @@
+import { initTabRail } from './tab-rail.js';
+
 interface Bill {
   bill: string;
   title: string;
@@ -8,41 +10,8 @@ interface Bill {
 }
 
 export function initLegalTab(): void {
-  // Sidebar selection for 4th Amendment
-  const legalBtns = document.querySelectorAll<HTMLButtonElement>('.legal-btn');
-  const legalPanels = document.querySelectorAll<HTMLElement>('.legal-panel');
-
-  legalBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = btn.getAttribute('data-legal');
-      legalBtns.forEach(b => {
-        b.classList.remove('sidebar-active');
-        b.setAttribute('aria-selected', 'false');
-      });
-      legalPanels.forEach(p => p.classList.add('hidden'));
-      btn.classList.add('sidebar-active');
-      btn.setAttribute('aria-selected', 'true');
-      document.querySelector(`.legal-panel[data-legal-panel="${idx}"]`)?.classList.remove('hidden');
-    });
-  });
-
-  // Sidebar selection for bill gaps
-  const gapBtns = document.querySelectorAll<HTMLButtonElement>('.gap-btn');
-  const gapPanels = document.querySelectorAll<HTMLElement>('.gap-panel');
-
-  gapBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = btn.getAttribute('data-gap');
-      gapBtns.forEach(b => {
-        b.classList.remove('sidebar-active');
-        b.setAttribute('aria-selected', 'false');
-      });
-      gapPanels.forEach(p => p.classList.add('hidden'));
-      btn.classList.add('sidebar-active');
-      btn.setAttribute('aria-selected', 'true');
-      document.querySelector(`.gap-panel[data-gap-panel="${idx}"]`)?.classList.remove('hidden');
-    });
-  });
+  initTabRail('legal-rail');
+  initTabRail('gap-rail');
 
   // State map — load SVG paths and inject as dotted fills
   const smHighlighted: Record<string, string> = {

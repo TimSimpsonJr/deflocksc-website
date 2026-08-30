@@ -37,13 +37,13 @@ function typeBadge(type: FoiaContact['type']): string {
     scdot: 'State Agency',
   };
   const colors: Record<string, string> = {
-    police: 'bg-[#dc2626]/20 text-[#fca5a5]',
-    sheriff: 'bg-[#dc2626]/20 text-[#fca5a5]',
-    clerk: 'bg-[#fbbf24]/20 text-[#fbbf24]',
-    sled: 'bg-[#525252]/30 text-[#a3a3a3]',
-    scdot: 'bg-[#525252]/30 text-[#a3a3a3]',
+    police: 'badge badge-error',
+    sheriff: 'badge badge-error',
+    clerk: 'badge badge-warning',
+    sled: 'badge badge-neutral',
+    scdot: 'badge badge-neutral',
   };
-  return `<span class="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] ${colors[type] || ''}">${labels[type] || type}</span>`;
+  return `<span class="${colors[type] || 'badge badge-neutral'} font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.05em]">${labels[type] || type}</span>`;
 }
 
 function renderAgencyCard(contact: FoiaContact): string {
@@ -72,7 +72,7 @@ function renderAgencyCard(contact: FoiaContact): string {
     : '';
 
   return `
-    <div class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] p-4 hover:border-[rgba(255,255,255,0.15)] transition-colors">
+    <div class="card bg-base-200 border border-white/10 p-4 hover:border-white/20 transition-colors">
       <div class="flex items-start justify-between gap-3 mb-2">
         <div>
           <h4 class="text-[#e8e8e8] font-semibold text-sm">${contact.name}</h4>
@@ -83,7 +83,7 @@ function renderAgencyCard(contact: FoiaContact): string {
         </div>
         <button
           type="button"
-          class="foia-use-btn shrink-0 bg-[#262626] hover:bg-[#dc2626] text-[#a3a3a3] hover:text-white text-xs font-bold uppercase tracking-[0.05em] px-3 py-2 min-h-[44px] transition-colors cursor-pointer"
+          class="foia-use-btn shrink-0 btn btn-neutral btn-sm min-h-11 text-xs uppercase tracking-[0.05em]"
           data-agency-id="${contact.id}"
         >
           Use This Agency
@@ -330,15 +330,10 @@ function initFoiaFinder(contacts: FoiaContact[]): void {
 
   searchInput?.addEventListener('input', filterBrowse);
 
-  document.querySelectorAll<HTMLButtonElement>('.foia-type-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      activeTypeFilter = chip.dataset.type || 'all';
-      document.querySelectorAll('.foia-type-chip').forEach(c => {
-        c.classList.remove('bg-[#dc2626]', 'text-white');
-        c.classList.add('bg-[#262626]', 'text-[#a3a3a3]');
-      });
-      chip.classList.remove('bg-[#262626]', 'text-[#a3a3a3]');
-      chip.classList.add('bg-[#dc2626]', 'text-white');
+  document.querySelectorAll<HTMLInputElement>('.foia-type-chip').forEach(chip => {
+    chip.addEventListener('change', () => {
+      if (!chip.checked) return;
+      activeTypeFilter = chip.value || 'all';
       filterBrowse();
     });
   });
