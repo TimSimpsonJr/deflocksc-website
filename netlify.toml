@@ -24,6 +24,15 @@
   status = 200
   query = {address = ":address", benchmark = ":benchmark", vintage = ":vintage", format = ":format"}
 
+# Proxy Deflock CDN camera tiles: cdn.deflock.me only sends
+# Access-Control-Allow-Origin for deflock.org, so the browser fetches
+# same-origin /deflock-tiles/* and Netlify fetches the CDN server-side.
+# Query strings (the CDN's ?v= cache-buster) pass through automatically.
+[[redirects]]
+  from = "/deflock-tiles/*"
+  to = "https://cdn.deflock.me/regions/:splat"
+  status = 200
+
 # Security headers.
 # CSP is defined ONLY in public/_headers. Do not add it here: when both files set
 # the same header for the same path, netlify.toml wins, so a stale copy in this

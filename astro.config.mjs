@@ -45,6 +45,15 @@ export default defineConfig({
           changeOrigin: true,
           rewrite: (path) => path.replace('/api/geocode', '/geocoder/geographies/onelineaddress'),
         },
+        // Deflock CDN camera tiles: cdn.deflock.me only sends CORS headers for
+        // deflock.org, so the browser always fetches same-origin /deflock-tiles/*.
+        // netlify.toml proxies it in production; this mirrors that for `astro dev`
+        // (Netlify redirects do not run under the dev server).
+        '/deflock-tiles': {
+          target: 'https://cdn.deflock.me',
+          changeOrigin: true,
+          rewrite: (path) => path.replace('/deflock-tiles', '/regions'),
+        },
         '/api/events': {
           target: FUNCTIONS_SERVER,
           changeOrigin: true,

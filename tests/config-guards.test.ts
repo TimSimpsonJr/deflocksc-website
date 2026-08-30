@@ -123,6 +123,13 @@ describe('public/_headers', () => {
   it('sets no header rule on /api/*', () => {
     expect(Object.keys(headerBlocks).filter((p) => p.startsWith('/api'))).toEqual([]);
   });
+
+  it('allows Wikimedia Commons thumbnails in img-src (camera popup images)', () => {
+    // cameras.ts builds commons.wikimedia.org/w/thumb.php URLs, which redirect
+    // to upload.wikimedia.org — CSP must allow both hops.
+    expect(cspLine).toMatch(/img-src[^;]*https:\/\/commons\.wikimedia\.org/);
+    expect(cspLine).toMatch(/img-src[^;]*https:\/\/upload\.wikimedia\.org/);
+  });
 });
 
 describe('netlify.toml', () => {
@@ -139,6 +146,14 @@ describe('netlify.toml', () => {
     // netlify.toml wins on a same-path same-header conflict, so a stale copy here
     // would silently override the real policy
     expect(netlifyToml).not.toMatch(/^\s*Content-Security-Policy\s*=/im);
+  });
+
+  it('proxies /deflock-tiles/* to the Deflock CDN regions path', () => {
+    // cdn.deflock.me only sends Access-Control-Allow-Origin for deflock.org,
+    // so the camera map must fetch tiles same-origin through this rewrite.
+    expect(netlifyToml).toMatch(
+      /from = "\/deflock-tiles\/\*"\s*\r?\n\s*to = "https:\/\/cdn\.deflock\.me\/regions\/:splat"\s*\r?\n\s*status = 200/
+    );
   });
 });
 
