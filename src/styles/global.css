@@ -14,6 +14,16 @@
 
 @import "tailwindcss";
 
+/* Exclude docs/ from Tailwind's automatic content scan. A backslash-plus-hex
+   absolute path embedded in any scanned file decodes as a CSS unicode escape
+   and crashes the build (RangeError: Invalid code point); keeping docs/ out of
+   the scan makes it categorically safe to vendor documentation into the repo. */
+@source not "../../docs";
+
+/* Tailwind Typography (`prose`) — CSS-first v4 integration. Themed via the
+   --tw-prose-* variables; consumed by the blog post body. */
+@plugin "@tailwindcss/typography";
+
 /* ── daisyUI (Tailwind 4 plugin) ──
    Built-in themes are turned off so no light theme can ever apply; only the
    custom `deflock` theme below is registered. daisyUI's component classes
@@ -26,7 +36,8 @@
 
 /* The brand theme. Maps daisyUI's semantic slots onto the DeflockSC palette
    (#171717 base, #1a1a1a alt, #0d0d0d deep, #dc2626 red, #fbbf24 amber),
-   squared/small corners, flat surfaces (no depth, no noise). Content colors
+   slightly-rounded corners (0.3rem fields / 0.45rem boxes, per the approved
+   UI-kit mockup), flat surfaces (no depth, no noise). Content colors
    are chosen for AA contrast against their backgrounds. Marked default +
    prefersdark so it applies at :root even without an attribute; Base.astro
    also stamps data-theme="deflock" on <html> for explicitness. */
@@ -48,7 +59,7 @@
   --color-accent: #fbbf24;
   --color-accent-content: #171717;
 
-  --color-neutral: #1a1a1a;
+  --color-neutral: #262626;
   --color-neutral-content: #d4d4d4;
 
   --color-info: #38bdf8;
@@ -60,9 +71,9 @@
   --color-error: #dc2626;
   --color-error-content: #ffffff;
 
-  --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.375rem;
+  --radius-selector: 0.3rem;
+  --radius-field: 0.3rem;
+  --radius-box: 0.45rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
@@ -284,7 +295,7 @@
   scrollbar-width: thin;
 }
 
-/* Sidebar + panel pattern (FAQ, FOIA templates, Rebuttals, Legal) */
+/* Sidebar + panel pattern (homepage FAQ only — toolkit consumers migrated to .rail-tab; delete with the homepage rebuild) */
 .sidebar-btn {
   color: #a3a3a3;
   background: transparent;
@@ -302,6 +313,70 @@
 /* offset padding for the 2px border */
 .sidebar-active.px-6 { padding-left: calc(1.5rem - 2px); }
 .sidebar-active.px-8 { padding-left: calc(2rem - 2px); }
+
+/* ── DaisyUI migration shared primitives (2026-08 site-wide pass) ──
+   Unlayered on purpose: these win over daisyUI's @layer rules at equal
+   specificity. Runtime renderers (toast.ts, foia-finder.ts,
+   results-renderer.ts) build DOM carrying these classes, so they must stay
+   global — scoped styles would never match (class-parity rule). */
+
+/* Toast container: a PERSISTENT live region — never display:none'd (toggling
+   display, like inserting a fresh role=status node, makes screen-reader
+   announcements unreliable). Empty it paints nothing, but daisy's .toast is a
+   fixed padded flex box, so keep the shell click-transparent. */
+#app-toast { pointer-events: none; }
+#app-toast > * { pointer-events: auto; }
+
+/* Master-detail rail: vertical tabs replacing .sidebar-btn/.sidebar-active.
+   Active state keys on aria-selected (toggled by src/scripts/tab-rail.ts) —
+   luminance + red edge + weight, never hue alone. The 2px left border is
+   always reserved so activation adds no layout shift. */
+.rail-tab {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid transparent;
+  color: #a3a3a3;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.rail-tab + .rail-tab { border-top: 1px solid rgba(255, 255, 255, 0.04); }
+.rail-tab:hover { background: rgba(255, 255, 255, 0.04); color: #e8e8e8; }
+.rail-tab[aria-selected="true"] {
+  background: #1a1a1a;
+  border-left-color: #dc2626;
+  color: #e8e8e8;
+  font-weight: 600;
+}
+.rail-tab:focus-visible { outline: 2px solid #fbbf24; outline-offset: -2px; }
+
+/* Filter chips: daisy radio-as-btn groups (blog tags, FOIA agency types).
+   All chips stay visible; :checked is the semantic active state and paints
+   the mockup's primary fill. */
+.filter-chip:checked {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
+/* daisyUI breadcrumbs, deflock skin: the approved mockup separates crumbs
+   with "/" — replace daisy's rotated-border chevron. daisy's own separator is
+   `li + *::before` (verified against node_modules/daisyui/components/
+   breadcrumbs.css), so mirror that selector exactly. Spacing decision: daisy's
+   separator margin-inline (0.5rem 0.75rem) is deliberately KEPT — this
+   override touches glyph properties only, never margins. */
+.breadcrumbs > ul > li + *::before {
+  content: "/";
+  border: 0;
+  rotate: none;
+  width: auto;
+  height: auto;
+  opacity: 1;
+  color: #525252;
+  background: none;
+}
 
 /* ── Scroll-reveal entrance animations ── */
 @media (prefers-reduced-motion: no-preference) {
@@ -347,7 +422,7 @@
   background-color: #171717;
   color: #e8e8e8;
   border: 1px solid color-mix(in oklab, #e8e8e8 20%, transparent);
-  border-radius: 0.25rem;
+  border-radius: var(--radius-field);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   line-height: 1.5;
@@ -430,7 +505,7 @@
 }
 .deflock-calendar::part(button) {
   color: #e8e8e8;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-field);
 }
 .deflock-calendar::part(button):hover {
   background-color: #262626;
@@ -442,7 +517,7 @@ calendar-month.deflock-month::part(heading) {
 }
 calendar-month.deflock-month::part(button) {
   color: #e8e8e8;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-field);
 }
 calendar-month.deflock-month::part(button):hover {
   background-color: #262626;
