@@ -154,7 +154,7 @@ export function collapseSeries(occurrences: readonly Occurrence[]): Occurrence[]
 /**
  * The LIST-view recurrence label text, or null for a one-off event.
  *
- * Appended to the card's quiet type line in the muted DM Mono `.event-typeline`
+ * Appended to the card's quiet type line in the muted `.event-typeline` label
  * idiom, e.g. "Public event · Repeats weekly" (CSS uppercases it, so it reads
  * "… · REPEATS WEEKLY"). A one-off event returns null and gets no suffix.
  */

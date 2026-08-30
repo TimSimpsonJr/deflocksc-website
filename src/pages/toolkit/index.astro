@@ -68,7 +68,7 @@ const hashRedirects: Record<string, string> = {
             style={card.span === 2 ? 'grid-column:span 2;' : ''}
           >
             <div class="p-7 flex flex-col h-full bg-base-100 group-hover:bg-base-200 transition-colors relative border-t-2 border-[#dc2626] overflow-hidden">
-              <p class="font-['DM_Mono',monospace] text-[9px] uppercase tracking-[0.2em] text-[#737373] mb-3 flex items-center gap-2 relative z-10">
+              <p class="font-['Instrument_Sans_Variable',sans-serif] font-semibold text-[9px] uppercase tracking-[0.2em] text-[#737373] mb-3 flex items-center gap-2 relative z-10">
                 <span class="w-[5px] h-[5px] rounded-full bg-[#dc2626] flex-shrink-0" style="box-shadow: 0 0 4px rgba(220,38,38,0.6);" aria-hidden="true"></span>
                 {card.title}
               </p>
@@ -76,7 +76,7 @@ const hashRedirects: Record<string, string> = {
               <p class="text-[14px] text-[#a3a3a3] leading-[1.6] flex-1 mb-6 relative z-10">{card.desc}</p>
               <div class="flex flex-wrap gap-1 mb-0 relative z-10">
                 {card.tags.map((tag) => (
-                  <span class="badge badge-outline font-['DM_Mono',monospace] text-[9px] tracking-[0.1em] uppercase">{tag}</span>
+                  <span class="badge badge-outline font-['Instrument_Sans_Variable',sans-serif] font-semibold text-[9px] tracking-[0.1em] uppercase">{tag}</span>
                 ))}
               </div>
               <div class="absolute bottom-5 right-5 z-10 text-[#737373] group-hover:text-[#dc2626] transition-colors">

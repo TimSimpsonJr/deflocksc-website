@@ -4,7 +4,7 @@
 
 Astro 5 + Tailwind CSS 4 (+ daisyUI `deflock` theme) advocacy site against ALPR surveillance in
 South Carolina. MapLibre GL JS for the camera map and the events map. Self-hosted fonts (Instrument
-Sans Variable, DM Mono via @fontsource). Rep/boundary data from the `open-civics` npm packages.
+Sans Variable via @fontsource). Rep/boundary data from the `open-civics` npm packages.
 Community events + council meetings stored via Netlify Blobs. Vitest unit suite (co-located
 `*.test.ts`). Deployed on Netlify (auto-deploy from `master`); Umami analytics proxied through `/u`.
 

@@ -36,8 +36,8 @@ Task 0 (build-safe there: `docs/` is excluded from Tailwind scanning; see §7 fi
 | Tabs | The events-page `tabs tabs-box` treatment verbatim (base-200 tray, `#3d3d3d` active pill with `rgba(255,255,255,0.36)` hairline, `#a3a3a3` inactive text, amber focus ring) |
 | Master-detail | Vertical rail of `role="tab"` buttons: transparent resting, `rgba(255,255,255,0.04)` hover, active = base-200 fill + 2px red left border (border always reserved so activation adds no shift), amber inset focus ring |
 | Buttons | `btn-primary` (red CTA), `btn-neutral` (grey), `btn-outline`, `btn-ghost`; site CTA idiom = `btn btn-primary text-xs uppercase tracking-[0.08em]` (matches SubmitEventForm) |
-| Badges | `badge badge-warning` (amber, e.g. "Your district", bill status), `badge badge-outline` (muted chips), DM Mono uppercase |
-| Stats | daisy `stats`/`stat` block: red tabular `stat-value`, DM Mono uppercase `stat-title`, base-100 well with hairline border |
+| Badges | `badge badge-warning` (amber, e.g. "Your district", bill status), `badge badge-outline` (muted chips), Instrument Sans uppercase |
+| Stats | daisy `stats`/`stat` block: red tabular `stat-value`, Instrument Sans uppercase `stat-title`, base-100 well with hairline border |
 | Breadcrumbs | daisy `breadcrumbs` structure with a global override replacing the chevron separator with the mockup's `/` in muted grey |
 
 ## 3. House-style guide (codified events conventions)
@@ -67,8 +67,9 @@ These conventions come from the de-slopped events subsystem and now bind all mig
    where it matches a taller sibling — with `min-w-11` added on square icon buttons. Amber
    `:focus-visible` ring (inset where a clamped/overflow parent would clip an outset ring); the
    global red `:focus-visible` remains the default elsewhere.
-7. **DM Mono label idiom** (`label-mono*` utility classes) for overlines, metadata, breadcrumbs,
-   badges — unchanged.
+7. **Label idiom** (`label-mono*` utility classes) for overlines, metadata, breadcrumbs, badges.
+   DM Mono was later removed site-wide; the `label-mono*` utilities now render in Instrument Sans 600
+   (uppercase + letter-spacing preserved).
 8. **Three surfaces only.** `bg-base-100/200/300` (or their hex equals in global CSS) — no new
    near-blacks. Hairlines: `rgba(255,255,255,0.07)` resting, `…0.10–0.15` hover, `…0.22–0.36` strong.
 

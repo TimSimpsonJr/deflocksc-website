@@ -17,7 +17,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
   <div class="pipeline-grid grid md:grid-cols-2 bg-[rgba(255,255,255,0.07)] mx-6 md:mx-12 mb-12" style="gap:1px">
     <!-- Primary cell: spans 2 rows on desktop -->
     <div data-reveal="left" class="pipeline-cell-primary bg-[#141414] p-8 md:p-12 relative md:row-span-2">
-      <p class="label-mono-tight text-[#737373] mb-10">Primary node · 01 / Capture</p>
+      <p class="label-mono-tight tabular-nums text-[#737373] mb-10">Primary node · 01 / Capture</p>
       <h3 class="text-[#e8e8e8] font-bold text-[1.6rem] tracking-[-0.015em] leading-[1.2] mb-4 relative">
         It photographs every car. Every single time.
       </h3>
@@ -29,7 +29,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
 
     <!-- Secondary cell 1 -->
     <div data-reveal="right" data-reveal-delay="1" class="bg-[#111111] p-8 relative">
-      <p class="label-mono-tight text-[#737373] mb-8">02 / Ingest</p>
+      <p class="label-mono-tight tabular-nums text-[#737373] mb-8">02 / Ingest</p>
       <h3 class="text-[#e8e8e8] font-semibold text-[1.3rem] tracking-[-0.015em] leading-[1.2] mb-3 relative">Your data leaves the county immediately.</h3>
       <p class="text-[#a0a0a0] text-base leading-[1.65] relative">
         That data doesn't stay in your county. Flock runs a national network. Police from other states can search it. Federal agencies can too. Researchers found three separate ways federal agents get into local camera data — including a back door that let outside agencies search without anyone knowing. Flock's CEO denied having federal contracts on camera in July 2025. He admitted it three weeks later. Every drive you've taken is in there.
@@ -39,7 +39,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
 
     <!-- Secondary cell 2 -->
     <div data-reveal="right" data-reveal-delay="2" class="bg-[#111111] p-8 relative">
-      <p class="label-mono-tight text-[#737373] mb-8">03 / Access</p>
+      <p class="label-mono-tight tabular-nums text-[#737373] mb-8">03 / Access</p>
       <h3 class="text-[#e8e8e8] font-semibold text-[1.3rem] tracking-[-0.015em] leading-[1.2] mb-3 relative">Your local cops can't stop it.</h3>
       <p class="text-[#a0a0a0] text-base leading-[1.65] relative">
         No SC city or county has passed an oversight ordinance. The cameras went up, the data started flowing, and no rules govern how long it's kept. None of it requires a warrant. Your local police can't turn off the federal access. <span class="text-[#dc2626] font-semibold">And neither can you.</span>
@@ -75,7 +75,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
           <div class="cs-title">False Arrest from ALPR Error</div>
           <div class="cs-blurb">A misread scan flagged an innocent driver as a stolen vehicle match. Charges were later dropped.</div>
         </div>
-        <div class="cs-num">01</div>
+        <div class="cs-num tabular-nums">01</div>
       </div>
       <div data-reveal="up" data-reveal-delay="1" class="cs-card" data-overlay="1" tabindex="0" role="group" aria-label="Case study 2 of 5">
         <div class="cs-scene" id="scene-2" aria-hidden="true">
@@ -114,7 +114,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
               <circle cx="93" cy="310" r="6" fill="#dc2626" opacity="0.8"/>
             </g>
             <!-- Counter label (centered in viewBox, outside s2-map so it doesn't zoom) -->
-            <text class="s2-label" x="480" y="310" text-anchor="middle" font-family="DM Mono,monospace" font-size="42" font-weight="500" fill="rgba(255,255,255,0.85)" letter-spacing="1">
+            <text class="s2-label" x="480" y="310" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="42" font-weight="500" fill="rgba(255,255,255,0.85)" letter-spacing="1">
               <tspan class="s2-count">0</tspan> QUERIES
             </text>
           </svg>
@@ -124,7 +124,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
           <div class="cs-title">364,000 Out-of-State Queries</div>
           <div class="cs-blurb">ALPR data shared with agencies across the country, without oversight or consent.</div>
         </div>
-        <div class="cs-num">02</div>
+        <div class="cs-num tabular-nums">02</div>
       </div>
       <div data-reveal="up" data-reveal-delay="2" class="cs-card" data-overlay="2" tabindex="0" role="group" aria-label="Case study 3 of 5">
         <div class="cs-scene" id="scene-3" aria-hidden="true">
@@ -148,9 +148,9 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
               <svg width="56" height="64" viewBox="0 0 56 64">
                 <path d="M28,3 L52,11 L52,32 C52,48 28,61 28,61 C28,61 4,48 4,32 L4,11 Z"
                   fill="rgba(220,38,38,0.1)" stroke="rgba(220,38,38,0.5)" stroke-width="1.4"/>
-                <text x="28" y="30" text-anchor="middle" font-family="DM Mono,monospace"
+                <text x="28" y="30" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
                   font-size="11" fill="rgba(220,38,38,0.8)">FED.</text>
-                <text x="28" y="44" text-anchor="middle" font-family="DM Mono,monospace"
+                <text x="28" y="44" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
                   font-size="7.5" fill="rgba(220,38,38,0.6)">AUTHORITY</text>
               </svg>
             </div>
@@ -161,7 +161,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
           <div class="cs-title">4,000 Federal Agency Searches</div>
           <div class="cs-blurb">Federal authorities ran thousands of unauthorized queries on local ALPR data.</div>
         </div>
-        <div class="cs-num">03</div>
+        <div class="cs-num tabular-nums">03</div>
       </div>
       <!-- Bottom row: 2 cards -->
       <div data-reveal="up" data-reveal-delay="3" class="cs-card" data-overlay="3" tabindex="0" role="group" aria-label="Case study 4 of 5">
@@ -170,15 +170,15 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
             style="position:absolute;inset:0;width:100%;height:100%;">
             <!-- Far: personnel record lines -->
             <g class="s4-record">
-              <text x="28" y="36" font-family="DM Mono,monospace" font-size="7"
+              <text x="28" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="7"
                 fill="rgba(255,255,255,0.18)" letter-spacing="2">PERSONNEL RECORD</text>
               <rect x="28" y="44" width="80" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
               <rect x="28" y="54" width="62" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
               <rect x="28" y="64" width="74" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
               <rect x="28" y="74" width="50" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
-              <text x="28" y="94" font-family="DM Mono,monospace" font-size="6"
+              <text x="28" y="94" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="6"
                 fill="rgba(255,255,255,0.12)" letter-spacing="1">ROLE · SHERIFF</text>
-              <text x="28" y="106" font-family="DM Mono,monospace" font-size="6"
+              <text x="28" y="106" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="6"
                 fill="rgba(255,255,255,0.12)" letter-spacing="1">ACCESS · UNRESTRICTED</text>
             </g>
             <!-- Mid: sheriff star badge -->
@@ -187,16 +187,16 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
               <polygon points="148,79 154,96 172,96 158,107 163,124 148,113 133,124 138,107 124,96 142,96"
                 fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.2"/>
               <circle cx="148" cy="105" r="10" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
-              <text x="148" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+              <text x="148" y="108" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
                 font-size="5" fill="rgba(255,255,255,0.25)" letter-spacing="0.5">SHERIFF</text>
             </g>
             <!-- Near: CONVICTED stamp -->
             <g class="s4-stamp">
               <rect x="30" y="88" width="140" height="40" rx="3"
                 fill="rgba(220,38,38,0.08)" stroke="rgba(220,38,38,0.6)" stroke-width="1.5"/>
-              <text x="100" y="108" text-anchor="middle" font-family="DM Mono,monospace"
+              <text x="100" y="108" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
                 font-size="20" font-weight="500" fill="#dc2626" letter-spacing="2">CONVICTED</text>
-              <text x="100" y="122" text-anchor="middle" font-family="DM Mono,monospace"
+              <text x="100" y="122" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
                 font-size="8" fill="rgba(220,38,38,0.7)" letter-spacing="3">FEDERAL CHARGE</text>
             </g>
           </svg>
@@ -206,7 +206,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
           <div class="cs-title">Sheriff Convicted of Federal Crimes</div>
           <div class="cs-blurb">The official overseeing ALPR camera data was convicted of wire fraud, drug misrepresentation, and corruption.</div>
         </div>
-        <div class="cs-num">04</div>
+        <div class="cs-num tabular-nums">04</div>
       </div>
       <div data-reveal="up" data-reveal-delay="4" class="cs-card" data-overlay="4" tabindex="0" role="group" aria-label="Case study 5 of 5">
         <div class="cs-scene" id="scene-5" aria-hidden="true">
@@ -221,11 +221,11 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
             <!-- Evidence label on front face -->
             <g transform="translate(105,68) skewY(18.43)">
               <rect class="s5-label-bg" x="5" y="6" width="50" height="34" rx="1.5"/>
-              <text x="30" y="18" text-anchor="middle" font-family="DM Mono,monospace"
+              <text x="30" y="18" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
                 font-size="8" font-weight="500" fill="rgba(255,255,255,0.22)" letter-spacing="1.8">EVIDENCE</text>
-              <text x="30" y="27" text-anchor="middle" font-family="DM Mono,monospace"
+              <text x="30" y="27" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
                 font-size="5" fill="rgba(255,255,255,0.13)" letter-spacing="0.8">CASE #APD-2024</text>
-              <text x="30" y="35" text-anchor="middle" font-family="DM Mono,monospace"
+              <text x="30" y="35" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
                 font-size="4" fill="rgba(255,255,255,0.09)" letter-spacing="0.6">ALPR PROGRAM</text>
             </g>
 
@@ -252,7 +252,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
             <g class="s5-verdict">
               <rect x="85" y="144" width="130" height="24" rx="2"
                 fill="rgba(10,10,10,0.92)" stroke="rgba(220,38,38,0.5)" stroke-width="0.8"/>
-              <text x="150" y="160" text-anchor="middle" font-family="DM Mono,monospace"
+              <text x="150" y="160" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
                 font-size="9" font-weight="500" fill="rgba(220,38,38,0.8)" letter-spacing="2">NO EVIDENCE FOUND</text>
             </g>
           </svg>
@@ -262,7 +262,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
           <div class="cs-title">Audit Exposed Compliance Failures</div>
           <div class="cs-blurb">Austin's own audit found 20% of searches lacked documentation. The city cancelled its Flock contract.</div>
         </div>
-        <div class="cs-num">05</div>
+        <div class="cs-num tabular-nums">05</div>
       </div>
     </div>
   </div>
@@ -321,7 +321,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     flex: 1;
   }
   .cs-loc {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Instrument Sans Variable', sans-serif;
     font-size: 9px;
     letter-spacing: 0.12em;
     color: #dc2626;
@@ -341,7 +341,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     position: absolute;
     top: 9px;
     right: 10px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Instrument Sans Variable', sans-serif;
     font-size: 8px;
     color: rgba(255,255,255,0.14);
   }
@@ -354,9 +354,9 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     align-items: center; gap: 3px;
     transition: transform 0.48s ease-out, opacity 0.48s ease-out, box-shadow 0.48s ease-out;
   }
-  .s1-tag { font-family: 'DM Mono',monospace; font-size: 7px; letter-spacing: 0.14em; color: rgba(255,255,255,0.22); }
-  .s1-num { font-family: 'DM Mono',monospace; font-size: 22px; font-weight: 500; letter-spacing: 0.06em; color: #e2e2e2; line-height: 1; }
-  .s1-state { font-family: 'DM Mono',monospace; font-size: 8px; letter-spacing: 0.16em; color: rgba(255,255,255,0.28); }
+  .s1-tag { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 7px; letter-spacing: 0.14em; color: rgba(255,255,255,0.22); }
+  .s1-num { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 22px; font-weight: 500; letter-spacing: 0.06em; color: #e2e2e2; line-height: 1; }
+  .s1-state { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 8px; letter-spacing: 0.16em; color: rgba(255,255,255,0.28); }
 
   .s1-back { top: 0; left: 0; background: #0a0a0a; border: 1px solid rgba(255,255,255,0.08); opacity: 0.42; z-index: 1; }
   .s1-front { top: 28px; left: 22px; background: #151515; border: 1px solid rgba(255,255,255,0.28); z-index: 2; box-shadow: 0 4px 18px rgba(0,0,0,0.55); }
@@ -366,7 +366,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
 
   .s1-neq {
     position: absolute; top: 22px; left: 68px; z-index: 3;
-    font-size: 28px; font-weight: 500; font-family: 'DM Mono',monospace;
+    font-size: 28px; font-weight: 500; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     color: transparent; transition: color 0.28s 0.24s, transform 0.48s ease-out; pointer-events: none;
   }
   .cs-card:hover .s1-neq { color: rgba(220,38,38,0.9); transform: translateY(-14px); }
@@ -375,7 +375,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
     position: absolute; bottom: 2px; right: 0; z-index: 4;
     display: flex; align-items: center; gap: 6px; padding: 6px 12px;
     background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.4); border-radius: 3px;
-    font-family: 'DM Mono',monospace; font-size: 11px; letter-spacing: 0.1em; color: #dc2626;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; letter-spacing: 0.1em; color: #dc2626;
     opacity: 0; transform: scale(0.88) translateY(4px);
     transition: opacity 0.3s 0.38s, transform 0.3s 0.38s; white-space: nowrap;
   }
@@ -445,7 +445,7 @@ import HowItWorksOverlays from './HowItWorksOverlays.astro';
   .cs-card:hover .s3-doc-2 { transform: rotate(2.5deg) translate(-2px,2px); }
   .cs-card:hover .s3-doc-3 { transform: translateY(-18px); box-shadow: 0 20px 44px rgba(0,0,0,0.88); }
 
-  .s3-hdr { font-family: 'DM Mono',monospace; font-size: 7px; letter-spacing: 0.12em; color: rgba(255,255,255,0.2); margin-bottom: 8px; }
+  .s3-hdr { font-family: 'Instrument Sans Variable', sans-serif; font-size: 7px; letter-spacing: 0.12em; color: rgba(255,255,255,0.2); margin-bottom: 8px; }
   .s3-line { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.07); margin: 4px 0; }
   .s3-line.w88 { width: 88%; } .s3-line.w72 { width: 72%; }
   .s3-line.w55 { width: 55%; } .s3-line.w80 { width: 80%; }

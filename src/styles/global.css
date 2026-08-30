@@ -1,10 +1,6 @@
 /* Self-hosted fonts (no Google Fonts dependency) */
 @import "@fontsource-variable/instrument-sans/wght.css";
 @import "@fontsource-variable/instrument-sans/wght-italic.css";
-@import "@fontsource/dm-mono/300.css";
-@import "@fontsource/dm-mono/300-italic.css";
-@import "@fontsource/dm-mono/400.css";
-@import "@fontsource/dm-mono/500.css";
 
 /* accessible-autocomplete base stylesheet (city combobox on the submit form).
    Re-themed to the dark `deflock` palette in the events-form section below;
@@ -100,40 +96,40 @@
   }
 }
 
-/* DM Mono label system */
+/* Label idiom — Instrument Sans, uppercase + letter-spacing */
 .label-mono {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Instrument Sans Variable', sans-serif;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.16em;
 }
 .label-mono-tight {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Instrument Sans Variable', sans-serif;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.13em;
 }
 .label-mono-compact {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Instrument Sans Variable', sans-serif;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 .label-mono-nav {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Instrument Sans Variable', sans-serif;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
 
 .label-mono-heading {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Instrument Sans Variable', sans-serif;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.16em;
   color: #d4d4d4;
