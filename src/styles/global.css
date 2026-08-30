@@ -329,8 +329,8 @@
 
 /* Master-detail rail: vertical tabs replacing .sidebar-btn/.sidebar-active.
    Active state keys on aria-selected (toggled by src/scripts/tab-rail.ts) —
-   luminance + red edge + weight, never hue alone. The 2px left border is
-   always reserved so activation adds no layout shift. */
+   luminance + weight, never hue alone. The 2px left border is always
+   reserved so activation adds no layout shift. */
 .rail-tab {
   display: block;
   width: 100%;
@@ -345,8 +345,7 @@
 .rail-tab + .rail-tab { border-top: 1px solid rgba(255, 255, 255, 0.04); }
 .rail-tab:hover { background: rgba(255, 255, 255, 0.04); color: #e8e8e8; }
 .rail-tab[aria-selected="true"] {
-  background: #1a1a1a;
-  border-left-color: #dc2626;
+  background: rgba(255, 255, 255, 0.06);
   color: #e8e8e8;
   font-weight: 600;
 }

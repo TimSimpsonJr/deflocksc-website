@@ -13,7 +13,6 @@ const stateCoords: Record<string, [number, number]> = {
 
 <!-- Section 1: 4th Amendment Primer — sidebar + panel -->
 <div class="mb-16">
-  <p class="label-mono text-[#a3a3a3] mb-3">Constitutional Rights</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-4">
     {fourthAmendment.title}
   </h2>
@@ -24,9 +23,6 @@ const stateCoords: Record<string, [number, number]> = {
   <div class="legal-layout md:grid md:grid-cols-[280px_1fr] bg-[rgba(255,255,255,0.07)]" style="gap:1px">
     <!-- Key points sidebar -->
     <div class="bg-base-100" role="tablist" aria-label="Fourth Amendment key points" id="legal-rail">
-      <div class="label-mono text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
-        Key Points
-      </div>
       {fourthAmendment.keyPoints.map((kp, i) => (
         <button
           type="button"
@@ -52,7 +48,6 @@ const stateCoords: Record<string, [number, number]> = {
           aria-labelledby={`legal-tab-${i}`}
           hidden={i !== 0}
         >
-          <p class="label-mono-tight text-[#a3a3a3] mb-2">Point {String(i + 1).padStart(2, '0')}</p>
           <h3 class="text-[#e8e8e8] font-bold text-lg mb-4">{kp.point}</h3>
           <p class="text-[#a3a3a3] text-base leading-[1.7]">{kp.detail}</p>
         </div>
@@ -67,7 +62,6 @@ const stateCoords: Record<string, [number, number]> = {
 
 <!-- Section 2: Legal Landscape — Dotted US Map -->
 <div class="mb-16">
-  <p class="label-mono text-[#a3a3a3] mb-3">State Comparison</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-6">
     How Other States Compare
   </h2>
@@ -131,7 +125,6 @@ const stateCoords: Record<string, [number, number]> = {
 
 <!-- Section 3: SC Bill Tracker — 1px-gap grid, no container box -->
 <div class="mb-16">
-  <p class="label-mono text-[#a3a3a3] mb-3">Legislation</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-6">
     SC Bill Tracker
   </h2>
@@ -205,7 +198,6 @@ const stateCoords: Record<string, [number, number]> = {
 
 <!-- Section 4: Bill Gaps — sidebar + panel -->
 <div class="mb-12">
-  <p class="label-mono text-[#a3a3a3] mb-3">Analysis</p>
   <h2 class="text-[#e8e8e8] font-bold text-xl md:text-2xl tracking-[-0.02em] mb-3">
     What's Missing from the Pending Bills
   </h2>
@@ -218,9 +210,6 @@ const stateCoords: Record<string, [number, number]> = {
 
   <!-- Gap list (sidebar) -->
   <div class="bg-base-100" role="tablist" aria-label="Bill gaps" id="gap-rail">
-    <div class="label-mono text-[#a3a3a3] px-6 py-3 border-b border-[rgba(255,255,255,0.04)]">
-      Gaps
-    </div>
     {billGaps.map((g: any, i: number) => (
       <button
         type="button"
@@ -246,7 +235,6 @@ const stateCoords: Record<string, [number, number]> = {
         aria-labelledby={`gap-tab-${i}`}
         hidden={i !== 0}
       >
-        <p class="label-mono-tight text-[#a3a3a3] mb-2">Gap {String(i + 1).padStart(2, '0')}</p>
         <h3 class="text-[#e8e8e8] font-bold text-lg mb-4">{g.gap}</h3>
         <p class="text-[#a3a3a3] text-base leading-[1.7]">{g.detail}</p>
       </div>

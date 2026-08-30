@@ -43,12 +43,12 @@ function typeBadge(type: FoiaContact['type']): string {
     sled: 'badge badge-neutral',
     scdot: 'badge badge-neutral',
   };
-  return `<span class="${colors[type] || 'badge badge-neutral'} font-['DM_Mono',monospace] text-[10px] uppercase tracking-[0.05em]">${labels[type] || type}</span>`;
+  return `<span class="${colors[type] || 'badge badge-neutral'}">${labels[type] || type}</span>`;
 }
 
 function renderAgencyCard(contact: FoiaContact): string {
   const cameraLine = contact.hasAlprCameras
-    ? `<p class="text-[#fca5a5] text-xs font-semibold uppercase tracking-[0.05em]">${contact.cameraCount ? contact.cameraCount + ' ALPR cameras confirmed' : 'ALPR cameras confirmed'}</p>`
+    ? `<p class="text-[#fca5a5] text-sm font-semibold">${contact.cameraCount ? contact.cameraCount + ' ALPR cameras confirmed' : 'ALPR cameras confirmed'}</p>`
     : '';
 
   const emailLine = contact.custodian.email
