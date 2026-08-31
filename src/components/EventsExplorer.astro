@@ -762,4 +762,21 @@ const island = {
      /events but wrong inside a homepage band, where it would pin mid-page. Reset
      it to static here. The desktop sticky MAP panel is intentionally left alone. */
   .events-explorer--home .events-tabs-bar { position: static; top: auto; }
+
+  /* Homepage variant: bound the list and month panels so the events section is a
+     fixed-height, internally-scrollable container. On /events the list runs its
+     full length, but on the homepage it sits between Take Action and the blog —
+     an uncapped list forces the reader to scroll through every event to reach the
+     blog below. Capping the card list (the "N upcoming" line and the Past-events
+     disclosure stay outside the scroll) to a viewport-relative height with its own
+     scroll lets a reader page past the whole section in one motion, or browse the
+     full list in place. Scroll chaining is left at its default so the page keeps
+     scrolling once the inner list bottoms out. */
+  .events-explorer--home #events-list,
+  .events-explorer--home #panel-month {
+    max-height: min(30rem, 62vh);
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding-right: 0.4rem;
+  }
 </style>
