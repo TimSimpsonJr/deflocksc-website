@@ -1,21 +1,30 @@
 ---
 // Shared 4-card row linking to the /toolkit/* sub-pages. Self-contained and
-// prop-free: rendered inside TakeActionZone on the homepage (§2.6a) and reused
-// on the toolkit index page. It renders only the card row (no section wrapper
-// or heading), so each consumer supplies its own surrounding context. The row
-// carries its own data-reveal so it animates in wherever it is placed.
+// prop-free by default: rendered inside TakeActionZone on the homepage (§2.6a)
+// and reused on the toolkit index page. It renders only the card row (no
+// section wrapper or heading), so each consumer supplies its own surrounding
+// context. The row carries its own data-reveal so it animates in wherever it
+// is placed.
 //
-// Copy is verbatim from the approved mockup
-// (docs/plans/assets/2026-08-30-homepage-mockup.html). Each card is a real <a>
-// (the mockup's inert tabindex articles are mockup-only); the cards are a list
-// of links, so they live in a <ul>.
+// The `detailed` prop (used only by the toolkit hub) adds a red icon well to
+// each card for more presence; the homepage row stays concise (icon-less).
+// Copy is verbatim from the approved homepage mockup
+// (docs/plans/assets/2026-08-30-homepage-mockup.html). Each card is a real <a>;
+// the cards are a list of links, so they live in a <ul>.
 
 interface ToolkitCard {
   title: string;
   href: string;
   desc: string;
   badge: string;
+  icon: 'file' | 'mic' | 'mega' | 'scale';
 }
+
+interface Props {
+  /** Toolkit hub passes this to add the icon well; homepage stays concise. */
+  detailed?: boolean;
+}
+const { detailed = false } = Astro.props;
 
 const cards: ToolkitCard[] = [
   {
@@ -23,33 +32,51 @@ const cards: ToolkitCard[] = [
     href: '/toolkit/foia',
     desc: 'Ready-to-send public-records letters for any SC agency running Flock.',
     badge: 'Templates',
+    icon: 'file',
   },
   {
     title: 'Public-comment scripts',
     href: '/toolkit/speaking',
     desc: 'Three-minute remarks you can adapt and read straight from the podium.',
     badge: 'Scripts',
+    icon: 'mic',
   },
   {
     title: 'Outreach materials',
     href: '/toolkit/outreach',
     desc: 'Flyers, briefs, and social graphics to rally your neighbors before the vote.',
     badge: 'Print + social',
+    icon: 'mega',
   },
   {
     title: 'Know your rights',
     href: '/toolkit/legal',
     desc: "What SC law does and doesn't allow, and what to say when you're recording in public.",
     badge: 'Legal',
+    icon: 'scale',
   },
 ];
 ---
+
+{detailed && (
+  <svg class="tk-sprite" width="0" height="0" aria-hidden="true" focusable="false"><defs>
+    <g id="tk-i-file" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" /><path d="M9 13h6M9 17h4" /></g>
+    <g id="tk-i-mic" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z" /><path d="M5 10a7 7 0 0 0 14 0" /><path d="M8 21h8M12 17v4" /></g>
+    <g id="tk-i-mega" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a3 3 0 0 1 0 6" /><path d="M10 8H7a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3l6 4V4z" /></g>
+    <g id="tk-i-scale" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10M12 4v16M6 6l6-1 6 1" /><path d="M9 12L6 6l-3 6a3 3 0 0 0 6 0zM21 12l-3-6-3 6a3 3 0 0 0 6 0z" /></g>
+  </defs></svg>
+)}
 
 <ul class="toolkit-row" data-reveal="up">
   {
     cards.map((card) => (
       <li class="min-w-0">
         <a href={card.href} class="tk-card">
+          {detailed && (
+            <span class="tk-well" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><use href={`#tk-i-${card.icon}`} /></svg>
+            </span>
+          )}
           <span class="tk-head">
             <span class="tk-title">{card.title}</span>
             <span class="tk-arrow" aria-hidden="true">&rarr;</span>
@@ -107,6 +134,30 @@ const cards: ToolkitCard[] = [
   .tk-card:hover {
     border-color: rgba(255, 255, 255, 0.22);
     background: #1e1e1e;
+  }
+
+  /* Icon well (detailed variant only). */
+  .tk-sprite {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+  .tk-well {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.45rem;
+    background: #141414;
+    color: #ef4444;
+  }
+  .tk-well svg {
+    width: 20px;
+    height: 20px;
   }
 
   .tk-head {
