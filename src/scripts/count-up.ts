@@ -122,9 +122,6 @@ export function observeCountUps(
     return;
   }
 
-  // Safe to reset now: an observer will run and restore each value on view.
-  for (const [el, fmt] of tracked) el.textContent = formatStat(0, fmt);
-
   const observer = new IntersectionObserver(
     (entries, obs) => {
       for (const entry of entries) {
@@ -138,12 +135,10 @@ export function observeCountUps(
     { threshold: options.threshold ?? 0.4, rootMargin: '0px 0px -40px 0px' },
   );
 
-  for (const el of tracked.keys()) observer.observe(el);
+  // Reset each element to 0 only once it is successfully being observed, so a
+  // failure to observe leaves the final value visible instead of stranded at 0.
+  for (const [el, fmt] of tracked) {
+    observer.observe(el);
+    el.textContent = formatStat(0, fmt);
+  }
 }
-
-/**
- * Compatibility alias for `observeCountUps`. Some homepage sections import the
- * IO-based entry point under this name; both spellings resolve to one function.
- * Prefer `observeCountUps` in new code.
- */
-export const initCountUp = observeCountUps;

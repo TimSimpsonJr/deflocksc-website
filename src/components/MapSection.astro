@@ -8,7 +8,7 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
 ---
 
 <section id="map" aria-labelledby="map-section-heading"
-  class="bg-base-100 border-t border-[rgba(255,255,255,0.10)] relative overflow-hidden"
+  class="bg-base-100 border-t border-[rgba(255,255,255,0.10)] relative overflow-hidden scroll-mt-20"
   style="padding-block: clamp(3rem, 7vw, 5.5rem);">
   <div class="mx-auto w-full max-w-[1120px] px-[clamp(1rem,4vw,2.25rem)]">
 
@@ -57,7 +57,7 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
 
       <!-- Side column (right) -->
       <div class="map-side">
-        <p class="map-statline"><span class="n">{scTotal}</span> cameras &middot; <span class="n">{jurisdictions}</span> jurisdictions</p>
+        <p class="map-statline"><span class="n"><span class="sr-only">{scTotal}</span><span aria-hidden="true" data-count-up>{scTotal}</span></span> cameras &middot; <span class="n"><span class="sr-only">{jurisdictions}</span><span aria-hidden="true" data-count-up>{jurisdictions}</span></span> jurisdictions</p>
         <p class="map-caption">Pan across the state, tap any dot to see the vendor, operating agency, and direction each camera faces.</p>
         <div>
           <button id="open-full-map" type="button" class="btn btn-outline min-h-11">Open the full map</button>
@@ -71,7 +71,7 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
       <p class="text-[#a3a3a3] text-xs">
         Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
       </p>
-      <p class="text-[#737373] text-xs mt-1">
+      <p class="text-[#9a9a9a] text-xs mt-1">
         Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
       </p>
     </div>
@@ -125,7 +125,7 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
     letter-spacing: 0.02em;
   }
   .map-statline .n {
-    color: #dc2626;
+    color: #ef4444; /* red — ≥4.5:1 on #171717 */
     font-weight: 700;
     font-variant-numeric: tabular-nums;
   }
@@ -396,5 +396,5 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
   });
 
   // Count-up on the map statline numbers (shared util, fires once on view).
-  observeCountUps(document.querySelectorAll<HTMLElement>('.map-statline .n'));
+  observeCountUps(document.querySelectorAll<HTMLElement>('.map-statline [data-count-up]'));
 </script>

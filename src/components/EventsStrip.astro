@@ -110,7 +110,7 @@ const cols = Math.min(strip.length, 3);
               <a href="/events" class="estrip-card">
                 <span class="estrip-date">
                   <span class="d">{dayOfMonth(o.date).padStart(2, '0')}</span>
-                  <span class="m">{monthAbbr(o.date)} {o.date.slice(0, 4)}</span>
+                  <span class="m">{`${monthAbbr(o.date)} ${o.date.slice(0, 4)}`}</span>
                 </span>
                 <span class={`${badgeClass} estrip-badge`}>{eventTypeLabel(e.type)}</span>
                 <h3 class="estrip-title">{e.title}</h3>
@@ -195,9 +195,17 @@ const cols = Math.min(strip.length, 3);
                 transform 0.18s cubic-bezier(0.23, 1, 0.32, 1);
   }
   .estrip-card:hover { border-color: rgba(255, 255, 255, 0.22); background: #1e1e1e; }
-  .estrip-card:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+  .estrip-card:focus-visible { outline: 2px solid #dc2626; outline-offset: 2px; }
   @media (hover: hover) {
     .estrip-card:hover { transform: translateY(-2px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .estrip-card {
+      transition: none;
+    }
+    .estrip-card:hover {
+      transform: none;
+    }
   }
 
   .estrip-date { display: flex; align-items: baseline; gap: 0.5rem; }
