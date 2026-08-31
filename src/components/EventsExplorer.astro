@@ -21,6 +21,11 @@ interface Props {
 
 const { variant = 'page' } = Astro.props;
 
+// The homepage renders a capped "next N" preview; /events (undefined) renders the
+// full list. Passed to EventsList (server render) and carried in the island so
+// the client controller caps its re-renders to the same limit.
+const listLimit = variant === 'home' ? 6 : undefined;
+
 // Baked events.json is validated with the shared strict publicEventSchema and
 // projected through toPublicEvent — IDENTICAL to the events-page task that created
 // this file. This task must NOT weaken that back to a cast plus a partial field
@@ -99,6 +104,10 @@ const island = {
   today,
   horizonEnd,
   pastCutoff,
+  // Homepage preview cap. Undefined on /events, where JSON.stringify omits the
+  // key entirely, so the client controller's `listLimit != null` guards leave the
+  // full-list path untouched.
+  listLimit,
 };
 ---
 
@@ -126,7 +135,7 @@ const island = {
     </div>
 
     <div id="panel-list" role="tabpanel" aria-labelledby="tab-list" tabindex="0" data-panel="list" class="is-active">
-      <EventsList upcoming={upcomingList} past={past} cityNames={cityNames} countyNames={countyNames} />
+      <EventsList upcoming={upcomingList} past={past} cityNames={cityNames} countyNames={countyNames} limit={listLimit} />
     </div>
 
     <div id="panel-month" role="tabpanel" aria-labelledby="tab-month" tabindex="0" data-panel="month">
@@ -763,20 +772,60 @@ const island = {
      it to static here. The desktop sticky MAP panel is intentionally left alone. */
   .events-explorer--home .events-tabs-bar { position: static; top: auto; }
 
-  /* Homepage variant: bound the list and month panels so the events section is a
-     fixed-height, internally-scrollable container. On /events the list runs its
-     full length, but on the homepage it sits between Take Action and the blog —
-     an uncapped list forces the reader to scroll through every event to reach the
-     blog below. Capping the card list (the "N upcoming" line and the Past-events
-     disclosure stay outside the scroll) to a viewport-relative height with its own
-     scroll lets a reader page past the whole section in one motion, or browse the
-     full list in place. Scroll chaining is left at its default so the page keeps
-     scrolling once the inner list bottoms out. */
-  .events-explorer--home #events-list,
+  /* Homepage variant renders a COMPACT preview card: title, the time+place line,
+     and the type/recurrence label. The address and the (often paragraph-long)
+     description are dropped so the preview shows several events at a glance instead
+     of a fraction of one tall card. Both remain one click away in the event-detail
+     popover. Scoped to #events-list so it hits the server-rendered cards and the
+     client-rebuilt buildCard() cards alike (shared class contract), never the popover. */
+  .events-explorer--home #events-list .event-address,
+  .events-explorer--home #events-list .event-desc {
+    display: none;
+  }
+  /* Homepage variant: cap ONLY the month panel's height with its own scroll. The
+     LIST is now hard-capped to 6 rows in markup (EventsList's slice) and in the
+     client controller (events-page.ts), so it no longer needs a scroll cap — the
+     "See all events" link is the way to the rest. #panel-month, by contrast, still
+     shows every occurrence, so it keeps a viewport-relative scroll cap here.
+     Crucially, #panel-month is a plain BLOCK wrapper around .events-months, so a
+     max-height scrolls it cleanly; #events-list is itself the flex column (see
+     .events-list, flex-direction: column) and capping IT would let its
+     overflow:hidden flex-item cards collapse to ~2px rows — which is exactly why
+     only the month panel carries a cap, and the list is bounded by row COUNT instead. */
   .events-explorer--home #panel-month {
     max-height: min(30rem, 62vh);
     overflow-y: auto;
     scrollbar-gutter: stable;
     padding-right: 0.4rem;
+  }
+  /* Homepage variant is a forward-looking preview: hide the "N upcoming" count
+     line and the Past-events disclosure. Both belong to the full /events view; the
+     homepage just shows the next few events and links out to the rest. */
+  .events-explorer--home .events-count,
+  .events-explorer--home .events-past {
+    display: none;
+  }
+  /* The preview's way out to the full explorer. Amber, matching the site's
+     .event-pop-addr amber-link idiom (the address/official-schedule links). */
+  .events-explorer--home .events-see-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 1.25rem;
+    color: #fbbf24;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(251, 191, 36, 0.5);
+    padding-bottom: 1px;
+    width: fit-content;
+  }
+  .events-explorer--home .events-see-all:hover {
+    color: #fcd34d;
+    border-bottom-color: #fbbf24;
+  }
+  .events-explorer--home .events-see-all:focus-visible {
+    outline: 2px solid #fbbf24;
+    outline-offset: 2px;
   }
 </style>

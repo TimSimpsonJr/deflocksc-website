@@ -7,9 +7,17 @@ interface Props {
   past: Occurrence[];
   cityNames: Record<string, string>;
   countyNames: Record<string, string>;
+  // Homepage preview cap. When set (variant="home" passes 6), only the first
+  // `limit` upcoming rows render and a "see all" link points at /events; on
+  // /events it is undefined and the full list renders exactly as before.
+  limit?: number;
 }
 
-const { upcoming, past, cityNames, countyNames } = Astro.props;
+const { upcoming, past, cityNames, countyNames, limit } = Astro.props;
+
+// The homepage preview shows a hard-capped slice; /events (limit undefined)
+// shows every upcoming row, identical to before this prop existed.
+const shownUpcoming = limit != null ? upcoming.slice(0, limit) : upcoming;
 
 const place = (o: Occurrence) =>
   `${cityNames[o.event.city] ?? o.event.city} · ${countyNames[o.event.county] ?? o.event.county} County`;
@@ -22,11 +30,11 @@ const place = (o: Occurrence) =>
       whole line, not the bare number. aria-live used to sit on the <ul>, which
       re-announced all 30+ cards every time the type radiogroup was arrowed. */}
   <p class="events-count label-mono tabular-nums text-[#737373]" aria-live="polite" aria-atomic="true">
-    <span id="events-count">{upcoming.length}</span> upcoming
+    <span id="events-count">{shownUpcoming.length}</span> upcoming
   </p>
 
   <ul id="events-list" class="events-list">
-    {upcoming.map((o) => (
+    {shownUpcoming.map((o) => (
       <li
         class={`event-card event-card--${eventTypeSlug(o.event.type)}`}
         data-event-id={o.event.id}
@@ -59,13 +67,20 @@ const place = (o: Occurrence) =>
     ))}
   </ul>
 
+  {/* The homepage preview's one way out to the full explorer: rendered only when
+      the list is capped (limit set). On /events (limit undefined) there is no cap
+      and no link — the page already IS the full list. */}
+  {limit != null && (
+    <a class="events-see-all" href="/events">See all events <span aria-hidden="true">&rarr;</span></a>
+  )}
+
   <!-- One empty state, two leads. A calendar empty to begin with keeps the
        general lead below (the no-JavaScript default); when the client filters to
        a specific county with nothing on it, events-page.ts rewrites the lead to
        name that county ("No events in Greenville County yet"). The proof line and
        the two ways in are shared, and the proof comes from emptyStateProof() on
        both render paths. -->
-  <div id="events-empty" class="events-empty" hidden={upcoming.length > 0}>
+  <div id="events-empty" class="events-empty" hidden={shownUpcoming.length > 0}>
     <p class="events-empty-lead" id="events-empty-lead">Nothing on the calendar right now.</p>
     <p class="events-empty-proof" id="events-empty-proof">{emptyStateProof(past.length)}</p>
     <p class="events-empty-actions">
