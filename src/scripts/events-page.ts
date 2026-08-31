@@ -73,6 +73,10 @@ interface Island {
   today: string;
   horizonEnd: string;
   pastCutoff: string;
+  // Homepage preview cap. Set to 6 for variant="home"; omitted (undefined) on
+  // /events, where every `listLimit != null` guard below leaves the full-list
+  // path untouched.
+  listLimit?: number;
 }
 
 const islandEl = document.getElementById('events-data');
@@ -768,6 +772,12 @@ function applyMerge(merged: PublicEvent[]) {
   for (const o of collapseSeries(freshOccurrences)) {
     if (list) insertSorted(list, buildCard(o), sortKey(o.date, o.event.time, o.event.id));
   }
+  // On the homepage preview an overlay insert could push the list past its cap;
+  // trim the tail back to island.listLimit so it stays a "next N" preview.
+  // /events leaves listLimit undefined and keeps every inserted row.
+  if (island.listLimit != null && list) {
+    while (list.children.length > island.listLimit) list.lastElementChild?.remove();
+  }
   for (const o of freshOccurrences) {
     const chips = document.querySelector(`[data-chips="${CSS.escape(o.date)}"]`);
     if (chips) insertSorted(chips, buildChip(o), sortKey(o.date, o.event.time, o.event.id));
@@ -1101,7 +1111,13 @@ function applyFilter(next: EventFilter): void {
   // The list shows one row per event (collapsed series); the month grid keeps
   // every occurrence, so each reads from a different set of the same `upcoming`.
   const list = document.getElementById('events-list');
-  if (list) list.replaceChildren(...collapseSeries(upcoming).map(buildCard));
+  if (list) {
+    // The homepage preview caps the list to island.listLimit (the "next 6");
+    // /events leaves it undefined and renders every collapsed row.
+    const rows = collapseSeries(upcoming);
+    const shown = island.listLimit != null ? rows.slice(0, island.listLimit) : rows;
+    list.replaceChildren(...shown.map(buildCard));
+  }
 
   for (const chips of document.querySelectorAll<HTMLElement>('[data-chips]')) {
     chips.replaceChildren();
