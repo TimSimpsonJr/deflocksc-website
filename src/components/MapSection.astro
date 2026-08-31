@@ -339,6 +339,10 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
 
     const handle = await loadMap();
     handle.resize();
+    // Re-frame the state after the container is definitely sized. On mobile the
+    // frame can still be 0-sized when the map is first created, making the
+    // initial fitBounds a no-op; re-fitting here keeps the default SC-wide.
+    handle.map.fitBounds(SC_BBOX, { padding: 24, duration: 0 });
 
     const target = document.getElementById('camera-map');
     if (target) {
