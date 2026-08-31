@@ -177,8 +177,8 @@ export function addCameraLayers(map: maplibregl.Map, geojson: GeoJSON.FeatureCol
     type: 'geojson',
     data: geojson,
     cluster: true,
-    clusterMaxZoom: 10, // individual dots/cones from zoom 11 (was 15, then 12 — decluster earlier)
-    clusterRadius: 40,
+    clusterMaxZoom: 9, // individual dots/cones from zoom 10 (was 15 -> 12 -> 10 -> 9)
+    clusterRadius: 30,
   });
 
   // Cluster glow (much larger blurred circle behind)
