@@ -1,0 +1,41 @@
+---
+import EventsExplorer from './EventsExplorer.astro';
+---
+<section id="events" class="hp-band b1" aria-labelledby="events-heading">
+  <div class="hp-shell">
+    <div class="sec-head-wrap" data-reveal="up">
+      <h2 id="events-heading" class="sec-title">Upcoming events: show up.</h2>
+      <p class="sec-lead">The room is where it's decided. Here's where to be next.</p>
+    </div>
+    <EventsExplorer variant="home" />
+  </div>
+</section>
+
+<style>
+  /* Band skeleton + shell (shared homepage rhythm, §1). Copied verbatim from the
+     former EventsStrip.astro — the same scoped-duplication pattern TakeActionZone
+     and SignalCta already follow. */
+  .hp-band {
+    position: relative;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+  }
+  .hp-band.b1 { background: #171717; }
+  .hp-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-inline: clamp(1rem, 4vw, 2.25rem);
+  }
+
+  .sec-head-wrap { max-width: 62ch; margin-bottom: 2.4rem; }
+  .sec-title {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.5rem, 3.4vw, 2.15rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.12;
+    color: #e8e8e8;
+    text-wrap: balance;
+  }
+  .sec-lead { margin: 0; color: #a3a3a3; font-size: 1.02rem; max-width: 60ch; }
+</style>
