@@ -1,6 +1,7 @@
 import type { RepGroup, LocalCouncils } from './types.js';
 import { escapeHtml } from '../../lib/escape-html.js';
 import { showToast } from '../toast.js';
+import { countUpNow } from '../count-up.js';
 
 declare const umami: { track: (event: string) => void } | undefined;
 
@@ -35,20 +36,6 @@ function titleCase(s: string): string {
   return s.replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function animateCount(el: HTMLElement, target: number): void {
-  const duration = 1000;
-  const start = performance.now();
-  function tick(now: number): void {
-    const elapsed = now - start;
-    const progress = Math.min(elapsed / duration, 1);
-    // Ease-out: 1 - (1 - t)^3
-    const eased = 1 - Math.pow(1 - progress, 3);
-    el.textContent = String(Math.round(eased * target));
-    if (progress < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
 export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, number>): void {
   currentGroups = groups;
   const container = document.getElementById('action-results-list');
@@ -77,7 +64,9 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
         const value = document.createElement('div');
         value.className = 'stat-value text-primary text-3xl';
         value.setAttribute('data-count', String(count));
-        value.textContent = '0';
+        // Ship the final value in the DOM for assistive tech; countUpNow resets
+        // it to 0 only when the count-up animation actually runs.
+        value.textContent = String(count);
         const label = document.createElement('div');
         label.className = 'stat-title label-mono-compact whitespace-normal';
         label.textContent = title;
@@ -96,9 +85,8 @@ export function renderResults(groups: RepGroup[], cameraCounts?: Record<string, 
 
       container.appendChild(statDiv);
 
-      statDiv.querySelectorAll('[data-count]').forEach(el => {
-        const target = parseInt(el.getAttribute('data-count')!, 10);
-        animateCount(el as HTMLElement, target);
+      statDiv.querySelectorAll<HTMLElement>('[data-count]').forEach(el => {
+        countUpNow(el);
       });
     }
   }

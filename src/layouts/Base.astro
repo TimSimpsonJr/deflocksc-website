@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import ActionModal from '../components/ActionModal.astro';
+import impactStats from '../data/impact-stats.json';
 
 interface Props {
   title?: string;
@@ -12,7 +13,16 @@ interface Props {
   publishedDate?: string;
 }
 
-const { title = "DeflockSC — License Plate Surveillance in South Carolina", description = "Over 240 ALPR cameras track drivers across South Carolina with no public vote and no oversight. See the map, find your reps, and fight back.", ogImage = "/og-image.png", ogType = "website", publishedDate } = Astro.props;
+// Sitewide default meta description — used only by pages that don't pass their
+// own `description`. The camera floor is derived from the build-time
+// impact-stats.json (design §4.1/§5/§10) so the default never hardcodes a camera
+// number and stays true across data refreshes; it replaces the stale "Over 240
+// ALPR cameras…" default. Any page (including the homepage) that supplies its
+// own description overrides this.
+const cameraFloor = (Math.floor(impactStats.scTotal / 100) * 100).toLocaleString('en-US');
+const defaultDescription = `More than ${cameraFloor} ALPR cameras track where South Carolinians drive, with no state law on who can look or how long the data is kept. See the map and find your representatives.`;
+
+const { title = "DeflockSC — License Plate Surveillance in South Carolina", description = defaultDescription, ogImage = "/og-image.png", ogType = "website", publishedDate } = Astro.props;
 const siteOrigin = Astro.site ?? new URL("https://deflocksc.org");
 const canonicalURL = new URL(Astro.url.pathname, siteOrigin);
 const ogImageURL = new URL(ogImage, siteOrigin).href;
@@ -33,6 +43,13 @@ const analyticsExcluded =
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+
+    {/* No-JS reveal gate (§7/§8): stamp .has-js on <html> before first paint, so
+        the [data-reveal] hiding CSS in global.css applies only when JS is present
+        to un-hide it. With JS off this never runs, .has-js is absent, and every
+        reveal element renders visible. is:inline keeps it unbundled and synchronous. */}
+    <script is:inline>document.documentElement.classList.add('has-js');</script>
+
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />

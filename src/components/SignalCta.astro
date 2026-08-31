@@ -1,0 +1,99 @@
+---
+// Signal signup — the closing CTA of the conversion zone (§2.6c). Centered
+// bordered panel. Fires NO analytics (Rev 2, Fable#14): a record of who moved
+// toward the Signal group is exactly what a subpoena would want, matching
+// Base.astro excluding /events/* from analytics entirely.
+//
+// Scraper countermeasure — the same posture as the events page intake button:
+// the button carries no href and no data-* URL, so the destination appears
+// nowhere in the prerendered HTML. The bundled script assigns it to
+// window.location at click time, so a scraper that never clicks never harvests
+// it. Unlike /events, there is no "Before you join" dialog here: the safety note
+// is inline and always visible, and the click navigates directly.
+---
+
+<section id="stay" class="hp-band b2" aria-labelledby="stay-heading">
+  <div class="hp-shell">
+    <div class="signal" data-reveal="up">
+      <h2 id="stay-heading" class="signal-title">Stay in the loop.</h2>
+      <p class="signal-lead">
+        Organizing happens fast, and votes get scheduled with little notice. Join
+        the DeflockSC Signal group to hear about hearings and actions before they
+        happen.
+      </p>
+
+      {/* No href and no data-* URL: the internal redirect path is assigned to
+          window.location at click time by the bundled script below, never
+          written into the static markup. Kept as an Astro comment (not an HTML
+          comment) so the build strips it and cannot leak the path. */}
+      <button id="signal-cta" type="button" class="btn btn-primary btn-lg">
+        Join the Signal group
+      </button>
+
+      <p class="signal-safety">
+        <span class="lead-in">Heads up:</span> this group is open and unvetted:
+        anyone can be inside it. Join with a pseudonym, not your real name, and
+        share only what you'd be comfortable seeing made public.
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Imported (not inlined) so Astro externalizes it into a JS chunk: a hoisted
+  // no-import inline script gets written straight into the page HTML, which
+  // would leak the redirect path into view-source. The module keeps the literal
+  // out of the static markup, matching the events page's anti-scrape posture.
+  import '../scripts/signal-cta.js';
+</script>
+
+<style>
+  /* Band skeleton + shell (shared homepage rhythm, §1). */
+  .hp-band {
+    position: relative;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+  }
+  .hp-band.b2 { background: #1a1a1a; }
+  .hp-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-inline: clamp(1rem, 4vw, 2.25rem);
+  }
+
+  .signal {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: clamp(1.8rem, 4vw, 2.8rem);
+    background: #171717;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 0.45rem;
+    text-align: center;
+  }
+  .signal-title {
+    margin: 0 0 0.7rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: #e8e8e8;
+    text-wrap: balance;
+  }
+  .signal-lead {
+    margin: 0 auto 1.6rem;
+    color: #a3a3a3;
+    max-width: 46ch;
+    line-height: 1.55;
+  }
+  .signal-safety {
+    margin: 1.5rem 0 0;
+    padding: 0.9rem 1rem;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 0.3rem;
+    text-align: left;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: #a3a3a3;
+  }
+  .signal-safety .lead-in { color: #fbbf24; font-weight: 600; }
+</style>

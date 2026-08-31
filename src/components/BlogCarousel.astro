@@ -1,0 +1,203 @@
+---
+// BlogCarousel — §2.2. Depth/credibility right after the hook; replaces
+// BlogPreview. A horizontal CSS scroll-snap carousel: pure CSS, no JS, no
+// auto-advance (so no reduced-motion special-casing and no carousel script).
+// The container is focusable and labelled so keyboard users can arrow-scroll it.
+//
+// Same query as the old BlogPreview: published posts, newest first, first five.
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+  .slice(0, 5);
+---
+
+{posts.length > 0 && (
+  <section id="blog" class="blog-band" aria-labelledby="blog-heading">
+    <div class="blog-shell">
+      <div class="blog-head" data-reveal="up">
+        <h2 id="blog-heading" class="blog-title">From the blog</h2>
+      </div>
+
+      <div class="carousel-wrap" data-reveal="up" data-reveal-delay="1">
+        <div class="carousel" tabindex="0" role="group" aria-label="Blog posts, horizontal scroller">
+          {posts.map((post) => (
+            <a href={`/blog/${post.id}`} class="post-card" aria-label={post.data.title}>
+              {post.data.featuredImage ? (
+                <div class="post-thumb post-thumb--img">
+                  <img
+                    src={post.data.featuredImage}
+                    alt={post.data.featuredImageAlt ?? post.data.title}
+                    width="280"
+                    height="175"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              ) : (
+                <div class="post-thumb post-thumb--ph" aria-hidden="true">
+                  <span class="lens"></span>
+                </div>
+              )}
+              {post.data.tags && post.data.tags.length > 0 && (
+                <span class="post-cat">{post.data.tags[0]}</span>
+              )}
+              <h3 class="post-card-title">{post.data.title}</h3>
+              <span class="post-read" aria-hidden="true">Read &rarr;&#xFE0E;</span>
+            </a>
+          ))}
+        </div>
+        <p class="carousel-hint"><span aria-hidden="true">&harr;</span> Scroll for more</p>
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .blog-band {
+    background: #1a1a1a; /* base-200 */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+  }
+  .blog-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-inline: clamp(1rem, 4vw, 2.25rem);
+  }
+  .blog-head {
+    max-width: 62ch;
+    margin-bottom: 2.4rem;
+  }
+  .blog-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 3.4vw, 2.15rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.12;
+    color: #e8e8e8;
+  }
+
+  .carousel-wrap {
+    position: relative;
+  }
+  .carousel {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.8rem;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+  }
+  .carousel:focus-visible {
+    outline: 2px solid #dc2626;
+    outline-offset: 4px;
+    border-radius: 0.3rem;
+  }
+  .carousel::-webkit-scrollbar {
+    height: 8px;
+  }
+  .carousel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 4px;
+  }
+
+  /* Card — the whole card is one link. Flex column so "Read" pins to the bottom
+     and every card in the row stretches to equal height (align-items:stretch). */
+  .post-card {
+    flex: 0 0 280px;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1.05rem 1.1rem;
+    background: #1a1a1a; /* base-200 */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.3rem;
+    color: #e8e8e8;
+    text-decoration: none;
+    transition: border-color 0.18s cubic-bezier(0.23, 1, 0.32, 1),
+      background 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .post-card:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: #1e1e1e;
+  }
+
+  .post-thumb {
+    aspect-ratio: 16 / 10;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.3rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .post-thumb--img img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .post-thumb--ph {
+    background: linear-gradient(135deg, #201414, #171717 60%);
+    display: grid;
+    place-content: center;
+  }
+  .post-thumb--ph::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(220, 38, 38, 0.05) 1px, transparent 1px);
+    background-size: 100% 8px;
+  }
+  .post-thumb--ph .lens {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid rgba(220, 38, 38, 0.6);
+    position: relative;
+    z-index: 1;
+  }
+  .post-thumb--ph .lens::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.4);
+  }
+
+  .post-cat {
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #a3a3a3; /* muted — ≥4.5:1 on the card fill */
+  }
+  .post-card-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1.25;
+    color: #e8e8e8;
+  }
+  .post-read {
+    margin-top: auto;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #ef4444; /* red — ≥4.5:1 on the card fill */
+  }
+
+  .carousel-hint {
+    margin: 0.6rem 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.66rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #a3a3a3;
+  }
+</style>

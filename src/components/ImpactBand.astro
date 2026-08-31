@@ -1,0 +1,125 @@
+---
+// ImpactBand — §2.3. The scale, in three numbers, with count-up on first view.
+//
+// Exactly three stats in three columns at EVERY width: the column count never
+// changes, so the vertical dividers can never mis-stack (the iPad divider bug
+// the 5-stat version hit). Below 560px the type and padding shrink instead of
+// wrapping. The 0-state-laws and 100+-communities stats live in the legislation
+// ask-frame, not here.
+//
+// The camera total is read from src/data/impact-stats.json (spec §4.1 forbids
+// hardcoding any camera number in markup); 110+ and 422M+ are static sourced
+// figures (§4.2). Count-up runs through the shared src/scripts/count-up.ts, and
+// the final value ships in the DOM for assistive tech from first paint.
+import impactStats from '../data/impact-stats.json';
+
+const scTotalDisplay = impactStats.scTotal.toLocaleString('en-US');
+
+const stats = [
+  { value: scTotalDisplay, caption: 'ALPR cameras tracked in SC' },
+  { value: '110+', caption: 'SC agencies running them' },
+  { value: '422M+', caption: 'Plate reads · SLED, 2019–22' },
+];
+---
+
+<section class="impact-band" aria-labelledby="impact-heading">
+  <div class="impact-shell">
+    <div class="impact-head" data-reveal="up">
+      <h2 id="impact-heading" class="impact-title">The scale of it, in South Carolina</h2>
+    </div>
+
+    <div class="impact-grid">
+      {stats.map((stat, i) => (
+        <div class="istat" data-reveal="up" data-reveal-delay={String(i + 1)}>
+          <div class="istat-v">
+            <span class="sr-only">{stat.value}</span>
+            <span aria-hidden="true" data-count-up>{stat.value}</span>
+          </div>
+          <div class="istat-t">{stat.caption}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .impact-band {
+    background: #0d0d0d; /* base-300 */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+  }
+  .impact-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-inline: clamp(1rem, 4vw, 2.25rem);
+  }
+  .impact-head {
+    max-width: 62ch;
+    margin-bottom: 2.4rem;
+  }
+  .impact-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 3.4vw, 2.15rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.12;
+    color: #e8e8e8;
+  }
+
+  /* Three columns held from desktop through phone; type shrinks rather than
+     wrapping to a new column count, so the vertical dividers stay correct. */
+  .impact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #171717; /* base-100 */
+  }
+  .istat {
+    padding: 1.8rem 1.4rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 0;
+  }
+  .istat:first-child {
+    border-left: 0;
+  }
+  .istat-v {
+    font-size: clamp(1.5rem, 4.6vw, 2.7rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #dc2626; /* primary — large text, ≥3:1 */
+    font-variant-numeric: tabular-nums;
+  }
+  .istat-t {
+    margin-top: 0.7rem;
+    font-size: 0.63rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.5;
+    color: #a3a3a3; /* muted — small text, ≥4.5:1 on #171717 */
+  }
+
+  @media (max-width: 560px) {
+    .istat {
+      padding: 1.15rem 0.7rem;
+    }
+    .istat-v {
+      font-size: clamp(1.15rem, 5.4vw, 1.7rem);
+    }
+    .istat-t {
+      font-size: 0.55rem;
+      letter-spacing: 0.06em;
+      margin-top: 0.5rem;
+    }
+  }
+</style>
+
+<script>
+  import { observeCountUps } from '../scripts/count-up';
+
+  // Scope the query to this band so it never double-observes [data-count-up]
+  // elements owned by the map statline / ask-frame in sibling sections.
+  const band = document.querySelector('.impact-band');
+  if (band) observeCountUps(band.querySelectorAll<HTMLElement>('[data-count-up]'));
+</script>

@@ -1,120 +1,141 @@
 ---
+import impactStats from '../data/impact-stats.json';
+
+// Statewide figures for the map statline. Computed at build into
+// impact-stats.json (design §4.1); never hardcode a camera number in markup.
+const scTotal = impactStats.scTotal.toLocaleString('en-US');
+const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
 ---
 
-<section id="map-section" aria-labelledby="map-section-heading" class="bg-[#0d0d0d] relative overflow-hidden">
+<section id="map" aria-labelledby="map-section-heading"
+  class="bg-base-100 border-t border-[rgba(255,255,255,0.10)] relative overflow-hidden scroll-mt-20"
+  style="padding-block: clamp(3rem, 7vw, 5.5rem);">
+  <div class="mx-auto w-full max-w-[1120px] px-[clamp(1rem,4vw,2.25rem)]">
 
-  <!-- Ghost "242" background number -->
-  <div class="absolute top-[-10px] right-[-40px] font-black leading-none pointer-events-none select-none z-0"
-       style="font-size:clamp(12rem,22vw,22rem);color:rgba(220,38,38,0.05);letter-spacing:-0.06em;"
-       aria-hidden="true">242</div>
-
-  <!-- Two-column header: copy left, stats right -->
-  <div class="md:grid md:grid-cols-[1fr_240px] relative z-10 border-b border-[rgba(255,255,255,0.07)]">
-
-    <!-- Left: heading + copy -->
-    <div class="px-6 md:px-16 pt-10 md:pt-14 pb-10 md:pb-12 md:border-r md:border-[rgba(255,255,255,0.07)]">
-      <p data-reveal="left" class="label-mono text-[#737373] mb-6">Upstate SC / Camera Network</p>
-      <h2 id="map-section-heading" data-reveal="left" data-reveal-delay="1" class="font-black leading-none tracking-[-0.035em] mb-8"
-          style="font-size:clamp(2rem,3.5vw,3rem);">
-        Cameras are<br>already watching.
-        <span class="block" style="color:rgba(232,232,232,0.2);">No rules attached.</span>
+    <!-- Heading -->
+    <div data-reveal="up" class="max-w-[62ch] mb-10">
+      <h2 id="map-section-heading" class="text-white font-semibold tracking-[-0.015em] leading-[1.12]"
+          style="font-size:clamp(1.5rem,3.4vw,2.15rem);text-wrap:balance;">
+        These cameras are watching your South Carolina town right now.
       </h2>
-
-      <div data-reveal="left" data-reveal-delay="2" class="space-y-5 text-[15px] text-[#a3a3a3] leading-[1.75] max-w-[520px]">
-        <p>
-          <strong class="text-[#e8e8e8]">Flock Safety cameras are up across Upstate SC:</strong> Greenville, Spartanburg, Anderson, and surrounding areas.
-        </p>
-        <p>
-          <strong class="text-[#e8e8e8]">Greenville:</strong> Greenville PD runs 57 Flock cameras. The first batch went up in January 2021, paid for with federal civil asset forfeiture funds. No city ordinance. No council vote on oversight. There are still no rules about who sees the data, how long it's kept, or who checks how it's used.
-        </p>
-        <p>
-          <strong class="text-[#e8e8e8]">Spartanburg:</strong> City PD runs 15 cameras. The county's were deployed under Sheriff Chuck Wright&hellip; who pled guilty to federal criminal charges in October 2025 including wire fraud and corruption. A convicted criminal had unrestricted access to a system tracking where you drive. Neither the city nor the county has an oversight policy.
-        </p>
-        <p>
-          <strong class="text-[#e8e8e8]">From Greenville to Spartanburg to Anderson and beyond:</strong> Cameras first, questions never. No Upstate city or county has passed an oversight ordinance. Even when other cities tried, it didn't matter. Local governments can't control where the data goes once it's in Flock's network.
-        </p>
-        <p>
-          <strong class="text-[#e8e8e8]">The official count undersells it.</strong> When Greenville went looking for more cameras, its own RFP required the new ones to connect with HOA and neighborhood cameras too. The city's SafeWatch program asks residents to register their personal surveillance cameras with police. At least one Greenville HOA already runs its own license plate reader. The 57-camera figure is a floor, not a ceiling.
-        </p>
-      </div>
     </div>
 
-    <!-- Right: stat column -->
-    <div data-reveal="left" class="hidden md:flex flex-col px-7 pt-14 pb-12">
-      <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
-        <div class="text-[32px] font-black text-[#dc2626] leading-none tracking-[-0.03em] mb-1">242</div>
-        <div class="font-['Instrument_Sans_Variable',sans-serif] font-semibold text-[8px] uppercase tracking-[0.15em] text-[#737373]">Total cameras<br>documented</div>
-      </div>
-      <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
-        <div class="text-[32px] font-black text-[#dc2626] leading-none tracking-[-0.03em] mb-1">57</div>
-        <div class="font-['Instrument_Sans_Variable',sans-serif] font-semibold text-[8px] uppercase tracking-[0.15em] text-[#737373]">Greenville PD</div>
-      </div>
-      <div class="py-4 border-b border-[rgba(255,255,255,0.06)]">
-        <div class="text-[24px] font-black leading-none tracking-[-0.03em] mb-1" style="color:#555;">0</div>
-        <div class="font-['Instrument_Sans_Variable',sans-serif] font-semibold text-[8px] uppercase tracking-[0.15em] text-[#737373]">Oversight<br>ordinances</div>
-      </div>
-      <div class="py-4">
-        <div class="text-[24px] font-black leading-none tracking-[-0.03em] mb-1" style="color:#555;">0</div>
-        <div class="font-['Instrument_Sans_Variable',sans-serif] font-semibold text-[8px] uppercase tracking-[0.15em] text-[#737373]">Public<br>votes</div>
-      </div>
-    </div>
+    <!-- Map + side column -->
+    <div data-reveal="up" class="map-layout">
 
-  </div>
+      <!-- Map frame (left) -->
+      <div class="map-embed">
+        <!-- Mobile: tap-to-load placeholder (hidden at md+, where the map shows directly) -->
+        <div id="map-button-container" class="md:hidden absolute inset-0 flex items-center justify-center bg-base-200 p-8 text-center">
+          <button
+            id="map-toggle"
+            type="button"
+            class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer"
+          >
+            Explore the camera map &rarr;&#xFE0E;
+          </button>
+        </div>
 
-  <!-- Map intro — above the red separator -->
-  <div data-reveal="up" class="relative z-10 px-6 md:px-16 py-6 flex items-baseline gap-4 flex-wrap">
-    <span class="label-mono text-[#dc2626]">Interactive Map</span>
-    <span class="text-[#e8e8e8] font-extrabold tracking-[-0.02em]" style="font-size:clamp(1rem,1.5vw,1.15rem);">See the cameras watching your street.</span>
-    <span class="font-['Instrument_Sans_Variable',sans-serif] text-[11px] text-[#737373] tracking-[0.08em]">Community sourced · Updated hourly</span>
-  </div>
-
-  <!-- Map embed area — raw feed, red top separator -->
-  <div class="relative z-10" style="border-top: 2px solid #dc2626;">
-
-    <!-- Mobile toggle button -->
-    <div id="map-button-container" class="md:hidden bg-[#1a1a1a] p-8 text-center">
-      <button
-        id="map-toggle"
-        type="button"
-        class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer"
-      >
-        Explore the camera map &rarr;&#xFE0E;
-      </button>
-    </div>
-
-    <!-- Map -->
-    <div id="map-frame" class="hidden md:block" style="position: relative;">
-      <div class="map-badge" aria-hidden="true">
-        <span class="map-live-dot"></span>
-        ALPR Network
+        <!-- Live map (hidden below md until the toggle reveals it) -->
+        <div id="map-frame" class="hidden md:block absolute inset-0">
+          <div class="map-badge" aria-hidden="true">
+            <span class="map-live-dot"></span>
+            ALPR Network
+          </div>
+          <button id="scroll-toggle" type="button" class="map-scroll-btn" aria-pressed="false">
+            <svg class="scroll-btn-icon" width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+              <rect x="2" y="4.5" width="7" height="5.5" rx="0.75" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M3.5 4.5V3a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            <span class="scroll-btn-label">Enable scroll zoom</span>
+          </button>
+          <div id="map-container" style="height: 100%; clip-path: inset(0);">
+            <div id="camera-map" class="map-dark" style="width: 100%; height: 100%;" role="application" aria-label="ALPR Camera Map" tabindex="-1"></div>
+          </div>
+        </div>
       </div>
-      <button id="scroll-toggle" type="button" class="map-scroll-btn" aria-pressed="false">
-        <svg class="scroll-btn-icon" width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-          <rect x="2" y="4.5" width="7" height="5.5" rx="0.75" stroke="currentColor" stroke-width="1.2"/>
-          <path d="M3.5 4.5V3a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
-        <span class="scroll-btn-label">Enable scroll zoom</span>
-      </button>
-      <div id="map-container" style="height: 600px; clip-path: inset(0);">
-        <div id="camera-map" class="map-dark" style="width: 100%; height: 100%;" role="application" aria-label="ALPR Camera Map"></div>
+
+      <!-- Side column (right) -->
+      <div class="map-side">
+        <p class="map-statline"><span class="n"><span class="sr-only">{scTotal}</span><span aria-hidden="true" data-count-up>{scTotal}</span></span> cameras &middot; <span class="n"><span class="sr-only">{jurisdictions}</span><span aria-hidden="true" data-count-up>{jurisdictions}</span></span> jurisdictions</p>
+        <p class="map-caption">Pan across the state, tap any dot to see the vendor, operating agency, and direction each camera faces.</p>
+        <div>
+          <button id="open-full-map" type="button" class="btn btn-outline min-h-11">Open the full map</button>
+        </div>
       </div>
+
     </div>
 
     <!-- Attribution -->
-    <div class="px-6 md:px-16 py-4 border-t border-[rgba(255,255,255,0.07)]">
+    <div class="mt-8 pt-6 border-t border-[rgba(255,255,255,0.10)]">
       <p class="text-[#a3a3a3] text-xs">
         Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
       </p>
-      <p class="text-[#737373] text-base mt-1">
+      <p class="text-[#9a9a9a] text-xs mt-1">
         Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
       </p>
     </div>
 
   </div>
-
 </section>
 
 <style>
+  /* Map + side-column layout: one column on phones, map-left / info-right at
+     >= 900px. The 900px breakpoint is bespoke (not a Tailwind default), so the
+     grid lives here in scoped CSS. */
+  .map-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+  }
+  @media (min-width: 900px) {
+    .map-layout {
+      grid-template-columns: 1.7fr 1fr;
+      align-items: center;
+    }
+  }
+
+  /* Bordered map frame. width:100% keeps the width definite (= its grid track)
+     so aspect-ratio derives the HEIGHT from it. Without a definite width,
+     aspect-ratio + min-height derive the WIDTH from the 320px floor (~569px),
+     which overflows narrow tracks and scrolls the body. min-width:0 lets the
+     grid track shrink below the frame's intrinsic content (repo grid gotcha). */
+  .map-embed {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 16 / 9;
+    min-height: 320px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 0.45rem;
+    overflow: hidden;
+    background: radial-gradient(120% 130% at 30% 20%, #1c1c1c 0%, #141414 55%, #0d0d0d 100%);
+  }
+
+  .map-side {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    align-items: flex-start;
+  }
+  .map-statline {
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-size: 0.9rem;
+    color: #e8e8e8;
+    letter-spacing: 0.02em;
+  }
+  .map-statline .n {
+    color: #ef4444; /* red — ≥4.5:1 on #171717 */
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .map-caption {
+    font-size: 0.9rem;
+    color: #a3a3a3;
+    line-height: 1.6;
+    max-width: 46ch;
+  }
+
   /* Scroll-to-zoom toggle button */
   .map-scroll-btn {
     position: absolute;
@@ -202,7 +223,7 @@
     .map-live-dot { animation: none; }
   }
 
-  /* MapLibre control + popup chrome and the camera popup body now live in
+  /* MapLibre control + popup chrome and the camera popup body live in
      src/styles/global.css under `.map-dark` / `.camera-popup*`, so a second
      map container is not left with unstyled default controls. */
 </style>
@@ -211,9 +232,15 @@
   import type { MapHandle } from '../scripts/map/core.js';
   import type { GeoJSONSource } from 'maplibre-gl';
   import type { DeflockCamera } from '../scripts/map/tile-loader.js';
+  import { observeCountUps } from '../scripts/count-up.js';
 
-  const MAP_CENTER: [number, number] = [-82.39, 34.85];
-  const MAP_ZOOM = 11;
+  // Seed view roughly frames the state; fitBounds below tightens it to the SC
+  // bounding box the moment the map is created, so the initial view is
+  // viewport-responsive instead of a hardcoded Greenville center/zoom.
+  const SC_SEED_CENTER: [number, number] = [-80.95, 33.6];
+  const SC_SEED_ZOOM = 6.4;
+  // [[west, south], [east, north]] — the South Carolina bounding box.
+  const SC_BBOX: [[number, number], [number, number]] = [[-83.35, 32.03], [-78.54, 35.22]];
 
   let mapReady: Promise<MapHandle> | null = null;
 
@@ -226,12 +253,16 @@
     const handle = createMap({
       container: 'camera-map',
       style: '/map-style.json',
-      center: MAP_CENTER,
-      zoom: MAP_ZOOM,
+      center: SC_SEED_CENTER,
+      zoom: SC_SEED_ZOOM,
     });
 
+    // Frame the whole state, instantly. Called right after createMap so the
+    // first paint is already SC-wide — no change to the shared map core needed.
+    handle.map.fitBounds(SC_BBOX, { padding: 24, duration: 0 });
+
     // EXACT property mapping the popups, direction cones, and OSM links depend
-    // on — unchanged from the previous one-shot loader. Do not alter fields.
+    // on — unchanged from the previous loader. Do not alter fields.
     const toGeoJSON = (cameras: DeflockCamera[]): GeoJSON.FeatureCollection => ({
       type: 'FeatureCollection',
       features: cameras.map((cam) => {
@@ -291,7 +322,39 @@
     return mapReady;
   }
 
-  // Desktop: lazy-load when map section scrolls into view
+  // Shared "open-map" operation (design §2.4 decision D3). One code path used by
+  // the mobile toggle, the "Open the full map" CTA, and #camera-map hash visits:
+  // reveal the mobile frame if it is still hidden, initialize + resize the map,
+  // scroll it into view, then move focus to it. On desktop the frame is already
+  // visible and initialized, so this reduces to scroll + focus.
+  async function openMap(opts: { track?: boolean } = {}): Promise<void> {
+    if (opts.track && typeof umami !== 'undefined') umami.track('map-opened-mobile');
+
+    document.getElementById('map-button-container')?.classList.add('hidden');
+    const frame = document.getElementById('map-frame');
+    if (frame) {
+      frame.classList.remove('hidden');
+      frame.classList.add('block');
+    }
+
+    const handle = await loadMap();
+    handle.resize();
+    // Re-frame the state after the container is definitely sized. On mobile the
+    // frame can still be 0-sized when the map is first created, making the
+    // initial fitBounds a no-op; re-fitting here keeps the default SC-wide.
+    handle.map.fitBounds(SC_BBOX, { padding: 24, duration: 0 });
+
+    const target = document.getElementById('camera-map');
+    if (target) {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+      // #camera-map carries tabindex="-1", so it is programmatically focusable;
+      // preventScroll keeps the smooth scroll we just started.
+      target.focus({ preventScroll: true });
+    }
+  }
+
+  // Desktop: lazy-load when the map scrolls into view.
   const mapContainer = document.getElementById('camera-map');
   if (mapContainer && window.matchMedia('(min-width: 768px)').matches) {
     const observer = new IntersectionObserver((entries) => {
@@ -308,18 +371,24 @@
     if (e.matches && !mapReady) loadMap();
   });
 
-  // Mobile toggle
-  document.getElementById('map-toggle')?.addEventListener('click', async () => {
-    if (typeof umami !== 'undefined') umami.track('map-opened-mobile');
-    document.getElementById('map-button-container')?.classList.add('hidden');
-    const frame = document.getElementById('map-frame');
-    if (frame) {
-      frame.classList.remove('hidden');
-      frame.classList.add('block');
-    }
-    const handle = await loadMap();
-    handle.resize();
+  // Call site (a): the mobile toggle button — keeps its umami event.
+  document.getElementById('map-toggle')?.addEventListener('click', () => {
+    void openMap({ track: true });
   });
+
+  // Call site (b): the "Open the full map" CTA.
+  document.getElementById('open-full-map')?.addEventListener('click', () => {
+    void openMap();
+  });
+
+  // Call site (c): initial load + hashchange for the legacy #camera-map anchor,
+  // so a /#camera-map deep link lands on the visible, initialized map (on mobile
+  // it reveals + initializes first).
+  function handleCameraMapHash(): void {
+    if (window.location.hash === '#camera-map') void openMap();
+  }
+  window.addEventListener('hashchange', handleCameraMapHash);
+  handleCameraMapHash();
 
   // Scroll-to-zoom toggle
   document.getElementById('scroll-toggle')?.addEventListener('click', async () => {
@@ -330,4 +399,6 @@
     btn.querySelector('.scroll-btn-label')!.textContent = enabled ? 'Disable scroll zoom' : 'Enable scroll zoom';
   });
 
+  // Count-up on the map statline numbers (shared util, fires once on view).
+  observeCountUps(document.querySelectorAll<HTMLElement>('.map-statline [data-count-up]'));
 </script>
