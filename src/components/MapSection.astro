@@ -59,9 +59,6 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
       <div class="map-side">
         <p class="map-statline"><span class="n"><span class="sr-only">{scTotal}</span><span aria-hidden="true" data-count-up>{scTotal}</span></span> cameras &middot; <span class="n"><span class="sr-only">{jurisdictions}</span><span aria-hidden="true" data-count-up>{jurisdictions}</span></span> jurisdictions</p>
         <p class="map-caption">Pan across the state, tap any dot to see the vendor, operating agency, and direction each camera faces.</p>
-        <div>
-          <button id="open-full-map" type="button" class="btn btn-outline min-h-11">Open the full map</button>
-        </div>
       </div>
 
     </div>
@@ -234,13 +231,10 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
   import type { DeflockCamera } from '../scripts/map/tile-loader.js';
   import { observeCountUps } from '../scripts/count-up.js';
 
-  // Seed view roughly frames the state; fitBounds below tightens it to the SC
-  // bounding box the moment the map is created, so the initial view is
-  // viewport-responsive instead of a hardcoded Greenville center/zoom.
-  const SC_SEED_CENTER: [number, number] = [-80.95, 33.6];
-  const SC_SEED_ZOOM = 6.4;
-  // [[west, south], [east, north]] — the South Carolina bounding box.
-  const SC_BBOX: [[number, number], [number, number]] = [[-83.35, 32.03], [-78.54, 35.22]];
+  // Open on Greenville (the Upstate has the densest deployment); users pan and
+  // zoom out from there to explore the rest of the state.
+  const MAP_CENTER: [number, number] = [-82.39, 34.85];
+  const MAP_ZOOM = 11;
 
   let mapReady: Promise<MapHandle> | null = null;
 
@@ -253,13 +247,9 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
     const handle = createMap({
       container: 'camera-map',
       style: '/map-style.json',
-      center: SC_SEED_CENTER,
-      zoom: SC_SEED_ZOOM,
+      center: MAP_CENTER,
+      zoom: MAP_ZOOM,
     });
-
-    // Frame the whole state, instantly. Called right after createMap so the
-    // first paint is already SC-wide — no change to the shared map core needed.
-    handle.map.fitBounds(SC_BBOX, { padding: 24, duration: 0 });
 
     // EXACT property mapping the popups, direction cones, and OSM links depend
     // on — unchanged from the previous loader. Do not alter fields.
@@ -323,7 +313,7 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
   }
 
   // Shared "open-map" operation (design §2.4 decision D3). One code path used by
-  // the mobile toggle, the "Open the full map" CTA, and #camera-map hash visits:
+  // the mobile toggle and #camera-map hash visits:
   // reveal the mobile frame if it is still hidden, initialize + resize the map,
   // scroll it into view, then move focus to it. On desktop the frame is already
   // visible and initialized, so this reduces to scroll + focus.
@@ -339,10 +329,6 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
 
     const handle = await loadMap();
     handle.resize();
-    // Re-frame the state after the container is definitely sized. On mobile the
-    // frame can still be 0-sized when the map is first created, making the
-    // initial fitBounds a no-op; re-fitting here keeps the default SC-wide.
-    handle.map.fitBounds(SC_BBOX, { padding: 24, duration: 0 });
 
     const target = document.getElementById('camera-map');
     if (target) {
@@ -376,12 +362,7 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
     void openMap({ track: true });
   });
 
-  // Call site (b): the "Open the full map" CTA.
-  document.getElementById('open-full-map')?.addEventListener('click', () => {
-    void openMap();
-  });
-
-  // Call site (c): initial load + hashchange for the legacy #camera-map anchor,
+  // Call site (b): initial load + hashchange for the legacy #camera-map anchor,
   // so a /#camera-map deep link lands on the visible, initialized map (on mobile
   // it reveals + initializes first).
   function handleCameraMapHash(): void {

@@ -50,3 +50,6 @@ scripts/.cache/
 # under import.meta.env.DEV in src/pages/events.astro and dead-code-eliminated
 # from production builds. Must never be committed or shipped.
 src/data/events.dev.json
+
+# Local deploy-env setup helper for the events-calendar pipeline (not committed).
+scripts/setup-deploy-env.mjs
