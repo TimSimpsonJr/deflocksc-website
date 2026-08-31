@@ -1,0 +1,765 @@
+---
+import EventsList from './EventsList.astro';
+import EventsMonth from './EventsMonth.astro';
+import EventsMap from './EventsMap.astro';
+import registry from '../data/registry.json';
+import bakedEventsRaw from '../data/events.json';
+import { toPublicEvent, type PublicEvent, type StoredEvent } from '../lib/public-event.js';
+import { publicEventSchema } from '../lib/event-schema.js';
+import { loadCouncilEvents } from '../lib/council-events.js';
+import {
+  expandAll,
+  splitByToday,
+  collapseSeries,
+  addMonths,
+} from '../lib/events-view.js';
+import { toJsonIsland } from '../lib/json-island.js';
+
+interface Props {
+  variant?: 'page' | 'home';
+}
+
+const { variant = 'page' } = Astro.props;
+
+// Baked events.json is validated with the shared strict publicEventSchema and
+// projected through toPublicEvent — IDENTICAL to the events-page task that created
+// this file. This task must NOT weaken that back to a cast plus a partial field
+// check: publicEventSchema's `.strict()` is what rejects a hand-edited record
+// carrying a server-only field (signalUrl, codeDigest, revoked) and fails the build,
+// and toPublicEvent is the allowlist projection that stops any such field reaching
+// the data island (design §5/§6). The per-field caps live inside the shared schema,
+// never retyped here.
+const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index) => {
+  const parsed = publicEventSchema.safeParse(raw);
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    const at = issue.path.length > 0 ? issue.path.join('.') : '_record';
+    const detail = issue.code === 'unrecognized_keys' ? 'unexpected_field' : issue.message;
+    throw new Error(
+      `src/data/events.json: record ${index} at "${at}" failed strict validation (${detail})`,
+    );
+  }
+  // events.json holds ONLY folded submissions (meetup/public). Curated council
+  // records live in council-meetings.json and merge in via loadCouncilEvents();
+  // they must never arrive on this path, where toPublicEvent's 13-field allowlist
+  // would silently strip their `source` and `nths` and render the wrong dates.
+  // publicEventSchema now admits `type: 'council'` for the council loader's sake,
+  // so reject it explicitly here rather than let a mistyped record through.
+  if (parsed.data.type === 'council') {
+    throw new Error(
+      `src/data/events.json: record ${index} has type "council"; curated council ` +
+        `meetings belong in council-meetings.json, not events.json`,
+    );
+  }
+  return toPublicEvent(parsed.data as unknown as StoredEvent);
+});
+
+// Curated council meetings (src/data/council-meetings.json), merged into the
+// baked list alongside the folded submissions. loadCouncilEvents() validates each
+// entry with the strict councilEventSchema and throws on a bad one, so an
+// unverified or malformed council entry fails the build here rather than shipping.
+// These are curated-only: they never touch Netlify Blobs, /go, or the submission
+// path, and carry hasSignalGroup === false with no signalUrl.
+bakedEvents.push(...loadCouncilEvents());
+
+const today = new Date().toISOString().slice(0, 10);
+const horizonEnd = addMonths(today, 12);
+const cutoffDate = new Date(`${today}T00:00:00Z`);
+cutoffDate.setUTCDate(cutoffDate.getUTCDate() - 90);
+const pastCutoff = cutoffDate.toISOString().slice(0, 10);
+
+// Display names, derived from registry.json at build time and shipped in the data
+// island. registry.json itself is ~50 KB and must never reach the client bundle.
+const cityNames: Record<string, string> = {};
+const countyNames: Record<string, string> = {};
+for (const j of registry.jurisdictions as Array<Record<string, string>>) {
+  if (j.type === 'place') {
+    cityNames[j.id.split(':')[1]] = j.name.replace(/ (City|Town) Council$/, '');
+  } else if (j.type === 'county') {
+    countyNames[j.county.toLowerCase()] = j.county;
+  }
+}
+
+// The page prerenders the FULL, unfiltered calendar — that is the no-JavaScript
+// invariant. The client narrows it in place; nothing here is filtered.
+const allOccurrences = expandAll(bakedEvents, horizonEnd);
+const { upcoming, past: recentPast } = splitByToday(allOccurrences, today);
+const past = recentPast.filter((o) => o.date >= pastCutoff);
+
+// The LIST view collapses each recurring series to a single row (its next
+// upcoming occurrence); the MONTH grid keeps every occurrence. `upcomingList` is
+// therefore one row per distinct event, which is also what the "N upcoming"
+// heading and the chip counts report.
+const upcomingList = collapseSeries(upcoming);
+
+const island = {
+  events: bakedEvents,
+  cityNames,
+  countyNames,
+  today,
+  horizonEnd,
+  pastCutoff,
+};
+---
+
+<div class:list={['events-explorer', variant === 'home' && 'events-explorer--home']}>
+  <div class="events-tabs-bar">
+    <div
+      class="events-tabs tabs tabs-box"
+      role="tablist"
+      aria-label="Calendar views"
+      id="events-tabs"
+    >
+      <button id="tab-list" role="tab" aria-selected="true" aria-controls="panel-list" class="events-tab tab is-selected" data-tab="list" type="button">List</button>
+      <button id="tab-month" role="tab" aria-selected="false" aria-controls="panel-month" class="events-tab tab" data-tab="month" type="button" tabindex="-1">Month</button>
+      <button id="tab-map" role="tab" aria-selected="false" aria-controls="panel-map" class="events-tab tab events-tab-map" data-tab="map" type="button" tabindex="-1">Map</button>
+    </div>
+  </div>
+
+  {/* Built by events-page.ts on load. Empty and hidden without JavaScript,
+      so there is no dead control — the full list below is the complete view. */}
+  <nav id="events-filters" class="events-filters" aria-label="Filter events" hidden></nav>
+
+  <div class="events-grid">
+    <div id="panel-map" role="tabpanel" aria-labelledby="tab-map" tabindex="0" data-panel="map">
+      <EventsMap />
+    </div>
+
+    <div id="panel-list" role="tabpanel" aria-labelledby="tab-list" tabindex="0" data-panel="list" class="is-active">
+      <EventsList upcoming={upcomingList} past={past} cityNames={cityNames} countyNames={countyNames} />
+    </div>
+
+    <div id="panel-month" role="tabpanel" aria-labelledby="tab-month" tabindex="0" data-panel="month">
+      <EventsMonth occurrences={upcoming} today={today} cityNames={cityNames} />
+    </div>
+  </div>
+
+  <div id="intake-dialog" class="intake-dialog" hidden>
+    <div class="intake-panel" role="dialog" aria-modal="true" aria-labelledby="intake-heading">
+      <h2 id="intake-heading">Before you join</h2>
+      <p>
+        This group is unvetted, which is the point (it has to be open for strangers to
+        find us) and also the risk: everyone who can read this page can join it,
+        including bad actors or people whose interest in South Carolina organizing is
+        professional (journalists, police, etc.). Please do not share anything in this
+        chat that you wouldn't want published or used against you in court.
+      </p>
+      <p>
+        Two minutes of setup first. Open Signal, set a username, and switch Privacy ›
+        Phone Number to Nobody. Use a name you don't mind strangers keeping.
+      </p>
+      <p class="intake-actions">
+        {/* No href: the intake path is set on window.location at click time by
+             events-page.ts, so the path never appears in the static HTML and a
+             scraper that never clicks never sees it. Kept as an Astro comment
+             (not an HTML comment) so the build strips it from output instead of
+             preserving it and leaking the path into the static markup. */}
+        <button id="intake-confirm" type="button" class="event-signal event-signal-btn">I've done that, open Signal</button>
+        <button id="intake-cancel" type="button" class="event-signal event-signal-btn">Cancel</button>
+      </p>
+    </div>
+  </div>
+
+  {/* One shared event-detail popover (Section C of the dev mockup). A native
+      <dialog> styled with daisyUI's `modal`; opened per event by
+      openEventPopover() in events-page.ts, which fills the empty slots below.
+      showModal() gives the focus trap and Esc-to-close for free; the two
+      method="dialog" forms give the ✕ button, the Close button, and the
+      backdrop click their close behaviour. Every slot is filled via textContent
+      / built nodes — no event data ever reaches innerHTML. */}
+  <dialog id="event-detail" class="modal" aria-labelledby="event-detail-title">
+    <div class="modal-box bg-base-200 border border-white/10 max-w-lg">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3" aria-label="Close">✕</button>
+      </form>
+
+      <h3 class="event-pop-title" id="event-detail-title"></h3>
+      <p class="event-typeline event-pop-typeline" id="event-detail-typelabel"></p>
+
+      <dl class="event-pop-dl">
+        <dt class="event-pop-dt">When</dt>
+        <dd class="event-pop-dd" id="event-detail-when"></dd>
+
+        <dt class="event-pop-dt">Where</dt>
+        <dd class="event-pop-dd" id="event-detail-where"></dd>
+
+        <dt class="event-pop-dt" id="event-detail-place-label">Location</dt>
+        <dd class="event-pop-dd" id="event-detail-place"></dd>
+      </dl>
+
+      {/* Official-schedule link. Shown only for events carrying a `source`
+          (curated council entries do; submitted meetups/public events do not).
+          The label and icon are static; openEventPopover sets only the href on
+          #event-detail-source-link and unhides the wrapper. Amber, matching the
+          address link's .event-pop-addr treatment. */}
+      <p class="event-pop-source" id="event-detail-source" hidden>
+        <a class="event-pop-addr" id="event-detail-source-link" target="_blank" rel="noopener noreferrer">
+          Official schedule
+          <svg class="event-pop-ext-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          <span class="sr-only"> (opens in a new tab)</span>
+        </a>
+      </p>
+
+      <div class="event-pop-upcoming" id="event-detail-upcoming" hidden>
+        <p class="event-pop-upcoming-label">Upcoming meetings</p>
+        <ul class="event-pop-upcoming-list" id="event-detail-upcoming-list"></ul>
+        <p class="event-pop-upcoming-foot" id="event-detail-upcoming-foot"></p>
+      </div>
+
+      {/* Caveat for recurring events: the listed dates follow the usual cadence,
+          not a confirmed schedule. openEventPopover toggles its visibility (keyed
+          off recurrence) AND sets the copy: source-agnostic by default, because a
+          recurring event need not carry a `source` link, and pointing at an
+          "official schedule" that is not shown would be a dead reference. The
+          "…on the official schedule" variant is set only when a source link is
+          rendered above. This static default is the no-source wording. */}
+      <p class="event-pop-caveat" id="event-detail-caveat" hidden>Dates follow the usual schedule; confirm before attending.</p>
+
+      <p class="event-pop-desc" id="event-detail-desc" hidden></p>
+
+      <div class="modal-action event-pop-foot">
+        <form method="dialog" class="mr-auto"><button class="btn btn-ghost btn-sm" type="submit">Close</button></form>
+        <a class="btn btn-primary btn-sm" id="event-detail-signal" rel="noreferrer" hidden>Join Signal group</a>
+        {/* Council meetings only: opens the shared "Before you join" warning
+            (events-page.ts), then the open council-attendees Signal group. A real
+            button, not an <a>, since navigation happens after the warning. */}
+        <button type="button" class="btn btn-primary btn-sm" id="event-detail-council-signal" hidden>Find others attending</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button aria-label="Close">close</button>
+    </form>
+  </dialog>
+
+  <script type="application/json" id="events-data" set:html={toJsonIsland(island)}></script>
+  <script>
+    import '../scripts/events-page.js';
+  </script>
+</div>
+
+<style is:global>
+  /* Every rule for event cards, month chips, and tabs is global on purpose.
+     Astro scoped styles stamp a data-astro-* attribute onto template elements;
+     cards that events-page.ts creates at runtime have no such attribute and would
+     render unstyled. Class names here are the contract with that renderer. */
+
+  .events-hero { background: #111111; padding: 7rem 0 3rem; }
+  .events-hero-inner { max-width: 84rem; margin: 0 auto; padding: 0 1.5rem; }
+  .events-h1 {
+    color: #e8e8e8;
+    font-weight: 700;
+    font-size: clamp(1.9rem, 5vw, 3rem);
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+  }
+  .events-lede { color: #a0a0a0; font-size: 1.05rem; max-width: 40rem; }
+
+  .events-body { background: #171717; padding: 0 1.5rem 4rem; }
+
+  /* --- Tabs (daisyUI tabs-box, deflock-themed) ---
+     The picker is daisyUI `tabs tabs-box` (mockup Section B, Option 1): a
+     base-200 tray with a raised active pill. `.events-tabs-bar` keeps the
+     original full-width sticky header + hairline divider, and the compact boxed
+     tray sits at its left, aligned to the page content. The daisyUI classes
+     supply the tabs-box VISUAL; the rules below re-theme it for the deflock DARK
+     theme and repair three things the defaults get wrong here (verified against
+     the theme tokens in global.css and daisyui/components/tab.css):
+       1. Active pill — daisyUI paints it base-100 (#171717), which is DARKER than
+          the base-200 (#1a1a1a) tray, and its elevation shadow is zeroed by the
+          theme's --depth:0, so the pill is all but invisible. A clearly lighter
+          neutral fill plus a hairline edge make it a raised chip; selection is
+          carried by luminance + shape (and aria-selected), never hue alone, so it
+          survives colour-blindness. Brand red stays reserved for the Signal CTA,
+          matching the card design language.
+       2. Inactive text — daisyUI dims it to ~50% (color-mix ≈ #818181 on the
+          tray ≈ 4.47:1, just under AA). Reset to #a3a3a3 (~6.9:1 on #1a1a1a).
+       3. Focus ring — replaced with the page's amber ring (high contrast on the
+          dark tray) instead of daisyUI's thin currentColor outline, which can
+          otherwise render in the dim inactive colour.
+     Active styles key on aria-selected AND is-selected: selectTab() toggles both
+     together, so the visual active state and the accessible state agree by
+     construction. The active pill rule below is shared verbatim with the type
+     filter (a radiogroup keyed on aria-checked), so the two controls' pills are
+     one source of truth. Unlayered on purpose, so these win over daisyUI's
+     @layer utilities rules. */
+  .events-tabs-bar {
+    max-width: 84rem;
+    margin: 0 auto;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    position: sticky;
+    top: 4rem;
+    background: #171717;
+    z-index: 20;
+  }
+  /* Compact tray: shrink the flex row (daisyUI forces display:flex) to its three
+     tabs so the box reads as a toggle, not a full-width bar. */
+  .events-tabs {
+    width: fit-content;
+    max-width: 100%;
+  }
+  .events-tab {
+    min-height: 44px;                 /* WCAG touch target */
+    border: 1px solid transparent;    /* reserve the pill border so activating adds no shift */
+    color: #a3a3a3;                   /* inactive: AA on the base-200 tray */
+    cursor: pointer;
+  }
+  .events-tab:hover { color: #e8e8e8; }
+  /* Active pill. Keyed on is-selected + aria-selected (the view tabs) AND
+     aria-checked (the type filter, a radiogroup that borrows this exact pill so
+     the two controls cannot drift). WCAG 1.4.11: the fill (#3d3d3d) and the
+     hairline (rgba white .36, ~#6c6c6c composited on the #1a1a1a tray → ~3.3:1)
+     lift the selected state clear of 3:1 non-text contrast against the tray;
+     selection is carried by fill + border + shape + aria, never hue. Active pill
+     text (#e8e8e8) on #3d3d3d is ~8.9:1 (AA). */
+  .events-tab.is-selected,
+  .events-tab[aria-selected="true"],
+  .events-tab[aria-checked="true"] {
+    background: #3d3d3d;
+    color: #e8e8e8;
+    border-color: rgba(255, 255, 255, 0.36);
+  }
+  .events-tab:focus-visible {
+    outline: 2px solid #fbbf24;
+    outline-offset: 2px;
+    z-index: 1;
+  }
+
+  /* --- Panels: tabbed on mobile, two columns on desktop --- */
+  .events-grid { max-width: 84rem; margin: 0 auto; padding-top: 1.5rem; }
+  [data-panel] { display: none; }
+  [data-panel].is-active { display: block; }
+
+  @media (min-width: 1024px) {
+    .events-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 2rem;
+      align-items: start;
+    }
+    /* Map is always visible on desktop and never a tab. */
+    [data-panel='map'] {
+      display: block;
+      position: sticky;
+      top: 8rem;
+      align-self: start;
+    }
+    .events-tab-map { display: none; }
+  }
+
+  /* --- Event cards --- */
+  .events-count { margin-bottom: 0.75rem; }
+  .events-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+
+  /* Option 3 "side docket": a full-height NEUTRAL date panel (#0d0d0d, the theme's
+     deep base) flush against the card's left edge, with a type-coloured dot in its
+     corner. No red accent bar — the panel is the structure, the dot carries the
+     type, and brand red is reserved for the Signal CTA. */
+  .event-card {
+    display: grid;
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+  }
+  .event-date {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    background: #0d0d0d;
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .event-date-day { color: #e8e8e8; font-size: 1.7rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  .event-date-mon {
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: #8a8a8a;
+  }
+  .event-body { min-width: 0; padding: 1rem; }
+
+  /* Defence in depth against hostile titles (design §6). The sanitizer rejects
+     bidi overrides, zero-width runs, and stacked combining marks at submit time and
+     again at build; these four rules mean a miss cannot wreck the layout.
+     max-height:4.6em is the fallback for browsers without the `lh` unit. */
+  .event-title {
+    overflow-wrap: anywhere;
+    unicode-bidi: isolate;
+    max-height: 4.6em;
+    max-height: 3lh;
+    overflow: hidden;
+  }
+
+  .event-title {
+    color: #e8e8e8;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin: 0 0 0.35rem;
+  }
+  .event-meta { color: #a3a3a3; font-size: 0.875rem; margin: 0 0 0.35rem; }
+  .event-address { color: #a3a3a3; font-size: 0.8125rem; margin: 0 0 0.35rem; }
+  .event-desc { color: #a3a3a3; font-size: 0.875rem; margin: 0 0 0.5rem; overflow-wrap: anywhere; }
+  /* Quiet type/recurrence line ("PUBLIC EVENT · REPEATS MONTHLY"). The de-slopped
+     replacement for the old coloured pill badges: the site's label idiom
+     (uppercase, letter-spaced). This base stays muted grey (#a3a3a3 ~6.9:1 on the
+     #1a1a1a card) and is shared with the popover's type label (.event-pop-typeline),
+     which keeps the muted treatment. On the CARD the colour is keyed to the event
+     type below. The three type labels are distinct text signals (meetup "Location
+     in group", public "Public event", council "Council meeting"), so colour is
+     reinforcing, never the sole signal. */
+  .event-typeline {
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #a3a3a3;
+    margin: 0;
+  }
+  .event-card .event-typeline { margin: 0.6rem 0 0; }
+  /* Option A type cue: the card's type label is coloured by type — amber for a
+     meetup, green for a public event, blue for a council meeting — keyed off the
+     event-card--{type} modifier present on both render paths (EventsList.astro +
+     buildCard). Amber #fbbf24 (~11:1), green #4ade80 (~12:1), and council blue
+     #60a5fa (≈6.8:1) on #1a1a1a all clear WCAG AA for the 11px label. Scoped to
+     .event-card so the shared popover label (.event-pop-typeline) stays muted grey. */
+  .event-card--meetup .event-typeline { color: #fbbf24; }
+  .event-card--public .event-typeline { color: #4ade80; }
+  .event-card--council .event-typeline { color: #60a5fa; }
+
+  .event-signal {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.9rem;
+    color: #ffffff;
+    background: #dc2626;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+  }
+  .event-signal:hover { background: #b91c1c; }
+  .event-signal-btn { font-family: inherit; }
+
+  /* Brief highlight when a month-view chip scrolls its list card into view, so the
+     eye lands on the right row after the tab swap. The left accent bar is gone, so
+     the flash now pulses the whole card's border and background from an amber
+     highlight back to the resting neutral. */
+  @keyframes event-card-flash {
+    from { background: #2a2118; border-color: #fbbf24; }
+    to   { background: #1a1a1a; border-color: rgba(255, 255, 255, 0.07); }
+  }
+  .event-card-flash { animation: event-card-flash 1.2s ease-out; }
+  @media (prefers-reduced-motion: reduce) {
+    .event-card-flash { animation: none; outline: 2px solid #fbbf24; outline-offset: 2px; }
+  }
+
+  /* --- Empty state and past events --- */
+  .events-empty {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 2rem 1.25rem;
+    text-align: center;
+  }
+  .events-empty[hidden] { display: none; }
+  .events-empty-lead { color: #e8e8e8; font-weight: 700; margin: 0 0 0.5rem; }
+  .events-empty-proof { color: #a3a3a3; font-size: 0.9rem; margin: 0 0 1.25rem; }
+  .events-empty-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin: 0; }
+
+  .events-past { margin-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.07); padding-top: 1rem; }
+  .events-past summary { color: #a3a3a3; cursor: pointer; }
+  .events-past-list { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  .event-past-row { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0.75rem; color: #a3a3a3; font-size: 0.85rem; }
+  .event-past-date { font-family: 'Instrument Sans Variable', sans-serif; font-size: 11px; letter-spacing: 0.1em; font-variant-numeric: tabular-nums; }
+  .event-past-title { color: #a3a3a3; font-size: 0.9rem; font-weight: 600; margin: 0; }
+  .event-past-place { grid-column: 2; }
+
+  /* --- Month grids --- */
+  .events-months { display: flex; flex-direction: column; gap: 2rem; }
+  .month-title { color: #e8e8e8; font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; }
+  .month-dow, .month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+  .month-dow span {
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-size: 10px;
+    color: #525252;
+    text-align: center;
+    padding-bottom: 4px;
+  }
+  .month-cell {
+    min-height: 4.25rem;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 3px;
+    min-width: 0;
+  }
+  .month-cell-empty { background: transparent; border-color: transparent; }
+  .month-cell-today { border-color: #dc2626; }
+  .month-daynum { font-family: 'Instrument Sans Variable', sans-serif; font-size: 10px; color: #737373; font-variant-numeric: tabular-nums; }
+  .month-chips { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+  /* De-slopped to match the cards: no red left bar. A neutral fill with a hairline
+     border keeps each chip legible and obviously clickable in the dense grid; the
+     hover/focus states make the affordance explicit. */
+  .month-chip {
+    display: block;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 2px;
+    padding: 1px 3px;
+    text-decoration: none;
+    min-width: 0;
+  }
+  .month-chip:hover { background: rgba(255, 255, 255, 0.10); border-color: rgba(255, 255, 255, 0.18); }
+  .month-chip:focus-visible { outline: 2px solid #fbbf24; outline-offset: 1px; }
+  .month-chip-title { font-size: 10px; font-weight: 600; color: #e8e8e8; margin: 0; line-height: 1.25; max-height: 2lh; }
+
+  /* --- Intake dialog --- */
+  .intake-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .intake-dialog[hidden] { display: none; }
+  .intake-panel {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    max-width: 32rem;
+    padding: 1.75rem;
+    color: #a3a3a3;
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+  .intake-panel h2 { color: #e8e8e8; font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem; }
+  .intake-panel p { margin: 0 0 1rem; }
+  .intake-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0; }
+
+  /* --- Filters: county combobox + type segmented control ---
+     Built by events-page.ts, so styled globally: runtime-created nodes carry no
+     data-astro-* attribute for a scoped rule to match. The container ships hidden
+     and the script unhides it, which is why there is no flash of an empty bar. The
+     county combobox is accessible-autocomplete (default `autocomplete__` namespace),
+     which the dark `.autocomplete__*` skin in src/styles/global.css already themes;
+     only the events-specific tweaks (width, dropdown-arrow visibility over the
+     opaque input, the count in each option) live here. */
+  .events-filters {
+    max-width: 84rem;
+    margin: 0 auto;
+    padding: 1rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .events-filters[hidden] { display: none; }
+  .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+  .filter-legend { color: #525252; margin-right: 0.35rem; }
+
+  /* County combobox. The label sits left of a fixed-width searchable input that
+     wraps below the label on narrow screens. */
+  .events-county-ac {
+    flex: 0 1 22rem;
+    width: 22rem;
+    max-width: 100%;
+  }
+  /* The opaque input (#171717, from the global skin) would hide the dropdown arrow,
+     which the base stylesheet renders at z-index:-1 behind the input. Lift it above
+     the input and pad the input so text never runs under it. Scoped to this
+     combobox so the submit form's city picker (no dropdown arrow) is untouched. */
+  .events-county-ac .autocomplete__input { padding-right: 2rem; }
+  .events-county-ac .autocomplete__dropdown-arrow-down {
+    z-index: 1;
+    fill: #a3a3a3;
+    color: #a3a3a3;
+    pointer-events: none;
+  }
+  /* The per-county event count carried in each option label. Resting #8a8a8a
+     clears AA on the #1a1a1a menu (10px is small text). On the focused/hover row
+     the menu paints the whole option #dc2626, so the count goes near-white to stay
+     legible against that red, not the pale #fecaca that sat close to it. */
+  .county-opt-count { font-family: 'Instrument Sans Variable', sans-serif; font-size: 10px; color: #8a8a8a; font-variant-numeric: tabular-nums; }
+  .autocomplete__option:hover .county-opt-count,
+  .autocomplete__option--focused .county-opt-count { color: #ffffff; }
+
+  /* Type filter: an ARIA radiogroup that borrows the view-tabs pill VERBATIM. Each
+     radio ships `events-tab tab events-type-btn`, the group ships
+     `events-tabs tabs tabs-box`, so the tray, pill, active fill/border, focus
+     ring, sizing and hover all come from the .events-tab rules above (one source
+     of truth — the two controls cannot drift). Selection is aria-checked, not
+     aria-selected; the shared active rule matches both. Only the per-option count
+     needs its own styling here. */
+  .events-type-btn { gap: 0.4rem; }
+  .seg-count { font-family: 'Instrument Sans Variable', sans-serif; font-size: 10px; color: #8a8a8a; font-variant-numeric: tabular-nums; }
+  .events-tab[aria-checked="true"] .seg-count { color: #c9c9c9; }
+
+  .filter-clear {
+    color: #737373;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    margin-left: 0.35rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .filter-clear[hidden] { display: none; }
+  .events-past[hidden] { display: none; }
+
+  /* --- Event title trigger ---
+     The card title is a button that opens the shared detail popover. It is
+     styled to read as plain heading text (inherits the .event-title font, color
+     and clamp from its parent <h3>), gaining only a hover underline and a focus
+     ring so it is discoverable as a control. Kept in parity between the server
+     render (EventsList.astro) and the client render (buildCard in
+     events-page.ts), the same class-name contract the cards already hold to. */
+  .event-title-btn {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+  }
+  .event-title-btn:hover { color: #ffffff; text-decoration: underline; text-underline-offset: 2px; }
+  /* Inset ring: the parent .event-title clamps with overflow:hidden + max-height,
+     which would clip an outset (positive-offset) outline. Matches the tab/seg
+     buttons' inset ring. */
+  .event-title-btn:focus-visible { outline: 2px solid #fbbf24; outline-offset: -2px; }
+
+  /* --- Event detail popover (Section C of the dev mockup) ---
+     Text styling for the daisyUI <dialog class="modal"> defined near the panels
+     above. The modal, modal-box, badge and btn chrome come from daisyUI's
+     deflock theme; only the popover-specific type scale lives here, ported from
+     the approved mockup. Global because the dialog's contents are filled by
+     events-page.ts at runtime (no scoped data-astro-* attribute to match). */
+  /* Type label under the title. Reuses the shared .event-typeline idiom (uppercase,
+     letter-spaced); only its margins around the title live here. The label is coloured
+     by type to match the card — amber meetup, green public, blue council — keyed off
+     the dialog's data-type, which openEventPopover sets via eventTypeSlug. The three
+     type labels are distinct text signals (meetup "Location in group", public
+     "Public event", council "Council meeting"), so colour is reinforcing, never the
+     sole signal. */
+  .event-pop-typeline { margin: 0 0 1.1rem; }
+  /* Colour the popover type label the same way the card does (event-card--{type}),
+     here via the dialog's data-type. Amber #fbbf24 (~11:1), green #4ade80 (~12:1),
+     and council blue #60a5fa (≈6.8:1) all clear WCAG AA on the popover's dark
+     base-200 background. */
+  #event-detail[data-type="meetup"] .event-pop-typeline { color: #fbbf24; }
+  #event-detail[data-type="public"] .event-pop-typeline { color: #4ade80; }
+  #event-detail[data-type="council"] .event-pop-typeline { color: #60a5fa; }
+  .event-pop-title {
+    color: #e8e8e8;
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 0.4rem;
+    overflow-wrap: anywhere;
+    unicode-bidi: isolate;
+  }
+  .event-pop-dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.4rem 1rem; margin: 0 0 1.1rem; }
+  .event-pop-dt {
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b6b6b;
+    padding-top: 0.2rem;
+  }
+  .event-pop-dd { color: #d4d4d4; font-size: 0.9rem; margin: 0; overflow-wrap: anywhere; }
+  .event-pop-addr {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #fbbf24;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(251, 191, 36, 0.5);
+    padding-bottom: 1px;
+  }
+  .event-pop-addr:hover { color: #fcd34d; border-bottom-color: #fbbf24; }
+  .event-pop-addr:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+  .event-pop-ext-icon { flex: none; }
+  /* Official-schedule link wrapper: the amber .event-pop-addr treatment reused
+     from the address link, spaced like the dl above it. Hidden (explicit rule so
+     it beats any class display) when the event carries no source. */
+  .event-pop-source { margin: 0 0 1.1rem; }
+  .event-pop-source[hidden] { display: none; }
+  /* Recurring-event caveat by the upcoming list. Muted, at the upcoming-footer
+     scale. Hidden for one-off events. */
+  .event-pop-caveat { color: #8a8a8a; font-size: 0.8125rem; line-height: 1.5; margin: 0 0 1.25rem; }
+  .event-pop-caveat[hidden] { display: none; }
+  .event-pop-desc { color: #a3a3a3; font-size: 0.9rem; line-height: 1.6; margin: 0 0 1.25rem; overflow-wrap: anywhere; }
+  .event-pop-desc[hidden] { display: none; }
+  .event-pop-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; }
+  #event-detail-signal[hidden] { display: none; }
+
+  /* --- Popover "Upcoming meetings" list ---
+     Shown for any recurring event: a bordered list of the next few dates, the
+     first tagged "Next", with a muted cadence/indefinite footer. Amber "Next"
+     pill matches the site's emphasis idiom; contrast and a real <ul> keep it
+     accessible with no reliance on colour. */
+  .event-pop-upcoming { margin: 0 0 1.25rem; }
+  .event-pop-upcoming[hidden] { display: none; }
+  .event-pop-upcoming-label {
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b6b6b;
+    margin: 0 0 0.5rem;
+  }
+  .event-pop-upcoming-list { list-style: none; margin: 0; padding: 0; }
+  .event-pop-upcoming-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #d4d4d4;
+    font-size: 0.875rem;
+    padding: 0.4rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .event-pop-upcoming-item:first-child { border-top: 0; }
+  /* The "Next" tag on the first upcoming row is a daisyUI badge (badge-sm
+     badge-outline) recoloured to the amber highlight — amber, not the red Signal
+     CTA colour. daisyUI owns the pill shape; only the colour is overridden here,
+     at .badge specificity so it beats the plugin's own badge rules. */
+  .event-pop-upcoming-next.badge {
+    color: #fbbf24;
+    border-color: #fbbf24;
+  }
+  .event-pop-upcoming-foot { color: #8a8a8a; font-size: 0.8125rem; margin: 0.5rem 0 0; }
+
+  /* Respect reduced-motion for the modal's open/close transition. The id+class
+     selectors outrank daisyUI's bare .modal / .modal-box, so no !important. */
+  @media (prefers-reduced-motion: reduce) {
+    #event-detail.modal { transition: none; }
+    #event-detail .modal-box { transition: none; animation: none; }
+  }
+
+  /* Homepage variant: the tabs bar's page-level sticky (top: 4rem) is correct on
+     /events but wrong inside a homepage band, where it would pin mid-page. Reset
+     it to static here. The desktop sticky MAP panel is intentionally left alone. */
+  .events-explorer--home .events-tabs-bar { position: static; top: auto; }
+</style>

@@ -6,7 +6,7 @@ import ImpactBand from '../components/ImpactBand.astro';
 import MapSection from '../components/MapSection.astro';
 import LegislationAsks from '../components/LegislationAsks.astro';
 import TakeActionZone from '../components/TakeActionZone.astro';
-import EventsStrip from '../components/EventsStrip.astro';
+import HomeEvents from '../components/HomeEvents.astro';
 import SignalCta from '../components/SignalCta.astro';
 import impactStats from '../data/impact-stats.json';
 
@@ -20,11 +20,11 @@ const description = `More than ${cameraFloor} ALPR cameras track where South Car
 
 <Base title="DeflockSC — Stop License Plate Surveillance in South Carolina" description={description}>
   <Hero />
-  <BlogCarousel />
   <ImpactBand />
   <MapSection />
   <LegislationAsks />
   <TakeActionZone />
-  <EventsStrip />
+  <HomeEvents />
+  <BlogCarousel />
   <SignalCta />
 </Base>
