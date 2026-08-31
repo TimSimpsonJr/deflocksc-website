@@ -1,0 +1,28 @@
+# Normalize all text files to LF in the repository and on checkout.
+# This is a Windows checkout with core.autocrlf off and no prior attributes,
+# so line endings were unmanaged: files committed as a mix of LF and CRLF, and
+# the working tree drifted to CRLF. That drift made otherwise-tiny edits show up
+# as whole-file diffs. text=auto stores LF in the repo and normalizes on the fly
+# so diffs stay clean; eol=lf checks out LF everywhere, Windows included.
+* text=auto eol=lf
+
+# Binary assets: never touch line endings, never attempt a text diff.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.webp   binary
+*.avif   binary
+*.pdf    binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.otf    binary
+*.eot    binary
+*.mp4    binary
+*.webm   binary
+*.mov    binary
+*.zip    binary
+*.gz     binary
+*.wasm   binary
