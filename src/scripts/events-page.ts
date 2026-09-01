@@ -705,6 +705,12 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
   const e = o.event;
   const meetup = e.type === 'meetup';
 
+  popoverEvent = e;
+
+  // A stale copy-failure affordance must never survive into the next event.
+  const copyFallback = document.getElementById('event-detail-copy-fallback');
+  if (copyFallback) copyFallback.hidden = true;
+
   // eventTypeSlug maps the type to its data-type through an exhaustive switch
   // (shared with buildCard), so only the known values reach the attribute (amber
   // meetup, green public, blue council); the popover CSS keys the label colour
@@ -851,6 +857,15 @@ document.getElementById('event-detail-council-signal')?.addEventListener('click'
   const returnEl = popoverInvoker;
   detailDialog?.close();
   openIntake(COUNCIL_SIGNAL_URL, returnEl);
+});
+
+// Popover footer Share button: one static listener, reading whichever event the
+// dialog currently shows. { fromPopover: true } scopes the copy-failure
+// affordance to THIS share's popover — copyWithFeedback re-checks at rejection
+// time that the same event is still the open one, so a slow failure can never
+// paint its URL into a different popover.
+document.getElementById('event-detail-share')?.addEventListener('click', () => {
+  if (popoverEvent) shareEvent(popoverEvent, { fromPopover: true });
 });
 
 // Sidebar cards: delegated on the stable #events-list <ul> so it covers both the
