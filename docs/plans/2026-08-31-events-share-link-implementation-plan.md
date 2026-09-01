@@ -4,7 +4,7 @@
 
 **Goal:** Add a Share control to every upcoming event card and to the detail popover, and make the resulting `/events#<id>` permalink actually open that event when a recipient visits it.
 
-**Architecture:** Three pure, unit-tested helpers land in `src/lib/events-view.ts` (`eventShareUrl`, `parseEventIdHash`, `occurrenceById`); all browser behaviour lands in `src/scripts/events-page.ts` (a `shareEvent` action with a native-share → clipboard → honest-failure ladder, plus a deep-link resolver state machine driven from first paint, the overlay merge, and `hashchange`). Card markup changes land on BOTH render paths under the repo's documented class-parity contract (`src/components/EventsList.astro` server render + `buildCard()` client render), and the popover Share button + failure affordance land in `src/components/EventsExplorer.astro`.
+**Architecture:** Four pure, unit-tested helpers land in `src/lib/events-view.ts` (`eventShareUrl`, `parseEventIdHash`, `occurrenceById`, and the `deepLinkAction` decision core); all browser behaviour lands in `src/scripts/events-page.ts` (a `shareEvent` action with a native-share → clipboard → honest-failure ladder, plus a deep-link resolver whose state transitions are computed by `deepLinkAction` and driven from first paint, the overlay merge, and `hashchange`). `src/scripts/toast.ts` gains a backward-compatible error-icon variant so a failure toast never shows a checkmark. Card markup changes land on BOTH render paths under the repo's documented class-parity contract (`src/components/EventsList.astro` server render + `buildCard()` client render), and the popover Share button + failure affordance land in `src/components/EventsExplorer.astro`.
 
 **Tech Stack:** Astro 5, TypeScript, Tailwind 4 + daisyUI 5, vitest 4 (node environment — **jsdom is NOT installed**, so DOM behaviour is manual-verify), native `<dialog>`/`showModal()`.
 
@@ -36,12 +36,13 @@
 
 ### Steps
 
-- [ ] **1.1 Write the failing tests.** In `src/lib/events-view.test.ts`, add the three new names to the existing import (after `upcomingFooter,` on line 25, before `} from './events-view.js';`):
+- [ ] **1.1 Write the failing tests.** In `src/lib/events-view.test.ts`, add the four new names to the existing import (after `upcomingFooter,` on line 25, before `} from './events-view.js';`):
 
 ```ts
   eventShareUrl,
   parseEventIdHash,
   occurrenceById,
+  deepLinkAction,
 ```
 
 Then append at the end of the file (after the `upcomingFooter` describe, line 699):
@@ -136,6 +137,66 @@ describe('occurrenceById', () => {
     expect(occurrenceById([], 'gv2publ')).toBeUndefined();
   });
 });
+
+describe('deepLinkAction', () => {
+  const base = {
+    targetId: 'abcd2345',
+    resolvable: true,
+    dialogOpen: false,
+    openEventId: null as string | null,
+    overlaySettled: false,
+  };
+
+  it('does nothing for a null target (empty or filter hash)', () => {
+    expect(deepLinkAction({ ...base, targetId: null })).toEqual({
+      action: 'none',
+      pendingDeepLinkId: null,
+      deferredResolve: false,
+    });
+  });
+
+  it('parks an unresolvable id as pending while the overlay is unsettled', () => {
+    expect(deepLinkAction({ ...base, resolvable: false })).toEqual({
+      action: 'none',
+      pendingDeepLinkId: 'abcd2345',
+      deferredResolve: false,
+    });
+  });
+
+  it('drops an unresolvable id once the overlay has settled', () => {
+    expect(deepLinkAction({ ...base, resolvable: false, overlaySettled: true })).toEqual({
+      action: 'none',
+      pendingDeepLinkId: null,
+      deferredResolve: false,
+    });
+  });
+
+  it('opens when resolvable and the dialog is closed', () => {
+    expect(deepLinkAction(base)).toEqual({
+      action: 'open',
+      pendingDeepLinkId: null,
+      deferredResolve: false,
+    });
+  });
+
+  it('clears a stale deferral when the open dialog already shows the target (A→B→A regression)', () => {
+    // open A → hash to B (deferred) → hash back to A: the recomputed decision
+    // must come back deferredResolve:false, or closing A would reopen A.
+    expect(deepLinkAction({ ...base, dialogOpen: true, openEventId: 'abcd2345' })).toEqual({
+      action: 'none',
+      pendingDeepLinkId: null,
+      deferredResolve: false,
+    });
+  });
+
+  it('defers when the open dialog shows a different event', () => {
+    expect(deepLinkAction({ ...base, dialogOpen: true, openEventId: 'zzzzzzzz' })).toEqual({
+      action: 'defer',
+      pendingDeepLinkId: null,
+      deferredResolve: true,
+    });
+  });
+});
 ```
 
 (`ev`, `collapseSeries`, `splitByToday`, `expandAll`, and the `PublicEvent` type are already imported at the top of this test file — do not re-import them.)
@@ -148,7 +209,7 @@ npm test -- src/lib/events-view.test.ts
 
 Expected: the run FAILS with a module-evaluation error naming a missing export, e.g. `SyntaxError: The requested module './events-view.js' does not provide an export named 'eventShareUrl'` (vitest reports the file as failed). If it passes, stop — you edited the wrong file.
 
-- [ ] **1.3 Implement the three helpers.** Append to `src/lib/events-view.ts` after `emptyStateProof` (end of file, line 516):
+- [ ] **1.3 Implement the helpers.** Append to `src/lib/events-view.ts` after `emptyStateProof` (end of file, line 516):
 
 ```ts
 /* ------------------------------------------------------------------------ *
@@ -202,6 +263,56 @@ export function occurrenceById(
 ): Occurrence | undefined {
   return occurrences.find((o) => o.event.id === id);
 }
+
+export type DeepLinkAction = 'open' | 'defer' | 'none';
+
+export interface DeepLinkDecision {
+  action: DeepLinkAction;
+  pendingDeepLinkId: string | null;
+  deferredResolve: boolean;
+}
+
+/**
+ * Pure decision core of the deep-link resolver in events-page.ts. `targetId`
+ * is parseEventIdHash(location.hash); `resolvable` is whether an upcoming
+ * occurrence exists for it right now; `openEventId` is the id the detail
+ * dialog currently shows (only consulted while `dialogOpen`).
+ *
+ * Both output flags are COMPUTED FRESH on every call — the resolver assigns
+ * them wholesale, never or-s them — which is what clears a stale deferral when
+ * the hash returns to the id the open dialog already shows (open A → hash B →
+ * hash A → close must NOT reopen A).
+ */
+export function deepLinkAction(input: {
+  targetId: string | null;
+  resolvable: boolean;
+  dialogOpen: boolean;
+  openEventId: string | null;
+  overlaySettled: boolean;
+}): DeepLinkDecision {
+  const { targetId, resolvable, dialogOpen, openEventId, overlaySettled } = input;
+  if (targetId === null) {
+    return { action: 'none', pendingDeepLinkId: null, deferredResolve: false };
+  }
+  if (!resolvable) {
+    // Unknown (yet): pending only while the overlay might still deliver it.
+    return {
+      action: 'none',
+      pendingDeepLinkId: overlaySettled ? null : targetId,
+      deferredResolve: false,
+    };
+  }
+  if (dialogOpen) {
+    // showModal() throws on an open dialog: re-resolving the id it already
+    // shows is a no-op; any other id defers to the dialog's close event.
+    return {
+      action: openEventId === targetId ? 'none' : 'defer',
+      pendingDeepLinkId: null,
+      deferredResolve: openEventId !== targetId,
+    };
+  }
+  return { action: 'open', pendingDeepLinkId: null, deferredResolve: false };
+}
 ```
 
 - [ ] **1.4 Run the test file — expected PASS.**
@@ -210,13 +321,13 @@ export function occurrenceById(
 npm test -- src/lib/events-view.test.ts
 ```
 
-Expected: `Test Files  1 passed (1)`, all tests green (the file's prior tests plus the 13 new ones).
+Expected: `Test Files  1 passed (1)`, all tests green (the file's prior tests plus the 19 new ones).
 
 - [ ] **1.5 Commit.**
 
 ```
 git add src/lib/events-view.ts src/lib/events-view.test.ts
-git commit -m "feat(events): add share-link pure helpers (eventShareUrl, parseEventIdHash, occurrenceById)"
+git commit -m "feat(events): add share-link pure helpers (eventShareUrl, parseEventIdHash, occurrenceById, deepLinkAction)"
 ```
 
 ---
@@ -226,20 +337,70 @@ git commit -m "feat(events): add share-link pure helpers (eventShareUrl, parseEv
 **Type: manual-verify (browser APIs — `navigator.share`, clipboard, DOM; no jsdom in this repo).**
 
 **Files:**
+- Modify: `src/scripts/toast.ts` (extend `showToast` with a backward-compatible icon variant)
 - Modify: `src/scripts/events-page.ts`
   - import block from `../lib/events-view.js` (lines 35–59): add `eventShareUrl`
   - after the `escapeHtml` import (line 67): add the `showToast` import
+  - under `popoverInvoker` (line 515): declare `popoverEvent`
   - after `extLinkIcon()` (ends line 545): add a new `--- Share ---` section
 
 ### Steps
 
-- [ ] **2.1 Add the imports.** In the `from '../lib/events-view.js'` import list, add `eventShareUrl,` after `upcomingFooter,`. Then, directly below `import { escapeHtml } from '../lib/escape-html.js';` (line 67), add:
+- [ ] **2.1 Error-variant toast.** `showToast` always renders a checkmark, which would put a success icon on a failure message. In `src/scripts/toast.ts`, add an `errorIcon()` builder directly after `checkIcon()` (its closing brace, line 27), and give `showToast` an optional, backward-compatible `opts` parameter — existing `showToast('…')` callers compile and behave unchanged:
+
+```ts
+function errorIcon(): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('class', 'h-6 w-6 shrink-0 stroke-current');
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+  path.setAttribute('stroke-width', '2');
+  // Heroicons outline exclamation-circle, matching checkIcon's check-circle style.
+  path.setAttribute('d', 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z');
+  svg.appendChild(path);
+  return svg;
+}
+```
+
+Then replace the `showToast` function (lines 31–44) with:
+
+```ts
+export function showToast(message: string, opts?: { icon?: 'success' | 'error' }): void {
+  const container = document.getElementById('app-toast');
+  if (!container) return;
+  const alert = document.createElement('div');
+  alert.className = 'alert border-white/25';
+  const span = document.createElement('span');
+  span.textContent = message;
+  alert.append(opts?.icon === 'error' ? errorIcon() : checkIcon(), span);
+  container.replaceChildren(alert);
+  window.clearTimeout(hideTimer);
+  hideTimer = window.setTimeout(() => {
+    container.replaceChildren();
+  }, 2400);
+}
+```
+
+- [ ] **2.2 Add the imports.** In `src/scripts/events-page.ts`, in the `from '../lib/events-view.js'` import list, add `eventShareUrl,` after `upcomingFooter,`. Then, directly below `import { escapeHtml } from '../lib/escape-html.js';` (line 67), add:
 
 ```ts
 import { showToast } from './toast.js';
 ```
 
-- [ ] **2.2 Add the share section.** Insert after the closing brace of `extLinkIcon()` (line 545), before the `WEEKDAYS` constant:
+- [ ] **2.3 Declare the current-popover event.** Directly under `let popoverInvoker: HTMLElement | null = null;` (line 515), add:
+
+```ts
+/** The event the detail dialog is currently showing. Set by openEventPopover
+ *  (Task 4); read by the share failure path, the footer Share button, and the
+ *  deep-link resolver's already-open check. */
+let popoverEvent: PublicEvent | null = null;
+```
+
+- [ ] **2.4 Add the share section.** Insert after the closing brace of `extLinkIcon()` (line 545), before the `WEEKDAYS` constant:
 
 ```ts
 // --- Share (design: 2026-08-31-events-share-link) ------------------------
@@ -303,22 +464,33 @@ async function copyLink(url: string): Promise<boolean> {
 }
 
 /** Copy + honest feedback: a toast on success; on failure, the popover's
- *  select-and-copy affordance when the dialog is open, else a toast that says
- *  where to find one. Never a lying "copied" (design §1). */
-async function copyWithFeedback(url: string): Promise<void> {
+ *  select-and-copy affordance — but ONLY when the share started from a popover
+ *  that is STILL the open one. The copy is async, so by rejection time the
+ *  dialog may show a different event (or a card share may have an unrelated
+ *  popover open); revealing the affordance then would show the wrong URL in
+ *  the wrong context. `fromPopoverEventId` is the id of the popover the share
+ *  started from, or null for a card share, which therefore never borrows a
+ *  later-opened popover. Never a lying "copied" (design §1). */
+async function copyWithFeedback(url: string, fromPopoverEventId: string | null): Promise<void> {
   if (await copyLink(url)) {
     showToast('Link copied');
     return;
   }
   const fallback = document.getElementById('event-detail-copy-fallback');
   const input = document.getElementById('event-detail-copy-url') as HTMLInputElement | null;
-  if (detailDialog?.open && fallback && input) {
+  if (
+    fromPopoverEventId !== null &&
+    detailDialog?.open &&
+    popoverEvent?.id === fromPopoverEventId &&
+    fallback &&
+    input
+  ) {
     input.value = url;
     fallback.hidden = false;
     input.focus();
     input.select();
   } else {
-    showToast("Couldn't copy — open the event to copy the link");
+    showToast("Couldn't copy — open the event to copy the link", { icon: 'error' });
   }
 }
 
@@ -326,31 +498,34 @@ async function copyWithFeedback(url: string): Promise<void> {
  *  keeps the click's transient activation. AbortError (the visitor cancelled
  *  the OS sheet / no target) stays SILENT: no toast, no copy. Any other
  *  rejection (NotAllowedError, TypeError, …) falls through to the copy ladder.
- *  Payload is title + url only — no address, organizer, or type (design §1). */
-function shareEvent(e: PublicEvent): void {
+ *  Payload is title + url only — no address, organizer, or type (design §1).
+ *  `opts.fromPopover` marks a share initiated from the detail popover, which
+ *  scopes the copy-failure affordance to that same still-open popover. */
+function shareEvent(e: PublicEvent, opts?: { fromPopover?: boolean }): void {
   const url = eventShareUrl(location.origin, e.id);
+  const fromPopoverEventId = opts?.fromPopover ? e.id : null;
   if (typeof navigator.share === 'function') {
     navigator.share({ title: e.title, url }).catch((err: unknown) => {
       if ((err as { name?: string } | null)?.name === 'AbortError') return;
-      void copyWithFeedback(url);
+      void copyWithFeedback(url, fromPopoverEventId);
     });
     return;
   }
-  void copyWithFeedback(url);
+  void copyWithFeedback(url, fromPopoverEventId);
 }
 ```
 
-(Note: `copyWithFeedback` references `#event-detail-copy-fallback`, which does not exist until Task 4 — the null check makes it degrade to the toast branch in the meantime. `detailDialog` and `svgEl` are declared earlier in the module, lines 512–522.)
+(Note: `copyWithFeedback` references `#event-detail-copy-fallback`, which does not exist until Task 4 — the null check makes it degrade to the error-toast branch in the meantime. `popoverEvent` is null until Task 4 wires `openEventPopover`, which degrades the same way. `detailDialog` and `svgEl` are declared earlier in the module, lines 512–522.)
 
-- [ ] **2.3 Typecheck — expected no NEW errors.**
+- [ ] **2.5 Typecheck — expected no NEW errors.**
 
 ```
 node node_modules/typescript/bin/tsc --noEmit
 ```
 
-Expected: exactly the 14 baseline errors (see Worker context). `shareIcon` is not referenced yet — if tsc reports an unused-symbol error for it, it will not (this config does not flag unused locals); any NEW error naming your added lines means a real mistake.
+Expected: exactly the 14 baseline errors (see Worker context). The `opts` parameter on `showToast` is optional, so the existing callers (`src/scripts/action-modal/results-renderer.ts` and the inline scripts in `ToolkitFoia.astro`/`ToolkitOutreach.astro`) still typecheck/compile unchanged — no NEW error may name toast.ts or any caller. `shareIcon`/`shareEvent` are not referenced yet; this config does not flag unused locals.
 
-- [ ] **2.4 Build — expected pass.**
+- [ ] **2.6 Build — expected pass.**
 
 ```
 npm run build
@@ -358,11 +533,11 @@ npm run build
 
 Expected: exits 0, ends with the Astro completion summary. (`shareEvent`/`shareIcon` are as-yet-unused module-level functions; bundlers keep them without complaint.)
 
-- [ ] **2.5 Commit.**
+- [ ] **2.7 Commit.**
 
 ```
-git add src/scripts/events-page.ts
-git commit -m "feat(events): shareEvent action - native share first, clipboard fallback, honest failure"
+git add src/scripts/events-page.ts src/scripts/toast.ts
+git commit -m "feat(events): shareEvent action - native share first, honest failure, error-variant toast"
 ```
 
 ---
@@ -453,7 +628,9 @@ git commit -m "feat(events): shareEvent action - native share first, clipboard f
 // Sidebar cards: delegated on the stable #events-list <ul> so it covers both the
 // server-rendered cards and the ones buildCard() inserts later, without either
 // renderer wiring a per-card listener. The share branch is checked before the
-// title branch; the title button opens the popover.
+// title branch; the title button opens the popover. Card shares call shareEvent
+// WITHOUT { fromPopover }: a card-initiated copy failure surfaces as the error
+// toast and can never borrow a popover that happens to be open by then.
 document.getElementById('events-list')?.addEventListener('click', (ev) => {
   const target = ev.target as HTMLElement;
   const shareBtn = target.closest<HTMLElement>('.event-share-inline');
@@ -511,7 +688,7 @@ git commit -m "feat(events): inline Share button on event cards (both render pat
 
 **Files:**
 - Modify: `src/components/EventsExplorer.astro` — the dialog footer `.modal-action` (lines 233–240) and the markup just above it
-- Modify: `src/scripts/events-page.ts` — `popoverInvoker` region (line 515), `openEventPopover` (lines 574–706), the static listener region after the council-signal listener (line 725)
+- Modify: `src/scripts/events-page.ts` — `openEventPopover` (lines 574–706), the static listener region after the council-signal listener (line 725). (The `popoverEvent` declaration itself landed in Task 2.3.)
 
 ### Steps
 
@@ -545,15 +722,7 @@ Then add the Share button inside `.modal-action`, between the Close form and the
 
 Do NOT touch the backdrop form (lines 242–244) — backdrop click / Esc / Close behaviour is a preserved requirement.
 
-- [ ] **4.2 Store the current event.** In `src/scripts/events-page.ts`, directly under `let popoverInvoker: HTMLElement | null = null;` (line 515), add:
-
-```ts
-/** The event the detail dialog is currently showing. Read by the footer Share
- *  button's static listener and by the deep-link resolver's already-open check. */
-let popoverEvent: PublicEvent | null = null;
-```
-
-- [ ] **4.3 Fill-time wiring.** In `openEventPopover`, directly after `const meetup = e.type === 'meetup';` (line 577), add:
+- [ ] **4.2 Fill-time wiring.** In `openEventPopover`, directly after `const meetup = e.type === 'meetup';` (line 577), add:
 
 ```ts
   popoverEvent = e;
@@ -563,18 +732,20 @@ let popoverEvent: PublicEvent | null = null;
   if (copyFallback) copyFallback.hidden = true;
 ```
 
-- [ ] **4.4 Static Share listener.** After the council-signal click listener (its closing `});` on line 725), add:
+- [ ] **4.3 Static Share listener.** After the council-signal click listener (its closing `});` on line 725), add:
 
 ```ts
 // Popover footer Share button: one static listener, reading whichever event the
-// dialog currently shows. shareEvent handles native share vs copy vs the honest
-// failure affordance (which lives in this same dialog).
+// dialog currently shows. { fromPopover: true } scopes the copy-failure
+// affordance to THIS share's popover — copyWithFeedback re-checks at rejection
+// time that the same event is still the open one, so a slow failure can never
+// paint its URL into a different popover.
 document.getElementById('event-detail-share')?.addEventListener('click', () => {
-  if (popoverEvent) shareEvent(popoverEvent);
+  if (popoverEvent) shareEvent(popoverEvent, { fromPopover: true });
 });
 ```
 
-- [ ] **4.5 Typecheck + build.**
+- [ ] **4.4 Typecheck + build.**
 
 ```
 node node_modules/typescript/bin/tsc --noEmit
@@ -583,12 +754,21 @@ npm run build
 
 Expected: 14 baseline tsc errors, build exits 0.
 
-- [ ] **4.6 Manual verification.** `npm run dev` → http://localhost:4321/events:
+- [ ] **4.5 Manual verification.** `npm run dev` → http://localhost:4321/events:
   - Open any event's popover → the footer shows Close · Share · (Signal CTA when present). Click Share → "Link copied" toast (dialog stays open); paste → correct `/events#<id>`.
-  - Forced failure: in DevTools console run `Object.defineProperty(navigator, 'clipboard', { value: undefined })` and `document.execCommand = () => false`, then click the popover Share → NO "Link copied" toast; the "Copy failed — select and copy this link:" row appears with the URL selected. Open a DIFFERENT event's popover → the affordance is hidden again.
+  - Forced failure: in the DevTools console run all three overrides (Chromium exposes `navigator.share` on desktop too, so it must be shadowed first or the native sheet opens instead of the copy path):
+
+```js
+Object.defineProperty(navigator, 'share', { value: undefined, configurable: true });
+Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+document.execCommand = () => false;
+```
+
+  Then click the popover Share → NO "Link copied" toast; the "Copy failed — select and copy this link:" row appears with the URL selected. Open a DIFFERENT event's popover → the affordance is hidden again.
+  - With the same overrides active, close the popover and click a CARD's Share → the failure toast ("Couldn't copy — open the event to copy the link") shows the error glyph, not the checkmark.
   - Backdrop click, Esc, and the Close button all still close the dialog.
 
-- [ ] **4.7 Commit.**
+- [ ] **4.6 Commit.**
 
 ```
 git add src/components/EventsExplorer.astro src/scripts/events-page.ts
@@ -612,7 +792,7 @@ git commit -m "feat(events): Share button and copy-failure affordance in the det
 
 ### Steps
 
-- [ ] **5.1 Imports.** In the `from '../lib/events-view.js'` list, add `parseEventIdHash,` and `occurrenceById,` (alongside `eventShareUrl` from Task 2).
+- [ ] **5.1 Imports.** In the `from '../lib/events-view.js'` list, add `parseEventIdHash,`, `occurrenceById,`, and `deepLinkAction,` (alongside `eventShareUrl` from Task 2).
 
 - [ ] **5.2 Deep-link state + resolver.** Insert after the closing brace of `hashHasFilterKey` (line 1180), before the `hashchange` listener:
 
@@ -638,38 +818,37 @@ let overlaySettled = false;
  *  on hash changes. */
 let deepLinkOwned = false;
 /** A resolution arrived while the dialog was open; run the resolver again from
- *  the dialog's close event. */
+ *  the dialog's close event. RECOMPUTED by resolveDeepLink on every run (via
+ *  deepLinkAction) — set directly only by the hashchange hash-away branch. */
 let deferredResolve = false;
 
 /** Resolve the CURRENT location.hash as an event deep link: select the List
  *  tab, best-effort scroll the card into view, open the popover. A hash that
  *  is empty, a filter hash, or an id matching no upcoming event resolves to
  *  nothing (and is remembered as pending while the overlay might still
- *  deliver it). */
+ *  deliver it). Thin imperative shell around the unit-tested deepLinkAction:
+ *  parse the hash, probe resolvability, assign BOTH state flags wholesale
+ *  from the decision — never or-ing them — so a stale deferral clears when
+ *  the hash returns to the id the open dialog already shows (the A→B→A
+ *  regression), then act on the decision. */
 function resolveDeepLink(): void {
   const id = parseEventIdHash(location.hash);
-  if (id === null) {
-    pendingDeepLinkId = null;
-    return;
-  }
-
-  const occurrence = occurrenceById(collapseSeries(upcomingFor(allEvents)), id);
-  if (!occurrence) {
-    // Unknown (yet): pending only while the overlay might still deliver it.
-    // #main-content, #event-<id> month anchors, and past-only ids land here
-    // and stay a graceful no-op.
-    pendingDeepLinkId = overlaySettled ? null : id;
-    return;
-  }
-  pendingDeepLinkId = null;
-
-  if (detailDialog?.open) {
-    // showModal() throws on an open dialog. Re-resolving the id the dialog
-    // already shows is a no-op; any other id waits for the close event, whose
-    // handler re-runs this resolver against the then-live hash.
-    if (popoverEvent?.id !== id) deferredResolve = true;
-    return;
-  }
+  const occurrence =
+    id === null ? undefined : occurrenceById(collapseSeries(upcomingFor(allEvents)), id);
+  const decision = deepLinkAction({
+    targetId: id,
+    resolvable: occurrence !== undefined,
+    dialogOpen: detailDialog?.open ?? false,
+    openEventId: popoverEvent?.id ?? null,
+    overlaySettled,
+  });
+  pendingDeepLinkId = decision.pendingDeepLinkId;
+  deferredResolve = decision.deferredResolve;
+  // 'none' covers empty/filter hashes, unresolvable tokens (#main-content,
+  // #event-<id> month anchors, past-only ids — graceful no-ops), and the
+  // already-showing id; 'defer' waits for the dialog's close event, whose
+  // handler re-runs this resolver against the then-live hash.
+  if (decision.action !== 'open' || occurrence === undefined || id === null) return;
 
   selectTab('list');
   const card = document
@@ -686,7 +865,7 @@ function resolveDeepLink(): void {
 }
 ```
 
-(`upcomingFor` is the module-local helper at line 102; `collapseSeries` is already imported; `popoverEvent` came from Task 4. `resolveDeepLink` is a hoisted function declaration, so the Task 5.3 close handler — which appears earlier in the file — may call it.)
+(`upcomingFor` is the module-local helper at line 102; `collapseSeries` is already imported; `popoverEvent` was declared in Task 2.3 and is set by `openEventPopover` since Task 4.2. `resolveDeepLink` is a hoisted function declaration, so the Task 5.3 close handler — which appears earlier in the file — may call it.)
 
 - [ ] **5.3 Close handler.** Replace the dialog `close` handler (lines 711–715) with:
 
@@ -700,7 +879,11 @@ detailDialog?.addEventListener('close', () => {
   const invoker = popoverInvoker;
   popoverInvoker = null;
   deepLinkOwned = false;
+  // The invoker card can be gone by the time the queued close fires — trimmed
+  // by the homepage cap or pruned by a filter during the overlay merge. Fall
+  // back to the List tab so focus never drops to <body> (WCAG 2.4.3).
   if (invoker && invoker.isConnected) invoker.focus();
+  else document.getElementById('tab-list')?.focus();
   if (deferredResolve) {
     deferredResolve = false;
     resolveDeepLink();
@@ -720,6 +903,9 @@ detailDialog?.addEventListener('close', () => {
 window.addEventListener('hashchange', () => {
   if (location.hash.replace(/^#/, '') === '' || hashHasFilterKey(location.hash)) {
     pendingDeepLinkId = null;
+    // A filter hash also drops any deferral — closing a dialog after moving to
+    // a filter hash must not reopen anything.
+    deferredResolve = false;
     // Hash-away close: leaving a deep-link-opened dialog's id closes it.
     if (deepLinkOwned && detailDialog?.open) detailDialog.close();
     applyFilter(parseFilterHash(location.hash));
@@ -831,10 +1017,14 @@ git commit -m "feat(events): resolve /events#<id> deep links to the event popove
   .event-actions .event-typeline { margin: 0; }
 
   /* Neutral grey Share trigger — the type COLOUR stays on the label, never on
-     this control. The row reads as an 11px type line; the ~44px tap target
-     comes from min-height/min-width whose vertical overhang is absorbed by the
-     negative margin, so the card does not grow ~30px. flex-shrink:0 stops a
-     long type line crushing it. */
+     this control. Option A (owner decision): the card KEEPS today's height.
+     The row reads as an 11px type line; the 44px tap target comes from
+     min-height/min-width whose vertical overhang is fully absorbed by the
+     -15px margins ((44px − ~14px content) / 2), so the actions row measures
+     the same as the old bare type line and the card does not grow. The
+     wrapper's space-between plus justify-content:flex-end keep the overhang
+     on the RIGHT, away from the title button; flex-shrink:0 stops a long
+     type line crushing it. */
   .event-share-inline {
     display: inline-flex;
     align-items: center;
@@ -891,10 +1081,11 @@ npm run build
 Expected: exits 0.
 
 - [ ] **6.4 Manual verification.** `npm run dev`:
-  - /events list: the type line and Share sit on one row, Share right-aligned, grey (NOT the type colour — check against an amber meetup and a green public card), turning white on hover, amber inset focus ring on keyboard focus. Card height is visually unchanged versus a card without the button being hovered (the negative-margin trick) — if the row visibly inflates the card, tune `margin: -15px 0` until it does not.
-  - DevTools → inspect a Share button → its hit box is ≥ 44px tall.
+  - /events list: the type line and Share sit on one row, Share right-aligned, grey (NOT the type colour — check against an amber meetup and a green public card), turning white on hover, amber inset focus ring on keyboard focus.
+  - **Option A check — card height preserved:** in DevTools, the computed height of `.event-actions` equals the old type-line row (~17px), and a card's `offsetHeight` matches the same card on `master` (or the deployed site). The 44px target lives entirely in the negative-margin overhang; the card must NOT grow.
+  - **Hit-box overlap check (required):** DevTools → inspect a Share button → its hit box is ≥ 44px tall AND does NOT overlap the card's TITLE button — the only other interactive element in the card. Check the compact homepage cards especially (address/description hidden, so the title sits closer). Overlap with the non-interactive meta/type-line text is acceptable. If the box reaches the title button, shrink `min-height` and the negative margin TOGETHER (e.g. `min-height: 40px; margin: -13px 0;`) until it clears — never by growing the card.
   - Homepage preview cards: same row, not crowding the compact card (the design allows revisiting only if this looks crowded — note it in the PR if so, do not redesign).
-  - Popover: trigger the forced copy failure from Task 4.6 → the affordance renders as a labelled dark input, full width, selected text.
+  - Popover: trigger the forced copy failure from Task 4.5 → the affordance renders as a labelled dark input, full width, selected text.
 
 - [ ] **6.5 Commit.**
 
@@ -919,7 +1110,7 @@ git commit -m "style(events): share-control and copy-fallback CSS"
 npm test
 ```
 
-Expected: **32 files passed, 788 tests passed** (775 baseline + 13 from Task 1), 0 failures.
+Expected: **32 files passed, 794 tests passed** (775 baseline + 19 from Task 1), 0 failures.
 
 - [ ] **7.2 Typecheck.**
 
@@ -937,18 +1128,50 @@ npm run build
 
 Expected: exits 0.
 
-- [ ] **7.4 Manual acceptance matrix** (from the design's Testing section; run against `npm run dev`, using a real baked id and — where possible — a freshly submitted overlay-only event via /events/submit):
+- [ ] **7.4 Manual acceptance matrix** (from the design's Testing section; run against `npm run dev`, using a real baked id — the overlay-only row below carries its own temporary mock):
 
   - [ ] **Native share (mobile or DevTools device emulation with `navigator.share` available):** card Share and popover Share open the OS sheet with title + URL only; completing shows NO toast.
   - [ ] **Native share cancel = silent:** dismiss the OS sheet → no toast, no copy, no console error.
   - [ ] **Desktop copy + toast:** no `navigator.share` → click Share → "Link copied" toast; clipboard holds `http://localhost:4321/events#<id>`.
-  - [ ] **Forced copy failure = honest affordance:** with clipboard + execCommand disabled (Task 4.6 recipe), popover Share reveals the select-and-copy input (URL selected); a CARD Share with no popover open shows the "Couldn't copy — open the event to copy the link" toast instead. Never a false "Link copied".
+  - [ ] **Forced copy failure = honest affordance:** with share + clipboard + execCommand disabled (Task 4.5 three-override recipe), popover Share reveals the select-and-copy input (URL selected); a CARD Share with no popover open shows the "Couldn't copy — open the event to copy the link" toast with the ERROR glyph instead. Never a false "Link copied".
+  - [ ] **Delayed copy failure while switching popovers (context race):** make the copy fail SLOWLY — shadow `navigator.share` as undefined, set `document.execCommand = () => false`, and run `Object.defineProperty(navigator, 'clipboard', { value: { writeText: () => new Promise((_, rej) => setTimeout(() => rej(new Error('nope')), 3000)) }, configurable: true });`. Click Share INSIDE event A's popover, then close it and open event B's popover within 3 s → when the rejection lands, B's popover must NOT show the affordance with A's URL; the error toast shows instead. Repeat from a CARD Share with any popover opened afterwards → error toast, never that popover's affordance.
   - [ ] **Baked deep-link on load:** `/events#<baked id>` → List tab, card scrolled, popover open.
-  - [ ] **Overlay-only deep-link (pending → resolve after merge):** load `/events#<overlay-only id>` → nothing at first paint, popover opens when the overlay merge lands.
+  - [ ] **Overlay-only deep-link (pending → resolve after merge):** `npm run dev` serves no `/api/events` function, so mock it with a TEMPORARY dev-only endpoint — create `src/pages/api/events.ts`:
+
+```ts
+// TEMPORARY manual-test mock — DELETE before finishing Task 7.
+import type { APIRoute } from 'astro';
+
+export const GET: APIRoute = () =>
+  new Response(
+    JSON.stringify({
+      events: [{
+        id: 'ovrlaytt',
+        type: 'public',
+        title: 'Overlay test event',
+        description: null,
+        date: '2026-09-15', // adjust to a near-future date when running this
+        time: '18:00',
+        city: 'greenville',
+        county: 'greenville',
+        address: '1 Main St, Greenville',
+        hasSignalGroup: false,
+        recurrence: null,
+        organizer: 'handle-test',
+        createdAt: '2026-08-30T12:00:00Z',
+      }],
+    }),
+    { headers: { 'content-type': 'application/json' } },
+  );
+```
+
+  Load `/events#ovrlaytt` → nothing at first paint (pending), popover opens when the overlay merge lands. Then close the popover and reload-free wait: it must NOT re-open (pending was cleared by the resolve). DELETE the mock file afterwards — `git status` must not show it when this task ends. (A Chromium DevTools network override of `/api/events`, or a deploy preview with a freshly submitted event, are acceptable alternatives.)
   - [ ] **Unknown / past id:** `/events#zzzzzzz9` and a past-only event's id → no popover, no filter change, no error.
   - [ ] **Deep-link while another popover is open (defer):** open any popover from a card, edit the hash to a different id → nothing happens until you close; on close, the deep-linked popover opens.
+  - [ ] **Deferral clears on return (A→B→A regression):** open event A's popover from its card, edit the hash to event B's id (deferred), edit it BACK to A's id, then close A → nothing reopens.
   - [ ] **hashchange to a bare id:** with /events already loaded, editing the hash to `#<id>` opens that popover.
   - [ ] **Hash-away close:** with a DEEP-LINK-opened popover showing, change the hash to `#county=greenville` (or another id) → that popover closes (and the filter applies / the other popover opens).
+  - [ ] **Close-focus fallback (invoker gone):** open a popover from a card, delete that card's `<li>` in the DevTools Elements panel while the dialog is open, then close the dialog → `document.activeElement` is the List tab (`#tab-list`), not `<body>`.
   - [ ] **Backdrop click closes:** clicking outside the popover still closes it (preserved requirement).
   - [ ] **JS disabled:** disable JavaScript (DevTools → Ctrl+Shift+P → "Disable JavaScript"), load `/events#<baked id>` → the browser natively scrolls to that card.
   - [ ] **Filter + deep link never fight:** apply `#type=meetups`, then navigate to a council event's id → the popover opens, the type filter is NOT cleared, and the (absent) card is simply not scrolled to.
@@ -959,4 +1182,4 @@ Expected: exits 0.
 
 ## Self-review notes (spec coverage)
 
-Design § → task map: §1 share action → Task 2 (+4.4 wiring); §2 pure helpers → Task 1; §3 resolver invariants and all three call moments → Task 5 (first paint 5.5, overlay 5.6, hashchange 5.4; showModal guard + defer 5.2/5.3; hash-away close 5.4; best-effort scroll + never-clear-filter 5.2); §4 card changes both paths + delegated share-first branch → Task 3; §5 popover button, `popoverEvent`, static listener, failure affordance, preserved backdrop close → Task 4; CSS → Task 6; Testing section → Tasks 1 and 7. Non-goals honored: no past-row controls, no new routes, no history manipulation, no analytics.
+Design § → task map: §1 share action → Task 2 (+4.3 wiring; the honest-failure feedback is surface-scoped via `copyWithFeedback`'s `fromPopoverEventId` so an async rejection can never paint a URL into the wrong popover, and the failure toast uses the error-icon variant Task 2.1 adds to `toast.ts`); §2 pure helpers → Task 1, including the `deepLinkAction` decision core, which pins the A→B→A stale-deferral regression at the unit level; §3 resolver invariants and all three call moments → Task 5 (first paint 5.5, overlay 5.6, hashchange 5.4; showModal guard + defer computed by `deepLinkAction` in 5.2 and replayed from the close handler 5.3; hash-away close + deferral drop on filter hashes 5.4; best-effort scroll + never-clear-filter 5.2; close-focus fallback to the List tab 5.3); §4 card changes both paths + delegated share-first branch → Task 3; §5 popover button, `popoverEvent` (declared 2.3, set 4.2), static listener, failure affordance, preserved backdrop close → Task 4; CSS (Option A — card height preserved, hit box clear of the title button) → Task 6; Testing section → Tasks 1 and 7. Non-goals honored: no past-row controls, no new routes, no history manipulation, no analytics.
