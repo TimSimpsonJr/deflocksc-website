@@ -23,6 +23,10 @@ import {
   eventTypeLabel,
   upcomingOccurrences,
   upcomingFooter,
+  eventShareUrl,
+  parseEventIdHash,
+  occurrenceById,
+  deepLinkAction,
 } from './events-view.js';
 import type { EventFilter, Occurrence } from './events-view.js';
 import type { PublicEvent } from './public-event.js';
@@ -695,5 +699,155 @@ describe('upcomingFooter', () => {
   it('states the cadence for a bounded series', () => {
     expect(upcomingFooter({ freq: 'weekly', until: '2027-01-01' }, 4)).toBe('Repeats weekly');
     expect(upcomingFooter({ freq: 'monthly_nth', until: '2027-01-01' }, 4)).toBe('Repeats monthly');
+  });
+});
+
+describe('eventShareUrl', () => {
+  it('builds origin + /events + a hash of the id', () => {
+    expect(eventShareUrl('https://deflocksc.org', 'abcd2345')).toBe(
+      'https://deflocksc.org/events#abcd2345',
+    );
+  });
+
+  it('keeps a council id readable (encoding is a no-op for its alphabet)', () => {
+    expect(eventShareUrl('https://deflocksc.org', 'council-greenville-county')).toBe(
+      'https://deflocksc.org/events#council-greenville-county',
+    );
+  });
+
+  it('percent-encodes an id carrying URL-hostile characters', () => {
+    expect(eventShareUrl('https://deflocksc.org', 'a b&c=d')).toBe(
+      'https://deflocksc.org/events#a%20b%26c%3Dd',
+    );
+  });
+});
+
+describe('parseEventIdHash', () => {
+  it('returns null for an empty hash', () => {
+    expect(parseEventIdHash('')).toBeNull();
+    expect(parseEventIdHash('#')).toBeNull();
+  });
+
+  it('returns null for any filter hash (contains =)', () => {
+    expect(parseEventIdHash('#county=greenville')).toBeNull();
+    expect(parseEventIdHash('#type=meetups')).toBeNull();
+    expect(parseEventIdHash('#county=greenville&type=meetups')).toBeNull();
+  });
+
+  it('returns a bare id, with or without the leading #', () => {
+    expect(parseEventIdHash('#abcd2345')).toBe('abcd2345');
+    expect(parseEventIdHash('abcd2345')).toBe('abcd2345');
+    expect(parseEventIdHash('#council-greenville-county')).toBe('council-greenville-county');
+  });
+
+  it('passes reserved in-page anchors through as tokens (id lookup is the real guard)', () => {
+    expect(parseEventIdHash('#main-content')).toBe('main-content');
+    expect(parseEventIdHash('#event-abcd2345')).toBe('event-abcd2345');
+  });
+
+  it('decodes a percent-encoded token', () => {
+    expect(parseEventIdHash('#a%20b')).toBe('a b');
+  });
+
+  it('returns the raw token when decoding throws (malformed percent-escape)', () => {
+    expect(parseEventIdHash('#%')).toBe('%');
+    expect(parseEventIdHash('#%zz')).toBe('%zz');
+  });
+});
+
+describe('occurrenceById', () => {
+  const HORIZON = '2027-09-01';
+  const TODAY = '2026-08-23';
+  // The exact pipeline the deep-link resolver feeds it (design §2): expand,
+  // keep upcoming, collapse each series to its next occurrence.
+  const upcomingRows = (events: PublicEvent[]) =>
+    collapseSeries(splitByToday(expandAll(events, HORIZON), TODAY).upcoming);
+
+  it('finds a one-off event by id at its date', () => {
+    const rows = upcomingRows([ev({ id: 'gv2publ', date: '2026-09-04' })]);
+    const hit = occurrenceById(rows, 'gv2publ');
+    expect(hit?.event.id).toBe('gv2publ');
+    expect(hit?.date).toBe('2026-09-04');
+  });
+
+  it('resolves a recurring series to its next upcoming occurrence', () => {
+    const rows = upcomingRows([
+      ev({ id: 'gvweekly', date: '2026-08-04', recurrence: { freq: 'weekly', until: '2026-10-13' } }),
+    ]);
+    const hit = occurrenceById(rows, 'gvweekly');
+    expect(hit?.event.id).toBe('gvweekly');
+    // Weekly from Tue 2026-08-04; today is 2026-08-23, so the next one is 08-25.
+    expect(hit?.date).toBe('2026-08-25');
+  });
+
+  it('returns undefined for a past-only event (excluded by the upcoming split)', () => {
+    const rows = upcomingRows([ev({ id: 'pastonce', date: '2026-08-01' })]);
+    expect(occurrenceById(rows, 'pastonce')).toBeUndefined();
+  });
+
+  it('returns undefined for an unknown id and for an empty list', () => {
+    const rows = upcomingRows([ev({ id: 'gv2publ', date: '2026-09-04' })]);
+    expect(occurrenceById(rows, 'zzzzzzzz')).toBeUndefined();
+    expect(occurrenceById([], 'gv2publ')).toBeUndefined();
+  });
+});
+
+describe('deepLinkAction', () => {
+  const base = {
+    targetId: 'abcd2345',
+    resolvable: true,
+    dialogOpen: false,
+    openEventId: null as string | null,
+    overlaySettled: false,
+  };
+
+  it('does nothing for a null target (empty or filter hash)', () => {
+    expect(deepLinkAction({ ...base, targetId: null })).toEqual({
+      action: 'none',
+      pendingDeepLinkId: null,
+      deferredResolve: false,
+    });
+  });
+
+  it('parks an unresolvable id as pending while the overlay is unsettled', () => {
+    expect(deepLinkAction({ ...base, resolvable: false })).toEqual({
+      action: 'none',
+      pendingDeepLinkId: 'abcd2345',
+      deferredResolve: false,
+    });
+  });
+
+  it('drops an unresolvable id once the overlay has settled', () => {
+    expect(deepLinkAction({ ...base, resolvable: false, overlaySettled: true })).toEqual({
+      action: 'none',
+      pendingDeepLinkId: null,
+      deferredResolve: false,
+    });
+  });
+
+  it('opens when resolvable and the dialog is closed', () => {
+    expect(deepLinkAction(base)).toEqual({
+      action: 'open',
+      pendingDeepLinkId: null,
+      deferredResolve: false,
+    });
+  });
+
+  it('clears a stale deferral when the open dialog already shows the target (A→B→A regression)', () => {
+    // open A → hash to B (deferred) → hash back to A: the recomputed decision
+    // must come back deferredResolve:false, or closing A would reopen A.
+    expect(deepLinkAction({ ...base, dialogOpen: true, openEventId: 'abcd2345' })).toEqual({
+      action: 'none',
+      pendingDeepLinkId: null,
+      deferredResolve: false,
+    });
+  });
+
+  it('defers when the open dialog shows a different event', () => {
+    expect(deepLinkAction({ ...base, dialogOpen: true, openEventId: 'zzzzzzzz' })).toEqual({
+      action: 'defer',
+      pendingDeepLinkId: null,
+      deferredResolve: true,
+    });
   });
 });
