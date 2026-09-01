@@ -57,6 +57,9 @@ import {
   upcomingOccurrences,
   upcomingFooter,
   eventShareUrl,
+  parseEventIdHash,
+  occurrenceById,
+  deepLinkAction,
 } from '../lib/events-view.js';
 // The county filter is a searchable combobox built on accessible-autocomplete,
 // the same widget (and the same dark `.autocomplete__*` skin in global.css) the
@@ -842,11 +845,28 @@ export function openEventPopover(o: Occurrence, invoker?: HTMLElement | null): v
 
 // showModal() already traps focus and closes on Esc; the method="dialog" forms
 // handle the ✕, Close, and backdrop-click. All routes fire 'close', so returning
-// focus to the invoking control lives in one place here.
+// focus to the invoking control lives in one place here. A deep link that
+// arrived while the dialog was open was deferred (showModal throws on an open
+// dialog); the dialog is closed now, so resolve it against the live hash.
 detailDialog?.addEventListener('close', () => {
+  // Stale-close guard (queued close event): close() clears `open` SYNCHRONOUSLY
+  // but queues THIS event, so a hash change can reopen the shared dialog as a
+  // different event before this handler runs. If the dialog is open again, this
+  // close belongs to the previous cycle — bail, or it would wipe the newly
+  // opened event's deepLinkOwned / popoverInvoker / deferredResolve.
+  if (detailDialog?.open) return;
   const invoker = popoverInvoker;
   popoverInvoker = null;
+  deepLinkOwned = false;
+  // The invoker card can be gone by the time the queued close fires — trimmed
+  // by the homepage cap or pruned by a filter during the overlay merge. Fall
+  // back to the List tab so focus never drops to <body> (WCAG 2.4.3).
   if (invoker && invoker.isConnected) invoker.focus();
+  else document.getElementById('tab-list')?.focus();
+  if (deferredResolve) {
+    deferredResolve = false;
+    resolveDeepLink();
+  }
 });
 
 // Council popover CTA: close the popover (its close handler above returns focus to
@@ -1332,16 +1352,99 @@ function hashHasFilterKey(hash: string): boolean {
   return false;
 }
 
+// --- Event deep links (design: 2026-08-31-events-share-link §3) -----------
+// A bare #<id> hash resolves to that event's popover. Invariants: re-parse the
+// LIVE hash before every resolution (never trust a remembered id); never call
+// showModal() on an open dialog (it throws) — defer to its close event instead;
+// best-effort scroll only (a card can legitimately be absent: filtered out,
+// behind the homepage cap, overlay not merged yet) and NEVER clear a filter to
+// manufacture one. Closing leaves #<id> in the URL on purpose: close adds no
+// history entry, so Back leaves the page normally and reload re-opens,
+// consistent with the URL.
+
+/** A deep-linked id that was not resolvable when seen, kept only until the
+ *  overlay merge settles (it may deliver the event). */
+let pendingDeepLinkId: string | null = null;
+/** True once loadOverlay() finished (success OR failure): an id that still
+ *  matches nothing stops being pending. */
+let overlaySettled = false;
+/** True while the open dialog was opened BY this resolver, so a hash change
+ *  away from it closes it (hash-away close). User-opened dialogs never close
+ *  on hash changes. */
+let deepLinkOwned = false;
+/** A resolution arrived while the dialog was open; run the resolver again from
+ *  the dialog's close event. RECOMPUTED by resolveDeepLink on every run (via
+ *  deepLinkAction) — set directly only by the hashchange hash-away branch. */
+let deferredResolve = false;
+
+/** Resolve the CURRENT location.hash as an event deep link: select the List
+ *  tab, best-effort scroll the card into view, open the popover. A hash that
+ *  is empty, a filter hash, or an id matching no upcoming event resolves to
+ *  nothing (and is remembered as pending while the overlay might still
+ *  deliver it). Thin imperative shell around the unit-tested deepLinkAction:
+ *  parse the hash, probe resolvability, assign BOTH state flags wholesale
+ *  from the decision — never or-ing them — so a stale deferral clears when
+ *  the hash returns to the id the open dialog already shows (the A→B→A
+ *  regression), then act on the decision. */
+function resolveDeepLink(): void {
+  const id = parseEventIdHash(location.hash);
+  const occurrence =
+    id === null ? undefined : occurrenceById(collapseSeries(upcomingFor(allEvents)), id);
+  const decision = deepLinkAction({
+    targetId: id,
+    resolvable: occurrence !== undefined,
+    dialogOpen: detailDialog?.open ?? false,
+    openEventId: popoverEvent?.id ?? null,
+    overlaySettled,
+  });
+  pendingDeepLinkId = decision.pendingDeepLinkId;
+  deferredResolve = decision.deferredResolve;
+  // 'none' covers empty/filter hashes, unresolvable tokens (#main-content,
+  // #event-<id> month anchors, past-only ids — graceful no-ops), and the
+  // already-showing id; 'defer' waits for the dialog's close event, whose
+  // handler re-runs this resolver against the then-live hash.
+  if (decision.action !== 'open' || occurrence === undefined || id === null) return;
+
+  selectTab('list');
+  const card = document
+    .getElementById('events-list')
+    ?.querySelector<HTMLElement>(`[data-event-id="${CSS.escape(id)}"]`);
+  // Close returns focus to the card's title button when a card exists, else to
+  // the List tab. No flash on this path — it would sit behind the modal.
+  const invoker =
+    card?.querySelector<HTMLElement>('.event-title-btn') ??
+    document.getElementById('tab-list');
+  card?.scrollIntoView({ block: 'center' });
+  openEventPopover(occurrence, invoker);
+  deepLinkOwned = true;
+}
+
 // Back, forward, and any manual edit of the hash are hash changes; the pushState
 // in pushHash deliberately is not, so this fires once per user navigation and
-// never doubles a re-render. An empty hash clears (back button to a hashless
-// URL); a hash with a recognised filter key applies. Any other in-page anchor —
-// the skip link's #main-content, a future deep link — is ignored, so activating
-// it can never wipe the active county/type selection.
+// never doubles a re-render. An empty hash clears the filter; a hash with a
+// recognised filter key applies it; any OTHER token routes to the deep-link
+// resolver, where an unknown one (the skip link's #main-content, a month
+// anchor) is a graceful no-op that never wipes the county/type selection.
 window.addEventListener('hashchange', () => {
   if (location.hash.replace(/^#/, '') === '' || hashHasFilterKey(location.hash)) {
+    pendingDeepLinkId = null;
+    // A filter hash also drops any deferral — closing a dialog after moving to
+    // a filter hash must not reopen anything.
+    deferredResolve = false;
+    // Hash-away close: leaving a deep-link-opened dialog's id closes it.
+    if (deepLinkOwned && detailDialog?.open) detailDialog.close();
     applyFilter(parseFilterHash(location.hash));
+    return;
   }
+  const id = parseEventIdHash(location.hash);
+  if (deepLinkOwned && detailDialog?.open && popoverEvent?.id !== id) {
+    // The hash moved away from a deep-link-opened dialog: close it, and let
+    // its close handler run the deferred resolve against the new hash.
+    deferredResolve = true;
+    detailDialog.close();
+    return;
+  }
+  resolveDeepLink();
 });
 
 // First paint: build the filter controls, then apply whatever the hash already
@@ -1356,6 +1459,11 @@ if (filter.county === 'all' && filter.type === 'all') {
   applyFilter(filter);
 }
 
+// First paint: resolve any #<id> already in the URL against the baked set.
+// Baked list cards carry a real id, so the browser's native fragment scroll
+// already landed; this adds the tab select + popover open.
+resolveDeepLink();
+
 async function loadOverlay() {
   try {
     const res = await fetch('/api/events', { headers: { accept: 'application/json' } });
@@ -1365,9 +1473,22 @@ async function loadOverlay() {
     // mergeEvents(baked, null) then renders the baked set unchanged.
     const overlay = parseOverlayEnvelope(await res.json());
     applyMerge(mergeEvents(island.events, overlay));
+    overlaySettled = true;
+    // A deep link naming an overlay-only id was left pending by the first-paint
+    // resolve; the merged set may resolve it now. Re-resolve ONLY when that
+    // pending id is still what the live hash names — never re-open a popover
+    // the visitor already closed.
+    if (pendingDeepLinkId !== null && parseEventIdHash(location.hash) === pendingDeepLinkId) {
+      resolveDeepLink();
+    } else {
+      pendingDeepLinkId = null;
+    }
   } catch (err) {
-    // Fail soft: the baked page stays exactly as rendered.
+    // Fail soft: the baked page stays exactly as rendered, and the overlay is
+    // settled either way — an unresolved deep link stops being pending.
     console.warn('events: overlay unavailable, showing baked events only', err);
+    overlaySettled = true;
+    pendingDeepLinkId = null;
   }
 }
 
