@@ -876,6 +876,12 @@ function resolveDeepLink(): void {
 // arrived while the dialog was open was deferred (showModal throws on an open
 // dialog); the dialog is closed now, so resolve it against the live hash.
 detailDialog?.addEventListener('close', () => {
+  // Stale-close guard (queued close event): close() clears `open` SYNCHRONOUSLY
+  // but queues THIS event, so a hash change can reopen the shared dialog as a
+  // different event before this handler runs. If the dialog is open again, this
+  // close belongs to the previous cycle — bail, or it would wipe the newly
+  // opened event's deepLinkOwned / popoverInvoker / deferredResolve.
+  if (detailDialog?.open) return;
   const invoker = popoverInvoker;
   popoverInvoker = null;
   deepLinkOwned = false;
@@ -1083,7 +1089,7 @@ Expected: exits 0.
 - [ ] **6.4 Manual verification.** `npm run dev`:
   - /events list: the type line and Share sit on one row, Share right-aligned, grey (NOT the type colour — check against an amber meetup and a green public card), turning white on hover, amber inset focus ring on keyboard focus.
   - **Option A check — card height preserved:** in DevTools, the computed height of `.event-actions` equals the old type-line row (~17px), and a card's `offsetHeight` matches the same card on `master` (or the deployed site). The 44px target lives entirely in the negative-margin overhang; the card must NOT grow.
-  - **Hit-box overlap check (required):** DevTools → inspect a Share button → its hit box is ≥ 44px tall AND does NOT overlap the card's TITLE button — the only other interactive element in the card. Check the compact homepage cards especially (address/description hidden, so the title sits closer). Overlap with the non-interactive meta/type-line text is acceptable. If the box reaches the title button, shrink `min-height` and the negative margin TOGETHER (e.g. `min-height: 40px; margin: -13px 0;`) until it clears — never by growing the card.
+  - **Hit-box overlap check (required):** DevTools → inspect a Share button → its hit box is **at least 40px tall (44px is the target)** AND does NOT overlap the card's TITLE button — the only other interactive element in the card. Check the compact homepage cards especially (address/description hidden, so the title sits closer). Overlap with the non-interactive meta/type-line text is acceptable. If the box reaches the title button, shrink `min-height` and the negative margin TOGETHER (e.g. `min-height: 40px; margin: -13px 0;`) toward — but never below — a **40px floor**, never by growing the card. If a 40px box still can't clear the title on the compact homepage card, that's the signal to drop the card button on the home variant (note it, don't force it).
   - Homepage preview cards: same row, not crowding the compact card (the design allows revisiting only if this looks crowded — note it in the PR if so, do not redesign).
   - Popover: trigger the forced copy failure from Task 4.5 → the affordance renders as a labelled dark input, full width, selected text.
 
@@ -1136,39 +1142,17 @@ Expected: exits 0.
   - [ ] **Forced copy failure = honest affordance:** with share + clipboard + execCommand disabled (Task 4.5 three-override recipe), popover Share reveals the select-and-copy input (URL selected); a CARD Share with no popover open shows the "Couldn't copy — open the event to copy the link" toast with the ERROR glyph instead. Never a false "Link copied".
   - [ ] **Delayed copy failure while switching popovers (context race):** make the copy fail SLOWLY — shadow `navigator.share` as undefined, set `document.execCommand = () => false`, and run `Object.defineProperty(navigator, 'clipboard', { value: { writeText: () => new Promise((_, rej) => setTimeout(() => rej(new Error('nope')), 3000)) }, configurable: true });`. Click Share INSIDE event A's popover, then close it and open event B's popover within 3 s → when the rejection lands, B's popover must NOT show the affordance with A's URL; the error toast shows instead. Repeat from a CARD Share with any popover opened afterwards → error toast, never that popover's affordance.
   - [ ] **Baked deep-link on load:** `/events#<baked id>` → List tab, card scrolled, popover open.
-  - [ ] **Overlay-only deep-link (pending → resolve after merge):** `npm run dev` serves no `/api/events` function, so mock it with a TEMPORARY dev-only endpoint — create `src/pages/api/events.ts`:
+  - [ ] **Overlay-only deep-link (pending → resolve after merge):** `astro dev` PROXIES `/api/events` to the Netlify functions server at `127.0.0.1:9999` (see the `server.proxy` block in `astro.config.mjs`), so a stub Astro route at `src/pages/api/events.ts` would never receive the request — the proxy intercepts it first. Instead, with `npm run dev` running and `netlify dev` NOT running (so port 9999 is free), start a throwaway mock on the proxy's target port:
 
-```ts
-// TEMPORARY manual-test mock — DELETE before finishing Task 7.
-import type { APIRoute } from 'astro';
-
-export const GET: APIRoute = () =>
-  new Response(
-    JSON.stringify({
-      events: [{
-        id: 'ovrlaytt',
-        type: 'public',
-        title: 'Overlay test event',
-        description: null,
-        date: '2026-09-15', // adjust to a near-future date when running this
-        time: '18:00',
-        city: 'greenville',
-        county: 'greenville',
-        address: '1 Main St, Greenville',
-        hasSignalGroup: false,
-        recurrence: null,
-        organizer: 'handle-test',
-        createdAt: '2026-08-30T12:00:00Z',
-      }],
-    }),
-    { headers: { 'content-type': 'application/json' } },
-  );
+```bash
+node -e "require('http').createServer((_,res)=>{res.setHeader('content-type','application/json');res.end(JSON.stringify({events:[{id:'ovrlaytt',type:'public',title:'Overlay test event',description:null,date:'2026-10-15',time:'18:00',city:'greenville',county:'greenville',address:'1 Main St, Greenville',hasSignalGroup:false,recurrence:null,organizer:'handle-test',createdAt:'2026-08-30T12:00:00Z'}]}))}).listen(9999,'127.0.0.1',()=>console.log('mock /api/events on 9999'))"
 ```
 
-  Load `/events#ovrlaytt` → nothing at first paint (pending), popover opens when the overlay merge lands. Then close the popover and reload-free wait: it must NOT re-open (pending was cleared by the resolve). DELETE the mock file afterwards — `git status` must not show it when this task ends. (A Chromium DevTools network override of `/api/events`, or a deploy preview with a freshly submitted event, are acceptable alternatives.)
+  (Use a near-future `date`. The proxy rewrites `/api/events` → `/.netlify/functions/events`, but this mock ignores the path and answers any request on 9999.) Load `/events#ovrlaytt` → nothing at first paint (pending), popover opens when the overlay fetch merges. Then close the popover and wait a beat → it must NOT re-open (pending was cleared by the resolve). Stop the mock process (Ctrl-C) afterwards; it creates NO repo files, so `git status` stays clean. (A Chromium DevTools response override for `/api/events`, or a deploy preview with a freshly submitted event, are acceptable alternatives.)
   - [ ] **Unknown / past id:** `/events#zzzzzzz9` and a past-only event's id → no popover, no filter change, no error.
   - [ ] **Deep-link while another popover is open (defer):** open any popover from a card, edit the hash to a different id → nothing happens until you close; on close, the deep-linked popover opens.
   - [ ] **Deferral clears on return (A→B→A regression):** open event A's popover from its card, edit the hash to event B's id (deferred), edit it BACK to A's id, then close A → nothing reopens.
+  - [ ] **Queued-close race guard (A→B/close→C):** confirm by code inspection that the dialog `close` handler's FIRST statement is `if (detailDialog?.open) return;`. Functionally confirm the ordinary path still opens exactly once: with a deep-link popover A open, edit the hash to B → A closes and B opens (one popover, never two). The pure microtask race (C arriving before A's queued close event drains) is near-impossible to hand-trigger; the guard is what makes it safe regardless — inspection + the single-open check together stand in for it.
   - [ ] **hashchange to a bare id:** with /events already loaded, editing the hash to `#<id>` opens that popover.
   - [ ] **Hash-away close:** with a DEEP-LINK-opened popover showing, change the hash to `#county=greenville` (or another id) → that popover closes (and the filter applies / the other popover opens).
   - [ ] **Close-focus fallback (invoker gone):** open a popover from a card, delete that card's `<li>` in the DevTools Elements panel while the dialog is open, then close the dialog → `document.activeElement` is the List tab (`#tab-list`), not `<body>`.
