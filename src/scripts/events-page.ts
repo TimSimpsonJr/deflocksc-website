@@ -423,6 +423,9 @@ function buildCard(o: Occurrence): HTMLLIElement {
   // The event-card--{type} modifier keys the typeline colour (amber = meetup,
   // green = public, blue = council) in events.astro.
   li.className = `event-card event-card--${typeSuffix}`;
+  // Real id, mirroring EventsList.astro: gives a shared /events#<id> link a
+  // native fragment target. List cards only — month chips keep data-event-id.
+  li.id = e.id;
   li.dataset.eventId = e.id;
   li.dataset.date = o.date;
   li.dataset.sort = sortKey(o.date, e.time, e.id);
@@ -461,13 +464,21 @@ function buildCard(o: Occurrence): HTMLLIElement {
   if (e.address) body.append(el('p', 'event-address', e.address));
   if (e.description) body.append(el('p', 'event-desc', e.description));
 
-  // Quiet type/recurrence line. Mirrors EventsList.astro's <p class="event-typeline">
-  // exactly (the class-parity contract): the type label, with " · Repeats …"
-  // appended for a collapsed recurring series. The Signal join lives only in the
-  // detail popover now, so the card's sole control is the title button above.
+  // Quiet type/recurrence line + inline Share, one flex row. Mirrors
+  // EventsList.astro's <div class="event-actions"> exactly (the class-parity
+  // contract): the .event-typeline text, then a .event-share-inline button
+  // (neutral grey, ~44px target, aria-label carries the title). The delegated
+  // #events-list handler owns the click, so no per-card listener is attached.
   const repeat = recurrenceLabel(e.recurrence);
   const typeLabel = eventTypeLabel(e.type);
-  body.append(el('p', 'event-typeline', repeat ? `${typeLabel} · ${repeat}` : typeLabel));
+  const actions = el('div', 'event-actions');
+  actions.append(el('p', 'event-typeline', repeat ? `${typeLabel} · ${repeat}` : typeLabel));
+  const share = el('button', 'event-share-inline') as HTMLButtonElement;
+  share.type = 'button';
+  share.setAttribute('aria-label', `Share ${e.title}`);
+  share.append(shareIcon(), document.createTextNode('Share'));
+  actions.append(share);
+  body.append(actions);
 
   li.append(date, body);
   return li;
@@ -842,13 +853,22 @@ document.getElementById('event-detail-council-signal')?.addEventListener('click'
   openIntake(COUNCIL_SIGNAL_URL, returnEl);
 });
 
-// Sidebar cards: the title button opens the popover. Delegated on the stable
-// #events-list <ul> so it covers both the server-rendered cards and the ones
-// buildCard() inserts later, without either renderer wiring a per-card listener.
-// The title button is now the card's only control — the Signal join moved to the
-// detail popover — so this handler owns every click that lands on a card.
+// Sidebar cards: delegated on the stable #events-list <ul> so it covers both the
+// server-rendered cards and the ones buildCard() inserts later, without either
+// renderer wiring a per-card listener. The share branch is checked before the
+// title branch; the title button opens the popover. Card shares call shareEvent
+// WITHOUT { fromPopover }: a card-initiated copy failure surfaces as the error
+// toast and can never borrow a popover that happens to be open by then.
 document.getElementById('events-list')?.addEventListener('click', (ev) => {
-  const btn = (ev.target as HTMLElement).closest<HTMLElement>('.event-title-btn');
+  const target = ev.target as HTMLElement;
+  const shareBtn = target.closest<HTMLElement>('.event-share-inline');
+  if (shareBtn) {
+    const card = shareBtn.closest<HTMLElement>('[data-event-id]');
+    const event = allEvents.find((candidate) => candidate.id === card?.dataset.eventId);
+    if (event) shareEvent(event);
+    return;
+  }
+  const btn = target.closest<HTMLElement>('.event-title-btn');
   if (!btn) return;
   const card = btn.closest<HTMLElement>('[data-event-id]');
   const id = card?.dataset.eventId;
