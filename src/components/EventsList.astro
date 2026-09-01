@@ -36,6 +36,7 @@ const place = (o: Occurrence) =>
   <ul id="events-list" class="events-list">
     {shownUpcoming.map((o) => (
       <li
+        id={o.event.id}
         class={`event-card event-card--${eventTypeSlug(o.event.type)}`}
         data-event-id={o.event.id}
         data-date={o.date}
@@ -54,14 +55,27 @@ const place = (o: Occurrence) =>
           </p>
           {o.event.address && <p class="event-address">{o.event.address}</p>}
           {o.event.description && <p class="event-desc">{o.event.description}</p>}
-          {/* Quiet type/recurrence line — the de-slopped replacement for the old
-              coloured badge row. MUST stay in class-parity with buildCard() in
-              events-page.ts: a single <p class="event-typeline"> with the type
-              label, and " · Repeats …" appended for a collapsed recurring series.
-              The Signal join lives only in the detail popover now, never here. */}
-          <p class="event-typeline">
-            {eventTypeLabel(o.event.type)}{recurrenceLabel(o.event.recurrence) ? ` · ${recurrenceLabel(o.event.recurrence)}` : ''}
-          </p>
+          {/* Quiet type/recurrence line + inline Share, one flex row. MUST stay
+              in class-parity with buildCard() in events-page.ts: a
+              <div class="event-actions"> holding the <p class="event-typeline">
+              (type label, " · Repeats …" appended for a collapsed series) and a
+              .event-share-inline button (neutral grey, ~44px target). The Signal
+              join lives only in the detail popover, never here. */}
+          <div class="event-actions">
+            <p class="event-typeline">
+              {eventTypeLabel(o.event.type)}{recurrenceLabel(o.event.recurrence) ? ` · ${recurrenceLabel(o.event.recurrence)}` : ''}
+            </p>
+            <button type="button" class="event-share-inline" aria-label={`Share ${o.event.title}`}>
+              <svg class="event-share-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+              Share
+            </button>
+          </div>
         </div>
       </li>
     ))}

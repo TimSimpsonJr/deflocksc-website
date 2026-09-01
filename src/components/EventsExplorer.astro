@@ -230,8 +230,27 @@ const island = {
 
       <p class="event-pop-desc" id="event-detail-desc" hidden></p>
 
+      {/* Honest copy-failure affordance (design §1): revealed by events-page.ts
+          only when BOTH clipboard paths fail while this popover is open. The
+          readonly input arrives pre-filled and pre-selected. Hidden on every
+          openEventPopover fill. */}
+      <p class="event-pop-copy-fallback" id="event-detail-copy-fallback" hidden>
+        <label class="event-pop-copy-label" for="event-detail-copy-url">Copy failed — select and copy this link:</label>
+        <input class="event-pop-copy-url" id="event-detail-copy-url" type="text" readonly />
+      </p>
+
       <div class="modal-action event-pop-foot">
         <form method="dialog" class="mr-auto"><button class="btn btn-ghost btn-sm" type="submit">Close</button></form>
+        <button type="button" class="btn btn-neutral btn-sm" id="event-detail-share">
+          <svg class="event-share-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+          Share
+        </button>
         <a class="btn btn-primary btn-sm" id="event-detail-signal" rel="noreferrer" hidden>Join Signal group</a>
         {/* Council meetings only: opens the shared "Before you join" warning
             (events-page.ts), then the open council-attendees Signal group. A real
@@ -656,6 +675,53 @@ const island = {
      buttons' inset ring. */
   .event-title-btn:focus-visible { outline: 2px solid #fbbf24; outline-offset: -2px; }
 
+  /* --- Card actions row: type line + inline Share ---
+     One flex row (space-between) wrapping the quiet type line and the Share
+     button. The wrapper takes over the top margin the bare typeline used to
+     carry inside a card; this rule is AFTER ".event-card .event-typeline"
+     above, so the equal-specificity zeroing below wins by order. */
+  .event-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .event-card .event-actions { margin: 0.6rem 0 0; }
+  .event-actions .event-typeline { margin: 0; }
+
+  /* Neutral grey Share trigger — the type COLOUR stays on the label, never on
+     this control. Option A (owner decision): the card KEEPS today's height.
+     The row reads as an 11px type line; the 44px tap target comes from
+     min-height/min-width whose vertical overhang is fully absorbed by the
+     -15px margins ((44px − ~14px content) / 2), so the actions row measures
+     the same as the old bare type line and the card does not grow. The
+     wrapper's space-between plus justify-content:flex-end keep the overhang
+     on the RIGHT, away from the title button; flex-shrink:0 stops a long
+     type line crushing it. */
+  .event-share-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem;
+    flex-shrink: 0;
+    min-height: 44px;
+    min-width: 44px;
+    margin: -15px 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #a3a3a3;
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+  }
+  .event-share-inline:hover { color: #ffffff; }
+  .event-share-inline:focus-visible { outline: 2px solid #fbbf24; outline-offset: -2px; }
+  .event-share-icon { flex: none; }
+
   /* --- Event detail popover (Section C of the dev mockup) ---
      Text styling for the daisyUI <dialog class="modal"> defined near the panels
      above. The modal, modal-box, badge and btn chrome come from daisyUI's
@@ -722,6 +788,24 @@ const island = {
   .event-pop-desc[hidden] { display: none; }
   .event-pop-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; }
   #event-detail-signal[hidden] { display: none; }
+
+  /* --- Copy-failure affordance ---
+     Revealed only when BOTH clipboard paths fail while the popover is open
+     (design §1: honest failure, never a lying toast). The readonly input
+     arrives pre-filled and pre-selected by events-page.ts. */
+  .event-pop-copy-fallback { margin: 1rem 0 0; }
+  .event-pop-copy-fallback[hidden] { display: none; }
+  .event-pop-copy-label { display: block; color: #a3a3a3; font-size: 0.8125rem; margin: 0 0 0.35rem; }
+  .event-pop-copy-url {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #e8e8e8;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    padding: 0.45rem 0.55rem;
+  }
+  .event-pop-copy-url:focus-visible { outline: 2px solid #fbbf24; outline-offset: -2px; }
 
   /* --- Popover "Upcoming meetings" list ---
      Shown for any recurring event: a bordered list of the next few dates, the

@@ -513,3 +513,105 @@ export function emptyStateProof(pastCount: number): string {
     return "Nothing has run in the last 90 days either. Join the Signal group and you'll hear when the first one lands.";
   return `${pastCount} ${pastCount === 1 ? 'event has' : 'events have'} run in the last 90 days.`;
 }
+
+/* ------------------------------------------------------------------------ *
+ * Event share links / deep links (design: 2026-08-31-events-share-link)
+ *
+ * The sanctioned permalink for an event is /events#<id> — the same URL the
+ * submit form already generates and copies. These three pure helpers are the
+ * unit-tested core of the share button and the deep-link resolver in
+ * src/scripts/events-page.ts.
+ * ------------------------------------------------------------------------ */
+
+/**
+ * The shareable permalink for an event: `${origin}/events#<id>`. The id is
+ * encodeURIComponent-escaped; for the real id alphabets ([a-z2-7]{8} submitted,
+ * council-<slug> curated) that is a no-op, but a malformed id can never break
+ * the URL. The client calls this as eventShareUrl(location.origin, e.id).
+ */
+export function eventShareUrl(origin: string, id: string): string {
+  return `${origin}/events#${encodeURIComponent(id)}`;
+}
+
+/**
+ * Read a bare event id out of a URL hash, or null when the hash is not an
+ * event-id hash. An empty hash and any filter hash (anything containing '=',
+ * i.e. #county=…/#type=…) return null; anything else returns the token,
+ * decodeURIComponent-d, falling back to the RAW token when decoding throws
+ * (#%, #%zz — a crafted link must not throw, mirroring parseFilterHash).
+ * Reserved in-page anchors (#main-content, the month chips' #event-<id> hrefs)
+ * deliberately parse to a token: the id lookup downstream is the real guard,
+ * and those tokens simply match no event.
+ */
+export function parseEventIdHash(hash: string): string | null {
+  const raw = hash.replace(/^#/, '');
+  if (raw === '' || raw.includes('=')) return null;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+/**
+ * The collapsed occurrence for an event id, or undefined. Callers feed it an
+ * already-collapsed upcoming set — collapseSeries(splitByToday(...).upcoming) —
+ * so a recurring series resolves to its NEXT upcoming occurrence and a
+ * past-only or unknown id resolves to nothing.
+ */
+export function occurrenceById(
+  occurrences: readonly Occurrence[],
+  id: string,
+): Occurrence | undefined {
+  return occurrences.find((o) => o.event.id === id);
+}
+
+export type DeepLinkAction = 'open' | 'defer' | 'none';
+
+export interface DeepLinkDecision {
+  action: DeepLinkAction;
+  pendingDeepLinkId: string | null;
+  deferredResolve: boolean;
+}
+
+/**
+ * Pure decision core of the deep-link resolver in events-page.ts. `targetId`
+ * is parseEventIdHash(location.hash); `resolvable` is whether an upcoming
+ * occurrence exists for it right now; `openEventId` is the id the detail
+ * dialog currently shows (only consulted while `dialogOpen`).
+ *
+ * Both output flags are COMPUTED FRESH on every call — the resolver assigns
+ * them wholesale, never or-s them — which is what clears a stale deferral when
+ * the hash returns to the id the open dialog already shows (open A → hash B →
+ * hash A → close must NOT reopen A).
+ */
+export function deepLinkAction(input: {
+  targetId: string | null;
+  resolvable: boolean;
+  dialogOpen: boolean;
+  openEventId: string | null;
+  overlaySettled: boolean;
+}): DeepLinkDecision {
+  const { targetId, resolvable, dialogOpen, openEventId, overlaySettled } = input;
+  if (targetId === null) {
+    return { action: 'none', pendingDeepLinkId: null, deferredResolve: false };
+  }
+  if (!resolvable) {
+    // Unknown (yet): pending only while the overlay might still deliver it.
+    return {
+      action: 'none',
+      pendingDeepLinkId: overlaySettled ? null : targetId,
+      deferredResolve: false,
+    };
+  }
+  if (dialogOpen) {
+    // showModal() throws on an open dialog: re-resolving the id it already
+    // shows is a no-op; any other id defers to the dialog's close event.
+    return {
+      action: openEventId === targetId ? 'none' : 'defer',
+      pendingDeepLinkId: null,
+      deferredResolve: openEventId !== targetId,
+    };
+  }
+  return { action: 'open', pendingDeepLinkId: null, deferredResolve: false };
+}
