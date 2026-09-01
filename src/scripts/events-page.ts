@@ -56,6 +56,7 @@ import {
   eventTypeSlug,
   upcomingOccurrences,
   upcomingFooter,
+  eventShareUrl,
 } from '../lib/events-view.js';
 // The county filter is a searchable combobox built on accessible-autocomplete,
 // the same widget (and the same dark `.autocomplete__*` skin in global.css) the
@@ -65,6 +66,7 @@ import {
 // rule is that nothing reaches innerHTML unescaped.
 import accessibleAutocomplete from 'accessible-autocomplete';
 import { escapeHtml } from '../lib/escape-html.js';
+import { showToast } from './toast.js';
 
 interface Island {
   events: PublicEvent[];
@@ -514,6 +516,11 @@ const detailDialog = document.getElementById('event-detail') as HTMLDialogElemen
 /** The control that opened the dialog, refocused on close (WCAG 2.4.3). */
 let popoverInvoker: HTMLElement | null = null;
 
+/** The event the detail dialog is currently showing. Set by openEventPopover
+ *  (Task 4); read by the share failure path, the footer Share button, and the
+ *  deep-link resolver's already-open check. */
+let popoverEvent: PublicEvent | null = null;
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 function svgEl(tag: string, attrs: Record<string, string>): SVGElement {
   const node = document.createElementNS(SVG_NS, tag);
@@ -542,6 +549,117 @@ function extLinkIcon(): SVGElement {
     svgEl('line', { x1: '10', y1: '14', x2: '21', y2: '3' }),
   );
   return svg;
+}
+
+// --- Share (design: 2026-08-31-events-share-link) ------------------------
+// One action for both surfaces (card inline button, popover footer button).
+// The URL is built synchronously and navigator.share is the FIRST async call,
+// so it runs inside the click's transient activation — some browsers reject
+// share() if you await anything first.
+
+/** The share glyph (feather "share-2"): three nodes joined by two lines.
+ *  Built via createElementNS, mirroring extLinkIcon — createElement makes
+ *  HTML, not SVG, elements. */
+function shareIcon(): SVGElement {
+  const svg = svgEl('svg', {
+    class: 'event-share-icon',
+    viewBox: '0 0 24 24',
+    width: '14',
+    height: '14',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'aria-hidden': 'true',
+  });
+  svg.append(
+    svgEl('circle', { cx: '18', cy: '5', r: '3' }),
+    svgEl('circle', { cx: '6', cy: '12', r: '3' }),
+    svgEl('circle', { cx: '18', cy: '19', r: '3' }),
+    svgEl('line', { x1: '8.59', y1: '13.51', x2: '15.42', y2: '17.49' }),
+    svgEl('line', { x1: '15.41', y1: '6.51', x2: '8.59', y2: '10.49' }),
+  );
+  return svg;
+}
+
+/** Copy `url` to the clipboard. Resolves true on success, false on failure —
+ *  never throws and never lies. The same ladder the toolkit copy buttons use:
+ *  the async clipboard API first, then the execCommand('copy') textarea
+ *  fallback, whose boolean result is honoured rather than assumed. */
+async function copyLink(url: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(url);
+    return true;
+  } catch {
+    // fall through to execCommand
+  }
+  const ta = document.createElement('textarea');
+  ta.value = url;
+  ta.setAttribute('readonly', '');
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  let ok = false;
+  try {
+    ok = document.execCommand('copy');
+  } catch {
+    ok = false;
+  }
+  document.body.removeChild(ta);
+  return ok;
+}
+
+/** Copy + honest feedback: a toast on success; on failure, the popover's
+ *  select-and-copy affordance — but ONLY when the share started from a popover
+ *  that is STILL the open one. The copy is async, so by rejection time the
+ *  dialog may show a different event (or a card share may have an unrelated
+ *  popover open); revealing the affordance then would show the wrong URL in
+ *  the wrong context. `fromPopoverEventId` is the id of the popover the share
+ *  started from, or null for a card share, which therefore never borrows a
+ *  later-opened popover. Never a lying "copied" (design §1). */
+async function copyWithFeedback(url: string, fromPopoverEventId: string | null): Promise<void> {
+  if (await copyLink(url)) {
+    showToast('Link copied');
+    return;
+  }
+  const fallback = document.getElementById('event-detail-copy-fallback');
+  const input = document.getElementById('event-detail-copy-url') as HTMLInputElement | null;
+  if (
+    fromPopoverEventId !== null &&
+    detailDialog?.open &&
+    popoverEvent?.id === fromPopoverEventId &&
+    fallback &&
+    input
+  ) {
+    input.value = url;
+    fallback.hidden = false;
+    input.focus();
+    input.select();
+  } else {
+    showToast("Couldn't copy — open the event to copy the link", { icon: 'error' });
+  }
+}
+
+/** Share an event. navigator.share when available — called synchronously so it
+ *  keeps the click's transient activation. AbortError (the visitor cancelled
+ *  the OS sheet / no target) stays SILENT: no toast, no copy. Any other
+ *  rejection (NotAllowedError, TypeError, …) falls through to the copy ladder.
+ *  Payload is title + url only — no address, organizer, or type (design §1).
+ *  `opts.fromPopover` marks a share initiated from the detail popover, which
+ *  scopes the copy-failure affordance to that same still-open popover. */
+function shareEvent(e: PublicEvent, opts?: { fromPopover?: boolean }): void {
+  const url = eventShareUrl(location.origin, e.id);
+  const fromPopoverEventId = opts?.fromPopover ? e.id : null;
+  if (typeof navigator.share === 'function') {
+    navigator.share({ title: e.title, url }).catch((err: unknown) => {
+      if ((err as { name?: string } | null)?.name === 'AbortError') return;
+      void copyWithFeedback(url, fromPopoverEventId);
+    });
+    return;
+  }
+  void copyWithFeedback(url, fromPopoverEventId);
 }
 
 const WEEKDAYS = [
