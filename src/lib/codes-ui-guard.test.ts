@@ -48,6 +48,14 @@ describe('decideApiAuth', () => {
       .toEqual({ ok: false, code: 'bad_token' });
   });
 
+  it('rejects a length-mismatched token without throwing (constant-time compare guards length)', () => {
+    expect(() =>
+      decideApiAuth(EXPECTED, { token: 'a'.repeat(32), origin: undefined, secFetchSite: undefined }),
+    ).not.toThrow();
+    expect(decideApiAuth(EXPECTED, { token: 'a'.repeat(32), origin: undefined, secFetchSite: undefined }))
+      .toEqual({ ok: false, code: 'bad_token' });
+  });
+
   it('accepts a valid token with no Origin and no Sec-Fetch-Site (curl)', () => {
     expect(decideApiAuth(EXPECTED, { token: TOKEN, origin: undefined, secFetchSite: undefined }))
       .toEqual({ ok: true, value: true });

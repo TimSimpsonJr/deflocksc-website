@@ -23,7 +23,21 @@
  *    localhost) are accepted — safe once Host + token are enforced, and it
  *    removes the hand-typed-localhost footgun.
  */
+import { timingSafeEqual } from 'node:crypto';
 import { ok, err, type Ok, type Err } from './text-result.js';
+
+/**
+ * Constant-time string equality for the per-run token. `timingSafeEqual` throws
+ * on length-mismatched Buffers, so unequal byte lengths short-circuit to false
+ * (the length leak is unavoidable and acceptable); equal-length tokens are
+ * compared without a byte-by-byte early exit.
+ */
+function timingSafeStrEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 export type HostCode = 'bad_host';
 export type GuardCode = 'missing_token' | 'bad_token' | 'cross_site';
@@ -73,6 +87,6 @@ export function decideApiAuth(
     return err('cross_site');
   }
   if (request.token === undefined || request.token.length === 0) return err('missing_token');
-  if (request.token !== expected.token) return err('bad_token');
+  if (!timingSafeStrEqual(request.token, expected.token)) return err('bad_token');
   return ok(true);
 }
