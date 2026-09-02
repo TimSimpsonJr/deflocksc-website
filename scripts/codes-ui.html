@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Organizer codes — local admin</title>
+</head>
+<body>
+<p>codes-ui stub page — replaced by the real UI in the next task.</p>
+<p id="token-check"></p>
+<script nonce="__CSP_NONCE__">
+  const TOKEN = '__CODES_UI_TOKEN__';
+  document.getElementById('token-check').textContent =
+    'token wired: ' + (TOKEN.length === 64 ? 'yes' : 'NO — substitution broken');
+</script>
+</body>
+</html>
