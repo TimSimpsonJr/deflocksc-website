@@ -134,11 +134,13 @@ const optClass = "ml-1.5 normal-case tracking-[0.02em] text-[11px] text-[#737373
           class="absolute z-30 left-0 mt-2 bg-[#171717] border border-[rgba(255,255,255,0.14)] rounded-md p-3 shadow-2xl"
         >
           <calendar-date id="date-cally" class="deflock-calendar">
+            <span slot="previous" class="sr-only">Previous month</span>
             <svg slot="previous" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M15 18l-6-6 6-6"></path>
             </svg>
+            <span slot="next" class="sr-only">Next month</span>
             <svg slot="next" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 18l6-6 6 6"></path>
+              <path d="M9 18l6-6-6-6"></path>
             </svg>
             <calendar-month class="deflock-month"></calendar-month>
           </calendar-date>
