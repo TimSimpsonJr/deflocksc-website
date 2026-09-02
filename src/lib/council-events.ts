@@ -179,8 +179,9 @@ export function parseCouncilEvents(raw: readonly unknown[]): PublicEvent[] {
     seenIds.add(c.id);
     // Explicit construction, never a spread — the same discipline toPublicEvent
     // and validateSubmission use. hasSignalGroup is forced false; there is no
-    // signalUrl on a council PublicEvent, and createdAt is synthesized from the
-    // anchor date so the value is deterministic across build machines.
+    // signalUrl on a council PublicEvent. The validated `organizer` is NOT
+    // projected: it is backend-only metadata absent from PublicEvent, so a
+    // council entry (like a folded submission) never publishes it.
     return {
       id: c.id,
       type: 'council',
@@ -193,8 +194,6 @@ export function parseCouncilEvents(raw: readonly unknown[]): PublicEvent[] {
       address: c.address,
       hasSignalGroup: false,
       recurrence: c.recurrence,
-      organizer: c.organizer,
-      createdAt: `${c.date}T00:00:00Z`,
       source: c.source,
     };
   });

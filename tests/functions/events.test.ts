@@ -68,22 +68,27 @@ afterEach(() => {
 });
 
 describe('GET /api/events — leak containment', () => {
-  it('never serializes signalUrl, codeDigest, revoked, or unknown extra fields', async () => {
+  it('never serializes signalUrl, codeDigest, revoked, organizer, createdAt, or unknown extra fields', async () => {
     seed({ k7m29qxb: storedRecord() });
 
     const res = await callHandler();
     const body = await res.text();
 
-    // The four forbidden keys.
+    // The forbidden keys: the three secrets, the two backend-only moderation
+    // fields (organizer, createdAt), and any unknown extra.
     expect(body).not.toContain('signalUrl');
     expect(body).not.toContain('codeDigest');
     expect(body).not.toContain('revoked');
+    expect(body).not.toContain('organizer');
+    expect(body).not.toContain('createdAt');
     expect(body).not.toContain('internalNote');
 
     // And their values, in case a future refactor renames the keys.
     expect(body).not.toContain('signal.group');
     expect(body).not.toContain('FAKESECRETINVITEKEY');
     expect(body).not.toContain('a1b2c3d4e5f60718293a4b5c6d7e8f90');
+    expect(body).not.toContain('handle-jay');
+    expect(body).not.toContain('2026-08-17T14:22:00Z');
     expect(body).not.toContain('unknown-future-field-must-not-leak');
 
     // The public fields did survive, so the assertions above are not passing
@@ -106,12 +111,10 @@ describe('GET /api/events — leak containment', () => {
         'address',
         'city',
         'county',
-        'createdAt',
         'date',
         'description',
         'hasSignalGroup',
         'id',
-        'organizer',
         'recurrence',
         'time',
         'title',

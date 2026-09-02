@@ -31,8 +31,11 @@ describe('parseCouncilEvents — accepted', () => {
     expect(event.city).toBe('greenville');
     expect(event.county).toBe('greenville');
     expect(event.recurrence).toEqual({ freq: 'monthly_nth', nths: [2, 4], until: null });
-    // createdAt is synthesized from the anchor date (curated entries carry no timestamp).
-    expect(event.createdAt).toBe('2026-09-14T00:00:00Z');
+    // organizer and createdAt are backend-only fields, absent from PublicEvent:
+    // a council entry may carry `organizer` as metadata, but the projection must
+    // not publish it, and no createdAt is synthesized onto the public shape.
+    expect(Object.prototype.hasOwnProperty.call(event, 'organizer')).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(event, 'createdAt')).toBe(false);
   });
 
   it('accepts a weekly council with a concrete until and no nths', () => {

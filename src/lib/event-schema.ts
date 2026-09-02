@@ -228,17 +228,19 @@ const submissionSchema = z
   });
 
 /**
- * The stored/public event shape: exactly the 13 PublicEvent fields, and no
- * more. `src/pages/events.astro` re-validates the git-baked src/data/events.json
+ * The public event shape: exactly the 11 PublicEvent fields, and no more.
+ * `src/pages/events.astro` re-validates the git-baked src/data/events.json
  * against this at build time, so a later bad commit that adds a server-only
- * field (signalUrl, codeDigest, revoked) is rejected by `.strict()` and fails
- * the build rather than reaching a rendered card or the data island.
+ * field (signalUrl, codeDigest, revoked — or the backend-only organizer and
+ * createdAt) is rejected by `.strict()` and fails the build rather than reaching
+ * a rendered card or the data island.
  *
  * This is the ONE schema for that shape — the page keeps no local copy that can
  * drift from it. It is deliberately separate from submissionSchema above:
- * a submission has `organizerCode` and no `id`/`createdAt`; a stored record is
- * the mirror image. The per-field text caps are the same imported constants, so
- * the two schemas cannot disagree on a limit.
+ * a submission has `organizerCode` and no `id`; a stored record is the mirror
+ * image, and its `organizer`/`createdAt` never reach this published shape. The
+ * per-field text caps are the same imported constants, so the two schemas cannot
+ * disagree on a limit.
  */
 export const publicEventSchema = z
   .object({
@@ -300,8 +302,6 @@ export const publicEventSchema = z
         }
       })
       .nullable(),
-    organizer: z.string(),
-    createdAt: z.string(),
     // Council-only official-schedule URL. Capped and scheme-checked here so the
     // render schema is self-sufficient: the value is bound for an href, so an
     // unbounded or non-http(s) string must never pass this gate on its own.

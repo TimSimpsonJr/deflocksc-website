@@ -5,6 +5,11 @@
  * Signal invite), `codeDigest` (which would cluster events by organizer across
  * pseudonyms), and `revoked` (which would publish which organizer was burned
  * and when).
+ *
+ * It also keeps `organizer` (the pseudonym) and `createdAt`: both are
+ * backend-only moderation metadata, NOT part of the published payload. They are
+ * absent from `PublicEvent`/`PUBLIC_EVENT_FIELDS`, so `toPublicEvent` never
+ * projects them; the store retains them so revoke-by-code and audit stay intact.
  */
 export interface StoredEvent {
   id: string;
@@ -46,8 +51,6 @@ export interface PublicEvent {
     nths?: Array<1 | 2 | 3 | 4 | 5 | 'last'>;
     skipMonths?: number[];
   } | null;
-  organizer: string;
-  createdAt: string;
   /** Curated council entries only: the official schedule URL. Absent on
    *  submitted (meetup/public) events. Not part of PUBLIC_EVENT_FIELDS — it is
    *  set directly by loadCouncilEvents(), never projected from a StoredEvent. */
@@ -64,6 +67,10 @@ export interface PublicEvent {
  * loader-only field (`source`, which lives on `PublicEvent` but never on a
  * `StoredEvent`) from ever being added to this list — a defence of the same
  * confidentiality invariant `toPublicEvent` enforces at runtime.
+ *
+ * `organizer` and `createdAt` live on `StoredEvent` but are deliberately absent
+ * here: they are backend-only moderation metadata that no client reads, so the
+ * public payload does not carry them.
  */
 export const PUBLIC_EVENT_FIELDS: readonly (keyof PublicEvent & keyof StoredEvent)[] = [
   'id',
@@ -77,8 +84,6 @@ export const PUBLIC_EVENT_FIELDS: readonly (keyof PublicEvent & keyof StoredEven
   'address',
   'hasSignalGroup',
   'recurrence',
-  'organizer',
-  'createdAt',
 ];
 
 /**

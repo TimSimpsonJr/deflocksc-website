@@ -47,8 +47,6 @@ function ev(over: Partial<PublicEvent> = {}): PublicEvent {
     address: null,
     hasSignalGroup: true,
     recurrence: null,
-    organizer: 'handle-jay',
-    createdAt: '2026-08-17T14:22:00Z',
     ...over,
   } as PublicEvent;
 }
