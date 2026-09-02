@@ -116,8 +116,6 @@ describe('toJsonIsland', () => {
       address: '301 University Ridge, Greenville',
       hasSignalGroup: true,
       recurrence: { freq: 'weekly', until: '2027-02-22' },
-      organizer: 'handle-jay',
-      createdAt: '2026-08-17T14:22:00Z',
     };
     const out = toJsonIsland(value);
 
