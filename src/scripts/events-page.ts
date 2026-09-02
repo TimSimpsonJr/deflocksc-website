@@ -1429,8 +1429,8 @@ function syncChrome(): void {
   }
 }
 
-/** Re-render the list, the month chips, and the past rows for a filter, then sync
- *  the chrome. Pure DOM work — no history side effects, so hashchange can call it. */
+/** Re-render the list, the month calendar/agenda, and the past rows for a filter,
+ *  then sync the chrome. Pure DOM work — no history side effects, so hashchange can call it. */
 function applyFilter(next: EventFilter): void {
   filter = next;
 

@@ -92,9 +92,9 @@ const { upcoming, past: recentPast } = splitByToday(allOccurrences, today);
 const past = recentPast.filter((o) => o.date >= pastCutoff);
 
 // The LIST view collapses each recurring series to a single row (its next
-// upcoming occurrence); the MONTH grid keeps every occurrence. `upcomingList` is
-// therefore one row per distinct event, which is also what the "N upcoming"
-// heading and the chip counts report.
+// upcoming occurrence); the client-rendered month calendar reads every
+// occurrence from events-page.ts. `upcomingList` is therefore one row per
+// distinct event, which is what the "N upcoming" heading reports.
 const upcomingList = collapseSeries(upcoming);
 
 const island = {
@@ -481,19 +481,6 @@ const island = {
   }
   .event-signal:hover { background: #b91c1c; }
   .event-signal-btn { font-family: inherit; }
-
-  /* Brief highlight when a month-view chip scrolls its list card into view, so the
-     eye lands on the right row after the tab swap. The left accent bar is gone, so
-     the flash now pulses the whole card's border and background from an amber
-     highlight back to the resting neutral. */
-  @keyframes event-card-flash {
-    from { background: #2a2118; border-color: #fbbf24; }
-    to   { background: #1a1a1a; border-color: rgba(255, 255, 255, 0.07); }
-  }
-  .event-card-flash { animation: event-card-flash 1.2s ease-out; }
-  @media (prefers-reduced-motion: reduce) {
-    .event-card-flash { animation: none; outline: 2px solid #fbbf24; outline-offset: 2px; }
-  }
 
   /* --- Empty state and past events --- */
   .events-empty {
