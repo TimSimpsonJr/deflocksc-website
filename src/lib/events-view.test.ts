@@ -27,6 +27,9 @@ import {
   parseEventIdHash,
   occurrenceById,
   deepLinkAction,
+  groupByDate,
+  nextMeetingDay,
+  callyDayIso,
 } from './events-view.js';
 import type { EventFilter, Occurrence } from './events-view.js';
 import type { PublicEvent } from './public-event.js';
@@ -849,5 +852,89 @@ describe('deepLinkAction', () => {
       pendingDeepLinkId: null,
       deferredResolve: true,
     });
+  });
+});
+
+describe('groupByDate', () => {
+  const occ = (event: PublicEvent, date: string): Occurrence => ({ event, date });
+
+  it('buckets occurrences by their real date', () => {
+    const a = ev({ id: 'e1111111' });
+    const b = ev({ id: 'e2222222' });
+    const map = groupByDate([occ(a, '2026-09-01'), occ(b, '2026-09-03')]);
+    expect([...map.keys()]).toEqual(['2026-09-01', '2026-09-03']);
+    expect(map.get('2026-09-01')!.map((o) => o.event.id)).toEqual(['e1111111']);
+    expect(map.get('2026-09-03')!.map((o) => o.event.id)).toEqual(['e2222222']);
+  });
+
+  it('keeps multiple occurrences on one day in input order', () => {
+    const early = ev({ id: 'e1111111', time: '09:00' });
+    const late = ev({ id: 'e2222222', time: '19:00' });
+    const map = groupByDate([occ(early, '2026-09-05'), occ(late, '2026-09-05')]);
+    expect(map.get('2026-09-05')!.map((o) => o.event.id)).toEqual(['e1111111', 'e2222222']);
+  });
+
+  it('gives a recurring series one bucket per occurrence date', () => {
+    const weekly = ev({
+      id: 'gvweekly',
+      date: '2026-09-01',
+      recurrence: { freq: 'weekly', until: '2026-09-15' },
+    });
+    const map = groupByDate(expandAll([weekly], '2027-09-01'));
+    expect([...map.keys()]).toEqual(['2026-09-01', '2026-09-08', '2026-09-15']);
+  });
+
+  it('returns an empty map for no occurrences', () => {
+    expect(groupByDate([]).size).toBe(0);
+  });
+});
+
+describe('nextMeetingDay', () => {
+  const occ = (date: string): Occurrence => ({ event: ev(), date });
+  const mapOf = (...dates: string[]) => groupByDate(dates.map(occ));
+
+  it('returns fromIso itself when that day has events', () => {
+    expect(nextMeetingDay(mapOf('2026-09-01', '2026-09-05'), '2026-09-01')).toBe('2026-09-01');
+  });
+
+  it('returns the next day with events when fromIso has none', () => {
+    expect(nextMeetingDay(mapOf('2026-09-05', '2026-09-09'), '2026-09-02')).toBe('2026-09-05');
+  });
+
+  it('ignores days before fromIso', () => {
+    expect(nextMeetingDay(mapOf('2026-08-20', '2026-09-05'), '2026-09-01')).toBe('2026-09-05');
+  });
+
+  it('returns null when every event day is before fromIso', () => {
+    expect(nextMeetingDay(mapOf('2026-08-20', '2026-08-25'), '2026-09-01')).toBeNull();
+  });
+
+  it('returns null for an empty map', () => {
+    expect(nextMeetingDay(new Map(), '2026-09-01')).toBeNull();
+  });
+
+  it('does not depend on the map insertion order', () => {
+    const map = new Map<string, Occurrence[]>([
+      ['2026-09-09', [occ('2026-09-09')]],
+      ['2026-09-05', [occ('2026-09-05')]],
+    ]);
+    expect(nextMeetingDay(map, '2026-09-01')).toBe('2026-09-05');
+  });
+});
+
+describe('callyDayIso', () => {
+  it('reads a UTC-midnight Date as its UTC calendar day', () => {
+    // Cally constructs every callback Date as new Date(Date.UTC(...));
+    // local getters would report Aug 31 anywhere west of Greenwich and
+    // land every meeting dot a day early.
+    expect(callyDayIso(new Date(Date.UTC(2026, 8, 1)))).toBe('2026-09-01');
+  });
+
+  it('pads single-digit months and days', () => {
+    expect(callyDayIso(new Date(Date.UTC(2026, 0, 5)))).toBe('2026-01-05');
+  });
+
+  it('holds at the year boundary', () => {
+    expect(callyDayIso(new Date(Date.UTC(2026, 11, 31)))).toBe('2026-12-31');
   });
 });

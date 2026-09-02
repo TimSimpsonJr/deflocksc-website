@@ -308,20 +308,54 @@ export function addMonths(iso: string, months: number): string {
 }
 
 /**
- * Group occurrences by calendar month, keyed 'YYYY-MM', keys in calendar order.
- * EventsMonth.astro renders a fixed three-month window and reads from this map.
+ * Group occurrences by their exact calendar date, keyed 'YYYY-MM-DD'.
+ *
+ * The month view's client model: the calendar's getDayParts marks the map's
+ * keys with the has-events dot, and the day agenda renders the map's values
+ * for the selected date. Values keep input order, so a sorted input
+ * (expandAll order) yields each day's occurrences already sorted by time.
  */
-export function groupByMonth(
+export function groupByDate(
   occurrences: readonly Occurrence[],
 ): Map<string, Occurrence[]> {
   const out = new Map<string, Occurrence[]>();
   for (const o of occurrences) {
-    const key = o.date.slice(0, 7);
-    const bucket = out.get(key);
+    const bucket = out.get(o.date);
     if (bucket) bucket.push(o);
-    else out.set(key, [o]);
+    else out.set(o.date, [o]);
   }
-  return new Map([...out.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)));
+  return out;
+}
+
+/**
+ * The first day on/after `fromIso` that has events, or null when none does.
+ * Drives the month view's default selection: today if it has meetings, else
+ * the next day that does (the caller falls back to today on null). Scans the
+ * keys rather than trusting the map's insertion order, so an unsorted map
+ * still answers correctly. ISO date strings compare lexically, so no Date.
+ */
+export function nextMeetingDay(
+  byDate: ReadonlyMap<string, Occurrence[]>,
+  fromIso: string,
+): string | null {
+  let best: string | null = null;
+  for (const day of byDate.keys()) {
+    if (day < fromIso) continue;
+    if (best === null || day < best) best = day;
+  }
+  return best;
+}
+
+/**
+ * The ISO 'YYYY-MM-DD' day for a Date the Cally calendar hands to its
+ * callbacks (getDayParts, the focusday event detail). Cally constructs
+ * those Dates at UTC midnight — new Date(Date.UTC(...)) — so the UTC
+ * getters are the only safe read: local getters would report the PREVIOUS
+ * day anywhere west of Greenwich (Eastern time included), landing every
+ * meeting dot a day early.
+ */
+export function callyDayIso(d: Date): string {
+  return isoDate(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
 }
 
 /* ------------------------------------------------------------------------ *
@@ -539,9 +573,9 @@ export function eventShareUrl(origin: string, id: string): string {
  * i.e. #county=…/#type=…) return null; anything else returns the token,
  * decodeURIComponent-d, falling back to the RAW token when decoding throws
  * (#%, #%zz — a crafted link must not throw, mirroring parseFilterHash).
- * Reserved in-page anchors (#main-content, the month chips' #event-<id> hrefs)
- * deliberately parse to a token: the id lookup downstream is the real guard,
- * and those tokens simply match no event.
+ * Reserved in-page anchors (#main-content, stale #event-<id> links from the
+ * removed month chips) deliberately parse to a token: the id lookup downstream
+ * is the real guard, and those tokens simply match no event.
  */
 export function parseEventIdHash(hash: string): string | null {
   const raw = hash.replace(/^#/, '');

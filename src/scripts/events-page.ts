@@ -1,8 +1,9 @@
 /**
  * Events page runtime: view tabs, the baked/overlay merge, and the lazy map load.
  *
- * The list and month views are server-rendered from src/data/events.json, so the
- * page is complete with JavaScript off. This module only patches that markup:
+ * The list view is server-rendered from src/data/events.json, so the page is
+ * complete with JavaScript off (the month view is a client-rendered Cally
+ * calendar; List is the no-JS view). This module patches the list markup:
  * it inserts anything submitted since the last weekly fold. The overlay only ADDS —
  * it never tombstones a baked card (a revoked event is removed by the fold rewriting
  * events.json, and stopped at /go in the meantime). Card markup is therefore written
@@ -21,6 +22,11 @@
  * textContent, so a hostile title cannot become markup even if the sanitizer
  * upstream ever misses one.
  */
+
+// Registers the <calendar-date>/<calendar-month> web components the Month
+// view's calendar uses (side-effect import, same as SubmitEventForm's date
+// picker). Without it the EventsMonth scaffold never upgrades.
+import 'cally';
 
 import type { PublicEvent } from '../lib/public-event.js';
 import type { Occurrence, EventFilter, EventTypeFilter } from '../lib/events-view.js';
@@ -60,6 +66,9 @@ import {
   parseEventIdHash,
   occurrenceById,
   deepLinkAction,
+  groupByDate,
+  nextMeetingDay,
+  callyDayIso,
 } from '../lib/events-view.js';
 // The county filter is a searchable combobox built on accessible-autocomplete,
 // the same widget (and the same dark `.autocomplete__*` skin in global.css) the
@@ -362,46 +371,187 @@ if (mapEl && desktop.matches) {
 }
 desktop.addEventListener('change', (e) => { if (e.matches) void loadMap(); });
 
-// --- Month chip -> list card --------------------------------------------
-// A month chip points at its matching list card. That card lives in the List
-// panel, which is display:none while the Month tab is active, so a bare fragment
-// jump (#event-<id>) lands on nothing. Intercept the click, switch to the list
-// view, then scroll the card in. Delegated on the panel so it also covers chips
-// that applyMerge() inserts after load.
+// --- Month view: Cally calendar + day agenda -----------------------------
+// The Month panel is a Cally <calendar-date> (markup in EventsMonth.astro,
+// registered by the `import 'cally'` above) plus an agenda of the selected
+// day's meetings. This module owns all of its data: a by-date occurrence map
+// marks meeting-days via getDayParts (the CSS paints the `has-events` part's
+// amber dot) and fills the agenda for the day the visitor taps. Month
+// navigation (Cally's native ‹ ›) pages the calendar WITHOUT touching the
+// selection; Cally re-invokes getDayParts for the newly shown days on every
+// page, so the dots need no page listener. The `focusday` listener below
+// exists solely for the sr-only meeting-day summary: this cally release
+// has no pagechange event, but every ‹ › page dispatches focusday with a
+// Date inside the newly visible month.
 
-function focusListCard(eventId: string, date: string | null) {
-  const list = document.getElementById('events-list');
-  // Fallback: with no matching card, keep keyboard focus in the calendar by
-  // landing it on the List tab rather than letting selectTab() drop it to <body>.
-  const focusListTab = () => document.getElementById('tab-list')?.focus();
-  if (!list || !eventId) { focusListTab(); return; }
-  const cards = Array.from(
-    list.querySelectorAll<HTMLElement>(`[data-event-id="${CSS.escape(eventId)}"]`),
-  );
-  // A recurring event has one card per occurrence, all sharing its id; match the
-  // date too so the chip lands on its own day, falling back to the first card.
-  const card = (date && cards.find((c) => c.dataset.date === date)) || cards[0];
-  if (!card) { focusListTab(); return; }
-  card.scrollIntoView({ block: 'center' });
-  // selectTab('list') set the Month panel to display:none while the activated chip
-  // still held focus, so document.activeElement had already reset to <body>. Move
-  // focus onto the card itself (WCAG 2.4.3): make it programmatically focusable and
-  // focus without scrolling, since scrollIntoView above already positioned it.
-  card.tabIndex = -1;
-  card.focus({ preventScroll: true });
-  card.classList.add('event-card-flash');
-  window.setTimeout(() => card.classList.remove('event-card-flash'), 1200);
+// Cally ships its own TypeScript declarations, including the global
+// HTMLElementTagNameMap entries; alias the mapped element type because the
+// compound selector below defeats querySelector's tag-name inference.
+type CalendarDateElement = HTMLElementTagNameMap['calendar-date'];
+
+const monthCal = document.querySelector<CalendarDateElement>('#panel-month calendar-date');
+
+/** Every upcoming occurrence under the active filter, keyed by ISO date.
+ *  Rebuilt by refreshMonthView on every filter change and overlay merge. */
+let byDate = new Map<string, Occurrence[]>();
+
+/** The agenda's selected day. Set at init (today, else the next meeting
+ *  day), then only by the calendar's change event — month paging never
+ *  moves it, so the agenda keeps showing the last day tapped. */
+let selectedDay: string | null = null;
+
+/** The visible month ('YYYY-MM'), for the sr-only meeting-day summary.
+ *  Seeded from the initial selection (months="1", so the visible month is
+ *  the focused day's month); updated by the focusday listener. */
+let visibleMonth: string | null = null;
+
+/** A compact agenda card: time-first, no left date block (the agenda head
+ *  already names the day, so a per-row date would be redundant). Reuses the
+ *  list card's interactive contract — .event-title-btn opens the shared
+ *  popover, .event-share-inline shares — so the delegated
+ *  #events-agenda-list handler mirrors #events-list's, and the
+ *  event-card--{type} modifier keys the typeline colour exactly as
+ *  buildCard does. Every event string goes through textContent. */
+function buildAgendaCard(o: Occurrence): HTMLLIElement {
+  const e = o.event;
+  const li = document.createElement('li');
+  li.className = `agenda-card event-card--${eventTypeSlug(e.type)}`;
+  li.dataset.eventId = e.id;
+  li.dataset.date = o.date;
+
+  li.append(el('p', 'agenda-time', formatTime12(e.time)));
+
+  const heading = el('h3', 'event-title');
+  const titleBtn = el('button', 'event-title-btn', e.title) as HTMLButtonElement;
+  titleBtn.type = 'button';
+  titleBtn.setAttribute('aria-haspopup', 'dialog');
+  heading.append(titleBtn);
+  li.append(heading);
+
+  // The visible date lives in the agenda head, outside this card; keep an
+  // sr-only date here so a screen reader landing on the card still hears
+  // which day it belongs to (mirrors buildCard's aria-hidden date panel).
+  const meta = el('p', 'event-meta');
+  meta.append(el('span', 'sr-only', `${o.date} `), document.createTextNode(placeLabel(e)));
+  li.append(meta);
+
+  const repeat = recurrenceLabel(e.recurrence);
+  const typeLabel = eventTypeLabel(e.type);
+  const actions = el('div', 'event-actions');
+  actions.append(el('p', 'event-typeline', repeat ? `${typeLabel} · ${repeat}` : typeLabel));
+  const share = el('button', 'event-share-inline') as HTMLButtonElement;
+  share.type = 'button';
+  share.setAttribute('aria-label', `Share ${e.title}`);
+  share.append(shareIcon(), document.createTextNode('Share'));
+  actions.append(share);
+  li.append(actions);
+
+  return li;
 }
 
-document.getElementById('panel-month')?.addEventListener('click', (e) => {
-  const chip = (e.target as Element).closest<HTMLElement>('.month-chip');
-  if (!chip) return;
-  e.preventDefault();
-  selectTab('list');
-  focusListCard(chip.dataset.eventId ?? '', chip.dataset.date ?? null);
-});
+/** Render the agenda for the selected day: the day's full name, its
+ *  meetings, or the "No meetings this day." line. The polite live region
+ *  (#events-agenda-status) gets "date — N meetings" so each selection —
+ *  including the initial default day — is announced without re-reading
+ *  the visible heading awkwardly. */
+function renderAgenda(): void {
+  const head = document.getElementById('events-agenda-head');
+  const list = document.getElementById('events-agenda-list');
+  const empty = document.getElementById('events-agenda-empty');
+  const status = document.getElementById('events-agenda-status');
+  if (!head || !list || !empty) return;
+  if (!selectedDay) {
+    head.textContent = '';
+    list.replaceChildren();
+    empty.hidden = true;
+    if (status) status.textContent = '';
+    return;
+  }
+  const dayLabel = fullDateLabel(selectedDay);
+  head.textContent = dayLabel;
+  const occurrences = byDate.get(selectedDay) ?? [];
+  list.replaceChildren(...occurrences.map(buildAgendaCard));
+  empty.hidden = occurrences.length > 0;
+  if (status) {
+    status.textContent =
+      occurrences.length === 0
+        ? `${dayLabel} — no meetings`
+        : `${dayLabel} — ${occurrences.length} ${occurrences.length === 1 ? 'meeting' : 'meetings'}`;
+  }
+}
 
-// --- Card and chip construction (mirrors EventsList / EventsMonth) -------
+/** Rebuild the sr-only summary of the visible month's meeting-days — the
+ *  accessible equivalent of the amber dots, which are visual-only. */
+function renderCalSummary(): void {
+  const summary = document.getElementById('events-cal-summary');
+  if (!summary || !visibleMonth) return;
+  const monthName = monthLong(
+    Number(visibleMonth.slice(0, 4)),
+    Number(visibleMonth.slice(5, 7)) - 1,
+  );
+  const days = [...byDate.keys()]
+    .filter((day) => day.slice(0, 7) === visibleMonth)
+    .sort()
+    .map((day) => dayOfMonth(day));
+  summary.textContent =
+    days.length === 0
+      ? 'No meetings shown this month.'
+      : `Meetings this month on ${monthName} ${days.join(', ')}.`;
+}
+
+/** Rebuild the by-date map from `occurrences` (the active filter's upcoming
+ *  set, NOT collapsed — every occurrence of a recurring series keeps its
+ *  dot), re-mark the calendar, and re-render the agenda + summary. Assigning
+ *  getDayParts a FRESH closure each time is deliberate: Cally re-renders on
+ *  the property change, which repaints the visible month's dots — the
+ *  "nudge" the design calls for. If the filter removed the selected day's
+ *  meetings, the agenda now shows its empty line. */
+function refreshMonthView(occurrences: readonly Occurrence[]): void {
+  byDate = groupByDate(occurrences);
+  if (monthCal) {
+    monthCal.getDayParts = (d: Date) => (byDate.has(callyDayIso(d)) ? 'has-events' : '');
+  }
+  renderAgenda();
+  renderCalSummary();
+}
+
+/** First-paint month-view setup: bounds (start of the current month → the
+ *  12-month horizon), the meeting-day marks, the default selection (today
+ *  if it has meetings, else the next day that does, else today), and the
+ *  two listeners. Setting `value` on the property does not re-emit Cally's
+ *  change event, hence the explicit renders at the end. */
+function initMonthView(): void {
+  if (!monthCal) return;
+  monthCal.min = `${island.today.slice(0, 7)}-01`;
+  monthCal.max = island.horizonEnd;
+  refreshMonthView(upcomingFor(filterEvents(allEvents, filter)));
+  selectedDay = nextMeetingDay(byDate, island.today) ?? island.today;
+  visibleMonth = selectedDay.slice(0, 7);
+  monthCal.value = selectedDay;
+  monthCal.focusedDate = selectedDay;
+  monthCal.addEventListener('change', () => {
+    if (!monthCal.value) return;
+    selectedDay = monthCal.value;
+    renderAgenda();
+  });
+  // focusday fires on keyboard focus moves AND on every ‹ › page (cally
+  // 0.9.2 routes paging through its internal goto(), which dispatches it
+  // with a Date inside the newly visible month — there is no pagechange
+  // event in this release). ONLY the summary updates here, never the
+  // selection: paging leaves the agenda alone (settled behavior).
+  monthCal.addEventListener('focusday', (ev) => {
+    const detail = (ev as CustomEvent<Date>).detail;
+    if (!(detail instanceof Date)) return;
+    const month = callyDayIso(detail).slice(0, 7);
+    if (month === visibleMonth) return;
+    visibleMonth = month;
+    renderCalSummary();
+  });
+  renderAgenda();
+  renderCalSummary();
+}
+
+// --- Card construction (mirrors EventsList) ------------------------------
 
 function el(tag: string, className?: string, text?: string): HTMLElement {
   const node = document.createElement(tag);
@@ -427,7 +577,8 @@ function buildCard(o: Occurrence): HTMLLIElement {
   // green = public, blue = council) in events.astro.
   li.className = `event-card event-card--${typeSuffix}`;
   // Real id, mirroring EventsList.astro: gives a shared /events#<id> link a
-  // native fragment target. List cards only — month chips keep data-event-id.
+  // native fragment target. List cards only — agenda cards carry just
+  // data-event-id.
   li.id = e.id;
   li.dataset.eventId = e.id;
   li.dataset.date = o.date;
@@ -485,18 +636,6 @@ function buildCard(o: Occurrence): HTMLLIElement {
 
   li.append(date, body);
   return li;
-}
-
-function buildChip(o: Occurrence): HTMLAnchorElement {
-  const a = document.createElement('a');
-  a.className = 'month-chip';
-  a.href = `#event-${encodeURIComponent(o.event.id)}`;
-  a.dataset.eventId = o.event.id;
-  a.dataset.date = o.date;
-  a.dataset.sort = sortKey(o.date, o.event.time, o.event.id);
-  a.title = `${formatTime12(o.event.time)} · ${island.cityNames[o.event.city] ?? o.event.city}`;
-  a.append(el('span', 'event-title month-chip-title', o.event.title));
-  return a;
 }
 
 function buildPastRow(o: Occurrence): HTMLLIElement {
@@ -913,6 +1052,31 @@ document.getElementById('events-list')?.addEventListener('click', (ev) => {
   if (event) openEventPopover({ event, date }, btn);
 });
 
+// Agenda cards: the same delegation as #events-list, on the agenda's stable
+// <ul>, so it covers every card renderAgenda() inserts without per-card
+// listeners. Share branch first, then the title button → the shared
+// popover. Agenda shares call shareEvent WITHOUT { fromPopover } for the
+// same reason the list's do: a card-initiated copy failure must never
+// borrow a popover that happens to be open by then.
+document.getElementById('events-agenda-list')?.addEventListener('click', (ev) => {
+  const target = ev.target as HTMLElement;
+  const shareBtn = target.closest<HTMLElement>('.event-share-inline');
+  if (shareBtn) {
+    const card = shareBtn.closest<HTMLElement>('[data-event-id]');
+    const event = allEvents.find((candidate) => candidate.id === card?.dataset.eventId);
+    if (event) shareEvent(event);
+    return;
+  }
+  const btn = target.closest<HTMLElement>('.event-title-btn');
+  if (!btn) return;
+  const card = btn.closest<HTMLElement>('[data-event-id]');
+  const id = card?.dataset.eventId;
+  const date = card?.dataset.date;
+  if (!id || !date) return;
+  const event = allEvents.find((candidate) => candidate.id === id);
+  if (event) openEventPopover({ event, date }, btn);
+});
+
 // --- Merge and patch ----------------------------------------------------
 
 function applyMerge(merged: PublicEvent[]) {
@@ -939,8 +1103,9 @@ function applyMerge(merged: PublicEvent[]) {
     island.today,
   ).upcoming;
 
-  // The list collapses a recurring series to one row (its next occurrence); the
-  // month chips still get every occurrence, so the two loops read different sets.
+  // The list collapses a recurring series to one row (its next occurrence);
+  // the month calendar marks every occurrence, but reads it from the
+  // refreshMonthView below, not from a per-chip insert.
   const list = document.getElementById('events-list');
   for (const o of collapseSeries(freshOccurrences)) {
     if (list) insertSorted(list, buildCard(o), sortKey(o.date, o.event.time, o.event.id));
@@ -951,13 +1116,13 @@ function applyMerge(merged: PublicEvent[]) {
   if (island.listLimit != null && list) {
     while (list.children.length > island.listLimit) list.lastElementChild?.remove();
   }
-  for (const o of freshOccurrences) {
-    const chips = document.querySelector(`[data-chips="${CSS.escape(o.date)}"]`);
-    if (chips) insertSorted(chips, buildChip(o), sortKey(o.date, o.event.time, o.event.id));
-  }
 
-  // 3. The merged set is what every later filter change renders from.
+  // 3. The merged set is what every later filter change renders from. The
+  //    month calendar re-marks its days and re-renders the agenda from it
+  //    too: a merged-in event adds its dot, and its agenda row when its day
+  //    is the selected one.
   allEvents = merged;
+  refreshMonthView(upcomingFor(filterEvents(allEvents, filter)));
   syncChrome();
 }
 
@@ -971,8 +1136,8 @@ function applyMerge(merged: PublicEvent[]) {
 // styled as daisyUI tabs-box pills: All / Meetups / Public events / Council
 // meetings), filter the
 // list in place, and keep the choice in the URL hash so a filtered view is
-// shareable and the back button works. `el`, `buildCard`, `buildChip`, and
-// `placeLabel` already exist in this module; they are used, not redefined.
+// shareable and the back button works. `el`, `buildCard`, and `placeLabel`
+// already exist in this module; they are used, not redefined.
 
 /** One entry in the county combobox: the slug it filters to, its display name, and
  *  the count shown in the option label (faceted by the active type, exactly as the
@@ -1264,8 +1429,8 @@ function syncChrome(): void {
   }
 }
 
-/** Re-render the list, the month chips, and the past rows for a filter, then sync
- *  the chrome. Pure DOM work — no history side effects, so hashchange can call it. */
+/** Re-render the list, the month calendar/agenda, and the past rows for a filter,
+ *  then sync the chrome. Pure DOM work — no history side effects, so hashchange can call it. */
 function applyFilter(next: EventFilter): void {
   filter = next;
 
@@ -1281,8 +1446,8 @@ function applyFilter(next: EventFilter): void {
   const upcoming = split.upcoming;
   const past = split.past.filter((o) => o.date >= island.pastCutoff);
 
-  // The list shows one row per event (collapsed series); the month grid keeps
-  // every occurrence, so each reads from a different set of the same `upcoming`.
+  // The list shows one row per event (collapsed series); the month calendar
+  // marks every occurrence, so each reads a different view of `upcoming`.
   const list = document.getElementById('events-list');
   if (list) {
     // The homepage preview caps the list to island.listLimit (the "next 6");
@@ -1292,13 +1457,10 @@ function applyFilter(next: EventFilter): void {
     list.replaceChildren(...shown.map(buildCard));
   }
 
-  for (const chips of document.querySelectorAll<HTMLElement>('[data-chips]')) {
-    chips.replaceChildren();
-  }
-  for (const o of upcoming) {
-    const chips = document.querySelector(`[data-chips="${CSS.escape(o.date)}"]`);
-    if (chips) chips.append(buildChip(o));
-  }
+  // The month calendar re-marks its meeting-days and re-renders the agenda
+  // from the same filtered, UNcollapsed set. If the filter removed the
+  // selected day's meetings, the agenda shows its empty line.
+  refreshMonthView(upcoming);
 
   const pastList = document.getElementById('events-past-list');
   if (pastList) pastList.replaceChildren(...past.map(buildPastRow));
@@ -1400,7 +1562,7 @@ function resolveDeepLink(): void {
   pendingDeepLinkId = decision.pendingDeepLinkId;
   deferredResolve = decision.deferredResolve;
   // 'none' covers empty/filter hashes, unresolvable tokens (#main-content,
-  // #event-<id> month anchors, past-only ids — graceful no-ops), and the
+  // stale #event-<id> chip-era links, past-only ids — graceful no-ops), and the
   // already-showing id; 'defer' waits for the dialog's close event, whose
   // handler re-runs this resolver against the then-live hash.
   if (decision.action !== 'open' || occurrence === undefined || id === null) return;
@@ -1423,8 +1585,8 @@ function resolveDeepLink(): void {
 // in pushHash deliberately is not, so this fires once per user navigation and
 // never doubles a re-render. An empty hash clears the filter; a hash with a
 // recognised filter key applies it; any OTHER token routes to the deep-link
-// resolver, where an unknown one (the skip link's #main-content, a month
-// anchor) is a graceful no-op that never wipes the county/type selection.
+// resolver, where an unknown one (the skip link's #main-content, a stale
+// chip-era anchor) is a graceful no-op that never wipes the county/type selection.
 window.addEventListener('hashchange', () => {
   if (location.hash.replace(/^#/, '') === '' || hashHasFilterKey(location.hash)) {
     pendingDeepLinkId = null;
@@ -1458,6 +1620,13 @@ if (filter.county === 'all' && filter.type === 'all') {
 } else {
   applyFilter(filter);
 }
+
+// First paint: bound the calendar, mark its meeting-days, and select the
+// default day (today, else the next day with meetings). Runs after the
+// filter bootstrap so a shared #county=… link marks only that county's
+// days. (applyFilter may already have refreshed the map; initMonthView's
+// own refresh is idempotent.)
+initMonthView();
 
 // First paint: resolve any #<id> already in the URL against the baked set.
 // Baked list cards carry a real id, so the browser's native fragment scroll
