@@ -59,7 +59,7 @@ const recordWithExtraField = {
 } as unknown as StoredEvent;
 
 describe('PUBLIC_EVENT_FIELDS', () => {
-  it('lists exactly the thirteen public fields, in data-model order', () => {
+  it('lists exactly the eleven public fields, in data-model order', () => {
     expect(PUBLIC_EVENT_FIELDS).toEqual([
       'id',
       'type',
@@ -72,8 +72,6 @@ describe('PUBLIC_EVENT_FIELDS', () => {
       'address',
       'hasSignalGroup',
       'recurrence',
-      'organizer',
-      'createdAt',
     ]);
   });
 
@@ -82,6 +80,14 @@ describe('PUBLIC_EVENT_FIELDS', () => {
     expect(names).not.toContain('signalUrl');
     expect(names).not.toContain('codeDigest');
     expect(names).not.toContain('revoked');
+  });
+
+  it('excludes the backend-only organizer and createdAt fields', () => {
+    // organizer (the pseudonym) and createdAt are moderation metadata that lives
+    // on StoredEvent only; no client reads them, so they are not published.
+    const names: readonly string[] = PUBLIC_EVENT_FIELDS;
+    expect(names).not.toContain('organizer');
+    expect(names).not.toContain('createdAt');
   });
 });
 
@@ -100,8 +106,6 @@ describe('toPublicEvent', () => {
       address: '301 University Ridge, Greenville',
       hasSignalGroup: true,
       recurrence: { freq: 'monthly_nth', until: '2027-02-22' },
-      organizer: 'handle-jay',
-      createdAt: '2026-08-17T14:22:00Z',
     };
     expect(result).toEqual(expected);
   });
@@ -115,6 +119,27 @@ describe('toPublicEvent', () => {
     expect(Object.prototype.hasOwnProperty.call(result, 'signalUrl')).toBe(false);
     expect(Object.prototype.hasOwnProperty.call(result, 'codeDigest')).toBe(false);
     expect(Object.prototype.hasOwnProperty.call(result, 'revoked')).toBe(false);
+  });
+
+  it('omits the backend-only organizer and createdAt while keeping them on the input', () => {
+    // The confidentiality guarantee for the unused fields: the stored record
+    // carries organizer and createdAt (backend moderation metadata), but the
+    // projection must not publish either.
+    expect(publicRecord.organizer).toBe('handle-jay');
+    expect(publicRecord.createdAt).toBe('2026-08-17T14:22:00Z');
+
+    const result = toPublicEvent(publicRecord);
+    expect(Object.prototype.hasOwnProperty.call(result, 'organizer')).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(result, 'createdAt')).toBe(false);
+
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toContain('organizer');
+    expect(serialized).not.toContain('handle-jay');
+    expect(serialized).not.toContain('createdAt');
+
+    // The input StoredEvent is untouched — the two fields are still there.
+    expect(publicRecord.organizer).toBe('handle-jay');
+    expect(publicRecord.createdAt).toBe('2026-08-17T14:22:00Z');
   });
 
   it('drops an unrecognized property added to the stored record', () => {
@@ -206,7 +231,9 @@ describe('toPublicEvent', () => {
     expect(input.signalUrl).toBe(SECRET_SIGNAL_URL);
     expect(input.codeDigest).toBe(SECRET_CODE_DIGEST);
     expect(input.revoked).toBe(false);
-    expect(Object.keys(input).length).toBe(PUBLIC_EVENT_FIELDS.length + 3);
+    // StoredEvent has five fields beyond PUBLIC_EVENT_FIELDS: organizer,
+    // createdAt, signalUrl, codeDigest and revoked.
+    expect(Object.keys(input).length).toBe(PUBLIC_EVENT_FIELDS.length + 5);
   });
 
   it('returns a new object, not the input reference', () => {

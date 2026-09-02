@@ -234,8 +234,9 @@ describe('validateSubmission — body shape', () => {
 
 // --- publicEventSchema (the stored/public shape) ----------------------------
 
-// Distinct from a *submission*: a stored PublicEvent carries `id` and
-// `createdAt` and has no `organizerCode`. This is the exact shape of
+// Distinct from a *submission*: a PublicEvent carries `id` and has no
+// `organizerCode`. It also has no `organizer`/`createdAt` — those are
+// backend-only StoredEvent fields, never published. This is the exact shape of
 // src/data/events.json, which src/pages/events.astro re-validates at build.
 function publicEventRecord(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
@@ -250,8 +251,6 @@ function publicEventRecord(overrides: Record<string, unknown> = {}): Record<stri
     address: '1737 Main Street, Columbia',
     hasSignalGroup: false,
     recurrence: null,
-    organizer: 'handle-jay',
-    createdAt: '2026-08-17T14:22:00Z',
     ...overrides,
   };
 }
@@ -271,8 +270,6 @@ function councilEventRecord(overrides: Record<string, unknown> = {}): Record<str
     address: '206 S Main St, Greenville, SC 29601',
     hasSignalGroup: false,
     recurrence: { freq: 'monthly_nth', nths: [2, 4], until: null },
-    organizer: 'Greenville City Council',
-    createdAt: '2026-08-17T14:22:00Z',
     source: 'https://www.greenvillesc.gov/185/City-Council',
     ...overrides,
   };
@@ -285,9 +282,10 @@ describe('publicEventSchema — the stored/public shape', () => {
 
   it('rejects a record carrying a server-only key via .strict()', () => {
     // signalUrl, codeDigest and revoked live on StoredEvent, never on the
-    // published shape. `.strict()` makes a baked record that smuggles one fail
-    // the build rather than flow to the client.
-    for (const key of ['signalUrl', 'codeDigest', 'revoked']) {
+    // published shape — and organizer/createdAt are backend-only too. `.strict()`
+    // makes a baked record that smuggles any of them fail the build rather than
+    // flow to the client.
+    for (const key of ['signalUrl', 'codeDigest', 'revoked', 'organizer', 'createdAt']) {
       const parsed = publicEventSchema.safeParse(publicEventRecord({ [key]: 'x' }));
       expect(parsed.success, `${key} must be rejected`).toBe(false);
     }
@@ -306,8 +304,6 @@ describe('publicEventSchema — the stored/public shape', () => {
       address: '206 S Main St, Greenville, SC 29601',
       hasSignalGroup: false,
       recurrence: { freq: 'monthly_nth', nths: [2, 4], until: null },
-      organizer: 'Greenville City Council',
-      createdAt: '2026-08-17T14:22:00Z',
       source: 'https://www.greenvillesc.gov/185/City-Council',
     };
     expect(publicEventSchema.safeParse(record).success).toBe(true);

@@ -46,7 +46,7 @@ const bakedEvents: PublicEvent[] = (bakedEventsRaw as unknown[]).map((raw, index
   }
   // events.json holds ONLY folded submissions (meetup/public). Curated council
   // records live in council-meetings.json and merge in via loadCouncilEvents();
-  // they must never arrive on this path, where toPublicEvent's 13-field allowlist
+  // they must never arrive on this path, where toPublicEvent's 11-field allowlist
   // would silently strip their `source` and `nths` and render the wrong dates.
   // publicEventSchema now admits `type: 'council'` for the council loader's sake,
   // so reject it explicitly here rather than let a mistyped record through.
