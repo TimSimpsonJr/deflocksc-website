@@ -139,7 +139,7 @@ const island = {
     </div>
 
     <div id="panel-month" role="tabpanel" aria-labelledby="tab-month" tabindex="0" data-panel="month">
-      <EventsMonth occurrences={upcoming} today={today} cityNames={cityNames} />
+      <EventsMonth />
     </div>
   </div>
 
@@ -270,7 +270,7 @@ const island = {
 </div>
 
 <style is:global>
-  /* Every rule for event cards, month chips, and tabs is global on purpose.
+  /* Every rule for event cards, agenda cards, and tabs is global on purpose.
      Astro scoped styles stamp a data-astro-* attribute onto template elements;
      cards that events-page.ts creates at runtime have no such attribute and would
      render unstyled. Class names here are the contract with that renderer. */
@@ -515,43 +515,77 @@ const island = {
   .event-past-title { color: #a3a3a3; font-size: 0.9rem; font-weight: 600; margin: 0; }
   .event-past-place { grid-column: 2; }
 
-  /* --- Month grids --- */
-  .events-months { display: flex; flex-direction: column; gap: 2rem; }
-  .month-title { color: #e8e8e8; font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; }
-  .month-dow, .month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
-  .month-dow span {
-    font-family: 'Instrument Sans Variable', sans-serif;
-    font-size: 10px;
-    color: #525252;
-    text-align: center;
-    padding-bottom: 4px;
-  }
-  .month-cell {
-    min-height: 4.25rem;
+  /* --- Month view: Cally calendar + day agenda ---
+     The calendar is the Cally <calendar-date> web component (registered by
+     events-page.ts via `import 'cally'`), themed by the shared
+     .deflock-calendar / .deflock-month ::part() rules in global.css. Here
+     live the wrapper card, the meeting-day dot, and the agenda the client
+     renders below the calendar — global on purpose, like everything else
+     in this sheet: agenda cards are runtime-created nodes. */
+  .events-cal-wrap {
     background: #1a1a1a;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 3px;
-    min-width: 0;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 1rem;
   }
-  .month-cell-empty { background: transparent; border-color: transparent; }
-  .month-cell-today { border-color: #dc2626; }
-  .month-daynum { font-family: 'Instrument Sans Variable', sans-serif; font-size: 10px; color: #737373; font-variant-numeric: tabular-nums; }
-  .month-chips { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
-  /* De-slopped to match the cards: no red left bar. A neutral fill with a hairline
-     border keeps each chip legible and obviously clickable in the dense grid; the
-     hover/focus states make the affordance explicit. */
-  .month-chip {
+  .events-cal {
     display: block;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 2px;
-    padding: 1px 3px;
-    text-decoration: none;
-    min-width: 0;
+    width: fit-content;
+    margin-inline: auto;
   }
-  .month-chip:hover { background: rgba(255, 255, 255, 0.10); border-color: rgba(255, 255, 255, 0.18); }
-  .month-chip:focus-visible { outline: 2px solid #fbbf24; outline-offset: 1px; }
-  .month-chip-title { font-size: 10px; font-weight: 600; color: #e8e8e8; margin: 0; line-height: 1.25; max-height: 2lh; }
+  /* Meeting-day dot: a small amber marker under the day number, on the
+     `has-events` shadow part that events-page.ts's getDayParts assigns.
+     Literal #fbbf24 (the site's amber emphasis colour) — NOT
+     var(--color-accent), which the shared .deflock-calendar theme binds
+     to the RED selected-day fill (#dc2626). Only the events calendar ever
+     assigns this part, so the shared .deflock-month selector cannot leak
+     into the submit form's date picker. */
+  calendar-month.deflock-month::part(button has-events) {
+    position: relative;
+  }
+  calendar-month.deflock-month::part(button has-events)::after {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #fbbf24;
+  }
+
+  /* The selected day's agenda, below the calendar. The compact agenda card
+     reuses the list card's interactive contract (.event-title-btn opens the
+     shared popover, .event-share-inline shares) and the event-card--{type}
+     typeline colour cue; it drops the left date block — the agenda head
+     already names the day — and leads with the time instead. */
+  .events-agenda {
+    margin-top: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    padding-top: 1rem;
+  }
+  .events-agenda-head { color: #e8e8e8; font-weight: 700; font-size: 0.95rem; margin: 0 0 0.75rem; }
+  .events-agenda-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+  .events-agenda-empty { color: #a3a3a3; font-size: 0.9rem; margin: 0; }
+  .events-agenda-empty[hidden] { display: none; }
+  .agenda-card {
+    background: #171717;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 0.85rem 1rem;
+  }
+  .agenda-time {
+    font-family: 'Instrument Sans Variable', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #e8e8e8;
+    font-variant-numeric: tabular-nums;
+    margin: 0 0 0.25rem;
+  }
+  .agenda-card .event-title { font-size: 1rem; margin: 0 0 0.25rem; }
+  .agenda-card .event-meta { margin: 0; }
+  .agenda-card .event-actions { margin: 0.6rem 0 0; }
 
   /* --- Intake dialog --- */
   .intake-dialog {
@@ -866,16 +900,12 @@ const island = {
   .events-explorer--home #events-list .event-desc {
     display: none;
   }
-  /* Homepage variant: cap ONLY the month panel's height with its own scroll. The
-     LIST is now hard-capped to 6 rows in markup (EventsList's slice) and in the
-     client controller (events-page.ts), so it no longer needs a scroll cap — the
-     "See all events" link is the way to the rest. #panel-month, by contrast, still
-     shows every occurrence, so it keeps a viewport-relative scroll cap here.
-     Crucially, #panel-month is a plain BLOCK wrapper around .events-months, so a
-     max-height scrolls it cleanly; #events-list is itself the flex column (see
-     .events-list, flex-direction: column) and capping IT would let its
-     overflow:hidden flex-item cards collapse to ~2px rows — which is exactly why
-     only the month panel carries a cap, and the list is bounded by row COUNT instead. */
+  /* Homepage variant: cap ONLY the month panel's height with its own scroll.
+     The LIST is hard-capped to 6 rows in markup (EventsList's slice) and in the
+     client controller (events-page.ts), so it needs no scroll cap — the
+     "See all events" link is the way to the rest. #panel-month (the Cally
+     calendar plus the selected day's agenda, which grows with a busy day)
+     keeps a viewport-relative scroll cap here. */
   .events-explorer--home #panel-month {
     max-height: min(30rem, 62vh);
     overflow-y: auto;
