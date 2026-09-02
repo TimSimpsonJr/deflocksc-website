@@ -7,10 +7,12 @@
  *   npm run codes -- revoke <pseudonym> [--digest <64-hex>] [--fold|--no-fold]
  *   npm run codes -- set-intake <signal-url>
  *
- * This is the THIN SHELL. It reads the environment, wires stdin/stdout, talks to
- * Netlify Blobs, and sets exit codes. Every decision — argument parsing, the
- * canary check, the record shapes, all output text — lives in
- * src/lib/organizer-cli.ts, which is pure and unit tested.
+ * This is the THIN SHELL. It reads the environment, wires stdin/stdout, and
+ * sets exit codes. Argument parsing, the record shapes, and all output text
+ * live in src/lib/organizer-cli.ts (pure, unit tested); the issue/list/revoke
+ * core — canary, wordlist checksum, collision check, tombstone cascade —
+ * lives in src/lib/organizer-ops.ts (dependency-injected, unit tested), and
+ * is shared with the local admin UI server (scripts/codes-ui.ts).
  *
  * `npm run codes` bundles this file with esbuild and runs the bundle. Bare
  * `node scripts/organizer-codes.ts` does not work: Node's type stripping will
@@ -31,17 +33,21 @@
  *   - never print the intake URL during `list`
  *   - never commit anything
  */
-import { createHash, randomInt } from 'node:crypto';
+import { randomInt } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stderr, stdin, stdout } from 'node:process';
 
-import { type Store } from '@netlify/blobs';
-
 import * as cli from '../src/lib/organizer-cli.js';
-import { digestCode, generateCode, normalizeCode } from '../src/lib/organizer-code.js';
+import {
+  issueCode,
+  listCodes,
+  readVerifiedWordlist,
+  revokeCode,
+  type OpsDeps,
+} from '../src/lib/organizer-ops.js';
 import { validateSignalUrl } from '../src/lib/signal-url.js';
 import {
   ContextRefusedError,
@@ -52,8 +58,6 @@ import {
 } from '../src/lib/blob-stores.js';
 
 const PROJECT_ROOT = process.cwd();
-const WORDLIST_TXT = join(PROJECT_ROOT, cli.WORDLIST_TXT_REL);
-const WORDLIST_SHA = join(PROJECT_ROOT, cli.WORDLIST_SHA_REL);
 const FOLD_WORKFLOW_PATH = join(PROJECT_ROOT, '.github', 'workflows', cli.FOLD_WORKFLOW);
 const ENV_FILE = join(PROJECT_ROOT, '.env');
 
@@ -62,36 +66,28 @@ function fail(message: string): never {
   process.exit(1);
 }
 
-function readWordlist(): string[] {
-  if (!existsSync(WORDLIST_TXT)) {
-    fail(`missing ${WORDLIST_TXT}. Run: npm run build-wordlist`);
-  }
-  const bytes = readFileSync(WORDLIST_TXT);
-  const actual = createHash('sha256').update(bytes).digest('hex');
-  const checked = cli.checkWordlistChecksum(actual, readFileSync(WORDLIST_SHA, 'utf-8'));
-  if (!checked.ok) {
-    fail(
-      checked.code === 'mismatch'
-        ? `wordlist checksum mismatch. The word source for every code you issue is not what was audited. Restore it with: git checkout -- ${cli.WORDLIST_TXT_REL}`
-        : `${cli.WORDLIST_SHA_REL} is not a valid sha256sum record for the wordlist. Regenerate both with: npm run build-wordlist`,
-    );
-  }
-  const list = cli.parseWordlist(bytes.toString('utf-8'));
-  if (!list.ok) fail(`wordlist failed structural validation (${list.code})`);
-  return list.value;
-}
-
-async function enforceCanary(pepper: string, strict: boolean): Promise<void> {
-  const meta = metaStore();
-  const stored = (await meta.get(cli.CANARY_KEY, { type: 'text' })) as string | null;
-  const decision = cli.decideCanary(stored, cli.canaryDigest(pepper), strict);
-  if (decision.action === 'write') {
-    await meta.set(cli.CANARY_KEY, decision.value);
-    stdout.write(decision.note);
-    return;
-  }
-  if (decision.action === 'refuse') fail(decision.message);
-  if (decision.action === 'warn') stderr.write(`organizer-codes: warning: ${decision.message}\n`);
+/**
+ * The store factories run here, inside a subcommand — strictly after main()
+ * has set NETLIFY_BLOBS_CONTEXT and CONTEXT=production.
+ *
+ * onCanary prints in the same channels and order as the old inline
+ * enforceCanary — first-write note on stdout, mismatch warning on stderr —
+ * and the ops fire it BEFORE any store lookup/write, so the signal reaches
+ * the terminal even when the operation then fails mid-flight.
+ */
+function buildOpsDeps(pepper: string): OpsDeps {
+  return {
+    codes: codesStore(),
+    events: eventsStore(),
+    meta: metaStore(),
+    pepper,
+    now: () => new Date().toISOString(),
+    rng: (maxExclusive) => randomInt(maxExclusive),
+    onCanary: (note, warning) => {
+      if (note !== null) stdout.write(note);
+      if (warning !== null) stderr.write(`organizer-codes: warning: ${warning}\n`);
+    },
+  };
 }
 
 function copyToClipboard(text: string): boolean {
@@ -111,42 +107,25 @@ function copyToClipboard(text: string): boolean {
   return result.status === 0;
 }
 
-async function listCodeRows(store: Store): Promise<cli.ListRow[]> {
-  const { blobs } = await store.list();
-  const rows: cli.ListRow[] = [];
-  for (const blob of blobs) {
-    const record = await store.get(blob.key, { type: 'json' });
-    if (record === null || record === undefined) continue;
-    rows.push(cli.toListRow(blob.key, record));
-  }
-  return rows;
-}
-
 async function runIssue(
   command: { pseudonym: string; clip: boolean },
   pepper: string,
 ): Promise<void> {
-  await enforceCanary(pepper, true);
-  const words = readWordlist();
+  const wordlist = readVerifiedWordlist(PROJECT_ROOT);
+  if (!wordlist.ok) fail(wordlist.message);
 
-  const code = generateCode(words, (maxExclusive) => randomInt(maxExclusive));
-  const normalized = normalizeCode(code);
-  if (!normalized.ok) {
-    fail(`generated code failed normalizeCode (${normalized.code}) — this is a bug`);
-  }
-  const digest = digestCode(normalized.value, pepper);
+  // The canary note/warning is printed by buildOpsDeps' onCanary, inside
+  // issueCode, before any store work.
+  const result = await issueCode(
+    { ...buildOpsDeps(pepper), wordlist: wordlist.value },
+    { pseudonym: command.pseudonym },
+  );
 
-  const codes = codesStore();
-  if ((await codes.get(digest, { type: 'json' })) !== null) {
-    fail('the generated code collides with an existing code. Run issue again.');
-  }
-  await codes.setJSON(digest, cli.buildCodeRecord(command.pseudonym, new Date().toISOString()));
-
-  stdout.write(cli.formatIssueBanner(command.pseudonym, code));
+  stdout.write(cli.formatIssueBanner(result.pseudonym, result.code));
 
   if (command.clip) {
     stdout.write(
-      copyToClipboard(code)
+      copyToClipboard(result.code)
         ? '  Copied to the clipboard.\n\n'
         : '  Could not reach a clipboard tool; copy it by hand.\n\n',
     );
@@ -157,36 +136,21 @@ async function runRevoke(
   command: { pseudonym: string; digest: string | null; fold: cli.FoldMode },
   pepper: string,
 ): Promise<void> {
-  await enforceCanary(pepper, false);
+  // The canary note/warning is printed by buildOpsDeps' onCanary, inside
+  // revokeCode — before the lookup and the writes, exactly like the old
+  // inline enforceCanary, so it survives a mid-revoke failure.
+  const result = await revokeCode(buildOpsDeps(pepper), {
+    pseudonym: command.pseudonym,
+    digest: command.digest,
+  });
 
-  const codes = codesStore();
-  const selection = cli.selectRevocationTarget(
-    await listCodeRows(codes),
-    command.pseudonym,
-    command.digest,
-  );
-
-  if (selection.kind === 'none') fail(cli.formatNoCodeFound(command.pseudonym));
-  if (selection.kind === 'many') {
-    stderr.write(`organizer-codes: ${cli.formatAmbiguousRevoke(command.pseudonym, selection.rows)}`);
+  if (result.kind === 'none') fail(cli.formatNoCodeFound(command.pseudonym));
+  if (result.kind === 'many') {
+    stderr.write(`organizer-codes: ${cli.formatAmbiguousRevoke(command.pseudonym, result.rows)}`);
     process.exit(1);
   }
 
-  const target = selection.row;
-  await codes.setJSON(target.digest, cli.revokeRecord(target));
-
-  // Cascade: tombstone every event this code created.
-  const events = eventsStore();
-  const { blobs } = await events.list();
-  let tombstoned = 0;
-  for (const blob of blobs) {
-    const event = await events.get(blob.key, { type: 'json' });
-    if (!cli.shouldTombstone(event, target.digest)) continue;
-    await events.setJSON(blob.key, cli.tombstoneEvent(event as Record<string, unknown>));
-    tombstoned += 1;
-  }
-
-  stdout.write(cli.formatRevokeSummary(command.pseudonym, target.digest, tombstoned));
+  stdout.write(cli.formatRevokeSummary(command.pseudonym, result.digest, result.tombstoned));
   await maybeTriggerFold(command.fold);
 }
 
@@ -245,8 +209,8 @@ async function runSetIntake(command: { signalUrl: string }): Promise<void> {
   stdout.write(cli.formatIntakeUpdated());
 }
 
-async function runList(command: { json: boolean }): Promise<void> {
-  const rows = await listCodeRows(codesStore());
+async function runList(command: { json: boolean }, pepper: string): Promise<void> {
+  const rows = await listCodes(buildOpsDeps(pepper));
   if (command.json) {
     stdout.write(cli.toListJson(rows));
     return;
@@ -293,14 +257,14 @@ async function main(): Promise<void> {
   // shared stores. This CLI is the one caller that is *supposed* to write to
   // production — run deliberately, from a maintainer's machine, with a
   // production token — so it opts in here, explicitly and in one visible place.
-  // Both variables are read lazily by the store factories, so setting them
-  // after the imports is correct.
+  // Both variables are read lazily by the store factories, and buildOpsDeps
+  // only runs inside the subcommands below, so setting them here is correct.
   process.env.CONTEXT = 'production';
 
   if (command.name === 'issue') await runIssue(command, env.value.pepper);
   else if (command.name === 'revoke') await runRevoke(command, env.value.pepper);
   else if (command.name === 'set-intake') await runSetIntake(command);
-  else await runList(command);
+  else await runList(command, env.value.pepper);
 }
 
 try {

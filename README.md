@@ -57,6 +57,42 @@ pip install -r requirements.txt
 python scripts/scraper.py
 ```
 
+## Organizer Codes Admin (maintainers only)
+
+Organizer codes gate event submissions on `/events/submit`. Two local tools manage
+them, both requiring `ORGANIZER_CODE_PEPPER`, `NETLIFY_AUTH_TOKEN`, and
+`NETLIFY_SITE_ID` in a local `.env` (see `.env.example`). Both write to the
+**production** Netlify Blobs stores -- there is no dry run and no local fallback.
+
+- **CLI:** `npm run codes -- list | issue <pseudonym> | revoke <pseudonym> | set-intake <url>`
+- **Browser UI:** `npm run codes:ui` -- serves an admin page at
+  `http://127.0.0.1:4919` (issue with copy-to-clipboard, list, revoke behind a
+  named confirmation; revoked rows offer a retry that completes an interrupted
+  takedown). The server binds `127.0.0.1` only, answers only the two loopback
+  hostnames (anything else gets a 421), never opens a browser by itself (click
+  the printed URL), and is never deployed. A code is shown exactly once, at
+  issue time; it is never stored, logged, or shown again. Setting the intake
+  link stays CLI-only. Override the port with `CODES_UI_PORT` (digits only;
+  ports 80 and 443 are refused -- browsers omit the default port from
+  Host/Origin, which the server's exact loopback allowlist requires).
+
+### Remote access (not supported yet)
+
+The admin UI cannot be reached from a phone or another machine, **on purpose**:
+the server only answers requests whose `Host` and `Origin` are loopback
+(`127.0.0.1` / `localhost`). A proxy such as `tailscale serve` will collect 421s
+and 403s -- its MagicDNS hostname and HTTPS origin are not on the allowlist, and
+this tool does not check Tailscale's identity headers, so the proxy would add no
+authentication even if it connected. Do not "fix" this by loosening the guard.
+
+Enabling remote access safely is a separate future task with its own security
+review: an explicit MagicDNS `Host` + `Origin` allowlist, enforcement of the
+`Tailscale-User-Login` header against the maintainer's identity, run under a
+foreground `tailscale serve` (never `--bg`), and shut down after use.
+
+Until then: run the tool on the other machine directly, with that machine's own
+`.env`.
+
 ## Adapting for Your State
 
 This site is built for South Carolina, but the architecture is designed to be forked and localized. High-level checklist:
