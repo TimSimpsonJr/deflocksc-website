@@ -98,6 +98,8 @@ Fallback ladder (the number is never blank, never blocks render): **live** value
 | `tests/config-guards.test.ts` | **Mod** | Add guards: refactor happened (no inline `pointInRing`), `included_files` scoped to `[functions."sc-camera-count"]` only (no global `[functions]`, exactly one `included_files`), function `config.path`, CSP `connect-src 'self'` intact, dev proxy present, built homepage wraps the SSR number inside each `data-live-sc` hook. |
 | `.github/workflows/refresh-camera-data.yml` | **Mod** | Cron weekly → daily; add `npm ci` + `npm run prebuild` (the shared-module import + boundary files now require them); Node 20 → 22; run `npm run fetch-camera-data` (validating TS bundle, no longer `node scripts/fetch-camera-data.mjs`) then `npm run build-impact-stats`. The fetch step's validation failure exits non-zero and fails the job, so no corrupt snapshot/count is committed. |
 | `package.json` | **Mod** | Add `"fetch-camera-data"` + `"build-impact-stats"` esbuild-bundle scripts; add `happy-dom` (pinned) to `devDependencies` for the DOM test env. |
+| `docs/adapting-scrapers.md` | **Mod** | Fix operational-doc drift (Task 7.6): `scripts/fetch-camera-data.mjs` → `.ts`, `node scripts/fetch-camera-data.mjs` → `npm run fetch-camera-data`, weekly → daily cadence, plus a note that the refresh now validates the payload all-or-nothing and fails the job instead of overwriting the snapshot. |
+| `docs/architecture.md` | **Mod** | Same drift fix as above (Task 7.6): directory-tree comments, the Data Flow ASCII diagram, and the Data Pipelines table all still name `fetch-camera-data.mjs` and "weekly". |
 
 ---
 
@@ -2476,7 +2478,7 @@ jobs:
 npx vitest run tests/config-guards.test.ts -t "refresh-camera-data workflow"
 ```
 
-Expected: both guards pass.
+Expected: all three guards pass.
 
 ### Step 5 — Commit
 
@@ -2494,6 +2496,132 @@ validating bundle) instead of `node scripts/fetch-camera-data.mjs`: its
 all-or-nothing payload validation exits non-zero on a malformed CDN response,
 failing the job so build-impact-stats and the commit never run and no corrupt
 snapshot/count is committed.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+## Task 7.6 — Update operational docs
+
+`docs/adapting-scrapers.md` and `docs/architecture.md` are current operational documentation, not
+historical record — someone forking the site or running the pipeline by hand reads these, not
+`MANIFEST.md`. Both still describe the pre-Task-2.5/Task-7 world: they name the deleted
+`scripts/fetch-camera-data.mjs`, tell the reader to run `node scripts/fetch-camera-data.mjs`, and
+call the camera refresh weekly. Updating only `MANIFEST.md` (Task 8's at-merge housekeeping) would
+leave this operational documentation broken. Fix both docs to match Task 2.5 (`scripts/fetch-camera-data.ts`,
+`npm run fetch-camera-data`, all-or-nothing validation before write) and Task 7 (daily cron).
+
+**Files:**
+- Modify: `docs/adapting-scrapers.md`
+- Modify: `docs/architecture.md`
+
+### Step 1 — Confirm the stale references (RED)
+
+```bash
+grep -n "fetch-camera-data.mjs" docs/adapting-scrapers.md docs/architecture.md
+grep -n "refreshes weekly" docs/adapting-scrapers.md docs/architecture.md
+grep -n "weekly camera data" docs/adapting-scrapers.md docs/architecture.md
+```
+
+Expected: the first command prints 5 lines (`adapting-scrapers.md:15`, `:78`, `:129`;
+`architecture.md:23`, `:155`) plus the filename split across the Data Flow ASCII box
+(`architecture.md:132`-`133`, not grep-matchable as one string — fixed by inspection in Step 3);
+the second prints `adapting-scrapers.md:104`; the third prints `architecture.md:10`. (The Bill
+status pipeline's own `(weekly/monthly)` cadence in both docs' pipeline tables is untouched by this
+task — it is a different, unaffected pipeline.)
+
+### Step 2 — Edit `docs/adapting-scrapers.md`
+
+Each edit is an exact find → replace against the file's current text.
+
+1. Overview table row:
+   - Find: `| Camera data | \`scripts/fetch-camera-data.mjs\` | \`public/camera-data.json\` | GitHub Actions (weekly) |`
+   - Replace: `| Camera data | \`scripts/fetch-camera-data.ts\` | \`public/camera-data.json\` | GitHub Actions (daily) |`
+
+2. "How it works" intro sentence (Camera Data section):
+   - Find: `` `scripts/fetch-camera-data.mjs` fetches ALPR camera locations from the [Deflock](https://deflock.org) CDN. ``
+   - Replace: `` `scripts/fetch-camera-data.ts` fetches ALPR camera locations from the [Deflock](https://deflock.org) CDN. ``
+
+3. Output sentence — add the validation note (Camera Data section):
+   - Find: `The output is saved to \`public/camera-data.json\` and loaded by the MapLibre GL JS map component at runtime.`
+   - Replace: `The fetched payload is validated all-or-nothing against the shared validator in \`src/lib/sc-camera-count.ts\` before anything is written -- a malformed, empty, or mixed response fails the script (non-zero exit) and leaves the previously committed \`public/camera-data.json\` untouched. On success, the output is saved to \`public/camera-data.json\` and loaded by the MapLibre GL JS map component at runtime.`
+
+4. GitHub Actions cadence (`refresh-camera-data.yml` section):
+   - Find: `Camera data refreshes weekly on Wednesdays. This schedule is unlikely to need changes.`
+   - Replace: `Camera data refreshes daily. This schedule is unlikely to need changes.`
+
+5. Running Locally command block:
+   - Find:
+     ```
+     # Refresh camera data
+     node scripts/fetch-camera-data.mjs
+     ```
+   - Replace:
+     ```
+     # Refresh camera data
+     npm run fetch-camera-data
+     ```
+
+### Step 3 — Edit `docs/architecture.md`
+
+1. Directory tree, workflows:
+   - Find: `│   ├── refresh-camera-data.yml   — weekly camera data refresh from Deflock CDN`
+   - Replace: `│   ├── refresh-camera-data.yml   — daily camera data refresh from Deflock CDN`
+
+2. Directory tree, scripts:
+   - Find: `│   ├── fetch-camera-data.mjs     — pull camera data from Deflock CDN`
+   - Replace: `│   ├── fetch-camera-data.ts      — pull + validate camera data from Deflock CDN`
+
+3. Data Flow ASCII diagram (the box label spans two lines; the `.mjs` sits alone on the second):
+   - Find:
+     ```
+       │fetch-camera- ├──┼─►public/camera-     │          │                      │
+       │data.mjs     │  │  │data.json ─────────┼──fetch──►│  camera-map.ts      │
+     ```
+   - Replace:
+     ```
+       │fetch-camera- ├──┼─►public/camera-     │          │                      │
+       │data.ts      │  │  │data.json ─────────┼──fetch──►│  camera-map.ts      │
+     ```
+
+4. Data Pipelines table row:
+   - Find: `| Camera data | \`scripts/fetch-camera-data.mjs\` | \`public/camera-data.json\` | GitHub Actions (weekly) |`
+   - Replace: `| Camera data | \`scripts/fetch-camera-data.ts\` | \`public/camera-data.json\` | GitHub Actions (daily) |`
+
+### Step 4 — Verify (GREEN)
+
+```bash
+grep -n "fetch-camera-data.mjs" docs/adapting-scrapers.md docs/architecture.md
+grep -n "node scripts/fetch-camera-data" docs/adapting-scrapers.md docs/architecture.md
+grep -n "refreshes weekly" docs/adapting-scrapers.md docs/architecture.md
+grep -n "weekly camera data" docs/adapting-scrapers.md docs/architecture.md
+```
+
+Expected: all four commands print nothing. Every `.mjs`/`node scripts/fetch-camera-data.mjs`
+reference is gone from both docs, and both camera-specific cadence mentions read "daily". (A plain
+`grep -n weekly` over the two files will still show the Bill status pipeline's own
+`(weekly/monthly)` cadence in the two pipeline tables and its "updates weekly on Mondays" sentence
+in `adapting-scrapers.md` -- that pipeline is untouched by this task, so those lines are expected
+to remain.)
+
+### Step 5 — Commit
+
+```
+git add docs/adapting-scrapers.md docs/architecture.md
+git commit -m "$(cat <<'EOF'
+docs(counter): fix operational-docs drift for fetch-camera-data.ts + daily refresh
+
+docs/adapting-scrapers.md and docs/architecture.md still described the deleted
+scripts/fetch-camera-data.mjs, told readers to run `node
+scripts/fetch-camera-data.mjs`, and called the camera refresh weekly -- all
+superseded by Task 2.5 (validating scripts/fetch-camera-data.ts run via `npm
+run fetch-camera-data`) and Task 7 (daily cron). Update both docs to the
+current script name/command/cadence and note that a malformed refresh now
+fails the job instead of overwriting the snapshot, so this operational
+documentation (not just MANIFEST.md) matches what ships.
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 EOF
