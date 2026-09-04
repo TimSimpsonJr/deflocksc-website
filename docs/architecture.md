@@ -7,7 +7,7 @@ Bird's-eye view of the DeflockSC codebase: directory layout, component relations
 ```text
 deflocksc-website/
 ├── .github/workflows/
-│   ├── refresh-camera-data.yml   — weekly camera data refresh from Deflock CDN
+│   ├── refresh-camera-data.yml   — daily camera data refresh from Deflock CDN
 │   └── scrape-bills.yml          — bill status scraper (weekly in session, monthly off)
 ├── docs/
 │   └── plans/                    — design docs and implementation plans
@@ -20,7 +20,7 @@ deflocksc-website/
 │   └── og-image.png
 ├── scripts/
 │   ├── build-map-style.mjs       — generate customized OpenFreeMap style JSON
-│   ├── fetch-camera-data.mjs     — pull camera data from Deflock CDN
+│   ├── fetch-camera-data.ts      — pull + validate camera data from Deflock CDN
 │   ├── publish.py                — Obsidian vault → blog post publisher
 │   ├── scraper.py                — bill status scraper (scstatehouse.gov)
 │   └── sync-open-civics.mjs      — prebuild: syncs npm package data into project
@@ -130,7 +130,7 @@ rss.xml.ts            — generates RSS feed from the same collection
                     │                     │          │                      │
   ┌──────────────┐  │                     │          │                      │
   │fetch-camera- ├──┼─►public/camera-     │          │                      │
-  │data.mjs     │  │  │data.json ─────────┼──fetch──►│  camera-map.ts      │
+  │data.ts      │  │  │data.json ─────────┼──fetch──►│  camera-map.ts      │
   └──────────────┘  │                     │          │  (MapLibre GL JS)    │
                     └─────────────────────┘          └──────────────────────┘
 ```
@@ -152,7 +152,7 @@ For details on each pipeline and how to adapt them for other states, see [adapti
 | Local councils | `open-civics` npm package | `src/data/local-councils.json` | `npm update` + prebuild sync |
 | District boundaries | `open-civics-boundaries` npm package | `public/districts/*.json` | `npm update` + prebuild sync |
 | Bill status | `scripts/scraper.py` | `src/data/bills.json` | GitHub Actions (weekly/monthly) |
-| Camera data | `scripts/fetch-camera-data.mjs` | `public/camera-data.json` | GitHub Actions (weekly) |
+| Camera data | `scripts/fetch-camera-data.ts` | `public/camera-data.json` | GitHub Actions (daily) |
 
 ## Client-Side Systems
 
