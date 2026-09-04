@@ -78,7 +78,10 @@ describe('GET /api/sc-camera-count — success', () => {
     const [url, opts] = fetchMock.mock.calls[0];
     expect(url).toBe(CDN_URL);
     expect((opts as RequestInit).headers).toMatchObject({
-      'User-Agent': expect.stringContaining('deflocksc-website'),
+      // A browser User-Agent is required: DeFlock's CDN 403s a bot-style UA from
+      // Netlify's datacenter egress (see the function's USER_AGENT comment).
+      'User-Agent': expect.stringContaining('Mozilla'),
+      Accept: expect.stringContaining('json'),
     });
     // The fetch is bounded by an abort timeout so a hung DeFlock fails soft
     // instead of riding the platform function timeout.

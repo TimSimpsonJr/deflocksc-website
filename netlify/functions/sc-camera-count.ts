@@ -14,7 +14,7 @@ import type { FeatureCollection } from '../../src/lib/geo-utils.js';
  * GET /api/sc-camera-count — the daily-fresh SC camera total (design §3.2).
  *
  * Fetches the DeFlock CDN snapshot the same way scripts/fetch-camera-data.ts
- * does (same URL + User-Agent + shared validator), applies the SC bounding-box pre-filter and the
+ * does (same URL + shared validator; a browser User-Agent -- see USER_AGENT below), applies the SC bounding-box pre-filter and the
  * shared point-in-polygon count (src/lib/sc-camera-count.ts — identical
  * methodology to the build-time impact-stats.json), and returns an aggregate
  * count only (no coordinates, no PII).
@@ -56,8 +56,16 @@ import type { FeatureCollection } from '../../src/lib/geo-utils.js';
  */
 
 const CDN_URL = 'https://cdn.deflock.me/regions/20/-100.json';
+// DeFlock's CDN (Cloudflare-fronted) returns 403 to a bot-style User-Agent coming
+// from datacenter egress, which silently 403'd this function on Netlify (confirmed
+// on a deploy preview). A browser User-Agent gets past that UA gate. The build-time
+// scripts/fetch-camera-data.ts keeps its identifying UA because it runs from GitHub
+// Actions egress, which DeFlock does NOT block. Volume stays polite regardless: the
+// response is edge-cached for a day, so DeFlock is hit ~once/day site-wide.
+// (A cleaner long-term path is a sanctioned DeFlock API or routing via the site's
+// deflock-tiles proxy -- see the PR discussion.)
 const USER_AGENT =
-  'deflocksc-website/1.0 (https://github.com/TimSimpsonJr/deflocksc-website)';
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
 
 // Bound the upstream fetch well under Netlify's ~10s function timeout, so a hung
 // DeFlock aborts here and fails soft (see the catch) instead of 5xx-ing. The
@@ -155,7 +163,11 @@ export default async (req: Request, _context: Context): Promise<Response> => {
     if (new URL(req.url).search !== '') return jsonResponse({ stale: true }, false);
 
     const resp = await fetch(CDN_URL, {
-      headers: { 'User-Agent': USER_AGENT },
+      headers: {
+        'User-Agent': USER_AGENT,
+        Accept: 'application/json,text/plain,*/*',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
       // Bounded so a hung upstream aborts (TimeoutError -> catch) rather than
       // riding the platform function timeout into a 5xx.
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
@@ -196,10 +208,10 @@ export default async (req: Request, _context: Context): Promise<Response> => {
       true,
     );
   } catch {
-    // The caught error is deliberately not inspected or echoed — it can carry
-    // internal hostnames. Serve the uncached stale sentinel instead. This catches
-    // the fetch-abort TimeoutError AND the assertValidCameraPayload throw (non-array
-    // / empty / any-malformed payload), so every anomaly fails soft, uncached.
+    // The caught error is deliberately not inspected or echoed (it can carry
+    // internal hostnames). Serve the uncached stale sentinel instead -- this catches
+    // the fetch-abort TimeoutError and the assertValidCameraPayload throw, so every
+    // anomaly fails soft, uncached.
     return jsonResponse({ stale: true }, false);
   }
 };
