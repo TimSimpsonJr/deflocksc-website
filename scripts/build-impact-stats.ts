@@ -7,9 +7,10 @@
  *   - src/data/impact-stats.json  { scTotal, jurisdictions, generatedAt }
  *
  * The count methodology lives in src/lib/sc-camera-count.ts (imported below and
- * shared with netlify/functions/sc-camera-count.ts), so the build-time figure
- * and the live endpoint use identical logic. Run via `npm run build-impact-stats`,
- * which esbuild-bundles this TS (and the shared module) before executing it.
+ * shared with the daily refresh fetch, scripts/fetch-camera-data.ts), so the
+ * refresh's validation and the build-time figure use identical logic. Run via
+ * `npm run build-impact-stats`, which esbuild-bundles this TS (and the shared
+ * module) before executing it.
  * Because that bundle lands in node_modules/.cache, all paths are resolved from
  * process.cwd() (the repo root) — NOT from import.meta.url, which after bundling
  * points into node_modules/.cache and cannot locate public/ or src/data/.

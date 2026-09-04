@@ -9,9 +9,12 @@
  * ./geo-utils (holes + MultiPolygon handled there), so this module and the
  * production district matcher can never disagree.
  *
- * Imported by BOTH scripts/build-impact-stats.ts (build-time impact-stats.json
- * + camera-counts.json) and netlify/functions/sc-camera-count.ts (the daily
- * live endpoint), so the two paths share one methodology.
+ * Imported by BOTH scripts/fetch-camera-data.ts (the daily validating refresh
+ * fetch) and scripts/build-impact-stats.ts (build-time impact-stats.json +
+ * camera-counts.json), so the refresh and the build share one methodology and
+ * one payload validator. (A live Netlify endpoint was considered — design
+ * Approach A — but abandoned because DeFlock's CDN 403s Netlify egress; see the
+ * design doc's status note.)
  */
 import { pointInPolygon, type FeatureCollection } from './geo-utils.js';
 
@@ -25,10 +28,10 @@ export interface Camera {
 /**
  * A camera record is well-formed only with an id (number|string) and FINITE
  * numeric lat/lon. This is the single source of truth for structural validity,
- * imported by BOTH boundaries — the live Netlify function and the refresh/build
- * fetch step (scripts/fetch-camera-data.ts) — so neither path can silently count,
- * cache, or commit a malformed record. (A string/NaN/Infinity coord or a missing
- * id fails.)
+ * imported by the refresh/build fetch step (scripts/fetch-camera-data.ts) and
+ * re-asserted by the build generator (scripts/build-impact-stats.ts), so neither
+ * path can silently count or commit a malformed record. (A string/NaN/Infinity
+ * coord or a missing id fails.)
  */
 export function isWellFormedCamera(record: unknown): record is Camera {
   if (typeof record !== 'object' || record === null) return false;
@@ -57,15 +60,16 @@ export class InvalidCameraPayloadError extends Error {
  * rejects the WHOLE payload (never a filtered undercount). On return, `raw` is
  * narrowed to Camera[].
  *
- * Usage differs only in how each boundary handles the throw, never in what counts
+ * Usage differs only in how each caller handles the throw, never in what counts
  * as valid:
- *   - the live function (netlify/functions/sc-camera-count.ts) calls it inside its
- *     try/catch, so a throw becomes the uncached { stale:true } sentinel;
- *   - the refresh/build fetch step (scripts/fetch-camera-data.ts) calls it BEFORE
+ *   - the refresh fetch step (scripts/fetch-camera-data.ts) calls it BEFORE
  *     writing public/camera-data.json, so a throw exits the process non-zero and
- *     leaves the prior committed snapshot intact.
- * Neither path ever writes/caches/commits a malformed snapshot, and the shared
- * counter (countScCameras) does only its geographic SC-bbox clip — no structural
+ *     leaves the prior committed snapshot intact (the whole daily job fails
+ *     rather than commit a corrupt count);
+ *   - the build generator (scripts/build-impact-stats.ts) re-asserts it as
+ *     defense-in-depth before deriving impact-stats.json / camera-counts.json.
+ * Neither path ever writes/commits a malformed snapshot, and the shared counter
+ * (countScCameras) does only its geographic SC-bbox clip — no structural
  * filtering of its own.
  */
 export function assertValidCameraPayload(raw: unknown): asserts raw is Camera[] {

@@ -1,7 +1,15 @@
 # Live SC Camera Counter — Design
 
+> **STATUS (superseded):** The live-fetch endpoint (Approach A below) was abandoned in favor of
+> build-time-daily (Approach C) because DeFlock's CDN returns 403 to fetches from Netlify's function
+> egress, so the live function never returned a real count in production (PR #118 discussion). The
+> shipped design keeps only the build-time SC count, refreshed **daily** by the `refresh-camera-data`
+> GitHub Action (which fetches DeFlock from GitHub egress, not blocked) through the validating
+> all-or-nothing fetch. The rest of this document is retained as a historical record of the
+> Approach A design.
+
 Date: 2026-09-04
-Status: Approved (brainstorm), pending implementation plan
+Status: Superseded — Approach A (live Netlify Function) dropped for Approach C (build-time, daily refresh)
 Branch: `feature/live-camera-counter`
 
 ## 1. Problem & goal

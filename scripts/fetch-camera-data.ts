@@ -6,7 +6,7 @@
  * This is the UNTRUSTED-INPUT boundary of the refresh/build pipeline: the CDN
  * response is validated ALL-OR-NOTHING with the SHARED validator
  * (assertValidCameraPayload from src/lib/sc-camera-count.ts — the SAME gate the
- * live Netlify function applies) BEFORE the snapshot is written. A non-array,
+ * build generator re-asserts) BEFORE the snapshot is written. A non-array,
  * empty, or any-malformed payload throws, the process exits non-zero (via
  * main().catch below), and the prior committed public/camera-data.json is left
  * untouched — so a malformed CDN response can never be written or committed as a
@@ -38,8 +38,8 @@ async function main(): Promise<void> {
   // Structural gate at the untrusted-input boundary. Throws (-> non-zero exit)
   // BEFORE the write if the payload is not a NON-EMPTY array of well-formed
   // records, so the prior committed snapshot survives and no corrupt snapshot is
-  // ever written or committed. Same shared validator the live endpoint uses, so
-  // both boundaries reject identical payloads.
+  // ever written or committed. Same shared validator the build generator
+  // (build-impact-stats.ts) re-asserts, so both steps reject identical payloads.
   assertValidCameraPayload(raw);
   console.log(`Fetched ${raw.length} cameras (all well-formed)`);
 
