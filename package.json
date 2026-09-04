@@ -17,6 +17,7 @@
     "codes:ui": "esbuild scripts/codes-ui.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/codes-ui.mjs && node node_modules/.cache/codes-ui.mjs",
     "fetch-camera-data": "esbuild scripts/fetch-camera-data.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/fetch-camera-data.mjs && node node_modules/.cache/fetch-camera-data.mjs",
     "build-impact-stats": "esbuild scripts/build-impact-stats.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/build-impact-stats.mjs && node node_modules/.cache/build-impact-stats.mjs",
+    "build-timeline-data": "esbuild scripts/build-timeline-data.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/build-timeline-data.mjs && node node_modules/.cache/build-timeline-data.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
