@@ -28,7 +28,7 @@ Four moving parts, in dependency order:
    canonical `pointInPolygon` from `src/lib/geo-utils.ts`. Imported by BOTH the build script
    and the new function, so the two paths can never diverge.
 2. **Endpoint** `netlify/functions/sc-camera-count.ts` (new) — fetches the DeFlock CDN the same
-   way `scripts/fetch-camera-data.mjs` does, runs `countScCameras`, returns
+   way `scripts/fetch-camera-data.ts` does (same URL + UA + shared validator), runs `countScCameras`, returns
    `{ scTotal, jurisdictions, generatedAt, stale:false }` with a 24 h durable + SWR edge cache.
    Query-bearing requests are rejected before the fetch (Netlify's cache key includes the query, so
    `?bust=` would bypass the cache and hammer DeFlock); the fetch is bounded by an abort timeout;
@@ -42,8 +42,12 @@ Four moving parts, in dependency order:
    and on a valid numeric `scTotal` updates the three `data-live-sc` surfaces; otherwise leaves
    the SSR build-time number untouched. Count-up + reduced-motion are delegated to the existing
    `observeCountUps` in `src/scripts/count-up.ts` (that file is NOT modified).
-4. **Build/CI change** — refactor `build-impact-stats` to import the shared module; bump the
-   `refresh-camera-data.yml` cron weekly → daily.
+4. **Build/CI change** — refactor BOTH refresh/build scripts (`fetch-camera-data` and
+   `build-impact-stats`) to `.ts` importing the shared module, so the untrusted CDN fetch is
+   validated by the SAME all-or-nothing validator the live function uses BEFORE the snapshot is
+   written/committed; bump the `refresh-camera-data.yml` cron weekly → daily. A malformed CDN
+   payload now fails the refresh step (non-zero exit) and the whole job, leaving the prior
+   committed snapshot and counts untouched — never a corrupt fallback commit.
 
 Fallback ladder (the number is never blank, never blocks render): **live** value → **build-time**
 `impact-stats.json` value (SSR; used on fetch failure / `stale` / JS off).
@@ -73,12 +77,15 @@ Fallback ladder (the number is never blank, never blocks render): **live** value
 
 | File | New/Mod | Responsibility |
 |------|---------|----------------|
-| `src/lib/sc-camera-count.ts` | **New** | Pure, dependency-free SC-count module: `SC_BOUNDS`, `inScBounds`, `filterToScBounds`, `pointInFeatureCollection`, `keyFromFilename`, `countScCameras`. Reuses `pointInPolygon` from `geo-utils`. Single source of truth. |
-| `src/lib/sc-camera-count.test.ts` | **New** | Unit tests (dedup, holes, MultiPolygon, bbox, per-jurisdiction) + **parity** test vs. an inlined copy of the pre-refactor algorithm. |
-| `scripts/build-impact-stats.ts` | **New** (replaces `.mjs`) | Build-time generator; now *imports* `countScCameras` instead of an inline copy. Writes `public/camera-counts.json` + `src/data/impact-stats.json`, byte-format unchanged. |
+| `src/lib/sc-camera-count.ts` | **New** | Pure, dependency-free SC-count module: `SC_BOUNDS`, `inScBounds`, `filterToScBounds`, `pointInFeatureCollection`, `keyFromFilename`, `countScCameras`, **plus the shared payload validator `isWellFormedCamera` + `assertValidCameraPayload` (single source of truth for structural validity, called by BOTH the live function and the refresh/build fetch step)**. Reuses `pointInPolygon` from `geo-utils`. Single source of truth. |
+| `src/lib/sc-camera-count.test.ts` | **New** | Unit tests (dedup, holes, MultiPolygon, bbox, per-jurisdiction, **validator: well-formed/malformed/empty/non-array**) + **parity** test vs. an inlined copy of the pre-refactor algorithm. |
+| `scripts/fetch-camera-data.ts` | **New** (replaces `.mjs`) | Refresh step: fetches the DeFlock CDN, validates the payload **all-or-nothing** with the shared `assertValidCameraPayload` BEFORE writing `public/camera-data.json`; a malformed/empty/mixed payload throws → non-zero exit → prior snapshot left intact. Esbuild-bundled (like `build-impact-stats`); `ROOT`=`process.cwd()`. |
+| `scripts/fetch-camera-data.mjs` | **Delete** | Replaced by the validating `.ts` above. |
+| `tests/fetch-camera-data.exec.test.ts` | **New** | Execution-level regression: bundles the fetch step, stubs `fetch` (via `--import` preload) to return a malformed/empty payload, runs it from a fixture cwd, and asserts a NON-ZERO exit that does NOT overwrite `public/camera-data.json` / `camera-counts.json` / `impact-stats.json`; positive control proves a well-formed payload DOES write. |
+| `scripts/build-impact-stats.ts` | **New** (replaces `.mjs`) | Build-time generator; now *imports* `countScCameras` instead of an inline copy, and defensively re-asserts the snapshot via `assertValidCameraPayload` before any write. Writes `public/camera-counts.json` + `src/data/impact-stats.json`, byte-format unchanged. |
 | `scripts/build-impact-stats.mjs` | **Delete** | Replaced by the `.ts` above. |
 | `tests/build-impact-stats.exec.test.ts` | **New** | Execution-level regression: bundles the generator (esbuild) and runs it from a fixture cwd, asserting `ROOT`=`process.cwd()` finds the boundary files + writes correct figures. Catches the `import.meta.url`→`node_modules` bug a unit test can't. |
-| `netlify/functions/sc-camera-count.ts` | **New** | `GET /api/sc-camera-count`: reject query-bearing requests (cache-key politeness), fetch DeFlock with a bounded abort timeout, validate payload **all-or-nothing** (any malformed record → whole payload rejected) + computed result (`scTotal` and `jurisdictions` both positive integers), `countScCameras`, 24 h durable+SWR cache; timeout/`!ok`/non-array/empty/any-malformed/mixed/zero/non-positive-jurisdictions → 200 `{stale:true}` uncached. |
+| `netlify/functions/sc-camera-count.ts` | **New** | `GET /api/sc-camera-count`: reject query-bearing requests (cache-key politeness), fetch DeFlock with a bounded abort timeout, validate payload **all-or-nothing via the SHARED `assertValidCameraPayload`** (same validator as the refresh/build fetch step — any malformed record → whole payload rejected) + computed result (`scTotal` and `jurisdictions` both positive integers), `countScCameras`, 24 h durable+SWR cache; timeout/`!ok`/non-array/empty/any-malformed/mixed/zero/non-positive-jurisdictions → 200 `{stale:true}` uncached. |
 | `tests/functions/sc-camera-count.test.ts` | **New** | Function tests: success shape + cache header + CDN URL/UA + bounded signal; cache-busting query never reaches upstream; `!ok` / throw / non-array / empty-array / all-malformed / **mixed valid+malformed** / zero-result / timeout → `{stale:true}` uncached (mixed proves no filtered undercount is cached). |
 | `src/scripts/live-count.ts` | **New** | Client: memoized `getLiveCount()`, pure `parseLiveCount`/`cameraFloor`, `applyLiveCount`, idempotent `initLiveCount`. |
 | `src/scripts/live-count.test.ts` | **New** | Unit tests for the pure helpers (`parseLiveCount`, `cameraFloor`) — `node` env. |
@@ -89,8 +96,8 @@ Fallback ladder (the number is never blank, never blocks render): **live** value
 | `netlify.toml` | **Mod** | Add **function-scoped** `[functions."sc-camera-count"] included_files = ["public/districts/**"]` (NOT a global `[functions]` table). No redirect (routing via `config.path`). CSP unchanged. |
 | `astro.config.mjs` | **Mod** | Add `/api/sc-camera-count` dev proxy → functions server. |
 | `tests/config-guards.test.ts` | **Mod** | Add guards: refactor happened (no inline `pointInRing`), `included_files` scoped to `[functions."sc-camera-count"]` only (no global `[functions]`, exactly one `included_files`), function `config.path`, CSP `connect-src 'self'` intact, dev proxy present, built homepage wraps the SSR number inside each `data-live-sc` hook. |
-| `.github/workflows/refresh-camera-data.yml` | **Mod** | Cron weekly → daily; add `npm ci` + `npm run prebuild` (the shared-module import + boundary files now require them); Node 20 → 22; run `npm run build-impact-stats`. |
-| `package.json` | **Mod** | Add `"build-impact-stats"` esbuild-bundle script; add `happy-dom` (pinned) to `devDependencies` for the DOM test env. |
+| `.github/workflows/refresh-camera-data.yml` | **Mod** | Cron weekly → daily; add `npm ci` + `npm run prebuild` (the shared-module import + boundary files now require them); Node 20 → 22; run `npm run fetch-camera-data` (validating TS bundle, no longer `node scripts/fetch-camera-data.mjs`) then `npm run build-impact-stats`. The fetch step's validation failure exits non-zero and fails the job, so no corrupt snapshot/count is committed. |
+| `package.json` | **Mod** | Add `"fetch-camera-data"` + `"build-impact-stats"` esbuild-bundle scripts; add `happy-dom` (pinned) to `devDependencies` for the DOM test env. |
 
 ---
 
@@ -113,6 +120,9 @@ import {
   filterToScBounds,
   keyFromFilename,
   inScBounds,
+  isWellFormedCamera,
+  assertValidCameraPayload,
+  InvalidCameraPayloadError,
   SC_BOUNDS,
   type Camera,
 } from './sc-camera-count.js';
@@ -211,6 +221,57 @@ describe('countScCameras', () => {
 
   it('exposes SC_BOUNDS as the documented SC box', () => {
     expect(SC_BOUNDS).toEqual({ minLat: 31.5, maxLat: 35.5, minLon: -84.0, maxLon: -78.0 });
+  });
+});
+
+// --- Shared payload validator: the single source of truth both boundaries call ---
+
+describe('isWellFormedCamera', () => {
+  it('accepts a record with an id and finite numeric lat/lon', () => {
+    expect(isWellFormedCamera({ id: 1, lat: 34, lon: -81 })).toBe(true);
+    expect(isWellFormedCamera({ id: 'abc', lat: 33.5, lon: -80.2 })).toBe(true);
+  });
+
+  it('rejects a missing id, non-numeric coords, and non-finite coords', () => {
+    expect(isWellFormedCamera({ lat: 34, lon: -81 })).toBe(false); // no id
+    expect(isWellFormedCamera({ id: 1, lat: 'x', lon: 'y' })).toBe(false); // string coords
+    expect(isWellFormedCamera({ id: 1, lat: Number.NaN, lon: -81 })).toBe(false); // NaN
+    expect(isWellFormedCamera({ id: 1, lat: Infinity, lon: -81 })).toBe(false); // Infinity
+    expect(isWellFormedCamera(null)).toBe(false);
+    expect(isWellFormedCamera('nope')).toBe(false);
+  });
+});
+
+describe('assertValidCameraPayload (all-or-nothing)', () => {
+  it('passes a non-empty array of fully well-formed records', () => {
+    expect(() =>
+      assertValidCameraPayload([
+        { id: 1, lat: 34, lon: -81 },
+        { id: 2, lat: 34.5, lon: -80 },
+      ]),
+    ).not.toThrow();
+  });
+
+  it('throws InvalidCameraPayloadError for a non-array', () => {
+    expect(() => assertValidCameraPayload({ oops: true })).toThrow(InvalidCameraPayloadError);
+    expect(() => assertValidCameraPayload(null)).toThrow(InvalidCameraPayloadError);
+  });
+
+  it('throws for an empty array (never a valid snapshot)', () => {
+    expect(() => assertValidCameraPayload([])).toThrow(InvalidCameraPayloadError);
+  });
+
+  it('throws when ANY record is malformed — never a filtered subset', () => {
+    // One bad record poisons the whole payload; the two valid ones are NOT
+    // silently kept. This is the property both boundaries rely on so a mixed
+    // snapshot can never be written/committed or cached as a partial count.
+    expect(() =>
+      assertValidCameraPayload([
+        { id: 1, lat: 34, lon: -81 }, // well-formed
+        { id: 2, lat: 34.5, lon: -80 }, // well-formed
+        { id: 3, lat: 'x', lon: 'y' }, // malformed
+      ]),
+    ).toThrow(InvalidCameraPayloadError);
   });
 });
 
@@ -331,6 +392,66 @@ export interface Camera {
 }
 
 /**
+ * A camera record is well-formed only with an id (number|string) and FINITE
+ * numeric lat/lon. This is the single source of truth for structural validity,
+ * imported by BOTH boundaries — the live Netlify function and the refresh/build
+ * fetch step (scripts/fetch-camera-data.ts) — so neither path can silently count,
+ * cache, or commit a malformed record. (A string/NaN/Infinity coord or a missing
+ * id fails.)
+ */
+export function isWellFormedCamera(record: unknown): record is Camera {
+  if (typeof record !== 'object' || record === null) return false;
+  const r = record as Record<string, unknown>;
+  return (
+    (typeof r.id === 'number' || typeof r.id === 'string') &&
+    typeof r.lat === 'number' &&
+    Number.isFinite(r.lat) &&
+    typeof r.lon === 'number' &&
+    Number.isFinite(r.lon)
+  );
+}
+
+/** Thrown by assertValidCameraPayload when a snapshot is unusable. */
+export class InvalidCameraPayloadError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidCameraPayloadError';
+  }
+}
+
+/**
+ * ALL-OR-NOTHING payload gate — the single validator BOTH boundaries call before
+ * a raw camera snapshot is trusted. Throws InvalidCameraPayloadError unless `raw`
+ * is a NON-EMPTY array in which EVERY record is well-formed: one malformed record
+ * rejects the WHOLE payload (never a filtered undercount). On return, `raw` is
+ * narrowed to Camera[].
+ *
+ * Usage differs only in how each boundary handles the throw, never in what counts
+ * as valid:
+ *   - the live function (netlify/functions/sc-camera-count.ts) calls it inside its
+ *     try/catch, so a throw becomes the uncached { stale:true } sentinel;
+ *   - the refresh/build fetch step (scripts/fetch-camera-data.ts) calls it BEFORE
+ *     writing public/camera-data.json, so a throw exits the process non-zero and
+ *     leaves the prior committed snapshot intact.
+ * Neither path ever writes/caches/commits a malformed snapshot, and the shared
+ * counter (countScCameras) does only its geographic SC-bbox clip — no structural
+ * filtering of its own.
+ */
+export function assertValidCameraPayload(raw: unknown): asserts raw is Camera[] {
+  if (!Array.isArray(raw)) {
+    throw new InvalidCameraPayloadError('camera payload is not an array');
+  }
+  if (raw.length === 0) {
+    throw new InvalidCameraPayloadError('camera payload is empty');
+  }
+  if (!raw.every(isWellFormedCamera)) {
+    throw new InvalidCameraPayloadError(
+      'camera payload contains a malformed record (missing id or non-finite lat/lon)',
+    );
+  }
+}
+
+/**
  * SC bounding box — the cheap pre-filter run before the expensive
  * point-in-polygon work (mirrors scripts/build-camera-counts.py). The DeFlock
  * snapshot spans the whole SE-US CDN tile (~62k cameras); this trims it to a
@@ -440,12 +561,17 @@ Expected: all tests pass (parity block included).
 ```
 git add src/lib/sc-camera-count.ts src/lib/sc-camera-count.test.ts
 git commit -m "$(cat <<'EOF'
-feat(counter): shared SC camera-count module
+feat(counter): shared SC camera-count module + payload validator
 
 Extract the SC point-in-polygon count (scTotal + per-jurisdiction) into a
 pure, Vitest-covered module reusing geo-utils.pointInPolygon, so the build
-script and the forthcoming live endpoint share one methodology. Includes a
-parity test against a verbatim copy of the pre-refactor inline algorithm.
+script and the forthcoming live endpoint share one methodology. Also add the
+shared all-or-nothing payload validator (isWellFormedCamera +
+assertValidCameraPayload) that both the live function and the refresh/build
+fetch step call, so a malformed CDN snapshot is rejected identically at both
+boundaries and can never be counted, cached, or committed. Includes unit tests
+for the validator and a parity test against a verbatim copy of the pre-refactor
+inline algorithm.
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 EOF
@@ -459,7 +585,9 @@ EOF
 Convert `scripts/build-impact-stats.mjs` → `scripts/build-impact-stats.ts`, dropping its inline
 `pointInRing`/`pointInPolygon` copy in favor of `countScCameras`. Because a plain-`node` `.mjs`
 cannot import a `.ts` module, run it through esbuild — the repo's existing pattern for the
-`codes` and `build-wordlist` scripts.
+`codes` and `build-wordlist` scripts. It also imports the shared `assertValidCameraPayload` and
+re-asserts the snapshot before any write (defense-in-depth behind the primary fetch-boundary gate
+added in Task 2.5).
 
 **Files:**
 - Create: `scripts/build-impact-stats.ts` (replaces the `.mjs`).
@@ -646,6 +774,7 @@ import {
   countScCameras,
   keyFromFilename,
   filterToScBounds,
+  assertValidCameraPayload,
   type Camera,
 } from '../src/lib/sc-camera-count.js';
 import type { FeatureCollection } from '../src/lib/geo-utils.js';
@@ -668,7 +797,15 @@ function readJson<T>(path: string): T {
 }
 
 function main(): void {
-  const allCameras = readJson<Camera[]>(CAMERA_DATA);
+  const raw = readJson<unknown>(CAMERA_DATA);
+  // Defense-in-depth: the committed snapshot is already validated at the fetch
+  // boundary (scripts/fetch-camera-data.ts) with this SAME shared validator, but
+  // re-assert here BEFORE any artifact write so a standalone/local run on a stale
+  // or hand-edited public/camera-data.json can never derive (or overwrite the
+  // committed figures with) a malformed count. A throw exits non-zero before any
+  // writeFileSync.
+  assertValidCameraPayload(raw);
+  const allCameras: Camera[] = raw;
   console.log(
     `Loaded ${allCameras.length} cameras; ${filterToScBounds(allCameras).length} inside the SC bounding box`,
   );
@@ -766,6 +903,312 @@ import.meta.url, which points into node_modules/.cache after bundling). Output
 bytes and figures unchanged (guarded by the parity test); a source-text guard
 prevents re-inlining and an execution-level regression runs the bundled
 generator against a fixture root to prove ROOT resolves from cwd.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+## Task 2.5 — Validate the fetched CDN payload at the refresh/build boundary
+
+**Why (Codex round 3, blocking).** `scripts/fetch-camera-data.mjs` writes the untrusted DeFlock CDN
+response straight to `public/camera-data.json` with NO structural validation, and the daily workflow
+immediately derives figures from it and commits them. So a malformed/mixed snapshot that the live
+function would reject could still generate and commit a corrupted fallback count. Fix: apply the
+SAME shared all-or-nothing validator (`assertValidCameraPayload`, Task 1) at this boundary, BEFORE
+the snapshot is written — the untrusted-input choke point of the refresh/build pipeline. Because a
+plain-`node` `.mjs` cannot import the shared `.ts`, convert `fetch-camera-data` to `.ts` + an
+esbuild-bundle npm script (identical to Task 2 / `codes` / `build-wordlist`), so there is exactly
+ONE validator definition shared across both boundaries — not a re-inlined copy.
+
+**Files:**
+- Create: `scripts/fetch-camera-data.ts` (replaces the `.mjs`).
+- Delete: `scripts/fetch-camera-data.mjs`.
+- Modify: `package.json` — add the `fetch-camera-data` esbuild-bundle script.
+- Test: `tests/config-guards.test.ts` — source-text guard that the fetch step imports the shared
+  validator and the npm script is bundled.
+- Test: `tests/fetch-camera-data.exec.test.ts` — **execution-level** regression: bundle the fetch
+  step, stub `fetch` (via a `--import` preload) to return a malformed / empty payload, run the
+  bundle from a fixture cwd, and assert a NON-ZERO exit that does NOT overwrite the prior committed
+  `public/camera-data.json` (nor the downstream `camera-counts.json` / `impact-stats.json`, which
+  the fetch step never touches — proving it fails BEFORE the build step that would). A positive
+  control proves a well-formed payload exits 0 and DOES write.
+
+### Step 1 — Write the failing test
+
+Add to `tests/config-guards.test.ts` (after the `build-impact-stats refactor` describe):
+
+```ts
+describe('fetch-camera-data validation boundary (single shared validator)', () => {
+  const script = read('scripts/fetch-camera-data.ts');
+
+  it('validates via the shared all-or-nothing validator before writing', () => {
+    expect(script).toMatch(/from ['"]\.\.\/src\/lib\/sc-camera-count\.js['"]/);
+    expect(script).toContain('assertValidCameraPayload');
+  });
+
+  it('does not re-inline a local well-formed check (one definition only)', () => {
+    expect(script).not.toMatch(/function isWellFormedCamera/);
+  });
+
+  it('exposes an esbuild-bundled npm script', () => {
+    const pkg = JSON.parse(read('package.json'));
+    expect(pkg.scripts['fetch-camera-data']).toContain('esbuild scripts/fetch-camera-data.ts');
+    expect(pkg.scripts['fetch-camera-data']).toContain(
+      'node node_modules/.cache/fetch-camera-data.mjs',
+    );
+  });
+});
+```
+
+Then create `tests/fetch-camera-data.exec.test.ts` — the execution-level regression that runs the
+**bundled** fetch step against a stubbed `fetch` and proves a malformed payload fails before any
+artifact is overwritten. `fetch` is replaced in a child process via a `--import` preload module (so
+the bundle's own `globalThis.fetch` call is intercepted without any network or port), and the
+fixture seeds a prior committed snapshot plus the two downstream artifacts so the "not overwritten"
+guarantee is asserted byte-for-byte:
+
+```ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { build } from 'esbuild';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const repoRoot = fileURLToPath(new URL('..', import.meta.url));
+const bundlePath = join(repoRoot, 'node_modules', '.cache', 'fetch-camera-data.exec-test.mjs');
+
+// A prior committed snapshot the fetch step must NOT clobber on a bad payload,
+// plus the two downstream artifacts the fetch step never writes (seeded so the
+// "artifacts unchanged" guarantee is literal — the build step that would write
+// them never runs because fetch fails first).
+const PRIOR_SNAPSHOT = JSON.stringify([{ id: 42, lat: 34, lon: -81 }]);
+const PRIOR_COUNTS = JSON.stringify({ 'county:test': 5 }) + '\n';
+const PRIOR_STATS = JSON.stringify({ scTotal: 5, jurisdictions: 1, generatedAt: 'x' }) + '\n';
+
+// A preload module that stubs global fetch to return `records` as the CDN body.
+// Evaluated (via `node --import`) BEFORE the bundle's entry point, so the
+// bundle's fetch(CDN_URL) call hits this stub — no network, no port.
+function preload(records: unknown): string {
+  return (
+    'globalThis.fetch = async () => new Response(' +
+    JSON.stringify(JSON.stringify(records)) +
+    ", { status: 200, headers: { 'content-type': 'application/json' } });\n"
+  );
+}
+
+let fixtureRoot: string;
+let cameraData: string;
+let countsOut: string;
+let statsOut: string;
+
+beforeAll(async () => {
+  // Bundle the fetch step with the EXACT flags the `fetch-camera-data` npm script
+  // uses, producing the same node_modules/.cache artifact whose behavior is under
+  // test.
+  await build({
+    entryPoints: [join(repoRoot, 'scripts', 'fetch-camera-data.ts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    packages: 'external',
+    outfile: bundlePath,
+  });
+}, 120_000);
+
+afterAll(() => {
+  rmSync(bundlePath, { force: true });
+});
+
+function seedFixture(): void {
+  fixtureRoot = mkdtempSync(join(tmpdir(), 'fetch-camera-exec-'));
+  mkdirSync(join(fixtureRoot, 'public'), { recursive: true });
+  mkdirSync(join(fixtureRoot, 'src', 'data'), { recursive: true });
+  cameraData = join(fixtureRoot, 'public', 'camera-data.json');
+  countsOut = join(fixtureRoot, 'public', 'camera-counts.json');
+  statsOut = join(fixtureRoot, 'src', 'data', 'impact-stats.json');
+  writeFileSync(cameraData, PRIOR_SNAPSHOT);
+  writeFileSync(countsOut, PRIOR_COUNTS);
+  writeFileSync(statsOut, PRIOR_STATS);
+}
+
+// Run the bundle from the fixture cwd with `fetch` stubbed to return `records`.
+// Returns whether the process exited 0. A throw (non-zero exit) is the failure
+// signal the validation boundary produces on a bad payload.
+function runBundle(records: unknown): boolean {
+  const preloadPath = join(fixtureRoot, 'mock-fetch.mjs');
+  writeFileSync(preloadPath, preload(records));
+  try {
+    execFileSync(process.execPath, ['--import', pathToFileURL(preloadPath).href, bundlePath], {
+      cwd: fixtureRoot,
+      stdio: 'ignore',
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+describe('fetch-camera-data validation boundary (cluster: refresh-boundary-validation)', () => {
+  it('FAILS non-zero on a MIXED valid+malformed payload and overwrites NOTHING', () => {
+    seedFixture();
+    // Two well-formed records + one malformed: the shared all-or-nothing gate must
+    // reject the WHOLE payload, so no filtered undercount is ever written.
+    const ok = runBundle([
+      { id: 1, lat: 34, lon: -81 }, // well-formed, inside SC
+      { id: 2, lat: 34.5, lon: -80 }, // well-formed, inside SC
+      { id: 3, lat: 'x', lon: 'y' }, // malformed -> poisons the whole payload
+    ]);
+    expect(ok).toBe(false); // process exited non-zero -> refresh step failed
+    // Prior snapshot + both downstream artifacts are byte-for-byte intact.
+    expect(readFileSync(cameraData, 'utf8')).toBe(PRIOR_SNAPSHOT);
+    expect(readFileSync(countsOut, 'utf8')).toBe(PRIOR_COUNTS);
+    expect(readFileSync(statsOut, 'utf8')).toBe(PRIOR_STATS);
+    rmSync(fixtureRoot, { recursive: true, force: true });
+  });
+
+  it('FAILS non-zero on an EMPTY array and does not write an empty snapshot', () => {
+    seedFixture();
+    expect(runBundle([])).toBe(false);
+    expect(readFileSync(cameraData, 'utf8')).toBe(PRIOR_SNAPSHOT);
+    rmSync(fixtureRoot, { recursive: true, force: true });
+  });
+
+  it('positive control: a fully well-formed payload exits 0 and DOES write the new snapshot', () => {
+    seedFixture();
+    const fresh = [
+      { id: 1, lat: 34, lon: -81 },
+      { id: 2, lat: 34.5, lon: -80 },
+    ];
+    expect(runBundle(fresh)).toBe(true); // exited 0
+    expect(JSON.parse(readFileSync(cameraData, 'utf8'))).toEqual(fresh); // snapshot replaced
+    rmSync(fixtureRoot, { recursive: true, force: true });
+  });
+});
+```
+
+### Step 2 — Run it (expect FAIL)
+
+```
+npx vitest run tests/config-guards.test.ts -t "fetch-camera-data validation boundary"
+npx vitest run tests/fetch-camera-data.exec.test.ts
+```
+
+Expected: BOTH fail — `read('scripts/fetch-camera-data.ts')` throws `ENOENT` (the file is still
+`.mjs`), so the config-guards describe errors; and the exec test's `beforeAll` esbuild `build` fails
+to resolve the not-yet-created `scripts/fetch-camera-data.ts` entry point.
+
+### Step 3 — Minimal implementation
+
+Create `scripts/fetch-camera-data.ts` (the `.mjs`'s CORS-avoidance purpose is unchanged; the new
+part is the shared-validator gate before the write, and `ROOT`=`process.cwd()` for the bundled
+artifact):
+
+```ts
+/**
+ * fetch-camera-data.ts — fetch the DeFlock CDN snapshot and write it to
+ * public/camera-data.json for the build-time impact-stats generator (design §4.1).
+ * (Fetching server-side also avoids the CDN's missing CORS header.)
+ *
+ * This is the UNTRUSTED-INPUT boundary of the refresh/build pipeline: the CDN
+ * response is validated ALL-OR-NOTHING with the SHARED validator
+ * (assertValidCameraPayload from src/lib/sc-camera-count.ts — the SAME gate the
+ * live Netlify function applies) BEFORE the snapshot is written. A non-array,
+ * empty, or any-malformed payload throws, the process exits non-zero (via
+ * main().catch below), and the prior committed public/camera-data.json is left
+ * untouched — so a malformed CDN response can never be written or committed as a
+ * corrupt fallback, and can never flow into build-impact-stats.
+ *
+ * Run via `npm run fetch-camera-data`, which esbuild-bundles this TS (and the
+ * shared module) before executing it — the repo's codes / build-wordlist /
+ * build-impact-stats pattern. Because that bundle lands in node_modules/.cache,
+ * the output path is resolved from process.cwd() (the repo root), NOT
+ * import.meta.url (which after bundling points into node_modules/.cache).
+ */
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { assertValidCameraPayload } from '../src/lib/sc-camera-count.js';
+
+const CDN_URL = 'https://cdn.deflock.me/regions/20/-100.json';
+const USER_AGENT =
+  'deflocksc-website/1.0 (https://github.com/TimSimpsonJr/deflocksc-website)';
+const OUT_PATH = resolve(process.cwd(), 'public', 'camera-data.json');
+
+async function main(): Promise<void> {
+  console.log(`Fetching camera data from ${CDN_URL}...`);
+  const resp = await fetch(CDN_URL, { headers: { 'User-Agent': USER_AGENT } });
+  if (!resp.ok) {
+    throw new Error(`CDN responded with ${resp.status} ${resp.statusText}`);
+  }
+
+  const raw = (await resp.json()) as unknown;
+  // Structural gate at the untrusted-input boundary. Throws (-> non-zero exit)
+  // BEFORE the write if the payload is not a NON-EMPTY array of well-formed
+  // records, so the prior committed snapshot survives and no corrupt snapshot is
+  // ever written or committed. Same shared validator the live endpoint uses, so
+  // both boundaries reject identical payloads.
+  assertValidCameraPayload(raw);
+  console.log(`Fetched ${raw.length} cameras (all well-formed)`);
+
+  writeFileSync(OUT_PATH, JSON.stringify(raw));
+  console.log(`Wrote ${OUT_PATH}`);
+}
+
+main().catch((err) => {
+  console.error('Failed to fetch camera data:', err);
+  process.exit(1);
+});
+```
+
+Delete the old script:
+
+```
+git rm scripts/fetch-camera-data.mjs
+```
+
+Add the npm script to `package.json` (immediately above `build-impact-stats`, mirroring it exactly):
+
+```jsonc
+    "fetch-camera-data": "esbuild scripts/fetch-camera-data.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/fetch-camera-data.mjs && node node_modules/.cache/fetch-camera-data.mjs",
+```
+
+### Step 4 — Run the tests (expect PASS)
+
+```
+npx vitest run tests/config-guards.test.ts -t "fetch-camera-data validation boundary"
+npx vitest run tests/fetch-camera-data.exec.test.ts
+```
+
+Expected: the source-text guards pass, and the exec regression passes — the mixed and empty payloads
+each exit non-zero without overwriting any artifact, and the well-formed positive control writes the
+new snapshot.
+
+### Step 5 — Commit
+
+```
+git add scripts/fetch-camera-data.ts package.json tests/config-guards.test.ts tests/fetch-camera-data.exec.test.ts
+git rm --cached --ignore-unmatch scripts/fetch-camera-data.mjs
+git commit -m "$(cat <<'EOF'
+feat(counter): validate fetched CDN payload at the refresh/build boundary
+
+Close the gap where fetch-camera-data wrote the untrusted DeFlock response to
+public/camera-data.json with no validation, letting the daily workflow derive
+and commit a corrupted fallback count from a malformed/mixed snapshot that the
+live function would have rejected.
+
+Convert fetch-camera-data.mjs -> .ts (esbuild-bundled, like build-impact-stats /
+codes / build-wordlist) so it imports the SHARED assertValidCameraPayload and
+runs the SAME all-or-nothing validation the live endpoint does, BEFORE writing
+the snapshot. A non-array / empty / any-malformed payload throws, exits non-zero,
+and leaves the prior committed snapshot intact. Resolve the output path from
+process.cwd() (bundle lands in node_modules/.cache). An execution-level
+regression stubs fetch to return a mixed valid+malformed payload, runs the
+bundle, and proves the non-zero exit overwrites neither the snapshot nor the
+downstream artifacts (with a well-formed positive control).
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 EOF
@@ -1026,14 +1469,19 @@ Create `netlify/functions/sc-camera-count.ts`:
 import type { Config, Context } from '@netlify/functions';
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { countScCameras, keyFromFilename, type Camera } from '../../src/lib/sc-camera-count.js';
+import {
+  countScCameras,
+  keyFromFilename,
+  assertValidCameraPayload,
+  type Camera,
+} from '../../src/lib/sc-camera-count.js';
 import type { FeatureCollection } from '../../src/lib/geo-utils.js';
 
 /**
  * GET /api/sc-camera-count — the daily-fresh SC camera total (design §3.2).
  *
- * Fetches the DeFlock CDN snapshot the same way scripts/fetch-camera-data.mjs
- * does (same URL + User-Agent), applies the SC bounding-box pre-filter and the
+ * Fetches the DeFlock CDN snapshot the same way scripts/fetch-camera-data.ts
+ * does (same URL + User-Agent + shared validator), applies the SC bounding-box pre-filter and the
  * shared point-in-polygon count (src/lib/sc-camera-count.ts — identical
  * methodology to the build-time impact-stats.json), and returns an aggregate
  * count only (no coordinates, no PII).
@@ -1057,18 +1505,23 @@ import type { FeatureCollection } from '../../src/lib/geo-utils.js';
  * scTotal and NO durable caching, so the homepage silently keeps its build-time
  * number and the next request can recover immediately.
  *
- * Live-vs-build validation boundaries (why the two paths look different): the
- * shared counter (src/lib/sc-camera-count.ts) does NO structural/data-quality
- * filtering — it applies only the geographic SC-bbox clip that IS the counting
- * methodology (identical in both paths) and counts exactly the records it is
- * handed. STRUCTURAL validation lives at each boundary instead: THIS function does
- * strict all-or-nothing well-formedness validation because it consumes an
- * untrusted live DeFlock fetch, while the build script (scripts/build-impact-stats.ts)
- * needs none — its input is the already-trusted committed snapshot
- * (public/camera-data.json) produced by the fetch/commit pipeline. So both paths
- * feed the shared counter structurally-clean records, and neither silently drops a
- * malformed subset (the function rejects the whole payload; the build input is
- * clean by construction).
+ * Live-vs-build validation boundaries (the SAME gate on both paths): the shared
+ * counter (src/lib/sc-camera-count.ts) does NO structural/data-quality filtering —
+ * it applies only the geographic SC-bbox clip that IS the counting methodology
+ * (identical in both paths) and counts exactly the records it is handed.
+ * STRUCTURAL validation lives at each boundary, and it is the SAME shared
+ * validator on both: THIS function calls assertValidCameraPayload on its untrusted
+ * live DeFlock fetch, and the refresh/build fetch step
+ * (scripts/fetch-camera-data.ts) calls the identical assertValidCameraPayload on
+ * the untrusted CDN response BEFORE it writes public/camera-data.json — so the
+ * committed snapshot the build derives figures from is clean because it was
+ * validated at fetch, not "trusted by assumption" (the earlier reconciliation that
+ * called the build input already-trusted was wrong: that snapshot is itself an
+ * unvalidated CDN fetch until this gate runs). Both paths reject a non-array,
+ * empty, or any-malformed payload all-or-nothing (one bad record fails the WHOLE
+ * payload — never a filtered undercount), so both feed the shared counter
+ * structurally-clean records without either ever silently dropping a malformed
+ * subset.
  */
 
 const CDN_URL = 'https://cdn.deflock.me/regions/20/-100.json';
@@ -1091,25 +1544,6 @@ const CDN_CACHE = 'public, durable, s-maxage=86400, stale-while-revalidate=86400
 
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, 'utf-8')) as T;
-}
-
-/**
- * A camera record is well-formed only with an id (number|string) and finite
- * numeric lat/lon. The handler requires EVERY record to pass this (all-or-nothing):
- * one malformed record (a missing id, string coords, NaN/Infinity) fails the whole
- * payload soft rather than being dropped, so a malformed in-bounds record can never
- * fabricate — or silently undercount into — a cached positive total.
- */
-function isWellFormedCamera(c: unknown): c is Camera {
-  if (typeof c !== 'object' || c === null) return false;
-  const r = c as Record<string, unknown>;
-  return (
-    (typeof r.id === 'number' || typeof r.id === 'string') &&
-    typeof r.lat === 'number' &&
-    Number.isFinite(r.lat) &&
-    typeof r.lon === 'number' &&
-    Number.isFinite(r.lon)
-  );
 }
 
 function loadBoundaries(): {
@@ -1159,19 +1593,18 @@ export default async (req: Request, _context: Context): Promise<Response> => {
     if (!resp.ok) return jsonResponse({ stale: true }, false);
 
     const raw = (await resp.json()) as unknown;
-    // Validate the payload: a non-array or EMPTY snapshot is an upstream anomaly
-    // and must not be cached as a valid result for a day.
-    if (!Array.isArray(raw) || raw.length === 0) return jsonResponse({ stale: true }, false);
-
-    // ALL-OR-NOTHING structural validation. This is an UNTRUSTED live fetch, so a
-    // payload that mixes well-formed and malformed records is itself a corruption
-    // signal. Filtering to the valid subset (raw.filter(isWellFormedCamera)) would
-    // silently CACHE an undercount for 24h AND make the live path preprocess data
-    // differently from the build path. So if ANY record is malformed, fail soft on
-    // the WHOLE payload — never count a filtered remainder. Only a fully well-formed
-    // snapshot is handed to the shared counter, which does no structural filtering
-    // of its own (it counts exactly what it is given, after its geographic clip).
-    if (!raw.every(isWellFormedCamera)) return jsonResponse({ stale: true }, false);
+    // ALL-OR-NOTHING structural validation via the SHARED validator
+    // (src/lib/sc-camera-count.ts) — the SAME gate scripts/fetch-camera-data.ts
+    // applies at the refresh/build boundary, so the live and build paths reject
+    // identical payloads (one definition, no divergent preprocessing). It throws on
+    // a non-array, EMPTY, or ANY-malformed payload (mixing well-formed + malformed
+    // is itself a corruption signal; filtering to the valid subset would silently
+    // CACHE an undercount for 24h). The throw is caught below and served as the
+    // uncached { stale:true } sentinel; only a fully well-formed snapshot reaches
+    // the shared counter, which does no structural filtering of its own (it counts
+    // exactly what it is given, after its geographic SC-bbox clip). `raw` is
+    // narrowed to Camera[] by the assertion.
+    assertValidCameraPayload(raw);
     const cameras: Camera[] = raw;
 
     const { stateOutline, boundaries } = loadBoundaries();
@@ -1194,8 +1627,9 @@ export default async (req: Request, _context: Context): Promise<Response> => {
     );
   } catch {
     // The caught error is deliberately not inspected or echoed — it can carry
-    // internal hostnames. Serve the uncached stale sentinel instead. This also
-    // catches the fetch-abort TimeoutError.
+    // internal hostnames. Serve the uncached stale sentinel instead. This catches
+    // the fetch-abort TimeoutError AND the assertValidCameraPayload throw (non-array
+    // / empty / any-malformed payload), so every anomaly fails soft, uncached.
     return jsonResponse({ stale: true }, false);
   }
 };
@@ -1239,17 +1673,19 @@ git commit -m "$(cat <<'EOF'
 feat(counter): sc-camera-count Netlify function
 
 Add GET /api/sc-camera-count: fetch the DeFlock CDN (same URL + UA as
-fetch-camera-data.mjs), run the shared countScCameras over the bundled SC
+fetch-camera-data.ts), run the shared countScCameras over the bundled SC
 boundary GeoJSON, and return { scTotal, jurisdictions, generatedAt, stale }
 with a 24h durable + stale-while-revalidate edge cache.
 
 Politeness + fail-soft hardening: reject query-bearing requests before the
 upstream fetch (Netlify's cache key includes the query, so ?bust= would bypass
 the edge cache and hammer DeFlock); bound the fetch with an abort timeout;
-validate the payload ALL-OR-NOTHING (array, non-empty, and EVERY record
-well-formed — any malformed record rejects the whole payload instead of caching a
-filtered undercount, keeping the live path's preprocessing identical to the build
-path) and the computed result (both scTotal and jurisdictions positive integers,
+validate the payload ALL-OR-NOTHING via the SHARED assertValidCameraPayload (the
+same validator scripts/fetch-camera-data.ts uses at the refresh/build boundary:
+array, non-empty, and EVERY record well-formed — any malformed record rejects the
+whole payload instead of caching a filtered undercount, keeping the live path's
+preprocessing identical to the build path) and the computed result (both scTotal
+and jurisdictions positive integers,
 so a zero total or incomplete boundary bundle cannot cache as success) before
 caching. Timeout, empty-array, any-malformed-record, mixed valid+malformed,
 zero-result, and non-positive-jurisdictions all return HTTP 200 { stale:true }
@@ -1913,11 +2349,17 @@ EOF
 
 ## Task 7 — Refresh camera data daily (workflow)
 
-Bump the cron weekly → daily. Because `build-impact-stats` now imports the shared TS module (so
-it needs esbuild) and reads the boundary GeoJSON (generated by the prebuild from the
-`open-civics-boundaries` dependency), the job must install deps and run the prebuild — steps the
-prior install-free job lacked. **See "Resolved ambiguities" #4 — this is broader than the design's
-one-line "weekly → daily" and should be confirmed at review.**
+Bump the cron weekly → daily. Because BOTH `fetch-camera-data` and `build-impact-stats` are now
+esbuild-bundled TS that import the shared module (so they need esbuild) and `build-impact-stats`
+reads the boundary GeoJSON (generated by the prebuild from the `open-civics-boundaries`
+dependency), the job must install deps and run the prebuild — steps the prior install-free job
+lacked — and it now calls the validating `npm run fetch-camera-data` (not `node
+scripts/fetch-camera-data.mjs`). Because that step validates the CDN payload all-or-nothing before
+writing the snapshot, a malformed/empty/mixed response exits non-zero, which fails the step and the
+whole job (GitHub Actions stops on the first non-zero step by default), so `build-impact-stats` and
+the commit step never run — no corrupt snapshot or count is ever committed. **See "Resolved
+ambiguities" #4 — this is broader than the design's one-line "weekly → daily" and should be
+confirmed at review.**
 
 **Files:**
 - Modify: `.github/workflows/refresh-camera-data.yml`.
@@ -1938,7 +2380,14 @@ describe('refresh-camera-data workflow (design §3.4)', () => {
   it('installs deps and runs the prebuild before deriving figures', () => {
     expect(wf).toContain('npm ci');
     expect(wf).toContain('npm run prebuild');
+    expect(wf).toContain('npm run fetch-camera-data');
     expect(wf).toContain('npm run build-impact-stats');
+  });
+
+  it('fetches via the validating TS bundle, not the un-validated .mjs', () => {
+    // The validation gate lives in the esbuild-bundled fetch-camera-data.ts; the
+    // raw .mjs (which wrote the CDN response with no validation) must be gone.
+    expect(wf).not.toContain('node scripts/fetch-camera-data.mjs');
   });
 });
 ```
@@ -1978,16 +2427,23 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-      # build-impact-stats now imports the shared TS count module
-      # (src/lib/sc-camera-count.ts) via esbuild, and reads the SC boundary
-      # GeoJSON that the prebuild copies into public/districts from the
-      # open-civics-boundaries package — so this job installs deps and runs the
-      # prebuild before deriving the figures. The atomic refresh (design §4.1)
-      # then fetches the snapshot and derives the SC total + per-jurisdiction
-      # counts + impact stats from that one snapshot so the artifacts agree.
+      # fetch-camera-data and build-impact-stats are now esbuild-bundled TS that
+      # import the shared count module (src/lib/sc-camera-count.ts), and
+      # build-impact-stats reads the SC boundary GeoJSON the prebuild copies into
+      # public/districts from the open-civics-boundaries package — so this job
+      # installs deps and runs the prebuild before deriving figures.
       - run: npm ci
       - run: npm run prebuild
-      - run: node scripts/fetch-camera-data.mjs
+      # Atomic refresh (design §4.1): fetch + VALIDATE the CDN snapshot, then derive
+      # the SC total + per-jurisdiction counts + impact stats from that one snapshot
+      # so the artifacts agree. fetch-camera-data validates the payload
+      # ALL-OR-NOTHING with the shared validator BEFORE writing
+      # public/camera-data.json; a malformed/empty/mixed response throws -> non-zero
+      # exit, which fails this step and the whole job (GitHub Actions stops on the
+      # first non-zero step), so build-impact-stats and the commit step below never
+      # run and no corrupt snapshot or count is ever committed. The prior committed
+      # snapshot is left untouched.
+      - run: npm run fetch-camera-data
       - run: npm run build-impact-stats
       - name: Commit if data changed
         run: |
@@ -2027,12 +2483,17 @@ Expected: both guards pass.
 ```
 git add .github/workflows/refresh-camera-data.yml tests/config-guards.test.ts
 git commit -m "$(cat <<'EOF'
-ci(counter): refresh camera data daily
+ci(counter): refresh camera data daily via the validating fetch step
 
 Bump the refresh cron weekly -> daily so the committed fallback number and the
 map snapshot stay fresh. Add npm ci + npm run prebuild (and Node 22) because
-build-impact-stats now imports the shared TS module and reads the boundary
-GeoJSON the prebuild generates from open-civics-boundaries.
+fetch-camera-data and build-impact-stats are now esbuild-bundled TS importing the
+shared module, and build-impact-stats reads the boundary GeoJSON the prebuild
+generates from open-civics-boundaries. Call `npm run fetch-camera-data` (the
+validating bundle) instead of `node scripts/fetch-camera-data.mjs`: its
+all-or-nothing payload validation exits non-zero on a malformed CDN response,
+failing the job so build-impact-stats and the commit never run and no corrupt
+snapshot/count is committed.
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 EOF
@@ -2053,15 +2514,19 @@ Run the full gate from the worktree root. There is no dedicated lint script in `
 # 1. Full test suite — every new + existing test green.
 npm test
 #    -> vitest run; all files pass, including:
-#       src/lib/sc-camera-count.test.ts          (unit + parity)
+#       src/lib/sc-camera-count.test.ts          (unit + validator + parity)
+#       tests/fetch-camera-data.exec.test.ts     (refresh boundary: malformed/empty payload
+#                                                 fails non-zero, overwrites no artifact;
+#                                                 well-formed positive control writes)
 #       tests/build-impact-stats.exec.test.ts    (bundled generator runs from cwd)
 #       tests/functions/sc-camera-count.test.ts  (function: success, cache-key reject,
 #                                                 fail-soft timeout/empty/malformed/zero)
 #       src/scripts/live-count.test.ts           (client pure helpers, node env)
 #       src/scripts/live-count.dom.test.ts       (client DOM wiring, happy-dom env)
 #       src/scripts/count-up.test.ts             (unchanged — still green)
-#       tests/config-guards.test.ts              (refactor, routing, scoped included_files,
-#                                                 CSP, workflow, graceful-degradation guards)
+#       tests/config-guards.test.ts              (build + fetch refactor, routing, scoped
+#                                                 included_files, CSP, workflow,
+#                                                 graceful-degradation guards)
 
 # 2. Full production build — prebuild generates public/districts, Astro builds dist/.
 npm run build
@@ -2093,8 +2558,9 @@ Netlify Functions are verified against a deploy preview, never `astro dev` (see 
 
 ### At-merge housekeeping (owned repo)
 
-- Update `MANIFEST.md`: the `scripts/build-impact-stats.mjs` references (Structure line + Key
-  Relationships) become `build-impact-stats.ts`; add the new `src/lib/sc-camera-count.ts`,
+- Update `MANIFEST.md`: the `scripts/fetch-camera-data.mjs` and `scripts/build-impact-stats.mjs`
+  references (Structure lines + Key Relationships) become `fetch-camera-data.ts` /
+  `build-impact-stats.ts`; add the new `src/lib/sc-camera-count.ts`,
   `netlify/functions/sc-camera-count.ts`, and `src/scripts/live-count.ts` rows. Per the global
   rule, the MANIFEST is rewritten wholesale to budget before merge.
 - Commit the refreshed `src/data/impact-stats.json` (Task 8 step 3) so production ships a current
@@ -2121,12 +2587,15 @@ Netlify Functions are verified against a deploy preview, never `astro dev` (see 
    `resolve(process.cwd(), 'public', 'districts')`. This path resolution is the one item to confirm
    on a deploy preview (Verification step 1).
 
-3. **TS module imported by a Node build script.** `build-impact-stats.mjs` was intentionally
-   plain-Node ("no npm ci, no TS toolchain") with an *inlined* PIP copy. The design's
-   single-source-of-truth requirement (import the shared `.ts`) is incompatible with plain-Node
-   import. Resolved with the repo's existing pattern (`codes`, `build-wordlist`): author the
-   generator as `.ts`, add an esbuild-bundle npm script, run `node` on the bundle. This obsoletes
-   the old "dependency-free workflow" note.
+3. **TS module imported by the Node refresh/build scripts.** `build-impact-stats.mjs` (and
+   `fetch-camera-data.mjs`) were intentionally plain-Node ("no npm ci, no TS toolchain") —
+   `build-impact-stats` with an *inlined* PIP copy, `fetch-camera-data` with NO validation at all.
+   The single-source-of-truth requirement (import the shared `.ts` for the count AND the payload
+   validator) is incompatible with plain-Node import. Resolved with the repo's existing pattern
+   (`codes`, `build-wordlist`): author BOTH scripts as `.ts`, add an esbuild-bundle npm script for
+   each, run `node` on the bundle. This obsoletes the old "dependency-free workflow" note, and is
+   what lets the same `assertValidCameraPayload` guard both the live and refresh/build boundaries
+   from one definition (see hardening item #11).
 
 4. **Workflow scope (bigger than "weekly → daily").** For the refactored generator to run in CI it
    now needs `npm ci` (esbuild + `open-civics-boundaries`) and `npm run prebuild` (to generate the
@@ -2178,3 +2647,26 @@ Netlify Functions are verified against a deploy preview, never `astro dev` (see 
 10. **Approved decisions kept.** Production routing stays the function's own `config.path` (matching
     `/api/events`, no redirect), and the daily workflow keeps `npm ci` + `npm run prebuild` before
     deriving figures — both confirmed correct in review.
+
+### Round-3 hardening (Codex impl review, blocking)
+
+11. **Shared payload validator at BOTH boundaries (refresh/build reconciliation was wrong).** The
+    earlier plan claimed the live/build reconciliation held because the build script's input was an
+    "already-trusted committed snapshot." That was wrong: `scripts/fetch-camera-data.mjs` wrote the
+    untrusted DeFlock CDN response to `public/camera-data.json` with NO structural validation, and
+    the daily workflow immediately derived figures from it and committed them — so a malformed/mixed
+    snapshot the live function would reject could still generate and commit a corrupted fallback
+    count. Resolved by making structural validation a **single shared validator**
+    (`isWellFormedCamera` + `assertValidCameraPayload` in `src/lib/sc-camera-count.ts`, Task 1) and
+    calling it at BOTH boundaries: the live function (Task 3) now calls `assertValidCameraPayload`
+    instead of a local `raw.every(isWellFormedCamera)`, and the refresh/build fetch step —
+    converted to `scripts/fetch-camera-data.ts` (Task 2.5) — calls the identical validator BEFORE
+    writing the snapshot (a throw → non-zero exit → prior committed snapshot untouched → the
+    workflow's later `build-impact-stats`/commit steps never run). `build-impact-stats.ts` also
+    re-asserts defensively before any write. Both paths reject a non-array/empty/any-malformed
+    payload all-or-nothing (one bad record fails the WHOLE payload — never a filtered undercount);
+    the shared counter still applies only the geographic SC-bbox clip in both paths. A new
+    execution-level regression (`tests/fetch-camera-data.exec.test.ts`) stubs `fetch` to return a
+    mixed valid+malformed (and an empty) payload, runs the bundled fetch step, and proves the
+    non-zero exit overwrites neither the snapshot nor the downstream `camera-counts.json` /
+    `impact-stats.json`, with a well-formed positive control that DOES write.
