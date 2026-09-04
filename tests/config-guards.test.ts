@@ -157,6 +157,26 @@ describe('netlify.toml', () => {
   });
 });
 
+describe('build-impact-stats refactor (single source of truth)', () => {
+  const script = read('scripts/build-impact-stats.ts');
+
+  it('imports the shared count module instead of an inline copy', () => {
+    expect(script).toMatch(/from ['"]\.\.\/src\/lib\/sc-camera-count\.js['"]/);
+    expect(script).toContain('countScCameras');
+  });
+
+  it('no longer defines an inline point-in-polygon routine', () => {
+    expect(script).not.toMatch(/function pointInRing/);
+    expect(script).not.toMatch(/function pointInPolygon/);
+  });
+
+  it('exposes an esbuild-bundled npm script', () => {
+    const pkg = JSON.parse(read('package.json'));
+    expect(pkg.scripts['build-impact-stats']).toContain('esbuild scripts/build-impact-stats.ts');
+    expect(pkg.scripts['build-impact-stats']).toContain('node node_modules/.cache/build-impact-stats.mjs');
+  });
+});
+
 describe('repo config', () => {
   it('audits /events in lighthouserc.json', () => {
     const lhci = JSON.parse(read('lighthouserc.json'));
