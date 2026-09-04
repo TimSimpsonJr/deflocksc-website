@@ -36,6 +36,7 @@ jobs:
       # snapshot is left untouched.
       - run: npm run fetch-camera-data
       - run: npm run build-impact-stats
+      - run: npm run build-timeline-data
       - name: Commit if data changed
         run: |
           git config user.name "github-actions[bot]"
@@ -52,10 +53,10 @@ jobs:
             const head = strip(process.env.RUNNER_TEMP + "/impact-head.json");
             console.log(head !== null && cur === head ? "0" : "1");
           ')
-          if git diff --quiet public/camera-data.json public/camera-counts.json && [ "$impact_changed" = "0" ]; then
+          if git diff --quiet public/camera-data.json public/camera-counts.json public/timeline-cameras.bin && [ "$impact_changed" = "0" ]; then
             echo "No meaningful data changes; skipping commit."
           else
-            git add public/camera-data.json public/camera-counts.json src/data/impact-stats.json
-            git commit -m "chore: refresh camera data + impact stats"
+            git add public/camera-data.json public/camera-counts.json public/timeline-cameras.bin src/data/impact-stats.json
+            git commit -m "chore: refresh camera data + impact stats + timeline"
             git push
           fi
