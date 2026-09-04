@@ -42,6 +42,8 @@ export function wikimediaThumbnailUrl(filename: string): string {
 
 // --- Direction parsing ---
 
+// parseDirectionTag in scripts/build-timeline-data.ts is a node port of this —
+// mirror any change here into that build-time copy.
 export function parseDirection(tags: Record<string, string> | undefined): number | null {
   if (!tags) return null;
   const raw = tags['direction'] || tags['camera:direction'];

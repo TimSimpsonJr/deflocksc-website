@@ -83,6 +83,15 @@ export function roundCoord(n: number): number {
   return Math.round(n * 1e5) / 1e5;
 }
 
+/**
+ * Floor a YYYYMM month to the Jan-2020 timeline start: pre-2020 first-seen
+ * months are bucketed into 202001 so the scrubber/intro open there with no
+ * sparse pre-2020 tail (see TIMELINE_START_MONTH).
+ */
+export function floorToTimelineStart(m: number): number {
+  return Math.max(TIMELINE_START_MONTH, m);
+}
+
 /** Faithful port of parseDirection (cameras.ts). Degrees, or null. */
 export function parseDirectionTag(
   tags: Record<string, string> | null | undefined,
@@ -105,9 +114,16 @@ export function parseDirectionTag(
   return Number.isNaN(deg) ? null : deg;
 }
 
-/** Deterministic order (month, then lon, then lat) so reruns are byte-identical. */
+/**
+ * Deterministic order (month, then lon, lat, then dir) so reruns are
+ * byte-identical. The final dir tie-break makes the ordering TOTAL: two rows
+ * identical in month and 5-decimal-rounded coords but differing in direction
+ * still sort deterministically instead of leaking their input order through.
+ */
 export function sortForDeterminism(rows: TimelineRow[]): TimelineRow[] {
-  return [...rows].sort((a, b) => a.m - b.m || a.lon - b.lon || a.lat - b.lat);
+  return [...rows].sort(
+    (a, b) => a.m - b.m || a.lon - b.lon || a.lat - b.lat || (a.dir ?? -1) - (b.dir ?? -1),
+  );
 }
 
 /** Rows [{lon,lat,m,dir}] -> columnar {v,lon[],lat[],m[],dir[]}, coords rounded. */
@@ -245,7 +261,7 @@ async function main(): Promise<void> {
       rows.push({
         lon: cam.lon,
         lat: cam.lat,
-        m: Math.max(TIMELINE_START_MONTH, monthInt(iso)),
+        m: floorToTimelineStart(monthInt(iso)),
         dir: parseDirectionTag(cam.tags),
       });
     }

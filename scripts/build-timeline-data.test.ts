@@ -4,6 +4,7 @@ import {
   roundCoord,
   parseDirectionTag,
   sortForDeterminism,
+  floorToTimelineStart,
   encodeTable,
   decodeTable,
   chooseOutput,
@@ -68,6 +69,26 @@ describe('sortForDeterminism + encodeTable', () => {
     expect(t.lon.length).toBe(3);
     expect(t.m.length).toBe(t.lon.length);
     expect(t.dir.length).toBe(t.lon.length);
+  });
+  it('is total: rows identical but for dir sort byte-identically in either order', () => {
+    // Same month and same 5-decimal coords, differing ONLY in dir — the tie-break
+    // on dir makes the ordering total, so input order can no longer leak through.
+    const twins = [
+      { lon: -82.4, lat: 34.85, m: 202105, dir: 90 },
+      { lon: -82.4, lat: 34.85, m: 202105, dir: 270 },
+    ];
+    const a = serializeTable(encodeTable(twins));
+    const b = serializeTable(encodeTable([...twins].reverse()));
+    expect(a).toBe(b);
+  });
+});
+
+describe('floorToTimelineStart', () => {
+  it('floors a pre-2020 month up to the Jan-2020 timeline start', () => {
+    expect(floorToTimelineStart(201907)).toBe(202001);
+  });
+  it('passes a post-2020 month through unchanged', () => {
+    expect(floorToTimelineStart(202403)).toBe(202403);
   });
 });
 
