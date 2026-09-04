@@ -198,6 +198,41 @@ describe('fetch-camera-data validation boundary (single shared validator)', () =
   });
 });
 
+describe('sc-camera-count routing + CSP (design §3.3, §6)', () => {
+  const fn = read('netlify/functions/sc-camera-count.ts');
+  const astroConfig = read('astro.config.mjs');
+
+  it('routes via the v2 config.path (matching /api/events; no redirect needed)', () => {
+    expect(fn).toMatch(/path:\s*'\/api\/sc-camera-count'/);
+    // Belt-and-suspenders: no stray redirect was added for it.
+    expect(netlifyToml).not.toContain('/api/sc-camera-count');
+  });
+
+  it('scopes the boundary bundle to ONLY the sc-camera-count function', () => {
+    // Under the per-function table, NOT a global [functions] block — otherwise the
+    // multi-MB district dataset would ship into events / submit-event / go /
+    // address-suggest / fold-events, none of which read it.
+    expect(netlifyToml).toMatch(
+      /\[functions\."sc-camera-count"\]\s*\r?\n\s*included_files\s*=\s*\[\s*"public\/districts\/\*\*"\s*\]/,
+    );
+    // No unscoped [functions] table header (which would apply to every function).
+    expect(netlifyToml).not.toMatch(/^\s*\[functions\]\s*$/m);
+    // Exactly one included_files declaration — no stray global copy.
+    expect(netlifyToml.match(/included_files/g)?.length).toBe(1);
+  });
+
+  it('leaves CSP connect-src as self (same-origin fetch needs no CSP change)', () => {
+    expect(cspLine).toMatch(/connect-src 'self'/);
+  });
+
+  it('proxies /api/sc-camera-count to the functions server for astro dev', () => {
+    expect(astroConfig).toContain("'/api/sc-camera-count'");
+    expect(astroConfig).toContain(
+      "path.replace('/api/sc-camera-count', '/.netlify/functions/sc-camera-count')",
+    );
+  });
+});
+
 describe('repo config', () => {
   it('audits /events in lighthouserc.json', () => {
     const lhci = JSON.parse(read('lighthouserc.json'));

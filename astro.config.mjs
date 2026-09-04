@@ -59,6 +59,12 @@ export default defineConfig({
           changeOrigin: true,
           rewrite: (path) => path.replace('/api/events', '/.netlify/functions/events'),
         },
+        '/api/sc-camera-count': {
+          target: FUNCTIONS_SERVER,
+          changeOrigin: true,
+          rewrite: (path) =>
+            path.replace('/api/sc-camera-count', '/.netlify/functions/sc-camera-count'),
+        },
         '/api/submit-event': {
           target: FUNCTIONS_SERVER,
           changeOrigin: true,
