@@ -157,6 +157,47 @@ describe('netlify.toml', () => {
   });
 });
 
+describe('build-impact-stats refactor (single source of truth)', () => {
+  const script = read('scripts/build-impact-stats.ts');
+
+  it('imports the shared count module instead of an inline copy', () => {
+    expect(script).toMatch(/from ['"]\.\.\/src\/lib\/sc-camera-count\.js['"]/);
+    expect(script).toContain('countScCameras');
+  });
+
+  it('no longer defines an inline point-in-polygon routine', () => {
+    expect(script).not.toMatch(/function pointInRing/);
+    expect(script).not.toMatch(/function pointInPolygon/);
+  });
+
+  it('exposes an esbuild-bundled npm script', () => {
+    const pkg = JSON.parse(read('package.json'));
+    expect(pkg.scripts['build-impact-stats']).toContain('esbuild scripts/build-impact-stats.ts');
+    expect(pkg.scripts['build-impact-stats']).toContain('node node_modules/.cache/build-impact-stats.mjs');
+  });
+});
+
+describe('fetch-camera-data validation boundary (single shared validator)', () => {
+  const script = read('scripts/fetch-camera-data.ts');
+
+  it('validates via the shared all-or-nothing validator before writing', () => {
+    expect(script).toMatch(/from ['"]\.\.\/src\/lib\/sc-camera-count\.js['"]/);
+    expect(script).toContain('assertValidCameraPayload');
+  });
+
+  it('does not re-inline a local well-formed check (one definition only)', () => {
+    expect(script).not.toMatch(/function isWellFormedCamera/);
+  });
+
+  it('exposes an esbuild-bundled npm script', () => {
+    const pkg = JSON.parse(read('package.json'));
+    expect(pkg.scripts['fetch-camera-data']).toContain('esbuild scripts/fetch-camera-data.ts');
+    expect(pkg.scripts['fetch-camera-data']).toContain(
+      'node node_modules/.cache/fetch-camera-data.mjs',
+    );
+  });
+});
+
 describe('repo config', () => {
   it('audits /events in lighthouserc.json', () => {
     const lhci = JSON.parse(read('lighthouserc.json'));
@@ -168,5 +209,27 @@ describe('repo config', () => {
   it('gitignores .env', () => {
     const lines = read('.gitignore').split(/\r?\n/).map((l) => l.trim());
     expect(lines).toContain('.env');
+  });
+});
+
+describe('refresh-camera-data workflow (design §3.4)', () => {
+  const wf = read('.github/workflows/refresh-camera-data.yml');
+
+  it('runs daily, not weekly', () => {
+    expect(wf).toMatch(/cron:\s*'0 11 \* \* \*'/);
+    expect(wf).not.toMatch(/cron:\s*'0 11 \* \* 3'/);
+  });
+
+  it('installs deps and runs the prebuild before deriving figures', () => {
+    expect(wf).toContain('npm ci');
+    expect(wf).toContain('npm run prebuild');
+    expect(wf).toContain('npm run fetch-camera-data');
+    expect(wf).toContain('npm run build-impact-stats');
+  });
+
+  it('fetches via the validating TS bundle, not the un-validated .mjs', () => {
+    // The validation gate lives in the esbuild-bundled fetch-camera-data.ts; the
+    // raw .mjs (which wrote the CDN response with no validation) must be gone.
+    expect(wf).not.toContain('node scripts/fetch-camera-data.mjs');
   });
 });

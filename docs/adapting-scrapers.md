@@ -12,7 +12,7 @@ The site has two categories of data sources:
 | Local councils | `open-civics` npm package | `src/data/local-councils.json` (synced at build) | Bump package version |
 | District boundaries | `open-civics-boundaries` npm package | `public/districts/*.json` (synced at build) | Bump package version |
 | Bill status | `scripts/scraper.py` | `src/data/bills.json` | GitHub Actions (weekly/monthly) |
-| Camera data | `scripts/fetch-camera-data.mjs` | `public/camera-data.json` | GitHub Actions (weekly) |
+| Camera data | `scripts/fetch-camera-data.ts` | `public/camera-data.json` | GitHub Actions (daily) |
 
 ## Representative Data (open-civics)
 
@@ -75,13 +75,13 @@ The overall structure (read JSON, scrape each URL, update fields, write JSON) is
 
 ### How it works
 
-`scripts/fetch-camera-data.mjs` fetches ALPR camera locations from the [Deflock](https://deflock.org) CDN. The CDN serves camera data in geographic tiles; the script fetches a single tile covering the Southeast US:
+`scripts/fetch-camera-data.ts` fetches ALPR camera locations from the [Deflock](https://deflock.org) CDN. The CDN serves camera data in geographic tiles; the script fetches a single tile covering the Southeast US:
 
 ```
 https://cdn.deflock.me/regions/20/-100.json
 ```
 
-The output is saved to `public/camera-data.json` and loaded by the MapLibre GL JS map component at runtime.
+The fetched payload is validated all-or-nothing against the shared validator in `src/lib/sc-camera-count.ts` before anything is written -- a malformed, empty, or mixed response fails the script (non-zero exit) and leaves the previously committed `public/camera-data.json` untouched. On success, the output is saved to `public/camera-data.json` and loaded by the MapLibre GL JS map component at runtime.
 
 ### What to change for your state
 
@@ -101,7 +101,7 @@ Bill status updates weekly on Mondays during legislative session (January throug
 
 ### `refresh-camera-data.yml`
 
-Camera data refreshes weekly on Wednesdays. This schedule is unlikely to need changes.
+Camera data refreshes daily. This schedule is unlikely to need changes.
 
 ### What to update
 
@@ -126,5 +126,5 @@ npm run sync-data
 python scripts/scraper.py
 
 # Refresh camera data
-node scripts/fetch-camera-data.mjs
+npm run fetch-camera-data
 ```
