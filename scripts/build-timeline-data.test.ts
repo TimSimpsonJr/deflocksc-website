@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   monthInt,
+  ohsomeEndDate,
   roundCoord,
   parseDirectionTag,
   sortForDeterminism,
@@ -21,6 +22,21 @@ describe('monthInt', () => {
   });
   it('throws on an unparseable date', () => {
     expect(() => monthInt('not-a-date')).toThrow();
+  });
+});
+
+describe('ohsomeEndDate', () => {
+  it('takes the YYYY-MM-DD slice of a standard ISO timestamp', () => {
+    expect(ohsomeEndDate('2026-07-27T00:00:00Z')).toBe('2026-07-27');
+  });
+  it("handles ohsome's non-standard 09:00Z time form", () => {
+    expect(ohsomeEndDate('2026-07-27T09:00Z')).toBe('2026-07-27');
+  });
+  it('accepts a bare date', () => {
+    expect(ohsomeEndDate('2026-07-27')).toBe('2026-07-27');
+  });
+  it('throws on a malformed timestamp', () => {
+    expect(() => ohsomeEndDate('not-a-date')).toThrow();
   });
 });
 

@@ -78,6 +78,22 @@ export function monthInt(iso: string): number {
   return d.getUTCFullYear() * 100 + (d.getUTCMonth() + 1);
 }
 
+/**
+ * Derive the ohsome time-interval END from the metadata temporal extent.
+ * ohsome's underlying OSM-history data lags real time; its
+ * extractRegion.temporalExtent.toTimestamp marks the last date that data covers
+ * (e.g. "2026-07-27T09:00Z" — note the slightly non-standard "09:00Z" time).
+ * Requesting a `time` end beyond it returns HTTP 404 for EVERY region, so use
+ * this date slice as the interval end instead of today. Returns YYYY-MM-DD.
+ */
+export function ohsomeEndDate(toTimestamp: string): string {
+  const date = String(toTimestamp).slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error(`Unparseable ohsome temporalExtent toTimestamp: ${toTimestamp}`);
+  }
+  return date;
+}
+
 /** Round a coordinate to 5 decimals (~1.1 m), stable across reruns. */
 export function roundCoord(n: number): number {
   return Math.round(n * 1e5) / 1e5;
@@ -177,6 +193,7 @@ export function serializeTable(table: TimelineTable): string {
 // --- OSM first-seen date resolution (ohsome) ---
 
 const OHSOME_URL = 'https://api.ohsome.org/v1/elementsFullHistory/centroid';
+const OHSOME_METADATA_URL = 'https://api.ohsome.org/v1/metadata';
 // Deflock ALPR nodes in OSM. Extra matches are harmless — only ids also present
 // in camera-data.json are used; unmatched local cameras are excluded.
 const OHSOME_FILTER = 'man_made=surveillance and surveillance:type=ALPR and type:node';
@@ -192,18 +209,40 @@ const REGIONS: [number, number, number, number][] = [
   [-80.0, 40.0, -66.9, 49.5],   // Northeast
 ];
 
+/**
+ * Fetch the ohsome history's temporal-extent end date once, from the metadata
+ * endpoint. Its data lags real time, so the `time` interval END must be this
+ * date — not today, which 404s every region (see ohsomeEndDate). Throws on a
+ * failed fetch or missing field so main()'s try/catch routes to the graceful
+ * fallback rather than silently querying an out-of-range end.
+ */
+async function fetchOhsomeEndDate(): Promise<string> {
+  const res = await fetch(OHSOME_METADATA_URL);
+  if (!res.ok) throw new Error(`ohsome metadata responded ${res.status}`);
+  const json = (await res.json()) as {
+    extractRegion?: { temporalExtent?: { toTimestamp?: unknown } };
+  };
+  const toTimestamp = json.extractRegion?.temporalExtent?.toTimestamp;
+  if (typeof toTimestamp !== 'string') {
+    throw new Error('ohsome metadata missing extractRegion.temporalExtent.toTimestamp');
+  }
+  return ohsomeEndDate(toTimestamp);
+}
+
 async function fetchRegionEarliest(
   bbox: [number, number, number, number],
+  endDate: string,
   earliestById: Map<number, string>,
 ): Promise<void> {
-  const today = new Date().toISOString().slice(0, 10);
   const body = new URLSearchParams({
     bboxes: bbox.join(','),
     // ohsome requires exactly two comma-separated ISO-8601 timestamps for a
-    // start..end interval. The slash form (2016-01-01/<today>) returns HTTP 400
+    // start..end interval. The slash form (2016-01-01/<end>) returns HTTP 400
     // ("Wrong time parameter. You need to give exactly two ISO-8601 conform
-    // timestamps."), so use the comma form.
-    time: `2016-01-01,${today}`,
+    // timestamps."), so use the comma form. The END is the metadata temporal
+    // extent (endDate), NOT today: today lies beyond the underlying osh-data's
+    // coverage and 404s every region.
+    time: `2016-01-01,${endDate}`,
     filter: OHSOME_FILTER,
     properties: 'metadata',
   });
@@ -248,8 +287,13 @@ async function main(): Promise<void> {
   const earliestById = new Map<number, string>();
   let fresh: TimelineTable | null = null;
   try {
+    // ohsome's OSM-history data lags real time; derive the interval END from the
+    // metadata temporal extent once, up front. Using today would 404 every
+    // region (the end lies beyond the underlying osh-data's coverage).
+    const endDate = await fetchOhsomeEndDate();
+    console.log(`ohsome history extent ends ${endDate}; querying 2016-01-01..${endDate}`);
     for (const bbox of REGIONS) {
-      await fetchRegionEarliest(bbox, earliestById);
+      await fetchRegionEarliest(bbox, endDate, earliestById);
       console.log(`  ohsome ${bbox.join(',')}: ${earliestById.size} ids so far`);
     }
     const rows: TimelineRow[] = [];
