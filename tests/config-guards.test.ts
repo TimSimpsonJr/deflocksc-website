@@ -177,6 +177,27 @@ describe('build-impact-stats refactor (single source of truth)', () => {
   });
 });
 
+describe('fetch-camera-data validation boundary (single shared validator)', () => {
+  const script = read('scripts/fetch-camera-data.ts');
+
+  it('validates via the shared all-or-nothing validator before writing', () => {
+    expect(script).toMatch(/from ['"]\.\.\/src\/lib\/sc-camera-count\.js['"]/);
+    expect(script).toContain('assertValidCameraPayload');
+  });
+
+  it('does not re-inline a local well-formed check (one definition only)', () => {
+    expect(script).not.toMatch(/function isWellFormedCamera/);
+  });
+
+  it('exposes an esbuild-bundled npm script', () => {
+    const pkg = JSON.parse(read('package.json'));
+    expect(pkg.scripts['fetch-camera-data']).toContain('esbuild scripts/fetch-camera-data.ts');
+    expect(pkg.scripts['fetch-camera-data']).toContain(
+      'node node_modules/.cache/fetch-camera-data.mjs',
+    );
+  });
+});
+
 describe('repo config', () => {
   it('audits /events in lighthouserc.json', () => {
     const lhci = JSON.parse(read('lighthouserc.json'));

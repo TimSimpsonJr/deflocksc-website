@@ -15,6 +15,7 @@
     "build-wordlist": "esbuild scripts/build-wordlist.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/build-wordlist.mjs && node node_modules/.cache/build-wordlist.mjs",
     "codes": "esbuild scripts/organizer-codes.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/organizer-codes.mjs && node node_modules/.cache/organizer-codes.mjs",
     "codes:ui": "esbuild scripts/codes-ui.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/codes-ui.mjs && node node_modules/.cache/codes-ui.mjs",
+    "fetch-camera-data": "esbuild scripts/fetch-camera-data.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/fetch-camera-data.mjs && node node_modules/.cache/fetch-camera-data.mjs",
     "build-impact-stats": "esbuild scripts/build-impact-stats.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/build-impact-stats.mjs && node node_modules/.cache/build-impact-stats.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
