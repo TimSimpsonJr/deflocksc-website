@@ -31,7 +31,7 @@ const stats = [
     <div class="impact-grid">
       {stats.map((stat, i) => (
         <div class="istat" data-reveal="up" data-reveal-delay={String(i + 1)}>
-          <div class="istat-v">
+          <div class="istat-v" data-live-sc={i === 0 ? 'exact' : undefined}>
             <span class="sr-only">{stat.value}</span>
             <span aria-hidden="true" data-count-up>{stat.value}</span>
           </div>
@@ -117,9 +117,16 @@ const stats = [
 
 <script>
   import { observeCountUps } from '../scripts/count-up';
+  import { initLiveCount } from '../scripts/live-count.js';
 
-  // Scope the query to this band so it never double-observes [data-count-up]
-  // elements owned by the map statline / ask-frame in sibling sections.
+  // Scope to this band; exclude the SC stat — live-count owns it, so it is
+  // never observed twice.
   const band = document.querySelector('.impact-band');
-  if (band) observeCountUps(band.querySelectorAll<HTMLElement>('[data-count-up]'));
+  if (band) {
+    const countUps = Array.from(band.querySelectorAll<HTMLElement>('[data-count-up]')).filter(
+      (el) => !el.closest('[data-live-sc]'),
+    );
+    observeCountUps(countUps);
+  }
+  initLiveCount();
 </script>

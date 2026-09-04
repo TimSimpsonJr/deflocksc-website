@@ -233,6 +233,33 @@ describe('sc-camera-count routing + CSP (design §3.3, §6)', () => {
   });
 });
 
+describe('Live counter graceful degradation (design §3.3)', () => {
+  it('server-renders the SSR number INSIDE each live-count hook on the homepage', () => {
+    const html = readBuilt('index.html');
+    const scTotal = JSON.parse(read('src/data/impact-stats.json')).scTotal as number;
+    const exactStr = scTotal.toLocaleString('en-US'); // e.g. "1,624"
+    const floorStr = (Math.floor(scTotal / 100) * 100).toLocaleString('en-US'); // e.g. "1,600"
+    const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // Each exact hook must WRAP the SSR total in its sr-only mirror AND its
+    // count-up span — this associates the value with the element. An empty hook
+    // (e.g. <span data-live-sc="exact"></span>) would pass a bare
+    // count/contains check because the number also appears elsewhere on the
+    // page, but it fails this one. (Astro compresses inter-tag whitespace at
+    // build; \s* tolerates either form. The [^>]* after each opening tag
+    // absorbs Astro's scoped-CSS data-astro-cid-* attribute.)
+    const exactHook = new RegExp(
+      `data-live-sc="exact"[^>]*>\\s*<span class="sr-only"[^>]*>${esc(exactStr)}</span>` +
+        `\\s*<span[^>]*data-count-up[^>]*>${esc(exactStr)}</span>`,
+      'g',
+    );
+    expect(html.match(exactHook)?.length).toBe(2); // ImpactBand + MapSection
+
+    // The floor hook (Hero) must directly contain the floored SSR value.
+    expect(html).toMatch(new RegExp(`data-live-sc="floor"[^>]*>${esc(floorStr)}</span>`));
+  });
+});
+
 describe('repo config', () => {
   it('audits /events in lighthouserc.json', () => {
     const lhci = JSON.parse(read('lighthouserc.json'));
