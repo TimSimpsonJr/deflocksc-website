@@ -29,8 +29,13 @@ Four moving parts, in dependency order:
    and the new function, so the two paths can never diverge.
 2. **Endpoint** `netlify/functions/sc-camera-count.ts` (new) — fetches the DeFlock CDN the same
    way `scripts/fetch-camera-data.mjs` does, runs `countScCameras`, returns
-   `{ scTotal, jurisdictions, generatedAt, stale:false }` with a 24 h durable + SWR edge cache;
-   any failure returns HTTP 200 `{ stale:true }` uncached.
+   `{ scTotal, jurisdictions, generatedAt, stale:false }` with a 24 h durable + SWR edge cache.
+   Query-bearing requests are rejected before the fetch (Netlify's cache key includes the query, so
+   `?bust=` would bypass the cache and hammer DeFlock); the fetch is bounded by an abort timeout;
+   and the payload + computed total are validated before caching. The timeout, non-ok, non-array,
+   empty-array, malformed-record, and zero-result cases all return HTTP 200 `{ stale:true }`
+   uncached. Its boundary dataset is bundled via a **function-scoped**
+   `[functions."sc-camera-count"] included_files` so no other function ships it.
 3. **Client** `src/scripts/live-count.ts` (new) — fetches `/api/sc-camera-count` once per page,
    and on a valid numeric `scTotal` updates the three `data-live-sc` surfaces; otherwise leaves
    the SSR build-time number untouched. Count-up + reduced-motion are delegated to the existing
@@ -46,7 +51,9 @@ Fallback ladder (the number is never blank, never blocks render): **live** value
 - Astro 5 (`.astro` components + `type=module` client scripts), TypeScript, Tailwind 4.
 - Netlify Functions v2 (`import type { Config, Context } from '@netlify/functions'`; routed by
   `config.path`, matching `netlify/functions/events.ts`).
-- Vitest 4 (`environment: 'node'`; test command `npm test` = `vitest run`).
+- Vitest 4 (global `environment: 'node'`; test command `npm test` = `vitest run`). The one
+  DOM-capable test file opts into `happy-dom` via a per-file `// @vitest-environment happy-dom`
+  docblock — the global env stays `node`.
 - esbuild-bundled TS build scripts (the repo's existing `codes` / `build-wordlist` pattern).
 
 > **For agentic workers:** execute this plan with `superpowers:subagent-driven-development` (or
@@ -55,6 +62,10 @@ Fallback ladder (the number is never blank, never blocks render): **live** value
 > fail with the stated output*, write the minimal implementation, run it green, then commit with
 > the exact message. Do not batch tasks; commit at each task boundary. All paths below are
 > repo-relative to the worktree root `C:/Users/tim/workspace/dc-live-counter`.
+>
+> **Run all `git` commands through the Bash tool (Git Bash), NOT PowerShell** — the commit
+> messages below use `$(cat <<'EOF' … EOF)` heredocs, which Git Bash handles but PowerShell does
+> not. (`npm`/`npx`/`vitest` may run under either shell.)
 
 ## File Structure
 
@@ -64,18 +75,20 @@ Fallback ladder (the number is never blank, never blocks render): **live** value
 | `src/lib/sc-camera-count.test.ts` | **New** | Unit tests (dedup, holes, MultiPolygon, bbox, per-jurisdiction) + **parity** test vs. an inlined copy of the pre-refactor algorithm. |
 | `scripts/build-impact-stats.ts` | **New** (replaces `.mjs`) | Build-time generator; now *imports* `countScCameras` instead of an inline copy. Writes `public/camera-counts.json` + `src/data/impact-stats.json`, byte-format unchanged. |
 | `scripts/build-impact-stats.mjs` | **Delete** | Replaced by the `.ts` above. |
-| `netlify/functions/sc-camera-count.ts` | **New** | `GET /api/sc-camera-count`: fetch DeFlock, `countScCameras`, 24 h durable+SWR cache; failure → 200 `{stale:true}` uncached. |
-| `tests/functions/sc-camera-count.test.ts` | **New** | Function tests: success shape + cache header + CDN URL/UA; `!ok` / throw / non-array → `{stale:true}` uncached. |
+| `tests/build-impact-stats.exec.test.ts` | **New** | Execution-level regression: bundles the generator (esbuild) and runs it from a fixture cwd, asserting `ROOT`=`process.cwd()` finds the boundary files + writes correct figures. Catches the `import.meta.url`→`node_modules` bug a unit test can't. |
+| `netlify/functions/sc-camera-count.ts` | **New** | `GET /api/sc-camera-count`: reject query-bearing requests (cache-key politeness), fetch DeFlock with a bounded abort timeout, validate payload + computed total, `countScCameras`, 24 h durable+SWR cache; timeout/`!ok`/non-array/empty/malformed/zero → 200 `{stale:true}` uncached. |
+| `tests/functions/sc-camera-count.test.ts` | **New** | Function tests: success shape + cache header + CDN URL/UA + bounded signal; cache-busting query never reaches upstream; `!ok` / throw / non-array / empty-array / malformed-record / zero-result / timeout → `{stale:true}` uncached. |
 | `src/scripts/live-count.ts` | **New** | Client: memoized `getLiveCount()`, pure `parseLiveCount`/`cameraFloor`, `applyLiveCount`, idempotent `initLiveCount`. |
-| `src/scripts/live-count.test.ts` | **New** | Unit tests for the pure helpers (`parseLiveCount`, `cameraFloor`). |
+| `src/scripts/live-count.test.ts` | **New** | Unit tests for the pure helpers (`parseLiveCount`, `cameraFloor`) — `node` env. |
+| `src/scripts/live-count.dom.test.ts` | **New** | DOM wiring tests (`happy-dom` per-file env): success updates all 3 surfaces; stale/rejected leaves all 3 at SSR values; one fetch per page; exact-vs-floor formatting. |
 | `src/components/Hero.astro` | **Mod** | Wrap the floor number in `<span data-live-sc="floor">`; import + call `initLiveCount()`. |
 | `src/components/ImpactBand.astro` | **Mod** | Mark SC stat `data-live-sc="exact"`; exclude it from the component's own `observeCountUps`; call `initLiveCount()`. |
 | `src/components/MapSection.astro` | **Mod** | Mark SC statline number `data-live-sc="exact"`; exclude it from the component's own `observeCountUps`; call `initLiveCount()`. |
-| `netlify.toml` | **Mod** | Add `[functions] included_files = ["public/districts/**"]`. No redirect (routing via `config.path`). CSP unchanged. |
+| `netlify.toml` | **Mod** | Add **function-scoped** `[functions."sc-camera-count"] included_files = ["public/districts/**"]` (NOT a global `[functions]` table). No redirect (routing via `config.path`). CSP unchanged. |
 | `astro.config.mjs` | **Mod** | Add `/api/sc-camera-count` dev proxy → functions server. |
-| `tests/config-guards.test.ts` | **Mod** | Add guards: refactor happened (no inline `pointInRing`), `included_files` present, function `config.path`, CSP `connect-src 'self'` intact, dev proxy present, built homepage carries the `data-live-sc` hooks + SSR number. |
+| `tests/config-guards.test.ts` | **Mod** | Add guards: refactor happened (no inline `pointInRing`), `included_files` scoped to `[functions."sc-camera-count"]` only (no global `[functions]`, exactly one `included_files`), function `config.path`, CSP `connect-src 'self'` intact, dev proxy present, built homepage wraps the SSR number inside each `data-live-sc` hook. |
 | `.github/workflows/refresh-camera-data.yml` | **Mod** | Cron weekly → daily; add `npm ci` + `npm run prebuild` (the shared-module import + boundary files now require them); Node 20 → 22; run `npm run build-impact-stats`. |
-| `package.json` | **Mod** | Add `"build-impact-stats"` esbuild-bundle script. |
+| `package.json` | **Mod** | Add `"build-impact-stats"` esbuild-bundle script; add `happy-dom` (pinned) to `devDependencies` for the DOM test env. |
 
 ---
 
@@ -451,6 +464,12 @@ cannot import a `.ts` module, run it through esbuild — the repo's existing pat
 - Delete: `scripts/build-impact-stats.mjs`.
 - Modify: `package.json` — add the `build-impact-stats` script.
 - Test: `tests/config-guards.test.ts` — add a source-text guard that the refactor happened.
+- Test: `tests/build-impact-stats.exec.test.ts` — **execution-level** regression: bundle the
+  generator exactly as the npm script does, run the bundle from a fixture project root, and assert
+  it resolves the boundary files from `process.cwd()` and writes correct figures. This is the guard
+  that fails if `ROOT` ever regresses to an `import.meta.url` walk (which points into
+  `node_modules/.cache` post-bundle). A unit test alone cannot catch that — the bug only exists in
+  the bundled artifact, so it must be *executed*.
 
 ### Step 1 — Write the failing test
 
@@ -478,15 +497,122 @@ describe('build-impact-stats refactor (single source of truth)', () => {
 });
 ```
 
+Then create `tests/build-impact-stats.exec.test.ts` — the execution-level regression that runs the
+**bundled** generator (not the `.ts` source) and proves it locates the boundary files and writes
+correct output. It bundles with the same esbuild flags as the npm script, then runs the bundle with
+its cwd pointed at a throwaway fixture project root. If `ROOT` were derived from `import.meta.url`,
+the bundle (living under `node_modules/.cache`) would look for `public/camera-data.json` there,
+throw `ENOENT`, and this test would fail — so a clean run IS the assertion that `ROOT` is
+`process.cwd()`:
+
+```ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { build } from 'esbuild';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const repoRoot = fileURLToPath(new URL('..', import.meta.url));
+const bundlePath = join(repoRoot, 'node_modules', '.cache', 'build-impact-stats.exec-test.mjs');
+
+// A square covering the SC test coords (lon -83..-79, lat 33..35), GeoJSON [lng, lat].
+const scSquare = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[-83, 33], [-79, 33], [-79, 35], [-83, 35], [-83, 33]]],
+      },
+    },
+  ],
+};
+
+// Two cameras inside the square, one outside the SC bbox (pre-filtered out).
+const cameras = [
+  { id: 1, lat: 34, lon: -81 },
+  { id: 2, lat: 34.5, lon: -80 },
+  { id: 3, lat: 40, lon: -100 },
+];
+
+let fixtureRoot: string;
+
+beforeAll(async () => {
+  // Bundle the generator with the EXACT flags the `build-impact-stats` npm script
+  // uses (bundle + platform node + esm + external packages). This produces the
+  // same node_modules/.cache artifact whose ROOT resolution is under test.
+  await build({
+    entryPoints: [join(repoRoot, 'scripts', 'build-impact-stats.ts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    packages: 'external',
+    outfile: bundlePath,
+  });
+
+  // A throwaway project root holding ONLY the inputs the generator reads, so a
+  // pass proves it resolved them from process.cwd() (this dir), not from the
+  // bundle's own location under node_modules/.cache.
+  fixtureRoot = mkdtempSync(join(tmpdir(), 'impact-stats-exec-'));
+  mkdirSync(join(fixtureRoot, 'public', 'districts'), { recursive: true });
+  mkdirSync(join(fixtureRoot, 'src', 'data'), { recursive: true });
+  writeFileSync(join(fixtureRoot, 'public', 'camera-data.json'), JSON.stringify(cameras));
+  writeFileSync(
+    join(fixtureRoot, 'public', 'districts', 'state-outline.json'),
+    JSON.stringify(scSquare),
+  );
+  writeFileSync(
+    join(fixtureRoot, 'public', 'districts', 'county-test.json'),
+    JSON.stringify(scSquare),
+  );
+}, 120_000);
+
+afterAll(() => {
+  if (fixtureRoot) rmSync(fixtureRoot, { recursive: true, force: true });
+  rmSync(bundlePath, { force: true });
+});
+
+describe('build-impact-stats bundled execution (cluster: bundled-script-root)', () => {
+  it('resolves public/ + src/data from process.cwd() and writes correct figures', () => {
+    // Run the bundle from the fixture root. A throw here (ENOENT) is the failure
+    // signal that ROOT regressed to an import.meta.url walk into node_modules.
+    execFileSync(process.execPath, [bundlePath], {
+      cwd: fixtureRoot,
+      env: { ...process.env, IMPACT_STATS_DATE: '2026-09-04T00:00:00Z' },
+      stdio: 'ignore',
+    });
+
+    const stats = JSON.parse(
+      readFileSync(join(fixtureRoot, 'src', 'data', 'impact-stats.json'), 'utf8'),
+    );
+    const counts = JSON.parse(
+      readFileSync(join(fixtureRoot, 'public', 'camera-counts.json'), 'utf8'),
+    );
+
+    // ids 1 + 2 are inside the square; id 3 is outside the SC bbox.
+    expect(stats.scTotal).toBe(2);
+    expect(stats.jurisdictions).toBe(1);
+    expect(stats.generatedAt).toBe('2026-09-04T00:00:00.000Z');
+    expect(counts).toEqual({ 'county:test': 2 });
+  });
+});
+```
+
 ### Step 2 — Run it (expect FAIL)
 
 ```
 npx vitest run tests/config-guards.test.ts -t "build-impact-stats refactor"
+npx vitest run tests/build-impact-stats.exec.test.ts
 ```
 
-Expected: FAIL — `read('scripts/build-impact-stats.ts')` throws `ENOENT` (the file is still
-`.mjs`), so the whole describe errors. (`read` uses `readFileSync`, which throws on a missing
-file.)
+Expected: BOTH fail — `read('scripts/build-impact-stats.ts')` throws `ENOENT` (the file is still
+`.mjs`), so the config-guards describe errors; and the exec test's `beforeAll` esbuild `build`
+fails to resolve the not-yet-created `scripts/build-impact-stats.ts` entry point. (`read` uses
+`readFileSync`, which throws on a missing file.)
 
 ### Step 3 — Minimal implementation
 
@@ -506,12 +632,14 @@ port is gone, replaced by the import):
  * shared with netlify/functions/sc-camera-count.ts), so the build-time figure
  * and the live endpoint use identical logic. Run via `npm run build-impact-stats`,
  * which esbuild-bundles this TS (and the shared module) before executing it.
+ * Because that bundle lands in node_modules/.cache, all paths are resolved from
+ * process.cwd() (the repo root) — NOT from import.meta.url, which after bundling
+ * points into node_modules/.cache and cannot locate public/ or src/data/.
  *
  * generatedAt defaults to now; override for reproducible runs with IMPACT_STATS_DATE.
  */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import {
   countScCameras,
   keyFromFilename,
@@ -520,8 +648,13 @@ import {
 } from '../src/lib/sc-camera-count.js';
 import type { FeatureCollection } from '../src/lib/geo-utils.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, '..');
+// esbuild bundles this generator to node_modules/.cache/build-impact-stats.mjs
+// before Node runs it, so import.meta.url resolves INTO node_modules and is
+// useless for finding repo files. Resolve every path from process.cwd(), which
+// npm sets to the repo root — identical to the build-wordlist / organizer-codes
+// scripts (see their headers). Deriving ROOT from import.meta.url here would make
+// the generator (and the daily refresh workflow) read from node_modules and fail.
+const ROOT = process.cwd();
 const CAMERA_DATA = resolve(ROOT, 'public', 'camera-data.json');
 const DISTRICTS_DIR = resolve(ROOT, 'public', 'districts');
 const STATE_OUTLINE = resolve(DISTRICTS_DIR, 'state-outline.json');
@@ -597,9 +730,11 @@ mechanism the `codes`/`build-wordlist` scripts already rely on.)
 
 ```
 npx vitest run tests/config-guards.test.ts -t "build-impact-stats refactor"
+npx vitest run tests/build-impact-stats.exec.test.ts
 ```
 
-Expected: the three refactor guards pass.
+Expected: the three refactor guards pass, and the bundled-execution regression passes — the bundle
+ran from a fixture cwd, found the boundary files there, and wrote scTotal 2 / jurisdictions 1.
 
 Then prove behavioral parity on real data (requires deps + generated boundary files):
 
@@ -617,15 +752,18 @@ reproduced the committed 1,624 / 37 figures.
 ### Step 5 — Commit
 
 ```
-git add scripts/build-impact-stats.ts package.json tests/config-guards.test.ts
+git add scripts/build-impact-stats.ts package.json tests/config-guards.test.ts tests/build-impact-stats.exec.test.ts
 git rm --cached --ignore-unmatch scripts/build-impact-stats.mjs
 git commit -m "$(cat <<'EOF'
 refactor(counter): build-impact-stats imports shared count module
 
 Replace the inline point-in-polygon copy in build-impact-stats with the shared
 src/lib/sc-camera-count module, and run the (now TypeScript) generator through
-the repo's esbuild-bundle script pattern. Output bytes and figures unchanged
-(guarded by the parity test); a source-text guard prevents re-inlining.
+the repo's esbuild-bundle script pattern. Resolve paths from process.cwd() (not
+import.meta.url, which points into node_modules/.cache after bundling). Output
+bytes and figures unchanged (guarded by the parity test); a source-text guard
+prevents re-inlining and an execution-level regression runs the bundled
+generator against a fixture root to prove ROOT resolves from cwd.
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 EOF
@@ -675,11 +813,8 @@ import handler from '../../netlify/functions/sc-camera-count.js';
 const CDN_URL = 'https://cdn.deflock.me/regions/20/-100.json';
 const CDN_CACHE = 'public, durable, s-maxage=86400, stale-while-revalidate=86400';
 
-function call(): Promise<Response> {
-  return handler(
-    new Request('https://deflocksc.org/api/sc-camera-count'),
-    {} as unknown as Context,
-  );
+function call(url = 'https://deflocksc.org/api/sc-camera-count'): Promise<Response> {
+  return handler(new Request(url), {} as unknown as Context);
 }
 
 let fetchMock: ReturnType<typeof vi.fn>;
@@ -728,6 +863,25 @@ describe('GET /api/sc-camera-count — success', () => {
     expect((opts as RequestInit).headers).toMatchObject({
       'User-Agent': expect.stringContaining('deflocksc-website'),
     });
+    // The fetch is bounded by an abort timeout so a hung DeFlock fails soft
+    // instead of riding the platform function timeout.
+    expect((opts as RequestInit).signal).toBeInstanceOf(AbortSignal);
+  });
+});
+
+describe('GET /api/sc-camera-count — cache-key hardening', () => {
+  it('rejects a cache-busting query WITHOUT touching DeFlock', async () => {
+    // Netlify's default durable-cache key includes the query string, so
+    // /api/sc-camera-count?bust=<rand> would miss the edge cache and hit DeFlock
+    // on every request. A query-bearing request must never reach the upstream.
+    fetchMock.mockResolvedValue(new Response('[]', { status: 200 }));
+
+    const res = await call('https://deflocksc.org/api/sc-camera-count?bust=123456');
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ stale: true });
+    expect(res.headers.get('Netlify-CDN-Cache-Control')).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
 
@@ -758,6 +912,65 @@ describe('GET /api/sc-camera-count — fail soft', () => {
     const res = await call();
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ stale: true });
+  });
+
+  it('returns 200 { stale:true } uncached for an EMPTY camera array (never caches 0)', async () => {
+    // An empty upstream snapshot must not be cached as a valid {stale:false}
+    // result for 24h; treat it as a soft failure.
+    fetchMock.mockResolvedValue(new Response(JSON.stringify([]), { status: 200 }));
+    const res = await call();
+    const body = (await res.json()) as { stale: boolean; scTotal?: number };
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ stale: true });
+    expect(body.scTotal).toBeUndefined();
+    expect(res.headers.get('Netlify-CDN-Cache-Control')).toBeNull();
+  });
+
+  it('returns 200 { stale:true } with NO bogus total for malformed records', async () => {
+    // A record missing an id, or with non-numeric coords, must not be counted
+    // into a positive total. After validation nothing well-formed remains, so
+    // the endpoint fails soft rather than caching a fabricated number.
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify([
+          { lat: 34, lon: -81 }, // no id
+          { id: 9, lat: 'x', lon: 'y' }, // non-numeric coords
+        ]),
+        { status: 200 },
+      ),
+    );
+    const res = await call();
+    const body = (await res.json()) as { stale: boolean; scTotal?: number };
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ stale: true });
+    expect(body.scTotal).toBeUndefined();
+    expect(res.headers.get('Netlify-CDN-Cache-Control')).toBeNull();
+  });
+
+  it('returns 200 { stale:true } uncached when the count is ZERO (no SC matches)', async () => {
+    // Well-formed cameras that all fall outside SC -> scTotal 0. A zero total is
+    // an upstream/compute anomaly and must never be cached for a day.
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify([{ id: 1, lat: 40, lon: -100 }]), { status: 200 }),
+    );
+    const res = await call();
+    const body = (await res.json()) as { stale: boolean; scTotal?: number };
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ stale: true });
+    expect(body.scTotal).toBeUndefined();
+    expect(res.headers.get('Netlify-CDN-Cache-Control')).toBeNull();
+    // The upstream WAS fetched (this is a compute anomaly, not a query reject).
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 200 { stale:true } uncached when the fetch aborts (timeout)', async () => {
+    // AbortSignal.timeout fires a TimeoutError; the handler must catch it and
+    // fail soft rather than propagate to the platform timeout.
+    fetchMock.mockRejectedValue(new DOMException('The operation timed out.', 'TimeoutError'));
+    const res = await call();
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ stale: true });
+    expect(res.headers.get('Netlify-CDN-Cache-Control')).toBeNull();
   });
 
   it('does not leak the upstream error message', async () => {
@@ -798,15 +1011,31 @@ import type { FeatureCollection } from '../../src/lib/geo-utils.js';
  * count only (no coordinates, no PII).
  *
  * Edge-cached for a day with day-long stale-while-revalidate, so DeFlock is hit
- * at most ~once/day site-wide and viewers get an instant edge response. Any
- * upstream or compute failure returns HTTP 200 { stale:true } with no scTotal
- * and no durable caching, so the homepage silently keeps its build-time number
- * and the next request can recover immediately. The function never 5xxs.
+ * at most ~once/day site-wide and viewers get an instant edge response. To keep
+ * that politeness guarantee, any request carrying a query string is rejected
+ * BEFORE the upstream fetch — Netlify's default cache key includes the query, so
+ * a cache-busting `?x=` would otherwise miss the edge cache and hit DeFlock on
+ * every request.
+ *
+ * Fail-soft contract (never 5xxs, never caches a bad number): the upstream fetch
+ * is bounded by an abort timeout (so a hung DeFlock cannot ride the platform
+ * function timeout); the payload is validated (array, non-empty, well-formed
+ * records only); and the computed scTotal is validated (a positive integer)
+ * before caching. The timeout, empty-array, malformed-record, and zero-result
+ * cases all return HTTP 200 { stale:true } with no scTotal and NO durable
+ * caching, so the homepage silently keeps its build-time number and the next
+ * request can recover immediately.
  */
 
 const CDN_URL = 'https://cdn.deflock.me/regions/20/-100.json';
 const USER_AGENT =
   'deflocksc-website/1.0 (https://github.com/TimSimpsonJr/deflocksc-website)';
+
+// Bound the upstream fetch well under Netlify's ~10s function timeout, so a hung
+// DeFlock aborts here and fails soft (see the catch) instead of 5xx-ing. The
+// point-in-polygon pass over a few thousand SC candidates is fast, leaving ample
+// headroom.
+const FETCH_TIMEOUT_MS = 8000;
 
 // state-outline.json + county-*/place-*.json are generated into public/districts
 // by the prebuild (scripts/sync-open-civics.mjs) and bundled into this function
@@ -818,6 +1047,23 @@ const CDN_CACHE = 'public, durable, s-maxage=86400, stale-while-revalidate=86400
 
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, 'utf-8')) as T;
+}
+
+/**
+ * A camera record is usable only with an id (number|string) and finite numeric
+ * lat/lon. Filtering to these BEFORE counting stops a malformed in-bounds record
+ * (e.g. a missing id, or string coords) from fabricating a positive total.
+ */
+function isWellFormedCamera(c: unknown): c is Camera {
+  if (typeof c !== 'object' || c === null) return false;
+  const r = c as Record<string, unknown>;
+  return (
+    (typeof r.id === 'number' || typeof r.id === 'string') &&
+    typeof r.lat === 'number' &&
+    Number.isFinite(r.lat) &&
+    typeof r.lon === 'number' &&
+    Number.isFinite(r.lon)
+  );
 }
 
 function loadBoundaries(): {
@@ -848,20 +1094,39 @@ function jsonResponse(body: unknown, cacheable: boolean): Response {
   return new Response(JSON.stringify(body), { status: 200, headers });
 }
 
-export default async (_req: Request, _context: Context): Promise<Response> => {
+export default async (req: Request, _context: Context): Promise<Response> => {
   try {
-    const resp = await fetch(CDN_URL, { headers: { 'User-Agent': USER_AGENT } });
+    // Query params are part of Netlify's default durable-cache key, so a
+    // cache-busting `?x=` would miss the edge cache and hit DeFlock on every
+    // request (design §6 politeness). The homepage only ever fetches the bare
+    // path, so reject anything carrying a query BEFORE the upstream fetch — this
+    // request can never reach DeFlock and is never cached. Done inside the try so
+    // a malformed URL still fails soft.
+    if (new URL(req.url).search !== '') return jsonResponse({ stale: true }, false);
+
+    const resp = await fetch(CDN_URL, {
+      headers: { 'User-Agent': USER_AGENT },
+      // Bounded so a hung upstream aborts (TimeoutError -> catch) rather than
+      // riding the platform function timeout into a 5xx.
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
     if (!resp.ok) return jsonResponse({ stale: true }, false);
 
-    const cameras = (await resp.json()) as unknown;
-    if (!Array.isArray(cameras)) return jsonResponse({ stale: true }, false);
+    const raw = (await resp.json()) as unknown;
+    // Validate the payload: a non-array or EMPTY snapshot is an upstream anomaly
+    // and must not be cached as a valid result for a day.
+    if (!Array.isArray(raw) || raw.length === 0) return jsonResponse({ stale: true }, false);
+
+    const cameras = raw.filter(isWellFormedCamera);
+    if (cameras.length === 0) return jsonResponse({ stale: true }, false);
 
     const { stateOutline, boundaries } = loadBoundaries();
-    const { scTotal, jurisdictions } = countScCameras(
-      cameras as Camera[],
-      stateOutline,
-      boundaries,
-    );
+    const { scTotal, jurisdictions } = countScCameras(cameras, stateOutline, boundaries);
+
+    // Validate the RESULT before caching: never pin a zero/negative/non-integer
+    // total to the edge for 24h (a transient upstream hiccup must recover, not
+    // stick). Zero SC matches is treated as a soft failure.
+    if (!Number.isInteger(scTotal) || scTotal <= 0) return jsonResponse({ stale: true }, false);
 
     return jsonResponse(
       { scTotal, jurisdictions, generatedAt: new Date().toISOString(), stale: false },
@@ -869,7 +1134,8 @@ export default async (_req: Request, _context: Context): Promise<Response> => {
     );
   } catch {
     // The caught error is deliberately not inspected or echoed — it can carry
-    // internal hostnames. Serve the uncached stale sentinel instead.
+    // internal hostnames. Serve the uncached stale sentinel instead. This also
+    // catches the fetch-abort TimeoutError.
     return jsonResponse({ stale: true }, false);
   }
 };
@@ -880,14 +1146,20 @@ export const config: Config = {
 };
 ```
 
-Add the `[functions]` block to `netlify.toml` (place it directly after `[build.environment]`):
+Add the per-function `included_files` block to `netlify.toml` (place it directly after
+`[build.environment]`). Scope it to `[functions."sc-camera-count"]`, NOT a top-level `[functions]`
+table — the latter would bundle the multi-MB district dataset into every function:
 
 ```toml
-# Bundle the generated SC boundary GeoJSON into the sc-camera-count function so
-# it can run the point-in-polygon count at runtime. These files are produced by
-# the prebuild (scripts/sync-open-civics.mjs) into public/districts and are
-# otherwise gitignored, so they must be included explicitly.
-[functions]
+# Bundle the generated SC boundary GeoJSON into ONLY the sc-camera-count function
+# so it can run the point-in-polygon count at runtime. Scope this to the
+# per-function table [functions."sc-camera-count"]: a top-level [functions] block
+# would ship the (multi-MB) district dataset into every function (events,
+# submit-event, go, address-suggest, fold-events), none of which read it. These
+# files are produced by the prebuild (scripts/sync-open-civics.mjs) into
+# public/districts and are otherwise gitignored, so they must be included
+# explicitly.
+[functions."sc-camera-count"]
   included_files = ["public/districts/**"]
 ```
 
@@ -909,9 +1181,16 @@ feat(counter): sc-camera-count Netlify function
 Add GET /api/sc-camera-count: fetch the DeFlock CDN (same URL + UA as
 fetch-camera-data.mjs), run the shared countScCameras over the bundled SC
 boundary GeoJSON, and return { scTotal, jurisdictions, generatedAt, stale }
-with a 24h durable + stale-while-revalidate edge cache. Any failure returns
-HTTP 200 { stale:true } uncached, so the homepage keeps its build-time number.
-included_files bundles public/districts/** into the function.
+with a 24h durable + stale-while-revalidate edge cache.
+
+Politeness + fail-soft hardening: reject query-bearing requests before the
+upstream fetch (Netlify's cache key includes the query, so ?bust= would bypass
+the edge cache and hammer DeFlock); bound the fetch with an abort timeout;
+validate the payload (array, non-empty, well-formed records) and the computed
+total (positive integer) before caching. Timeout, empty-array, malformed-record,
+and zero-result all return HTTP 200 { stale:true } uncached, so the homepage
+keeps its build-time number. included_files is scoped to
+[functions."sc-camera-count"] so only this function ships public/districts/**.
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 EOF
@@ -947,8 +1226,17 @@ describe('sc-camera-count routing + CSP (design §3.3, §6)', () => {
     expect(netlifyToml).not.toContain('/api/sc-camera-count');
   });
 
-  it('bundles the boundary files into the function', () => {
-    expect(netlifyToml).toMatch(/included_files\s*=\s*\[\s*"public\/districts\/\*\*"\s*\]/);
+  it('scopes the boundary bundle to ONLY the sc-camera-count function', () => {
+    // Under the per-function table, NOT a global [functions] block — otherwise the
+    // multi-MB district dataset would ship into events / submit-event / go /
+    // address-suggest / fold-events, none of which read it.
+    expect(netlifyToml).toMatch(
+      /\[functions\."sc-camera-count"\]\s*\r?\n\s*included_files\s*=\s*\[\s*"public\/districts\/\*\*"\s*\]/,
+    );
+    // No unscoped [functions] table header (which would apply to every function).
+    expect(netlifyToml).not.toMatch(/^\s*\[functions\]\s*$/m);
+    // Exactly one included_files declaration — no stray global copy.
+    expect(netlifyToml.match(/included_files/g)?.length).toBe(1);
   });
 
   it('leaves CSP connect-src as self (same-origin fetch needs no CSP change)', () => {
@@ -1022,12 +1310,17 @@ EOF
 
 **Files:**
 - Create: `src/scripts/live-count.ts` — fetch + apply.
-- Test: `src/scripts/live-count.test.ts` — pure helpers.
+- Test: `src/scripts/live-count.test.ts` — pure helpers (`node` env).
+- Test: `src/scripts/live-count.dom.test.ts` — **DOM-capable** wiring tests (per-file `happy-dom`
+  env): success updates all three surfaces, a stale/rejected fetch leaves all three at their SSR
+  values, one request per page load, and exact-vs-floor formatting.
+- Modify: `package.json` — add `happy-dom` to `devDependencies` (the DOM test env; the global
+  Vitest env stays `node`).
 
-### Step 1 — Write the failing test
+### Step 1 — Write the failing tests
 
-Create `src/scripts/live-count.test.ts` (node env; tests only the pure decision/format helpers —
-the DOM wiring is verified in the browser, see the Verification task):
+Create `src/scripts/live-count.test.ts` (the global `node` env; tests only the pure
+decision/format helpers):
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -1066,13 +1359,191 @@ describe('cameraFloor', () => {
 });
 ```
 
+The pure helpers do not exercise the DOM apply/no-op logic the design's graceful-degradation
+contract depends on, so also add a DOM-capable test. The repo's Vitest env is `node`, so this ONE
+file opts into `happy-dom` via a per-file docblock (the global env is unchanged). Install the env
+first (an established, mature test DOM — pinned to a version comfortably older than 30 days so the
+machine's package-age gate allows it):
+
+```
+npm install --save-dev happy-dom@20.11.1
+```
+
+This adds to `package.json` `devDependencies`:
+
+```jsonc
+    "happy-dom": "20.11.1",
+```
+
+Create `src/scripts/live-count.dom.test.ts` (the fixture DOM is built with `createElement` +
+`textContent`, never `innerHTML`, so no HTML-injection surface):
+
+```ts
+// @vitest-environment happy-dom
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+const SSR_EXACT = '1,624'; // impact-stats.json scTotal, comma-formatted
+const SSR_FLOOR = '1,600'; // Math.floor(1624/100)*100, comma-formatted
+
+// An exact surface mirrors the component markup after Task 6:
+//   <TAG class=CLS data-live-sc="exact">
+//     <span class="sr-only">V</span><span aria-hidden data-count-up>V</span>
+//   </TAG>
+function exactSurface(tag: string, cls: string, value: string): HTMLElement {
+  const wrap = document.createElement(tag);
+  wrap.className = cls;
+  wrap.setAttribute('data-live-sc', 'exact');
+  const sr = document.createElement('span');
+  sr.className = 'sr-only';
+  sr.textContent = value;
+  const vis = document.createElement('span');
+  vis.setAttribute('aria-hidden', 'true');
+  vis.setAttribute('data-count-up', '');
+  vis.textContent = value;
+  wrap.append(sr, vis);
+  return wrap;
+}
+
+// Two exact surfaces (ImpactBand istat-v + MapSection statline .n) and one floor
+// surface (Hero prose span).
+function buildHomepage(): void {
+  document.body.replaceChildren();
+  document.body.append(
+    exactSurface('div', 'istat-v', SSR_EXACT),
+    exactSurface('span', 'n', SSR_EXACT),
+  );
+  const floor = document.createElement('span');
+  floor.setAttribute('data-live-sc', 'floor');
+  floor.textContent = SSR_FLOOR;
+  document.body.append(floor);
+}
+
+function surfaceTexts() {
+  const exacts = Array.from(document.querySelectorAll('[data-live-sc="exact"]'));
+  const floor = document.querySelector('[data-live-sc="floor"]')!;
+  return {
+    exactVisible: exacts.map((el) => el.querySelector('[data-count-up]')!.textContent),
+    exactSr: exacts.map((el) => el.querySelector('.sr-only')!.textContent),
+    floor: floor.textContent?.trim(),
+  };
+}
+
+function jsonFetch(body: unknown) {
+  return vi
+    .fn()
+    .mockResolvedValue(
+      new Response(JSON.stringify(body), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+}
+
+// live-count.ts memoizes the fetch and guards init with module-level state, so
+// each test re-imports the module to reset `started`/`cached`.
+async function freshModule() {
+  vi.resetModules();
+  return import('./live-count.js');
+}
+
+beforeEach(() => {
+  buildHomepage();
+  // Force count-up.ts into its no-animation branch so the DOM lands on the FINAL
+  // value synchronously — no IntersectionObserver callbacks (which never fire
+  // without layout) to await, so assertions see the applied value, not a mid-
+  // animation 0.
+  vi.stubGlobal('IntersectionObserver', undefined);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe('live-count DOM wiring (design §3.3, §7)', () => {
+  it('a successful fetch updates all three surfaces (two exact + one floor)', async () => {
+    const fetchMock = jsonFetch({ scTotal: 1725, jurisdictions: 40, stale: false });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { initLiveCount } = await freshModule();
+    initLiveCount(document);
+    await vi.waitFor(() => expect(surfaceTexts().floor).toBe('1,700'));
+
+    const t = surfaceTexts();
+    expect(t.exactVisible).toEqual(['1,725', '1,725']); // full total on both exact surfaces
+    expect(t.exactSr).toEqual(['1,725', '1,725']); // sr-only mirror updated too
+    expect(t.floor).toBe('1,700'); // cameraFloor(1725)
+  });
+
+  it('a stale response leaves all three surfaces at their SSR build values', async () => {
+    const fetchMock = jsonFetch({ stale: true });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { initLiveCount } = await freshModule();
+    initLiveCount(document);
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    // Flush the full promise chain (fetch -> json -> parse -> observeBuildValues).
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const t = surfaceTexts();
+    expect(t.exactVisible).toEqual([SSR_EXACT, SSR_EXACT]);
+    expect(t.exactSr).toEqual([SSR_EXACT, SSR_EXACT]);
+    expect(t.floor).toBe(SSR_FLOOR);
+  });
+
+  it('a rejected fetch also leaves the SSR build values unchanged', async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error('offline'));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { initLiveCount } = await freshModule();
+    initLiveCount(document);
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const t = surfaceTexts();
+    expect(t.exactVisible).toEqual([SSR_EXACT, SSR_EXACT]);
+    expect(t.floor).toBe(SSR_FLOOR);
+  });
+
+  it('fetches exactly once per page even when all three components init', async () => {
+    const fetchMock = jsonFetch({ scTotal: 1725, stale: false });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { initLiveCount } = await freshModule();
+    // Hero, ImpactBand, and MapSection each call initLiveCount on load.
+    initLiveCount(document);
+    initLiveCount(document);
+    initLiveCount(document);
+    await vi.waitFor(() => expect(surfaceTexts().floor).toBe('1,700'));
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith('/api/sc-camera-count', expect.anything());
+  });
+
+  it('formats exact surfaces as the full total and the floor as the rounded-down hundred', async () => {
+    const fetchMock = jsonFetch({ scTotal: 1699, stale: false });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { initLiveCount } = await freshModule();
+    initLiveCount(document);
+    await vi.waitFor(() => expect(surfaceTexts().exactVisible[0]).toBe('1,699'));
+
+    const t = surfaceTexts();
+    expect(t.exactVisible).toEqual(['1,699', '1,699']); // exact = full total
+    expect(t.floor).toBe('1,600'); // floor = Math.floor(1699/100)*100
+  });
+});
+```
+
 ### Step 2 — Run it (expect FAIL)
 
 ```
-npx vitest run src/scripts/live-count.test.ts
+npx vitest run src/scripts/live-count.test.ts src/scripts/live-count.dom.test.ts
 ```
 
-Expected: FAIL — `Failed to resolve import "./live-count.js"`.
+Expected: FAIL — both files error with `Failed to resolve import "./live-count.js"` (the module
+does not exist yet). If `happy-dom` is not yet installed, the DOM file additionally fails to load
+its environment — install it first (above).
 
 ### Step 3 — Minimal implementation
 
@@ -1179,18 +1650,20 @@ export function initLiveCount(root: ParentNode = document): void {
 }
 ```
 
-### Step 4 — Run the test (expect PASS)
+### Step 4 — Run the tests (expect PASS)
 
 ```
-npx vitest run src/scripts/live-count.test.ts
+npx vitest run src/scripts/live-count.test.ts src/scripts/live-count.dom.test.ts
 ```
 
-Expected: all tests pass.
+Expected: all tests pass — the pure helpers AND the happy-dom wiring tests (success updates all
+three surfaces, stale/rejected leaves the SSR values, one fetch per page, exact-vs-floor
+formatting).
 
 ### Step 5 — Commit
 
 ```
-git add src/scripts/live-count.ts src/scripts/live-count.test.ts
+git add src/scripts/live-count.ts src/scripts/live-count.test.ts src/scripts/live-count.dom.test.ts package.json package-lock.json
 git commit -m "$(cat <<'EOF'
 feat(counter): live-count client module
 
@@ -1198,7 +1671,9 @@ Add src/scripts/live-count.ts: memoized same-origin fetch of
 /api/sc-camera-count, pure parseLiveCount/cameraFloor guards, and DOM apply that
 updates every [data-live-sc] surface via the existing observeCountUps. On any
 failure it leaves the SSR build-time number untouched. Unit-test the pure
-helpers; DOM wiring is browser-verified.
+helpers, and add happy-dom DOM tests proving a success updates all three
+surfaces, a stale/rejected fetch leaves all three at their SSR values, exactly
+one request fires per page load, and exact-vs-floor formatting.
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 EOF
@@ -1225,16 +1700,28 @@ and builds `dist/` in `beforeAll`):
 
 ```ts
 describe('Live counter graceful degradation (design §3.3)', () => {
-  it('server-renders the build-time number and the live-count hooks on the homepage', () => {
+  it('server-renders the SSR number INSIDE each live-count hook on the homepage', () => {
     const html = readBuilt('index.html');
     const scTotal = JSON.parse(read('src/data/impact-stats.json')).scTotal as number;
+    const exactStr = scTotal.toLocaleString('en-US'); // e.g. "1,624"
+    const floorStr = (Math.floor(scTotal / 100) * 100).toLocaleString('en-US'); // e.g. "1,600"
+    const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-    // The real number is in the DOM at first paint (a11y / no-JS contract).
-    expect(html).toContain(scTotal.toLocaleString('en-US'));
+    // Each exact hook must WRAP the SSR total in its sr-only mirror AND its
+    // count-up span — this associates the value with the element. An empty hook
+    // (e.g. <span data-live-sc="exact"></span>) would pass a bare
+    // count/contains check because the number also appears elsewhere on the
+    // page, but it fails this one. (Astro compresses inter-tag whitespace at
+    // build; \s* tolerates either form.)
+    const exactHook = new RegExp(
+      `data-live-sc="exact"[^>]*>\\s*<span class="sr-only">${esc(exactStr)}</span>` +
+        `\\s*<span[^>]*data-count-up[^>]*>${esc(exactStr)}</span>`,
+      'g',
+    );
+    expect(html.match(exactHook)?.length).toBe(2); // ImpactBand + MapSection
 
-    // Two exact surfaces (ImpactBand + MapSection) and one floor surface (Hero).
-    expect(html.match(/data-live-sc="exact"/g)?.length).toBe(2);
-    expect(html).toContain('data-live-sc="floor"');
+    // The floor hook (Hero) must directly contain the floored SSR value.
+    expect(html).toMatch(new RegExp(`data-live-sc="floor"[^>]*>${esc(floorStr)}</span>`));
   });
 });
 ```
@@ -1245,8 +1732,8 @@ describe('Live counter graceful degradation (design §3.3)', () => {
 npx vitest run tests/config-guards.test.ts -t "Live counter graceful degradation"
 ```
 
-Expected: FAIL — the built homepage has no `data-live-sc` attributes yet (count is `undefined`,
-`toContain('data-live-sc="floor"')` fails).
+Expected: FAIL — the built homepage has no `data-live-sc` hooks yet, so `exactHook` matches 0 (not
+2) and the floor-hook `toMatch` fails.
 
 ### Step 3 — Minimal implementation
 
@@ -1338,8 +1825,8 @@ it, so it is never observed twice):
 npx vitest run tests/config-guards.test.ts -t "Live counter graceful degradation"
 ```
 
-Expected: PASS — the built homepage contains the SSR number, two `data-live-sc="exact"`, and one
-`data-live-sc="floor"`.
+Expected: PASS — each of the two exact hooks wraps the SSR total (in both its sr-only mirror and
+its count-up span), and the floor hook wraps the floored SSR value.
 
 ### Step 5 — Commit
 
@@ -1502,12 +1989,15 @@ Run the full gate from the worktree root. There is no dedicated lint script in `
 # 1. Full test suite — every new + existing test green.
 npm test
 #    -> vitest run; all files pass, including:
-#       src/lib/sc-camera-count.test.ts        (unit + parity)
-#       tests/functions/sc-camera-count.test.ts (function)
-#       src/scripts/live-count.test.ts          (client helpers)
-#       src/scripts/count-up.test.ts            (unchanged — still green)
-#       tests/config-guards.test.ts             (refactor, routing, CSP, workflow,
-#                                                graceful-degradation guards)
+#       src/lib/sc-camera-count.test.ts          (unit + parity)
+#       tests/build-impact-stats.exec.test.ts    (bundled generator runs from cwd)
+#       tests/functions/sc-camera-count.test.ts  (function: success, cache-key reject,
+#                                                 fail-soft timeout/empty/malformed/zero)
+#       src/scripts/live-count.test.ts           (client pure helpers, node env)
+#       src/scripts/live-count.dom.test.ts       (client DOM wiring, happy-dom env)
+#       src/scripts/count-up.test.ts             (unchanged — still green)
+#       tests/config-guards.test.ts              (refactor, routing, scoped included_files,
+#                                                 CSP, workflow, graceful-degradation guards)
 
 # 2. Full production build — prebuild generates public/districts, Astro builds dist/.
 npm run build
@@ -1528,7 +2018,9 @@ Netlify Functions are verified against a deploy preview, never `astro dev` (see 
 
 1. `GET /api/sc-camera-count` returns `200` with `{ scTotal, jurisdictions, generatedAt, stale:false }`
    and header `Netlify-CDN-Cache-Control: public, durable, s-maxage=86400, stale-while-revalidate=86400`.
-   Confirms `included_files` bundled `public/districts/**` and `process.cwd()` resolves them.
+   Confirms the function-scoped `included_files` bundled `public/districts/**` and `process.cwd()`
+   resolves them. Also `GET /api/sc-camera-count?bust=1` returns `{ stale:true }` with no durable
+   cache header (the query-reject path — DeFlock is not hit).
 2. Homepage: with JS enabled, the Hero floor / ImpactBand / MapSection SC numbers reflect the live
    value; with JS disabled (or the endpoint 500'd manually), they show the build-time number.
    Confirm no CSP `connect-src` violation in the console (same-origin `/api` fetch).
@@ -1558,9 +2050,12 @@ Netlify Functions are verified against a deploy preview, never `astro dev` (see 
 2. **Boundary files at function runtime.** `public/districts/{state-outline,county-*,place-*}.json`
    are **gitignored**, generated at prebuild by `scripts/sync-open-civics.mjs` from the
    `open-civics-boundaries` npm package (the design calls them "committed", which is inaccurate).
-   Resolved by bundling them into the function with `[functions] included_files = ["public/districts/**"]`
-   and reading from `resolve(process.cwd(), 'public', 'districts')`. This path resolution is the
-   one item to confirm on a deploy preview (Verification step 1).
+   Resolved by bundling them into the function with a **function-scoped**
+   `[functions."sc-camera-count"] included_files = ["public/districts/**"]` (a top-level
+   `[functions]` table would ship the multi-MB dataset into every function — events, submit-event,
+   go, address-suggest, fold-events — which none of them use) and reading from
+   `resolve(process.cwd(), 'public', 'districts')`. This path resolution is the one item to confirm
+   on a deploy preview (Verification step 1).
 
 3. **TS module imported by a Node build script.** `build-impact-stats.mjs` was intentionally
    plain-Node ("no npm ci, no TS toolchain") with an *inlined* PIP copy. The design's
@@ -1585,3 +2080,37 @@ Netlify Functions are verified against a deploy preview, never `astro dev` (see 
    components exclude their SC element from their own `observeCountUps` and let `live-count` be the
    sole owner of that element (set value → `observeCountUps([it])`, or fall back to the build value
    on failure). This preserves the a11y/no-JS contract and keeps `count-up.test.ts` green.
+
+---
+
+### Plan-review hardening (Codex plan review)
+
+7. **Bundled-script root (`ROOT`).** esbuild bundles `build-impact-stats.ts` into
+   `node_modules/.cache/`, so `import.meta.url`/`fileURLToPath` dirname-walking resolves `ROOT` to
+   `node_modules` — the generator (and the daily workflow) would read boundary files from the wrong
+   place and fail. Resolved by using `const ROOT = process.cwd()` (npm sets cwd to the repo root),
+   matching the sibling `build-wordlist` / `organizer-codes` bundled scripts, plus an
+   execution-level regression (`tests/build-impact-stats.exec.test.ts`) that runs the *bundled*
+   artifact from a fixture cwd and asserts it locates the boundary files and writes correct output.
+
+8. **Endpoint politeness + fail-soft.** Netlify's default durable-cache key includes the query
+   string, so `?bust=` would bypass the 24 h cache and hit DeFlock every request. Resolved by
+   rejecting query-bearing requests before the fetch. "Recovers immediately on any failure" is
+   fully implemented by: a bounded fetch abort timeout (`AbortSignal.timeout`, so a hung upstream
+   cannot ride the platform timeout); payload validation (array, non-empty, well-formed records);
+   and result validation (positive-integer `scTotal`) before caching. Timeout, empty-array,
+   malformed-record, and zero-result each return an **uncached** `{ stale:true }`, with a test per
+   case (and the cache-busting query proven to never reach upstream).
+
+9. **DOM test environment.** The design's client regression (a fetch failure leaves the rendered
+   fallback unchanged) needs a real DOM, but the global Vitest env is `node`. Resolved by adding
+   `happy-dom` (pinned ≥30 days old for the package-age gate) and a single per-file
+   `// @vitest-environment happy-dom` test that exercises all three surfaces on success, the
+   unchanged SSR values on stale/reject, one-fetch-per-page memoization, and exact-vs-floor
+   formatting — while the global `node` env is untouched. The built-homepage guard is also
+   strengthened to associate each hook element with its SSR value (rather than a page-wide
+   `toContain`, which an empty hook could pass).
+
+10. **Approved decisions kept.** Production routing stays the function's own `config.path` (matching
+    `/api/events`, no redirect), and the daily workflow keeps `npm ci` + `npm run prebuild` before
+    deriving figures — both confirmed correct in review.
