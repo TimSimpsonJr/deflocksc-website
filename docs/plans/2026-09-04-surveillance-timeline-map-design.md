@@ -71,7 +71,11 @@ Once substantially visible (and unless `prefers-reduced-motion`), the map
 **under ~25 seconds**, with **non-uniform easing**:
 
 - **Linger 2–3 beats** on the sparse **2020 opening** (the near-empty map is the
-  baseline the viewer measures growth against).
+  baseline the viewer measures growth against). The real data is **genuinely sparse
+  pre-2024 and surges in 2025–26** (first-seen by year: 2020: 72, 2021: 50, 2022:
+  258, 2023: 801, 2024: 6,638, 2025: 58,544, 2026: 64,239), so the full Jan-2020 →
+  present range is kept and this linger now **literally shows the quiet before the
+  surge** — the empty 2020 map is real, not a staged pause.
 - **Accelerate through the middle years** as density builds.
 - **Begin the national→SC fly-through in roughly the last ~18 months** of the
   timeline, so **SC fills in *after* arrival** — the viewer lands on their state and
@@ -113,7 +117,7 @@ at any zoom: clustering would collapse dots and destroy the appear-over-time
 bloom, which is the entire point.
 
 **Cones must not de-escalate the threat.** Keep each cone's **center dot at full dot
-intensity** (bright core + tight glow) when the cone resolves, so zooming into your
+intensity** (a bright, solid-red core) when the cone resolves, so zooming into your
 own street does **not** feel *calmer* than the national view. The cone adds
 direction; it must not trade away the menace of the point.
 
@@ -139,51 +143,64 @@ the reverse.
   viewport with no horizontal page scroll.
 - The guided intro still autoplays on mobile (motion-permitting); it is the
   primary payload for a reader who never touches the controls.
-- **Enforce a minimum dot-radius floor and a slightly stronger glow on small
-  (≤375px) viewports**, so national-zoom dots stay perceptible on a phone screen. On
-  mobile the intro *is* the whole payload — if the national-scale dots shrink below
-  perceptibility, the growth story is lost — so the zoom-interpolated radius (and its
-  glow) must not fall under a floor at small viewport widths.
+- **Enforce a minimum dot-radius floor on small (≤375px) viewports** (a slightly
+  larger, brighter solid-red core), so national-zoom dots stay perceptible on a phone
+  screen. On mobile the intro *is* the whole payload — if the national-scale dots
+  shrink below perceptibility, the growth story is lost — so the zoom-interpolated
+  radius must not fall under a floor at small viewport widths. Legibility here comes
+  from dot **size** and solid-red brightness, not a glow.
 
 ---
 
 ## Visual design
 
-### Dark, red, glowing
+### Dark ground, solid red
+
+> **Revision (2026-09-04, dot styling):** the earlier "glow must carry brightness"
+> guidance below is **superseded**. Settled/accumulated dots render **solid red
+> (source-over), never white**; there is **no persistent glow**. The additive
+> (`globalCompositeOperation: 'lighter'`) pile-up that turns dense areas white is
+> **rejected**. White/brightness is reserved for the brief per-dot **arrival flare**
+> only. Colorblind legibility now comes from **bright solid red + dot size** (the
+> grayscale/squint test still applies), not from a glow.
 
 - **Basemap:** dark (the site's `#171717` ground), deliberately low-contrast so
   the red reads as the only "live" thing on the map.
-- **Dots:** surveillance **red**, leaned **brighter** (toward `#ef4444`) — a bright
-  red core with `#f87171` accents — over the `#dc2626` end of the palette, with a red
-  **glow** (a larger, blurred, low-opacity circle layer beneath the solid dot,
-  echoing the homepage `cluster-glow` treatment). Crucially, the **glow must carry
-  brightness, not just hue**: the spreading network should read as spreading
-  *luminance* on the dark ground, so the meaning survives for **red-colorblind
-  (protanope) viewers** and on **dim screens** where a hue-only red would wash into
-  the dark basemap.
+- **Dots:** surveillance **red**, leaned **brighter** (toward `#ef4444`) — a bright,
+  **solid** red core over the `#dc2626` end of the palette, composited
+  **source-over** so overlapping dots deepen into denser *red*, **never white**.
+  There is **no persistent glow layer**: a settled camera is a hard red point, full
+  stop. Legibility on dim screens and for **red-colorblind (protanope) viewers**
+  comes from the **bright solid red plus dot size**, verified by the grayscale/squint
+  test — not from a luminous halo.
 - **Radius scales with zoom:** small when zoomed out (to fight national crowding
-  where ~62k dots overlap) and larger when zoomed in. Implemented as a
-  zoom-interpolated `circle-radius` (and matching glow radius).
-- **Bloom-in — hot flare, then cool:** when a dot first crosses the cutoff month it
-  briefly **flares hot** (a near-white / amber core) and then **cools** to the
-  standard surveillance red over a short ramp, so a new camera *arrives* rather than
-  just popping. **Why this matters:** dense metros saturate solid red early, so a
-  plain appear-ramp makes the animation stop visibly changing exactly where
-  surveillance is worst — while the running counter keeps climbing. This was the
-  review's **top concern**; the hot flare keeps growth legible even inside already-red
-  clusters, because each new arrival flashes bright before settling into the field.
-  Implementation technique (a paint expression keyed off how recently `m` crossed
-  the cutoff) is a detail only — see Rendering architecture; a paint-driven approach
-  is preferred over per-dot animation at 62k dots.
+  where ~130k dots overlap) and larger when zoomed in. Implemented as a
+  zoom-interpolated `circle-radius`; dot **size** (with the mobile floor) is what
+  carries legibility at national scale.
+- **Bloom-in — hot flare, then cool to solid red:** when a dot first crosses the
+  cutoff month it briefly **flares hot** (a near-white / amber core) and then
+  **cools** to the standard **solid** surveillance red over a short ramp, so a new
+  camera *arrives* rather than just popping. **Why this matters:** dense metros
+  saturate solid red early, so a plain appear-ramp makes the animation stop visibly
+  changing exactly where surveillance is worst — while the running counter keeps
+  climbing. This was the review's **top concern**; the hot flare keeps growth legible
+  even inside already-red clusters, because each new arrival flashes bright **for that
+  one dot** before settling into the red field. The flare is the **only** place
+  white/brightness appears — a transient per-arrival effect, not an accumulating glow.
+  Implementation technique (a paint expression keyed off how recently `m` crossed the
+  cutoff) is a detail only — see Rendering architecture; a paint-driven approach is
+  preferred over per-dot animation at ~130k dots.
 - **Cones:** at high zoom, the existing red directional cone (`createConeImage`,
   an 80×80 canvas wedge in `rgba(239,68,68,0.45)` with an `#ef4444` center dot)
-  replaces the dot, date-filtered the same way.
+  resolves at the dot, date-filtered the same way; the **center dot stays a
+  full-intensity solid-red core**.
 
 **Restraint is what makes it read as threat, not decoration.** The threat register
-depends on discipline: **hard, small dot cores**; a **tight** glow (not a soft,
-nebulous halo); and **dead-dark everything else**. The brightness spreads, but each
-camera stays a sharp point — a pretty, diffuse glow-scape would read as ambience, not
-surveillance. When in doubt, tighten and darken.
+depends on discipline: **hard, small, solid-red dot cores** and **dead-dark
+everything else**. The red spreads and deepens, but each camera stays a sharp point —
+a pretty, diffuse glow-scape would read as ambience, not surveillance, and an additive
+white pile-up would erase the very density it should indict. When in doubt, keep the
+dot solid, tighten it, and darken everything else.
 
 ### Branded chrome (DaisyUI, `deflock` theme)
 
@@ -270,17 +287,21 @@ homepage's `public/map-style.json`, so the homepage map is untouched.
 
 ### The reusable dated table
 
-The core artifact is a **compact flat dataset**, one row per camera, keyed by the
-existing OSM node IDs:
+The core artifact is a **compact flat dataset**, one row per camera:
 
 ```
-{ lon, lat, m }          // m = first-seen month as an integer, e.g. 202403
-   + optional id, dir    // id (OSM node) for cones/debug; dir for cone rotation
+{ lon, lat, m, dir }     // m = first-seen month as an integer, e.g. 202403
+                         // dir = facing direction in degrees, or null (for cones)
 ```
 
-This single **national** dataset drives **both** scales — SC is just a filtered
-view (`lon`/`lat` within SC bounds, or a client-side filter). Optionally also emit
-a small **SC-only subset** for a faster first paint (open question).
+It is one row per **continental ALPR node in OpenStreetMap** — the dataset is built
+directly from OSM element history (see Source, below): ~**130,602** rows, **100%
+dated**. It ships as a **compact binary** (`public/timeline-cameras.bin`) encoded via
+a shared codec; the browser decodes it into typed arrays (see Encoding & size).
+
+This single **national** dataset drives **both** scales — SC is just a **client-side
+filtered view** (`lon`/`lat` within SC bounds). **Resolved:** there is **no separate
+SC-only artifact**; the one national `.bin` is lazy-loaded and filtered in the client.
 
 The table is deliberately **engine-agnostic and reusable**: the same rows can
 later render an offline video export without touching the extraction pipeline (see
@@ -288,55 +309,81 @@ Out of scope / future).
 
 ### Source: OSM first-seen date (a proxy, stated honestly)
 
-The timeline is driven by each camera's **OpenStreetMap first-seen date** — when
-its OSM node was first created (version 1 timestamp), truncated to a month. This is
-framed honestly as **"documented in OpenStreetMap"** — a *proxy* for real install
-dates, never an official registry. See Honest methodology & framing for the
+The timeline is driven by each camera's **OpenStreetMap first-seen date** — the
+earliest `@validFrom` across its OSM node's versions (its creation), truncated to a
+month and floored to the Jan-2020 timeline start. Position is the node's **current
+centroid** (its latest version) and direction comes from that latest version's tags.
+This is framed honestly as **"documented in OpenStreetMap"** — a *proxy* for real
+install dates, never an official registry. See Honest methodology & framing for the
 caveats that must appear in the UI and post.
 
 This was chosen over (a) pursuing true install dates and (b) FOIA install-date
 callouts — both are out of scope.
 
-### Extraction method — a plan-level decision (with fallback)
+### Extraction method — RESOLVED: ohsome element history (built directly)
 
-A **build step** (peer to `scripts/fetch-camera-data.mjs`, e.g.
-`scripts/build-timeline-data.mjs`, a dependency-light Node `.mjs` like the
-existing fetch script) resolves the v1 creation date for each OSM node ID and
-emits the dated table.
+A **build step** (`scripts/build-timeline-data.ts`, an esbuild-bundled TS run via
+`npm run build-timeline-data`, the same idiom as `fetch-camera-data.ts` /
+`build-impact-stats.ts`) queries OSM element history and emits the dated table.
 
-The **exact extraction method is a plan-level decision.** Candidates:
+**Resolved (Checkpoint 1):** the method is the **HeiGIT ohsome API**
+(`/elementsFullHistory/centroid`), queried over macro-bboxes covering the lower 48
+(`man_made=surveillance and surveillance:type=ALPR and type:node`, adaptively
+subdividing a bbox into quadrants when a dense full-history response fails). For
+each returned node: `m` = the **earliest `@validFrom`** across its versions
+(first-seen, floored to Jan 2020); `lon`/`lat` = the **latest version's centroid**;
+`dir` = parsed from that latest version's tags. The ohsome query's time-interval
+**end date is derived from ohsome's metadata temporal extent** (`GET /metadata` →
+`extractRegion.temporalExtent.toTimestamp`), **not `today`** — the OSM-history data
+lags real time, and requesting an end beyond its coverage 404s every region.
 
-| Method | Notes |
-|---|---|
-| osmium `.osh.pbf` history extract | Local, deterministic, no rate limits; needs a full-history planet/region extract + the `osmium` tool in the build environment. |
-| HeiGIT **ohsome** API | Purpose-built for OSM element history; network dependency + rate limits; good for querying "creation timestamp" per element. |
-| OSM node history API | `GET /api/0.6/node/{id}/history`; simplest but ~62k individual calls — must be batched/cached politely, likely too slow for a full rebuild. |
+**The dataset is built ENTIRELY from ohsome — it no longer seeds from the DeFlock
+CDN snapshot** (`public/camera-data.json`), and it no longer runs the shared
+`assertValidCameraPayload` validator (the timeline does not consume the DeFlock
+snapshot anymore, reversing the #118-retarget's "reuse the shared validator"
+decision). *Rationale:* the committed DeFlock snapshot is only the Southeast 20° CDN
+tile (bbox lon −100..−80, lat 20..40), which **clips SC's own coast** (Myrtle Beach
+entirely, Charleston partially) and covers no West Coast / Northeast. The ohsome
+query returns **all continental ALPR nodes** (~130,602), so building directly from
+it yields a **true national dataset with full SC coverage**.
 
-Whichever is chosen, the **output is identical** (`{lon, lat, m}[]`). Document a
-**fallback**: if the chosen method is unavailable at build time, the build must
-degrade gracefully (e.g. reuse the last committed dated table, or fall back to a
-secondary method) rather than break the site build. The starting camera set (node
-IDs + current lon/lat/tags) comes from the same Deflock CDN data the site already
-uses.
+*Alternatives considered:* an `osmium` `.osh.pbf` full-history extract (local,
+deterministic, no rate limits, but needs a multi-GB extract + the `osmium` binary,
+confirmed absent on this machine) and the OSM node history API (`GET
+/api/0.6/node/{id}/history`, ~one call per node — too slow). Output format is
+identical, so `osmium`-in-CI remains an upgrade path.
 
-### Encoding & size
+**Fallback:** if ohsome is unreachable/errors or yields zero rows, the build
+**reuses the last committed `public/timeline-cameras.bin`** and exits 0 so the site
+build never breaks (`chooseOutput`).
 
-- ~62k US cameras → roughly **0.5–1.5 MB** depending on encoding. Object-per-row
-  JSON is the fattest; a **compact array/columnar form** (parallel arrays, or
-  `[lon, lat, m]` tuples with coordinates rounded to ~5 decimals) is materially
-  smaller, and **gzip/brotli** (which Netlify serves) shrinks it further.
-- Final encoding is an open question; the plan should pick the smallest form that
-  still deserializes cheaply on the client.
+### Encoding & size — RESOLVED: compact binary
+
+- **Format: a compact little-endian binary** (`public/timeline-cameras.bin`),
+  ~**1.37 MB** for the ~130,602 rows, produced and consumed via a **shared codec**
+  `src/lib/timeline-codec.ts` (`encodeTimelineTable` / `decodeTimelineTable`). It is
+  a structure-of-arrays packing: a **16-byte header** (`TLC1` magic + `uint16`
+  version + `uint32` count), then columns — `Int32` lon×1e5, `Int32` lat×1e5,
+  `Uint16` direction (`0xFFFF` = null), `Uint8` month-index (from Jan 2020). Total =
+  `16 + 11N` bytes. This replaces the earlier columnar-JSON idea (resolves the
+  encoding open question).
+- The browser **decodes the `.bin` via the codec** — fetch as an `ArrayBuffer` →
+  `decodeTimelineTable` → build the GeoJSON source. `decodeTimelineTable` returns
+  typed arrays (`Float64Array` lon/lat, `Int32Array` m, `Int16Array` dir with `-1`
+  for null), so no per-row JSON parse is needed. **gzip/brotli** (which Netlify
+  serves) shrinks the binary further on the wire.
 - **Lazy-loaded on scroll** — the dataset is fetched only when the map island
   scrolls near the viewport (see Blog embedding), never on initial page load.
 
 ### Refresh
 
-The dated-table build **piggybacks on the existing weekly refresh**,
-`.github/workflows/refresh-camera-data.yml` (Wednesdays, `0 11 * * 3`). Today that
-workflow runs `fetch-camera-data.mjs` + `build-impact-stats.mjs` and commits the
-changed artifacts. Add the timeline build as another step and include its output
-in the "commit if changed" set.
+The dated-table build **piggybacks on the existing daily refresh**,
+`.github/workflows/refresh-camera-data.yml` (daily, `0 11 * * *` — rewritten to
+daily by #118). That workflow runs `npm run fetch-camera-data` + `npm run
+build-impact-stats` (esbuild-bundled TS) and commits the changed artifacts. Add
+`npm run build-timeline-data` as another step and include `public/timeline-cameras.bin`
+in the "commit if changed" set. A small binary delta is cheap, so the daily cadence
+is kept unchanged.
 
 > **Coordination:** this workflow is also touched by the parallel live-camera-
 > counter work — see the Coordination note.
@@ -356,12 +403,14 @@ Reuse `createMap` from `src/scripts/map/core.ts`, instantiated with
 
 Add a **new** module, e.g. `src/scripts/map/layers/timeline-cameras.ts`, that:
 
-1. Creates a **GeoJSON source from the dated dataset** (its own source; it does
-   **not** reuse the `cameras` source, `addCameraLayers`, or the viewport
-   `tile-loader.ts` — those are clustered and viewport-driven). No `cluster: true`.
-2. Renders a **glow circle layer + solid dot layer** with **zoom-interpolated
-   radius** and a red glow, filtered by a data expression on the cutoff month:
-   `["<=", ["get", "m"], cutoff]`.
+1. Creates a **GeoJSON source from the decoded dated dataset** (the client fetches
+   `timeline-cameras.bin` as an `ArrayBuffer` and runs `decodeTimelineTable` first;
+   its own source, it does **not** reuse the `cameras` source, `addCameraLayers`, or
+   the viewport `tile-loader.ts` — those are clustered and viewport-driven). No
+   `cluster: true`.
+2. Renders a **solid dot layer** (source-over red, **no persistent glow**) with
+   **zoom-interpolated radius** and the arrival-flare paint, filtered by a data
+   expression on the cutoff month: `["<=", ["get", "m"], cutoff]`.
 3. At high zoom, shows a **camera-cone symbol layer** (also `m`-filtered),
    toggled by zoom-based layer visibility, reusing `createConeImage` (via
    `map.addImage`) and `parseDirection` for `icon-rotate`. Below the threshold the
@@ -376,15 +425,16 @@ The module owns only its own layers; it knows nothing about the scrubber or intr
 The scrubber sets `cutoff` and the module updates the layers' **filter** (or a
 paint expression). This is a **cheap filter/paint update — no per-frame refetch and
 no `setData`** on tick; the full dataset is loaded once via `setData` at init, and
-playback only changes the cutoff. This is what makes 62k dots animate smoothly.
+playback only changes the cutoff. This is what makes ~130k dots animate smoothly.
 
-For the **bloom-in** effect — a **hot flare that cools to red** (see Visual design)
-— prefer a **paint-expression approach** (e.g. an interpolation keyed off how
-recently `m` crossed the cutoff, ramping the fill/glow color from a near-white/amber
-core down to the standard red, alongside a short opacity/scale ramp) over per-dot JS
-animation, to stay performant at national scale. Driving color-through-time this way
-is what keeps new arrivals visible inside already-saturated metros without touching
-`setData` per frame. Exact technique is an implementation detail.
+For the **bloom-in** effect — a **hot flare that cools to solid red** (see Visual
+design) — prefer a **paint-expression approach** (an interpolation keyed off how
+recently `m` crossed the cutoff, ramping the **fill** color from a near-white/amber
+core down to the standard solid red) over per-dot JS animation, to stay performant at
+national scale. Driving color-through-time this way is what keeps new arrivals visible
+inside already-saturated metros without touching `setData` per frame — and it keeps
+brightness confined to the transient flare rather than an accumulating glow. Exact
+technique is an implementation detail.
 
 ### Guided intro drives camera + cutoff
 
@@ -437,7 +487,9 @@ global querySelectorAll script, already used across 10 posts):
    - `import('maplibre-gl/dist/maplibre-gl.css')`
    - `import('../scripts/map/core.js')`
    - `import('../scripts/map/layers/timeline-cameras.js')`
-   - then fetch the dated dataset.
+   - `import('../lib/timeline-codec.js')`
+   - then **fetch `timeline-cameras.bin` as an `ArrayBuffer` and `decodeTimelineTable`**
+     it into typed arrays.
 
 ### Chunk reuse (maplibre is not duplicated)
 
@@ -461,17 +513,18 @@ blog bundle. Keep the specifiers identical to preserve this.
 
 | File | New/Mod | Single responsibility |
 |---|---|---|
-| `scripts/build-timeline-data.mjs` | **New** | Build step: resolve OSM v1 first-seen month per node, emit the compact dated table. Peer to `fetch-camera-data.mjs`. |
-| `public/timeline-cameras.json` (+ optional `timeline-cameras-sc.json`) | **New** | The baked dated dataset artifact(s): `{lon,lat,m}` rows (national; optional SC subset for faster first paint). |
+| `scripts/build-timeline-data.ts` | **New** | Build step (esbuild-bundled TS, `npm run build-timeline-data`): query OSM element history via ohsome, reduce each node to `{lon,lat,m,dir}`, encode to the binary via the shared codec. Peer to `fetch-camera-data.ts`. |
+| `src/lib/timeline-codec.ts` (+ `timeline-codec.test.ts`) | **New** | Shared, dependency-free binary codec (`encodeTimelineTable`/`decodeTimelineTable`): the on-disk `.bin` format defined in one place — Node build encodes, browser decodes. |
+| `public/timeline-cameras.bin` | **New (generated)** | The baked dated dataset: a compact binary (`16 + 11N` bytes, ~1.37 MB) of `{lon,lat,m,dir}` rows (national; SC is a client-side filter — no separate SC artifact). |
 | `public/timeline-map-style.json` | **New** | Dedicated basemap style derived from `map-style.json`: roads on; road-name/water labels off; city labels gated to high zoom, muted; state/country labels off. |
-| `src/scripts/map/layers/timeline-cameras.ts` | **New** | Unclustered dated layer module: GeoJSON source + glow/dot layers (zoom-scaled radius, `m`≤cutoff filter) + high-zoom cone layer; `setCutoff`/`fitTo` API. |
+| `src/scripts/map/layers/timeline-cameras.ts` | **New** | Unclustered dated layer module: GeoJSON source (from the decoded `.bin`) + solid dot layer (zoom-scaled radius, arrival-flare paint, `m`≤cutoff filter) + high-zoom cone layer; `setCutoff`/`fitTo` API. |
 | `src/scripts/map/timeline-controller.ts` (name TBD) | **New** | Orchestration: scrubber state, play/pause timer, guided intro (cutoff + camera moves), reduced-motion branch, wiring to DaisyUI chrome. |
 | `src/components/TimelineMap.astro` (or an inline island in `[...slug].astro`) | **New** | The blog island: DaisyUI-branded chrome markup (`join`/`btn`/`range`/`badge`) + IntersectionObserver lazy-import + dataset fetch. Renders where `[data-timeline-map]` is present. |
 | `src/content/blog/<host-post>.md` | **New** | The host post: a newly authored, dedicated post (subject TBD) carrying the narrative + honest-methodology paragraph + the `data-timeline-map` marker div. |
 | `src/pages/blog/[...slug].astro` | **Mod** | Conditionally include the timeline island (frontmatter flag or `post.body.includes` gate). |
 | `src/content.config.ts` | **Mod (if flag chosen)** | Add optional `timelineMap` boolean to the blog schema. |
 | `src/styles/global.css` | **Mod (if needed)** | Any timeline-specific chrome tweaks not covered by DaisyUI + `.map-dark`. |
-| `.github/workflows/refresh-camera-data.yml` | **Mod** | Add the timeline-data build step; include its output in the commit-if-changed set. |
+| `.github/workflows/refresh-camera-data.yml` | **Mod** | Add the `npm run build-timeline-data` step; include `public/timeline-cameras.bin` in the commit-if-changed set. |
 | `astro.config.mjs` | **No change expected** | es2022 target already set; no new proxy needed (dataset is a static `public/` asset). |
 
 ---
@@ -493,21 +546,33 @@ The proxy nature of the data must be surfaced **twice**:
    - This is **not an official registry**; it is community-sourced documentation
      (Deflock.org / OpenStreetMap).
 
+**The 2025–26 surge is substantially real, not merely a mapping artifact.** The
+sharp rise in first-seen dates through 2025–26 reflects **both** a real acceleration
+in ALPR **deployment** during the same window **and** OpenStreetMap documentation
+catching up. Keep the "documented in OpenStreetMap (a proxy for install dates)"
+honesty and the caveats above — but do **not** frame the surge as *only* a
+documentation gap: real installations ramped sharply in this period, so the growth
+the map shows is substantially real.
+
 The framing is "watch the *documented* network grow," which is both honest and
-still damning — the growth is real even if the dates are approximate.
+still damning — the growth is real (and largely real-world), even if the exact dates
+are approximate.
 
 ---
 
 ## Implementation sequencing / checkpoints
 
 1. **Build the REAL dated dataset first, and validate placement against truth.**
-   Produce `public/timeline-cameras.json` from real OSM first-seen dates, then
-   sanity-check the dots on a throwaway render. The expectation: real ALPR data
+   Produce `public/timeline-cameras.bin` directly from OSM element history (ohsome),
+   then sanity-check the dots on a throwaway render. The expectation: real ALPR data
    should trace **road corridors between cities**, not tidy metro blobs like the
    illustrative mockup. Only revisit placement/data if it still looks wrong after
    seeing the real data — do not pre-optimize against the mockup's fiction.
-2. **Rendering layer** — the unclustered dated layer module: glow/dot layers,
-   zoom-scaled radius, `m`≤cutoff filter, high-zoom cone resolve.
+   *(Done — Checkpoint 1 gate passed: ~130,602 rows, 100% dated, full continental +
+   SC coverage.)*
+2. **Rendering layer** — the unclustered dated layer module: solid dot layer
+   (arrival-flare paint, no persistent glow), zoom-scaled radius, `m`≤cutoff filter,
+   high-zoom cone resolve.
 3. **Dedicated basemap style** — `timeline-map-style.json` (roads on, labels off except muted high-zoom city labels).
 4. **Hybrid guided intro + DaisyUI scrubber/chrome** — controller, play/pause,
    monthly range, readout, national⇄SC toggle, intro fly-through, interrupt.
@@ -531,19 +596,21 @@ doesn't tell the story, the rest is premature.
   present-day network shown, all controls still usable.
 - **Mobile 375px** — no horizontal page scroll; chrome stacks/shrinks; cooperative
   gestures let the page scroll past the map.
-- **Dataset build determinism** — running `build-timeline-data.mjs` twice on the
-  same OSM input yields byte-identical output (so the weekly workflow's
-  commit-if-changed check is meaningful and doesn't churn).
+- **Dataset build determinism** — running `build-timeline-data` twice on the
+  same OSM input yields byte-identical `.bin` output (deterministic row sort +
+  fixed-point codec), so the daily workflow's commit-if-changed check is meaningful
+  and doesn't churn.
 - **maplibre chunk sharing** — inspect the production build to confirm the
   maplibre-gl chunk is **shared**, not duplicated, between the homepage map and the
   blog island (identical import specifiers).
-- **Placement sanity vs. real data** — the checkpoint-1 truth check: dots follow
-  road corridors, SC density matches known deployment (Upstate-heavy), no obvious
-  geocoding artifacts.
+- **Placement sanity vs. real data** — the checkpoint-1 truth check (**passed**):
+  dots follow road corridors, SC density matches known deployment (Upstate-heavy),
+  no obvious geocoding artifacts; ~130,602 rows, 100% dated, full continental + SC.
 - **Grayscale + squint (colorblind/contrast) test** — with color removed
-  (grayscale) and/or eyes squinted, the map must still read as **spreading
-  brightness** as the timeline advances. If the growth is only legible in full color,
-  the glow isn't carrying enough luminance (see Visual design) and must be brightened.
+  (grayscale) and/or eyes squinted, the map must still read as **spreading red** as
+  the timeline advances. Legibility comes from **bright solid red + dot size**, not a
+  glow (see Visual design): if the growth is only legible in full color, raise the
+  dots' brightness/size — do not add a persistent glow.
 
 ---
 
@@ -565,13 +632,18 @@ doesn't tell the story, the rest is premature.
 
 ## Open questions
 
-1. **Exact OSM extraction method** — osmium history extract vs. ohsome API vs.
-   node history API (with a documented fallback). Output is identical regardless.
+1. **Exact OSM extraction method** — **RESOLVED (Checkpoint 1):** HeiGIT **ohsome**
+   `/elementsFullHistory/centroid`, built **directly** (not seeded from the DeFlock
+   snapshot, no `assertValidCameraPayload`), with the time-interval end derived from
+   ohsome's metadata temporal extent and a reuse-last-committed-`.bin` fallback.
+   `osmium`-in-CI remains an identical-output upgrade path.
 2. **Post subject/topic** — TBD (placement as a standalone new post is decided).
-3. **SC-subset artifact** — ship a separate `timeline-cameras-sc.json` for a
-   faster first paint, or filter the one national table client-side?
-4. **Final dataset encoding/size** — object rows vs. compact tuples/columnar;
-   coordinate precision; measure gzipped size.
+3. **SC-subset artifact** — **RESOLVED:** a **single national `.bin`** filtered
+   **client-side** for the SC view; no separate SC artifact.
+4. **Final dataset encoding/size** — **RESOLVED:** a compact **binary**
+   (`timeline-cameras.bin`, `16 + 11N` bytes, ~1.37 MB) via the shared
+   `timeline-codec.ts`; lon/lat as `Int32`×1e5 (~1.1 m), `Uint16` direction,
+   `Uint8` month index.
 5. **Guided-intro pacing (durations/easing only)** — the intro's **shape is set**
    (under ~25s total; non-uniform easing that lingers on the sparse 2020 opening,
    accelerates through the middle years, and begins the national→SC fly-through in
@@ -596,10 +668,14 @@ may touch the shared camera-data pipeline** — specifically:
 
 - `.github/workflows/refresh-camera-data.yml` (both may add build steps / commit
   entries),
-- `src/data/impact-stats.json` and `scripts/build-impact-stats.mjs` (the counter
+- `src/data/impact-stats.json` and `scripts/build-impact-stats.ts` (the counter
   likely reads/writes impact stats; the timeline build is added to the same
-  workflow),
-- the Deflock CDN data source the timeline build seeds from.
+  workflow).
+
+The timeline build **no longer seeds from the DeFlock CDN snapshot** — it sources its
+rows directly from OSM element history via ohsome (see Extraction method), so it
+shares only the workflow file and `package.json` with the counter, not the camera
+data source.
 
 **Coordinate to avoid merge conflicts** on the workflow file and the impact-stats
 artifacts — ideally land one branch's pipeline change first and rebase the other,
