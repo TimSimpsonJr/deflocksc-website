@@ -13,6 +13,10 @@
  *                     (2026-09-04 dot-styling decision): colorblind / dim-screen
  *                     legibility comes from bright solid red + dot SIZE, not a halo,
  *                     and an additive white pile-up in dense metros is rejected.
+ *                     Two paint modes on the handle: setCutoff() drives the
+ *                     white→red arrival flare for active playback/scrub; settle()
+ *                     holds a FLAT solid red (no flare) for a resting / held-final
+ *                     / reduced-motion frame, so the held frame is never white.
  *   - timeline-cones: high-zoom directional cones (icon-rotate from baked dir),
  *                     full-intensity center dot preserved. Same m <= cutoff.
  *
@@ -24,16 +28,35 @@
  */
 
 import maplibregl from 'maplibre-gl';
+import type { ExpressionSpecification } from 'maplibre-gl';
 import { createConeImage } from './cameras.js';
-import { cutoffFilter, flareColor, monthIndex } from '../../../lib/timeline-format.js';
+import {
+  cutoffFilter,
+  flareColor,
+  timelineFeatureProps,
+  SETTLED_RED,
+} from '../../../lib/timeline-format.js';
 import type { DecodedTimelineTable } from '../../../lib/timeline-codec.js';
 
 /** The client consumes the codec's decoded typed-array table directly. */
 export type TimelineTable = DecodedTimelineTable;
 
 export interface TimelineLayerHandle {
-  /** Cheap filter+paint update — NEVER setData. */
+  /**
+   * Cheap filter+paint update — NEVER setData. Renders the white→red arrival
+   * flare for the given cutoff. Guarded: a repeat call with the same
+   * month-quantized cutoff (as the per-frame intro loop produces) is a no-op, so
+   * the filter/paint are not needlessly re-applied over ~130k features.
+   */
   setCutoff(cutoff: number): void;
+  /**
+   * Switch the dots to FLAT solid red (no flare) for a resting / held-final /
+   * reduced-motion frame. Keeps the filter where the last setCutoff() left it and
+   * only swaps the dot paint, so the most-recent arrivals stop reading white/amber
+   * and the held frame is uniformly red — never white. The next setCutoff()
+   * restores the flare paint.
+   */
+  settle(): void;
   /** Camera move only (fit-bounds), same dataset drives both scales. */
   fitTo(scale: 'national' | 'sc'): void;
 }
@@ -43,29 +66,18 @@ const US_BOUNDS: maplibregl.LngLatBoundsLike = [[-125.0, 24.0], [-66.9, 49.5]];
 const CONE_MIN_ZOOM = 13; // cones resolve at town scale; dots below
 
 /**
- * Feature properties baked per camera:
- *   m       — YYYYMM first-seen month; drives the `m <= cutoff` visibility filter
- *             (raw YYYYMM is fine there: `<=` only needs monotonic ordering).
- *   mi      — LINEAR month index (year*12 + month-1); drives the hot-flare ramp,
- *             which subtracts months and MUST be continuous across year
- *             boundaries. See monthIndex()/flareColor() in timeline-format.ts.
- *   dir     — baked bearing for the cone icon-rotate (0 when unknown).
- *   hasDir  — whether a real direction is known (gates the cone layer). The codec
- *             stores a null direction as -1, so `dir >= 0` means "known".
+ * Bake the decoded typed-array table into a GeoJSON FeatureCollection. The
+ * per-row property mapping (m / mi / dir / hasDir, including the codec's -1
+ * no-direction sentinel) lives in the pure, unit-tested timelineFeatureProps() in
+ * timeline-format.ts — see its doc + tests for the sentinel semantics.
  */
 function tableToGeoJSON(t: TimelineTable): GeoJSON.FeatureCollection {
   const features: GeoJSON.Feature[] = [];
   for (let i = 0; i < t.m.length; i++) {
-    const hasDir = t.dir[i] >= 0; // codec: -1 sentinel = no direction
     features.push({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [t.lon[i], t.lat[i]] },
-      properties: {
-        m: t.m[i],
-        mi: monthIndex(t.m[i]),
-        dir: hasDir ? t.dir[i] : 0,
-        hasDir,
-      },
+      properties: timelineFeatureProps(t.m[i], t.dir[i]),
     });
   }
   return { type: 'FeatureCollection', features };
@@ -79,11 +91,19 @@ export function addTimelineLayers(
   const { mobile } = opts;
   const filter = cutoffFilter(opts.cutoff);
 
+  // Cone filter: the same `m <= cutoff` expression AND a known direction. Built
+  // from cutoffFilter's ExpressionSpecification, so the whole thing stays a typed
+  // expression — no cast. Reused by the layer setup and setCutoff.
+  const coneFilter = (f: ExpressionSpecification): ExpressionSpecification =>
+    ['all', f, ['get', 'hasDir']];
+
   map.addSource('timeline', { type: 'geojson', data: tableToGeoJSON(table) });
 
   // Zoom-scaled radius. Mobile floors the national end so dots stay visible —
   // SIZE carries legibility at national scale (there is no glow layer to lean on).
-  const dotRadius = mobile
+  // Typed as ExpressionSpecification so the interpolate literal is checked here at
+  // the declaration (circle-radius accepts an expression directly, no cast).
+  const dotRadius: ExpressionSpecification = mobile
     ? ['interpolate', ['exponential', 1.4], ['zoom'], 3, 2.6, 7, 3.6, 11, 6, 14, 9]
     : ['interpolate', ['exponential', 1.4], ['zoom'], 3, 1.6, 7, 2.6, 11, 5, 14, 8];
 
@@ -99,7 +119,7 @@ export function addTimelineLayers(
     filter,
     paint: {
       'circle-color': flareColor(opts.cutoff),
-      'circle-radius': dotRadius as unknown as maplibregl.DataDrivenPropertyValueSpecification<number>,
+      'circle-radius': dotRadius,
       'circle-opacity': 1,
     },
   });
@@ -122,7 +142,7 @@ export function addTimelineLayers(
     type: 'symbol',
     source: 'timeline',
     minzoom: CONE_MIN_ZOOM,
-    filter: ['all', filter, ['get', 'hasDir']] as unknown as maplibregl.FilterSpecification,
+    filter: coneFilter(filter),
     layout: {
       'icon-image': 'timeline-cone',
       'icon-size': 1.0,
@@ -132,12 +152,34 @@ export function addTimelineLayers(
     },
   });
 
+  // The layer is created already showing the flare paint at opts.cutoff, so seed
+  // the guard with it: `appliedCutoff` is the last cutoff whose filter+flare paint
+  // are on the map, and `flat` records whether settle() has since forced the flat
+  // red paint (which setCutoff must undo even when the cutoff is unchanged).
+  let appliedCutoff: number = opts.cutoff;
+  let flat = false;
+
   return {
     setCutoff(cutoff: number) {
+      // Per-frame no-op guard: the intro loop calls this every animation frame,
+      // but most frames repeat the same month-quantized cutoff. Skip re-applying
+      // the filter (re-evaluated over ~130k features) and paint when nothing that
+      // matters changed — but never skip while flat, so we always restore the flare.
+      if (cutoff === appliedCutoff && !flat) return;
       const f = cutoffFilter(cutoff);
       map.setFilter('timeline-dots', f);
-      map.setFilter('timeline-cones', ['all', f, ['get', 'hasDir']] as unknown as maplibregl.FilterSpecification);
+      map.setFilter('timeline-cones', coneFilter(f));
       map.setPaintProperty('timeline-dots', 'circle-color', flareColor(cutoff));
+      appliedCutoff = cutoff;
+      flat = false;
+    },
+    settle() {
+      // Flat solid red, no flare — the resting / held-final / reduced-motion frame.
+      // Only the dot paint changes (the filter stays at the latest cutoff), which
+      // drops the white/amber most-recent arrivals so the held frame is all red.
+      if (flat) return;
+      map.setPaintProperty('timeline-dots', 'circle-color', SETTLED_RED);
+      flat = true;
     },
     fitTo(scale) {
       map.fitBounds(scale === 'sc' ? SC_BOUNDS : US_BOUNDS, {

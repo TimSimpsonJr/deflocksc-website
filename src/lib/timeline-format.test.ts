@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { cutoffFilter, formatOsd, introCutoffAt, monthIndex, flareColor } from './timeline-format.js';
+import {
+  cutoffFilter,
+  formatOsd,
+  introCutoffAt,
+  monthIndex,
+  flareColor,
+  timelineFeatureProps,
+} from './timeline-format.js';
 
 describe('cutoffFilter', () => {
   it('builds a MapLibre <= filter on the m property', () => {
@@ -39,6 +46,32 @@ describe('flareColor', () => {
     expect(expr[3]).toBe(0);
     expect(expr[5]).toBe(1);
     expect(expr[7]).toBe(3);
+  });
+});
+
+describe('timelineFeatureProps', () => {
+  it('maps a real-bearing row: keeps the direction, sets hasDir, derives mi', () => {
+    // Mar 2024, facing 90deg -> dir preserved, hasDir true, mi from monthIndex.
+    expect(timelineFeatureProps(202403, 90)).toEqual({
+      m: 202403,
+      mi: monthIndex(202403),
+      dir: 90,
+      hasDir: true,
+    });
+  });
+  it('collapses the codec -1 no-direction sentinel to { dir: 0, hasDir: false }', () => {
+    expect(timelineFeatureProps(202001, -1)).toEqual({
+      m: 202001,
+      mi: monthIndex(202001),
+      dir: 0,
+      hasDir: false,
+    });
+  });
+  it('treats bearing 0 (due north) as a real, known direction', () => {
+    // Guards the `dir >= 0` boundary: 0 is a valid bearing, NOT the -1 sentinel.
+    const p = timelineFeatureProps(202401, 0);
+    expect(p.dir).toBe(0);
+    expect(p.hasDir).toBe(true);
   });
 });
 

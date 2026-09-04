@@ -3,11 +3,18 @@
  * the layer/controller modules so they can be unit-tested without MapLibre.
  */
 
-import type { ExpressionSpecification, FilterSpecification } from 'maplibre-gl';
+import type { ExpressionSpecification } from 'maplibre-gl';
 
-/** MapLibre filter: show only cameras first-seen on or before the cutoff month. */
-export function cutoffFilter(cutoff: number): FilterSpecification {
-  return ['<=', ['get', 'm'], cutoff] as unknown as FilterSpecification;
+/**
+ * MapLibre filter: show only cameras first-seen on or before the cutoff month.
+ * Returned as an `ExpressionSpecification` (not the looser `FilterSpecification`)
+ * so callers can nest it inside an `['all', …]` expression — e.g. the cone
+ * layer's `m <= cutoff AND hasDir` filter — without a cast. Every expression
+ * filter is a valid `FilterSpecification`, so `map.setFilter`/`addLayer` still
+ * accept it directly.
+ */
+export function cutoffFilter(cutoff: number): ExpressionSpecification {
+  return ['<=', ['get', 'm'], cutoff];
 }
 
 /**
@@ -24,8 +31,42 @@ export function monthIndex(m: number): number {
   return year * 12 + (mo - 1);
 }
 
+/** The baked GeoJSON feature properties for one timeline camera. */
+export interface TimelineFeatureProps {
+  /** YYYYMM first-seen month — drives the `m <= cutoff` visibility filter. */
+  m: number;
+  /** Linear month index (year*12 + month-1) — drives the flare ramp. */
+  mi: number;
+  /** Baked cone bearing in degrees (0 when unknown). */
+  dir: number;
+  /** Whether a real direction is known — gates the cone layer. */
+  hasDir: boolean;
+}
+
+/**
+ * Map one decoded codec row to its baked GeoJSON feature properties. The codec
+ * stores a null direction as the sentinel -1 (see timeline-codec.ts), so
+ * `dir >= 0` means "known": a real bearing keeps its value with hasDir true; the
+ * -1 sentinel collapses to `{ dir: 0, hasDir: false }` so downstream paint never
+ * sees a negative bearing. `mi` reuses monthIndex so the flare ramp stays linear
+ * across year boundaries. Pure and MapLibre-free, so it is unit-testable — see
+ * timeline-format.test.ts.
+ */
+export function timelineFeatureProps(m: number, dir: number): TimelineFeatureProps {
+  const hasDir = dir >= 0; // codec: -1 sentinel = no direction
+  return { m, mi: monthIndex(m), dir: hasDir ? dir : 0, hasDir };
+}
+
 /** Months of "recency" the hot flare ramps over as the cutoff advances. */
 export const FLARE_SPAN = 3;
+
+/**
+ * Surveillance red. This is BOTH the flare ramp's fully-cooled terminal color
+ * and the flat "settled" fill the layer holds on a resting/held-final frame.
+ * Sharing one constant guarantees a settled dot is identical to a fully-cooled
+ * one — solid red, never white — which is the whole point of the settled mode.
+ */
+export const SETTLED_RED = '#ef4444';
 
 /**
  * Hot-flare-then-cool fill expression. Interpolates on the LINEAR month delta
@@ -42,8 +83,8 @@ export function flareColor(cutoff: number): ExpressionSpecification {
     'interpolate', ['linear'], ['-', ci, ['get', 'mi']],
     0, '#fff7ed', // just arrived — hot
     1, '#fbbf24', // amber
-    FLARE_SPAN, '#ef4444', // cooled to surveillance red
-  ] as unknown as ExpressionSpecification;
+    FLARE_SPAN, SETTLED_RED, // cooled to surveillance red (== the settled fill)
+  ];
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
