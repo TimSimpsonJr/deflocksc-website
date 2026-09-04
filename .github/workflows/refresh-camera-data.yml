@@ -2,8 +2,8 @@ name: Refresh Camera Data
 
 on:
   schedule:
-    # Weekly on Wednesdays at 6am ET (offset from bill scraper)
-    - cron: '0 11 * * 3'
+    # Daily at 6am ET (offset from bill scraper)
+    - cron: '0 11 * * *'
   workflow_dispatch: # manual trigger
 
 permissions:
@@ -16,13 +16,26 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      # Atomic camera refresh (design §4.1): fetch the snapshot, then derive the
-      # SC total + per-jurisdiction counts + impact stats from that one snapshot
-      # so the artifacts can never disagree. Both generators are dependency-free
-      # (plain Node, no npm ci), so no install step is needed.
-      - run: node scripts/fetch-camera-data.mjs
-      - run: node scripts/build-impact-stats.mjs
+          node-version: '22'
+          cache: 'npm'
+      # fetch-camera-data and build-impact-stats are now esbuild-bundled TS that
+      # import the shared count module (src/lib/sc-camera-count.ts), and
+      # build-impact-stats reads the SC boundary GeoJSON the prebuild copies into
+      # public/districts from the open-civics-boundaries package — so this job
+      # installs deps and runs the prebuild before deriving figures.
+      - run: npm ci
+      - run: npm run prebuild
+      # Atomic refresh (design §4.1): fetch + VALIDATE the CDN snapshot, then derive
+      # the SC total + per-jurisdiction counts + impact stats from that one snapshot
+      # so the artifacts agree. fetch-camera-data validates the payload
+      # ALL-OR-NOTHING with the shared validator BEFORE writing
+      # public/camera-data.json; a malformed/empty/mixed response throws -> non-zero
+      # exit, which fails this step and the whole job (GitHub Actions stops on the
+      # first non-zero step), so build-impact-stats and the commit step below never
+      # run and no corrupt snapshot or count is ever committed. The prior committed
+      # snapshot is left untouched.
+      - run: npm run fetch-camera-data
+      - run: npm run build-impact-stats
       - name: Commit if data changed
         run: |
           git config user.name "github-actions[bot]"

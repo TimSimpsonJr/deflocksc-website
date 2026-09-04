@@ -273,3 +273,25 @@ describe('repo config', () => {
     expect(lines).toContain('.env');
   });
 });
+
+describe('refresh-camera-data workflow (design §3.4)', () => {
+  const wf = read('.github/workflows/refresh-camera-data.yml');
+
+  it('runs daily, not weekly', () => {
+    expect(wf).toMatch(/cron:\s*'0 11 \* \* \*'/);
+    expect(wf).not.toMatch(/cron:\s*'0 11 \* \* 3'/);
+  });
+
+  it('installs deps and runs the prebuild before deriving figures', () => {
+    expect(wf).toContain('npm ci');
+    expect(wf).toContain('npm run prebuild');
+    expect(wf).toContain('npm run fetch-camera-data');
+    expect(wf).toContain('npm run build-impact-stats');
+  });
+
+  it('fetches via the validating TS bundle, not the un-validated .mjs', () => {
+    // The validation gate lives in the esbuild-bundled fetch-camera-data.ts; the
+    // raw .mjs (which wrote the CDN response with no validation) must be gone.
+    expect(wf).not.toContain('node scripts/fetch-camera-data.mjs');
+  });
+});
