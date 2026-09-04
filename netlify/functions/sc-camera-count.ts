@@ -14,7 +14,7 @@ import type { FeatureCollection } from '../../src/lib/geo-utils.js';
  * GET /api/sc-camera-count — the daily-fresh SC camera total (design §3.2).
  *
  * Fetches the DeFlock CDN snapshot the same way scripts/fetch-camera-data.ts
- * does (same URL + shared validator; a browser User-Agent -- see USER_AGENT below), applies the SC bounding-box pre-filter and the
+ * does (same URL + User-Agent + shared validator), applies the SC bounding-box pre-filter and the
  * shared point-in-polygon count (src/lib/sc-camera-count.ts — identical
  * methodology to the build-time impact-stats.json), and returns an aggregate
  * count only (no coordinates, no PII).
@@ -56,16 +56,18 @@ import type { FeatureCollection } from '../../src/lib/geo-utils.js';
  */
 
 const CDN_URL = 'https://cdn.deflock.me/regions/20/-100.json';
-// DeFlock's CDN (Cloudflare-fronted) returns 403 to a bot-style User-Agent coming
-// from datacenter egress, which silently 403'd this function on Netlify (confirmed
-// on a deploy preview). A browser User-Agent gets past that UA gate. The build-time
-// scripts/fetch-camera-data.ts keeps its identifying UA because it runs from GitHub
-// Actions egress, which DeFlock does NOT block. Volume stays polite regardless: the
-// response is edge-cached for a day, so DeFlock is hit ~once/day site-wide.
-// (A cleaner long-term path is a sanctioned DeFlock API or routing via the site's
-// deflock-tiles proxy -- see the PR discussion.)
+// KNOWN LIMITATION (see PR #118 discussion): DeFlock's CDN (Cloudflare-fronted)
+// returns 403 to this function's fetch from Netlify's datacenter egress, and a
+// browser User-Agent does NOT reliably defeat it (the block is by IP/ASN, not just
+// UA -- confirmed over ~7 min of deploy-preview polling). So in production this live
+// endpoint currently ALWAYS fails soft to the build-time number. The build-time
+// scripts/fetch-camera-data.ts is unaffected because it runs from GitHub Actions
+// egress, which DeFlock does not block. Making this endpoint truly live needs a
+// DESIGN change (route via the site's deflock-tiles proxy, a sanctioned DeFlock API,
+// or a GitHub-Actions-computed value). We keep the honest, identifying User-Agent
+// rather than impersonating a browser (it did not work anyway, and it is not polite).
 const USER_AGENT =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
+  'deflocksc-website/1.0 (https://github.com/TimSimpsonJr/deflocksc-website)';
 
 // Bound the upstream fetch well under Netlify's ~10s function timeout, so a hung
 // DeFlock aborts here and fails soft (see the catch) instead of 5xx-ing. The
@@ -163,11 +165,7 @@ export default async (req: Request, _context: Context): Promise<Response> => {
     if (new URL(req.url).search !== '') return jsonResponse({ stale: true }, false);
 
     const resp = await fetch(CDN_URL, {
-      headers: {
-        'User-Agent': USER_AGENT,
-        Accept: 'application/json,text/plain,*/*',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
+      headers: { 'User-Agent': USER_AGENT },
       // Bounded so a hung upstream aborts (TimeoutError -> catch) rather than
       // riding the platform function timeout into a 5xx.
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
