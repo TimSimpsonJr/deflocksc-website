@@ -32,9 +32,11 @@ Four moving parts, in dependency order:
    `{ scTotal, jurisdictions, generatedAt, stale:false }` with a 24 h durable + SWR edge cache.
    Query-bearing requests are rejected before the fetch (Netlify's cache key includes the query, so
    `?bust=` would bypass the cache and hammer DeFlock); the fetch is bounded by an abort timeout;
-   and the payload + computed total are validated before caching. The timeout, non-ok, non-array,
-   empty-array, malformed-record, and zero-result cases all return HTTP 200 `{ stale:true }`
-   uncached. Its boundary dataset is bundled via a **function-scoped**
+   the payload is validated **all-or-nothing** (any malformed record rejects the whole payload — never
+   a filtered undercount); and the computed result is validated (both `scTotal` and `jurisdictions`
+   must be positive integers). The timeout, non-ok, non-array, empty-array, any-malformed-record,
+   zero-result, and non-positive-jurisdictions cases all return HTTP 200 `{ stale:true }` uncached.
+   Its boundary dataset is bundled via a **function-scoped**
    `[functions."sc-camera-count"] included_files` so no other function ships it.
 3. **Client** `src/scripts/live-count.ts` (new) — fetches `/api/sc-camera-count` once per page,
    and on a valid numeric `scTotal` updates the three `data-live-sc` surfaces; otherwise leaves
@@ -76,8 +78,8 @@ Fallback ladder (the number is never blank, never blocks render): **live** value
 | `scripts/build-impact-stats.ts` | **New** (replaces `.mjs`) | Build-time generator; now *imports* `countScCameras` instead of an inline copy. Writes `public/camera-counts.json` + `src/data/impact-stats.json`, byte-format unchanged. |
 | `scripts/build-impact-stats.mjs` | **Delete** | Replaced by the `.ts` above. |
 | `tests/build-impact-stats.exec.test.ts` | **New** | Execution-level regression: bundles the generator (esbuild) and runs it from a fixture cwd, asserting `ROOT`=`process.cwd()` finds the boundary files + writes correct figures. Catches the `import.meta.url`→`node_modules` bug a unit test can't. |
-| `netlify/functions/sc-camera-count.ts` | **New** | `GET /api/sc-camera-count`: reject query-bearing requests (cache-key politeness), fetch DeFlock with a bounded abort timeout, validate payload + computed total, `countScCameras`, 24 h durable+SWR cache; timeout/`!ok`/non-array/empty/malformed/zero → 200 `{stale:true}` uncached. |
-| `tests/functions/sc-camera-count.test.ts` | **New** | Function tests: success shape + cache header + CDN URL/UA + bounded signal; cache-busting query never reaches upstream; `!ok` / throw / non-array / empty-array / malformed-record / zero-result / timeout → `{stale:true}` uncached. |
+| `netlify/functions/sc-camera-count.ts` | **New** | `GET /api/sc-camera-count`: reject query-bearing requests (cache-key politeness), fetch DeFlock with a bounded abort timeout, validate payload **all-or-nothing** (any malformed record → whole payload rejected) + computed result (`scTotal` and `jurisdictions` both positive integers), `countScCameras`, 24 h durable+SWR cache; timeout/`!ok`/non-array/empty/any-malformed/mixed/zero/non-positive-jurisdictions → 200 `{stale:true}` uncached. |
+| `tests/functions/sc-camera-count.test.ts` | **New** | Function tests: success shape + cache header + CDN URL/UA + bounded signal; cache-busting query never reaches upstream; `!ok` / throw / non-array / empty-array / all-malformed / **mixed valid+malformed** / zero-result / timeout → `{stale:true}` uncached (mixed proves no filtered undercount is cached). |
 | `src/scripts/live-count.ts` | **New** | Client: memoized `getLiveCount()`, pure `parseLiveCount`/`cameraFloor`, `applyLiveCount`, idempotent `initLiveCount`. |
 | `src/scripts/live-count.test.ts` | **New** | Unit tests for the pure helpers (`parseLiveCount`, `cameraFloor`) — `node` env. |
 | `src/scripts/live-count.dom.test.ts` | **New** | DOM wiring tests (`happy-dom` per-file env): success updates all 3 surfaces; stale/rejected leaves all 3 at SSR values; one fetch per page; exact-vs-floor formatting. |
@@ -926,10 +928,11 @@ describe('GET /api/sc-camera-count — fail soft', () => {
     expect(res.headers.get('Netlify-CDN-Cache-Control')).toBeNull();
   });
 
-  it('returns 200 { stale:true } with NO bogus total for malformed records', async () => {
+  it('returns 200 { stale:true } with NO bogus total when ALL records are malformed', async () => {
     // A record missing an id, or with non-numeric coords, must not be counted
-    // into a positive total. After validation nothing well-formed remains, so
-    // the endpoint fails soft rather than caching a fabricated number.
+    // into a positive total. Every record here is malformed, so the all-or-nothing
+    // check fails the payload and the endpoint fails soft rather than caching a
+    // fabricated number.
     fetchMock.mockResolvedValue(
       new Response(
         JSON.stringify([
@@ -944,6 +947,31 @@ describe('GET /api/sc-camera-count — fail soft', () => {
     expect(res.status).toBe(200);
     expect(body).toEqual({ stale: true });
     expect(body.scTotal).toBeUndefined();
+    expect(res.headers.get('Netlify-CDN-Cache-Control')).toBeNull();
+  });
+
+  it('returns 200 { stale:true } uncached for a MIXED valid+malformed payload (no cached undercount)', async () => {
+    // ALL-OR-NOTHING: a payload mixing well-formed and malformed records must NOT
+    // be filtered down to the valid subset and cached — that would pin a 24h
+    // undercount to the edge (and preprocess the live data differently from the
+    // build path). ONE bad record fails the WHOLE snapshot soft. The two valid
+    // records below (which alone would yield scTotal 2 / jurisdictions 1) must be
+    // discarded, not counted. Proven by asserting NO scTotal field and no cache.
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify([
+          { id: 1, lat: 34, lon: -81 }, // well-formed, inside SC
+          { id: 2, lat: 34.5, lon: -80 }, // well-formed, inside SC
+          { id: 3, lat: 'x', lon: 'y' }, // malformed -> poisons the whole payload
+        ]),
+        { status: 200 },
+      ),
+    );
+    const res = await call();
+    const body = (await res.json()) as { stale: boolean; scTotal?: number };
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ stale: true }); // exactly { stale:true } — no scTotal, no jurisdictions
+    expect(body.scTotal).toBeUndefined(); // proves no filtered undercount was cached
     expect(res.headers.get('Netlify-CDN-Cache-Control')).toBeNull();
   });
 
@@ -1019,12 +1047,28 @@ import type { FeatureCollection } from '../../src/lib/geo-utils.js';
  *
  * Fail-soft contract (never 5xxs, never caches a bad number): the upstream fetch
  * is bounded by an abort timeout (so a hung DeFlock cannot ride the platform
- * function timeout); the payload is validated (array, non-empty, well-formed
- * records only); and the computed scTotal is validated (a positive integer)
- * before caching. The timeout, empty-array, malformed-record, and zero-result
- * cases all return HTTP 200 { stale:true } with no scTotal and NO durable
- * caching, so the homepage silently keeps its build-time number and the next
- * request can recover immediately.
+ * function timeout); the payload is validated ALL-OR-NOTHING (array, non-empty,
+ * and EVERY record well-formed — one malformed record rejects the whole payload
+ * rather than silently caching a filtered undercount); and the computed result is
+ * validated (both scTotal and jurisdictions must be positive integers, so a zero
+ * total or an incomplete boundary bundle cannot cache as success) before caching.
+ * The timeout, non-ok, non-array, empty-array, any-malformed-record, zero-result,
+ * and non-positive-jurisdictions cases all return HTTP 200 { stale:true } with no
+ * scTotal and NO durable caching, so the homepage silently keeps its build-time
+ * number and the next request can recover immediately.
+ *
+ * Live-vs-build validation boundaries (why the two paths look different): the
+ * shared counter (src/lib/sc-camera-count.ts) does NO structural/data-quality
+ * filtering — it applies only the geographic SC-bbox clip that IS the counting
+ * methodology (identical in both paths) and counts exactly the records it is
+ * handed. STRUCTURAL validation lives at each boundary instead: THIS function does
+ * strict all-or-nothing well-formedness validation because it consumes an
+ * untrusted live DeFlock fetch, while the build script (scripts/build-impact-stats.ts)
+ * needs none — its input is the already-trusted committed snapshot
+ * (public/camera-data.json) produced by the fetch/commit pipeline. So both paths
+ * feed the shared counter structurally-clean records, and neither silently drops a
+ * malformed subset (the function rejects the whole payload; the build input is
+ * clean by construction).
  */
 
 const CDN_URL = 'https://cdn.deflock.me/regions/20/-100.json';
@@ -1050,9 +1094,11 @@ function readJson<T>(path: string): T {
 }
 
 /**
- * A camera record is usable only with an id (number|string) and finite numeric
- * lat/lon. Filtering to these BEFORE counting stops a malformed in-bounds record
- * (e.g. a missing id, or string coords) from fabricating a positive total.
+ * A camera record is well-formed only with an id (number|string) and finite
+ * numeric lat/lon. The handler requires EVERY record to pass this (all-or-nothing):
+ * one malformed record (a missing id, string coords, NaN/Infinity) fails the whole
+ * payload soft rather than being dropped, so a malformed in-bounds record can never
+ * fabricate — or silently undercount into — a cached positive total.
  */
 function isWellFormedCamera(c: unknown): c is Camera {
   if (typeof c !== 'object' || c === null) return false;
@@ -1117,16 +1163,30 @@ export default async (req: Request, _context: Context): Promise<Response> => {
     // and must not be cached as a valid result for a day.
     if (!Array.isArray(raw) || raw.length === 0) return jsonResponse({ stale: true }, false);
 
-    const cameras = raw.filter(isWellFormedCamera);
-    if (cameras.length === 0) return jsonResponse({ stale: true }, false);
+    // ALL-OR-NOTHING structural validation. This is an UNTRUSTED live fetch, so a
+    // payload that mixes well-formed and malformed records is itself a corruption
+    // signal. Filtering to the valid subset (raw.filter(isWellFormedCamera)) would
+    // silently CACHE an undercount for 24h AND make the live path preprocess data
+    // differently from the build path. So if ANY record is malformed, fail soft on
+    // the WHOLE payload — never count a filtered remainder. Only a fully well-formed
+    // snapshot is handed to the shared counter, which does no structural filtering
+    // of its own (it counts exactly what it is given, after its geographic clip).
+    if (!raw.every(isWellFormedCamera)) return jsonResponse({ stale: true }, false);
+    const cameras: Camera[] = raw;
 
     const { stateOutline, boundaries } = loadBoundaries();
     const { scTotal, jurisdictions } = countScCameras(cameras, stateOutline, boundaries);
 
-    // Validate the RESULT before caching: never pin a zero/negative/non-integer
-    // total to the edge for 24h (a transient upstream hiccup must recover, not
-    // stick). Zero SC matches is treated as a soft failure.
+    // Validate the RESULT before caching: never pin a bad figure to the edge for
+    // 24h (a transient upstream hiccup must recover, not stick). scTotal must be a
+    // positive integer (zero SC matches is treated as a soft failure), AND
+    // jurisdictions must be a positive integer — a zero/non-positive jurisdictions
+    // count means an incomplete boundary bundle (missing county-*/place-* files),
+    // which must not be cached as a successful result.
     if (!Number.isInteger(scTotal) || scTotal <= 0) return jsonResponse({ stale: true }, false);
+    if (!Number.isInteger(jurisdictions) || jurisdictions <= 0) {
+      return jsonResponse({ stale: true }, false);
+    }
 
     return jsonResponse(
       { scTotal, jurisdictions, generatedAt: new Date().toISOString(), stale: false },
@@ -1186,10 +1246,14 @@ with a 24h durable + stale-while-revalidate edge cache.
 Politeness + fail-soft hardening: reject query-bearing requests before the
 upstream fetch (Netlify's cache key includes the query, so ?bust= would bypass
 the edge cache and hammer DeFlock); bound the fetch with an abort timeout;
-validate the payload (array, non-empty, well-formed records) and the computed
-total (positive integer) before caching. Timeout, empty-array, malformed-record,
-and zero-result all return HTTP 200 { stale:true } uncached, so the homepage
-keeps its build-time number. included_files is scoped to
+validate the payload ALL-OR-NOTHING (array, non-empty, and EVERY record
+well-formed — any malformed record rejects the whole payload instead of caching a
+filtered undercount, keeping the live path's preprocessing identical to the build
+path) and the computed result (both scTotal and jurisdictions positive integers,
+so a zero total or incomplete boundary bundle cannot cache as success) before
+caching. Timeout, empty-array, any-malformed-record, mixed valid+malformed,
+zero-result, and non-positive-jurisdictions all return HTTP 200 { stale:true }
+uncached, so the homepage keeps its build-time number. included_files is scoped to
 [functions."sc-camera-count"] so only this function ships public/districts/**.
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
