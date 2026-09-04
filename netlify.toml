@@ -6,17 +6,6 @@
 [build.environment]
   NODE_VERSION = "22"
 
-# Bundle the generated SC boundary GeoJSON into ONLY the sc-camera-count function
-# so it can run the point-in-polygon count at runtime. Scope this to the
-# per-function table [functions."sc-camera-count"]: a top-level [functions] block
-# would ship the (multi-MB) district dataset into every function (events,
-# submit-event, go, address-suggest, fold-events), none of which read it. These
-# files are produced by the prebuild (scripts/sync-open-civics.mjs) into
-# public/districts and are otherwise gitignored, so they must be included
-# explicitly.
-[functions."sc-camera-count"]
-  included_files = ["public/districts/**"]
-
 # Proxy Umami Cloud through our domain to avoid ad-blocker blocklists
 [[redirects]]
   from = "/u/script.js"

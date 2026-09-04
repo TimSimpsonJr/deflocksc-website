@@ -57,7 +57,7 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
 
       <!-- Side column (right) -->
       <div class="map-side">
-        <p class="map-statline"><span class="n" data-live-sc="exact"><span class="sr-only">{scTotal}</span><span aria-hidden="true" data-count-up>{scTotal}</span></span> cameras &middot; <span class="n"><span class="sr-only">{jurisdictions}</span><span aria-hidden="true" data-count-up>{jurisdictions}</span></span> jurisdictions</p>
+        <p class="map-statline"><span class="n"><span class="sr-only">{scTotal}</span><span aria-hidden="true" data-count-up>{scTotal}</span></span> cameras &middot; <span class="n"><span class="sr-only">{jurisdictions}</span><span aria-hidden="true" data-count-up>{jurisdictions}</span></span> jurisdictions</p>
         <p class="map-caption">Pan across the state, tap any dot to see the vendor, operating agency, and direction each camera faces.</p>
       </div>
 
@@ -230,7 +230,6 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
   import type { GeoJSONSource } from 'maplibre-gl';
   import type { DeflockCamera } from '../scripts/map/tile-loader.js';
   import { observeCountUps } from '../scripts/count-up.js';
-  import { initLiveCount } from '../scripts/live-count.js';
 
   // Open on Greenville (the Upstate has the densest deployment); users pan and
   // zoom out from there to explore the rest of the state.
@@ -381,10 +380,6 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
     btn.querySelector('.scroll-btn-label')!.textContent = enabled ? 'Disable scroll zoom' : 'Enable scroll zoom';
   });
 
-  // Count-up on the statline numbers, EXCEPT the SC cameras number (live-count owns it).
-  const statUps = Array.from(
-    document.querySelectorAll<HTMLElement>('.map-statline [data-count-up]'),
-  ).filter((el) => !el.closest('[data-live-sc]'));
-  observeCountUps(statUps);
-  initLiveCount();
+  // Count-up on the map statline numbers (shared util, fires once on view).
+  observeCountUps(document.querySelectorAll<HTMLElement>('.map-statline [data-count-up]'));
 </script>
