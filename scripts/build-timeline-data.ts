@@ -1,6 +1,12 @@
 /**
  * build-timeline-data.ts — bakes the compact dated camera table
- * (public/timeline-cameras.json) that drives the surveillance timeline map.
+ * (public/timeline-cameras.bin) that drives the surveillance timeline map.
+ *
+ * The table is packed to a compact little-endian binary via the shared
+ * timeline-codec (src/lib/timeline-codec.ts): the Node build encodes it here,
+ * the browser map client decodes it with the same module. See that file for the
+ * on-disk format. The binary is ~1.4 MB for ~130k rows (vs ~3.9 MB as JSON) and
+ * decodes straight into typed arrays.
  *
  * The dataset is sourced ENTIRELY from OSM element history via the HeiGIT ohsome
  * API: every continental ALPR node ohsome returns across the REGIONS bboxes
@@ -42,13 +48,14 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { encodeTimelineTable, decodeTimelineTable } from '../src/lib/timeline-codec.js';
 
 // esbuild bundles this generator to node_modules/.cache before Node runs it, so
 // import.meta.url resolves INTO node_modules and is useless for finding repo
 // files. Resolve every path from process.cwd(), which npm sets to the repo root —
 // identical to fetch-camera-data.ts / build-impact-stats.ts.
 const ROOT = process.cwd();
-const OUT_PATH = resolve(ROOT, 'public', 'timeline-cameras.json');
+const OUT_PATH = resolve(ROOT, 'public', 'timeline-cameras.bin');
 // Spec: the timeline UI opens at ~Jan 2020. OSM has ALPR nodes predating 2020,
 // so first-seen months are FLOORED to this stop and pre-2020 cameras are bucketed
 // into it — the scrubber and intro then start at 202001 with no sparse pre-2020
@@ -57,21 +64,12 @@ const TIMELINE_START_MONTH = 202001;
 
 // --- Types ---
 
-/** One normalized camera row before columnar encoding. */
+/** One normalized camera row before binary encoding (see timeline-codec). */
 export interface TimelineRow {
   lon: number;
   lat: number;
   m: number;
   dir: number | null;
-}
-
-/** The compact columnar dated table shipped as public/timeline-cameras.json. */
-export interface TimelineTable {
-  v: number;
-  lon: number[];
-  lat: number[];
-  m: number[];
-  dir: (number | null)[];
 }
 
 /**
@@ -229,9 +227,16 @@ export function sortForDeterminism(rows: TimelineRow[]): TimelineRow[] {
   );
 }
 
-/** Rows [{lon,lat,m,dir}] -> columnar {v,lon[],lat[],m[],dir[]}, coords rounded. */
-export function encodeTable(rows: TimelineRow[]): TimelineTable {
-  const norm = sortForDeterminism(
+/**
+ * Normalize rows for encoding: round coords to 5 decimals, then apply the
+ * deterministic total order. Rounding BEFORE sorting keeps the byte output
+ * stable — two rows whose raw coords differ only past the 5th decimal collapse
+ * to the same key and can no longer leak their input order through the sort.
+ * The shared codec re-applies the same fixed-point rounding on encode, so this
+ * pre-rounding only fixes the ordering; it does not change the stored values.
+ */
+export function normalizeRows(rows: TimelineRow[]): TimelineRow[] {
+  return sortForDeterminism(
     rows.map((r) => ({
       lon: roundCoord(r.lon),
       lat: roundCoord(r.lat),
@@ -239,42 +244,22 @@ export function encodeTable(rows: TimelineRow[]): TimelineTable {
       dir: r.dir ?? null,
     })),
   );
-  return {
-    v: 1,
-    lon: norm.map((r) => r.lon),
-    lat: norm.map((r) => r.lat),
-    m: norm.map((r) => r.m),
-    dir: norm.map((r) => r.dir),
-  };
 }
 
-/** Columnar table -> row objects. Inverse of encodeTable. */
-export function decodeTable(table: TimelineTable): TimelineRow[] {
-  const out: TimelineRow[] = [];
-  for (let i = 0; i < table.m.length; i++) {
-    out.push({ lon: table.lon[i], lat: table.lat[i], m: table.m[i], dir: table.dir[i] });
-  }
-  return out;
-}
-
-/** Graceful fallback selector. Returns { table, reused }. */
+/**
+ * Graceful-fallback selector over ENCODED bytes. Prefers the fresh build's
+ * bytes; falls back to the last committed .bin when the fresh build is
+ * unavailable (null) or empty; throws when neither is usable. main() only ever
+ * hands a non-null `fresh` when the build resolved rows, so a non-empty buffer
+ * here always carries rows.
+ */
 export function chooseOutput(
-  fresh: TimelineTable | null,
-  lastCommitted: TimelineTable | null,
-): { table: TimelineTable; reused: boolean } {
-  // Each `if` narrows its argument to TimelineTable inside the block.
-  if (fresh && Array.isArray(fresh.m) && fresh.m.length > 0) {
-    return { table: fresh, reused: false };
-  }
-  if (lastCommitted && Array.isArray(lastCommitted.m) && lastCommitted.m.length > 0) {
-    return { table: lastCommitted, reused: true };
-  }
+  fresh: Uint8Array | null,
+  lastCommitted: Uint8Array | null,
+): { bytes: Uint8Array; reused: boolean } {
+  if (fresh && fresh.length > 0) return { bytes: fresh, reused: false };
+  if (lastCommitted && lastCommitted.length > 0) return { bytes: lastCommitted, reused: true };
   throw new Error('Timeline build produced no rows and no committed table to fall back to');
-}
-
-/** Stable serialization for the shipped artifact (fixed key order, trailing NL). */
-export function serializeTable(table: TimelineTable): string {
-  return JSON.stringify(table) + '\n';
 }
 
 // --- OSM ALPR dataset (ohsome) ---
@@ -418,10 +403,16 @@ async function fetchTile(
   }
 }
 
-function readCommitted(): TimelineTable | null {
+/**
+ * Read the last committed .bin as raw bytes for the graceful fallback. Returns
+ * the bytes (not a decoded table) so the fallback path can reuse them verbatim;
+ * a missing or empty file yields null.
+ */
+function readCommitted(): Uint8Array | null {
   if (!existsSync(OUT_PATH)) return null;
   try {
-    return JSON.parse(readFileSync(OUT_PATH, 'utf-8')) as TimelineTable;
+    const buf = readFileSync(OUT_PATH);
+    return buf.length > 0 ? new Uint8Array(buf) : null;
   } catch {
     return null;
   }
@@ -429,7 +420,7 @@ function readCommitted(): TimelineTable | null {
 
 async function main(): Promise<void> {
   const featuresById = new Map<number, OhsomeFeature[]>();
-  let fresh: TimelineTable | null = null;
+  let fresh: Uint8Array | null = null;
   try {
     // ohsome's OSM-history data lags real time; derive the interval END from the
     // metadata temporal extent once, up front. Using today would 404 every
@@ -446,19 +437,23 @@ async function main(): Promise<void> {
       const row = reduceVersionsToRow(versions);
       if (row) rows.push(row); // undated / coordinate-less -> excluded
     }
-    fresh = encodeTable(rows);
+    // Only encode when we resolved rows; an empty build leaves `fresh` null so
+    // chooseOutput routes to the committed-table fallback rather than writing an
+    // empty 16-byte header.
+    fresh = rows.length > 0 ? encodeTimelineTable(normalizeRows(rows)) : null;
     console.log(`Resolved ${rows.length}/${featuresById.size} nodes to dated rows`);
   } catch (err) {
     console.error('ohsome dataset build failed; will fall back if possible:', err);
     fresh = null;
   }
 
-  const { table, reused } = chooseOutput(fresh, readCommitted());
+  const { bytes, reused } = chooseOutput(fresh, readCommitted());
   if (reused) console.warn('Reusing the last committed timeline table (fresh build unavailable).');
-  writeFileSync(OUT_PATH, serializeTable(table));
-  const months = table.m;
+  writeFileSync(OUT_PATH, Buffer.from(bytes));
+  // Decode the bytes we actually wrote to report the shipped row count + range.
+  const { m } = decodeTimelineTable(bytes);
   console.log(
-    `Wrote ${OUT_PATH}: ${months.length} rows, months ${months[0]}..${months[months.length - 1]}`,
+    `Wrote ${OUT_PATH}: ${m.length} rows, months ${m[0]}..${m[m.length - 1]}`,
   );
 }
 

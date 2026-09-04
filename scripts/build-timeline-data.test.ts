@@ -7,12 +7,11 @@ import {
   reduceVersionsToRow,
   sortForDeterminism,
   floorToTimelineStart,
-  encodeTable,
-  decodeTable,
+  normalizeRows,
   chooseOutput,
-  serializeTable,
   type OhsomeFeature,
 } from './build-timeline-data.js';
+import { encodeTimelineTable, decodeTimelineTable } from '../src/lib/timeline-codec.js';
 
 describe('monthInt', () => {
   it('encodes an ISO timestamp as a YYYYMM integer', () => {
@@ -135,7 +134,10 @@ describe('reduceVersionsToRow', () => {
   });
 });
 
-describe('sortForDeterminism + encodeTable', () => {
+const bytesEqual = (a: Uint8Array, b: Uint8Array) =>
+  a.length === b.length && a.every((v, i) => v === b[i]);
+
+describe('sortForDeterminism + normalizeRows', () => {
   const rows = [
     { lon: -82.4, lat: 34.85, m: 202105, dir: 90 },
     { lon: -80.0, lat: 33.0, m: 202001, dir: null },
@@ -146,28 +148,31 @@ describe('sortForDeterminism + encodeTable', () => {
     expect(s.map((r) => r.m)).toEqual([202001, 202105, 202105]);
     expect(s.slice(1).map((r) => r.lat)).toEqual([34.84, 34.85]);
   });
-  it('is byte-identical regardless of input order', () => {
-    const a = serializeTable(encodeTable(rows));
-    const b = serializeTable(encodeTable([...rows].reverse()));
-    expect(a).toBe(b);
+  it('rounds coords to 5 decimals and applies the deterministic order', () => {
+    const n = normalizeRows([
+      { lon: -82.3912345, lat: 34.8500049, m: 202105, dir: 90 },
+      { lon: -80.0, lat: 33.0, m: 202001, dir: undefined as unknown as number },
+    ]);
+    expect(n).toEqual([
+      { lon: -80.0, lat: 33.0, m: 202001, dir: null },
+      { lon: -82.39123, lat: 34.85, m: 202105, dir: 90 },
+    ]);
   });
-  it('produces index-aligned columnar arrays', () => {
-    const t = encodeTable(rows);
-    expect(t.v).toBe(1);
-    expect(t.lon.length).toBe(3);
-    expect(t.m.length).toBe(t.lon.length);
-    expect(t.dir.length).toBe(t.lon.length);
+  it('encodes byte-identically regardless of input order (via the shared codec)', () => {
+    const a = encodeTimelineTable(normalizeRows(rows));
+    const b = encodeTimelineTable(normalizeRows([...rows].reverse()));
+    expect(bytesEqual(a, b)).toBe(true);
   });
-  it('is total: rows identical but for dir sort byte-identically in either order', () => {
+  it('is total: rows identical but for dir encode byte-identically in either order', () => {
     // Same month and same 5-decimal coords, differing ONLY in dir — the tie-break
     // on dir makes the ordering total, so input order can no longer leak through.
     const twins = [
       { lon: -82.4, lat: 34.85, m: 202105, dir: 90 },
       { lon: -82.4, lat: 34.85, m: 202105, dir: 270 },
     ];
-    const a = serializeTable(encodeTable(twins));
-    const b = serializeTable(encodeTable([...twins].reverse()));
-    expect(a).toBe(b);
+    const a = encodeTimelineTable(normalizeRows(twins));
+    const b = encodeTimelineTable(normalizeRows([...twins].reverse()));
+    expect(bytesEqual(a, b)).toBe(true);
   });
 });
 
@@ -180,32 +185,36 @@ describe('floorToTimelineStart', () => {
   });
 });
 
-describe('decodeTable round-trips encodeTable', () => {
-  it('recovers the normalized (rounded, sorted) rows', () => {
+describe('normalizeRows -> shared codec round-trip', () => {
+  it('recovers the normalized (rounded, sorted) rows through the .bin codec', () => {
     const rows = [
-      { lon: -82.391234, lat: 34.850004, m: 202403, dir: 160.5 },
+      { lon: -82.391234, lat: 34.850004, m: 202403, dir: 90 },
       { lon: -80.12345, lat: 33.5, m: 202001, dir: null },
     ];
-    const back = decodeTable(encodeTable(rows));
-    expect(back).toEqual([
-      { lon: -80.12345, lat: 33.5, m: 202001, dir: null },
-      { lon: -82.39123, lat: 34.85, m: 202403, dir: 160.5 },
-    ]);
+    const decoded = decodeTimelineTable(encodeTimelineTable(normalizeRows(rows)));
+    // Sorted by month: 202001 first, then 202403; coords rounded to 5 decimals.
+    expect(Array.from(decoded.lon)).toEqual([-80.12345, -82.39123]);
+    expect(Array.from(decoded.lat)).toEqual([33.5, 34.85]);
+    expect(Array.from(decoded.m)).toEqual([202001, 202403]);
+    expect(Array.from(decoded.dir)).toEqual([-1, 90]); // null -> -1 sentinel
   });
 });
 
 describe('chooseOutput (graceful fallback)', () => {
-  const committed = { v: 1, lon: [-80], lat: [33], m: [202001], dir: [null] };
-  it('reuses the committed table when the fresh build is empty', () => {
-    expect(chooseOutput({ v: 1, lon: [], lat: [], m: [], dir: [] }, committed))
-      .toEqual({ table: committed, reused: true });
-    expect(chooseOutput(null, committed)).toEqual({ table: committed, reused: true });
+  const committed = encodeTimelineTable([{ lon: -80, lat: 33, m: 202001, dir: null }]);
+  const fresh = encodeTimelineTable([{ lon: -81, lat: 34, m: 202105, dir: 90 }]);
+  it('reuses the committed bytes when the fresh build is unavailable', () => {
+    expect(chooseOutput(null, committed)).toEqual({ bytes: committed, reused: true });
+    expect(chooseOutput(new Uint8Array(0), committed)).toEqual({
+      bytes: committed,
+      reused: true,
+    });
   });
-  it('uses the fresh table when it has rows', () => {
-    const fresh = { v: 1, lon: [-81], lat: [34], m: [202105], dir: [90] };
-    expect(chooseOutput(fresh, committed)).toEqual({ table: fresh, reused: false });
+  it('uses the fresh bytes when present', () => {
+    expect(chooseOutput(fresh, committed)).toEqual({ bytes: fresh, reused: false });
   });
-  it('throws when neither fresh nor committed has rows', () => {
+  it('throws when neither fresh nor committed is usable', () => {
     expect(() => chooseOutput(null, null)).toThrow();
+    expect(() => chooseOutput(new Uint8Array(0), new Uint8Array(0))).toThrow();
   });
 });
