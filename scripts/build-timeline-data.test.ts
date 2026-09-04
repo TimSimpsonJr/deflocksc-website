@@ -4,12 +4,14 @@ import {
   ohsomeEndDate,
   roundCoord,
   parseDirectionTag,
+  reduceVersionsToRow,
   sortForDeterminism,
   floorToTimelineStart,
   encodeTable,
   decodeTable,
   chooseOutput,
   serializeTable,
+  type OhsomeFeature,
 } from './build-timeline-data.js';
 
 describe('monthInt', () => {
@@ -60,6 +62,76 @@ describe('parseDirectionTag', () => {
     expect(parseDirectionTag({ direction: 'nw' })).toBe(315);
     expect(parseDirectionTag({ direction: '90;270' })).toBe(90);
     expect(parseDirectionTag({ 'camera:direction': '45' })).toBe(45);
+  });
+});
+
+// Mirrors the ohsome elementsFullHistory/centroid shape confirmed by the live
+// probe: each version is a Point Feature ([lon,lat]) whose properties carry the
+// @metadata plus each OSM tag as a top-level property (properties=metadata,tags).
+function version(
+  validFrom: string,
+  coords: [number, number] | null,
+  tags: Record<string, string> = {},
+): OhsomeFeature {
+  return {
+    geometry: coords ? { type: 'Point', coordinates: coords } : null,
+    properties: { '@osmId': 'node/1', '@validFrom': validFrom, ...tags },
+  };
+}
+
+describe('reduceVersionsToRow', () => {
+  it('takes m from the earliest version and position+dir from the latest', () => {
+    const row = reduceVersionsToRow([
+      version('2021-05-10T00:00:00Z', [-82.4, 34.85], { direction: '90' }),
+      version('2024-03-02T00:00:00Z', [-82.41, 34.86], { direction: '180' }),
+    ]);
+    // earliest validFrom -> month; latest version's coords + direction.
+    expect(row).toEqual({ lon: -82.41, lat: 34.86, m: 202105, dir: 180 });
+  });
+  it('floors a pre-2020 first-seen month to the timeline start', () => {
+    const row = reduceVersionsToRow([
+      version('2018-07-01T00:00:00Z', [-79.0, 33.0]),
+    ]);
+    expect(row?.m).toBe(202001);
+  });
+  it('is order-independent and idempotent under duplicate versions (bbox-edge)', () => {
+    const versions = [
+      version('2024-03-02T00:00:00Z', [-82.41, 34.86], { direction: '180' }),
+      version('2021-05-10T00:00:00Z', [-82.4, 34.85], { direction: '90' }),
+    ];
+    const a = reduceVersionsToRow(versions);
+    const b = reduceVersionsToRow([...versions].reverse());
+    const withDupes = reduceVersionsToRow([...versions, ...versions]);
+    expect(a).toEqual(b);
+    expect(withDupes).toEqual(a);
+  });
+  it('parses camera:direction from the latest version tags', () => {
+    const row = reduceVersionsToRow([
+      version('2022-01-01T00:00:00Z', [-80.0, 33.0], { 'camera:direction': 'nw' }),
+    ]);
+    expect(row?.dir).toBe(315);
+  });
+  it('yields dir null when the latest version has no direction tag', () => {
+    const row = reduceVersionsToRow([
+      version('2022-01-01T00:00:00Z', [-80.0, 33.0], { direction: '45' }),
+      version('2023-01-01T00:00:00Z', [-80.0, 33.0]),
+    ]);
+    expect(row?.dir).toBe(null);
+  });
+  it('uses the latest version WITH coordinates when the newest is a deletion', () => {
+    // A since-deleted node: its newest version has null geometry. Fall back to
+    // the latest coordinate-bearing version for position; m still first-seen.
+    const row = reduceVersionsToRow([
+      version('2021-05-10T00:00:00Z', [-82.4, 34.85], { direction: '90' }),
+      version('2024-03-02T00:00:00Z', null),
+    ]);
+    expect(row).toEqual({ lon: -82.4, lat: 34.85, m: 202105, dir: 90 });
+  });
+  it('returns null when no version has coordinates', () => {
+    expect(reduceVersionsToRow([version('2021-05-10T00:00:00Z', null)])).toBe(null);
+  });
+  it('returns null for an empty version list', () => {
+    expect(reduceVersionsToRow([])).toBe(null);
   });
 });
 
