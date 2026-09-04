@@ -39,7 +39,7 @@ src/
     blog/[...slug].astro        # Individual post — TOC, progress bar, read time, related (+ /og.png.ts per-post OG)
     rss.xml.ts                  # RSS feed
   lib/                          # Pure, Vitest-covered modules (most have a co-located *.test.ts)
-    district-matcher.ts, geo-utils.ts   # District matching + geometry (rep lookup)
+    district-matcher.ts, geo-utils.ts, sc-camera-count.ts   # District matching + geometry (rep lookup) + shared SC camera count/payload validator
     blog-utils.ts, og-image.ts          # Read-time/related posts + Satori OG image
     event-schema.ts, public-event.ts    # Submitted-event validation + public (private-field-stripped) projection
     recurrence.ts, fold-events.ts       # Recurring-series rule expansion + folding into dated instances
@@ -53,7 +53,7 @@ src/
     map/core.ts, map/tile-loader.ts     # MapLibre init/chrome + per-viewport CDN tile fetch/dedupe/fallback (+ tile-loader.test.ts)
     map/layers/cameras.ts, events.ts    # Camera layer (popups/clusters, +test) + event-location layer (+ events-constants.ts)
     events-page.ts              # Events calendar view interactivity (list/month/map, filters)
-    count-up.ts, signal-cta.ts  # Shared count-up animation; scraper-hidden Signal redirect (decodes go.ts "intake")
+    count-up.ts, signal-cta.ts, live-count.ts  # Shared count-up animation; scraper-hidden Signal redirect (decodes go.ts "intake"); daily-fresh SC total → Hero/ImpactBand/MapSection (SSR fallback)
     tab-rail.ts, toast.ts       # Master-detail toolkit tabs; site-wide copy-feedback toast (daisyUI alert)
     foia-finder.ts, toolkit-legal.ts    # Agency finder (reuses district-matcher) + state comparison map / bill-gap analysis
   data/
@@ -79,15 +79,15 @@ public/
 scripts/                        # Node/Python build + data tooling
   scraper.py, validate-bills.py # SC statehouse bill scraper → bills.json (+ CI schema check)
   sync-open-civics.mjs          # Prebuild: sync npm package data into project
-  build-map-style.mjs, fetch-camera-data.mjs, build-impact-stats.mjs  # Map style + CDN fetch + one PIP pass → camera-counts.json/impact-stats.json
+  build-map-style.mjs, fetch-camera-data.ts, build-impact-stats.ts  # Map style + validating CDN fetch (all-or-nothing payload gate) + one PIP pass → camera-counts.json/impact-stats.json (esbuild-bundled TS, shared src/lib/sc-camera-count.ts)
   build-camera-counts.py, build-city-centroids.py, build-county-map-{iso,svg}.py, build-county-shapes.mjs  # Legacy/count + centroid + SC county map builders
   generate-business-cards.js, generate-toolkit-pdfs.js  # Outreach card + FOIA template PDF generators
   organizer-codes.ts, build-wordlist.ts, update-letters-s447.py  # Organizer code CLI, EFF wordlist build, one-off letter patch
   publish.py, data/             # Obsidian → blog publisher; EFF wordlist + centroid overrides + SOURCES.md
 
-netlify/functions/              # Runtime endpoints (Netlify Blobs backed)
+netlify/functions/              # Runtime endpoints (Netlify Blobs + external API backed)
   submit-event.ts, events.ts, fold-events.ts  # Event intake (sanitize + rate-limit), public read API, server-side fold trigger
-  go.ts, address-suggest.ts     # Keyed redirect resolver (Signal "intake") + address autocomplete proxy
+  go.ts, address-suggest.ts, sc-camera-count.ts  # Keyed redirect resolver (Signal "intake") + address autocomplete proxy + GET /api/sc-camera-count daily edge-cached live count (fail-soft to build-time number)
 tina/config.ts, tina-lock.json  # TinaCMS config for blog editing
 
 tests/                          # config-guards + tile-loader invariants; functions/*.test.ts (Netlify function tests)
@@ -100,7 +100,8 @@ docs/                           # architecture/deployment/maintainability/*.md; 
 - **sync-open-civics.mjs (prebuild) → data + public/districts/** — assembles npm package data into project formats
 - **index.astro → Hero · BlogCarousel · ImpactBand · MapSection · LegislationAsks · TakeActionZone · EventsStrip · SignalCta** — rebuilt single-page homepage; TakeActionZone embeds ToolkitCards
 - **MapSection + map/core.ts + map/tile-loader.ts** — live per-viewport camera tiles via the same-origin `/deflock-tiles/*` proxy (netlify.toml in prod, astro.config.mjs dev proxy), declustering at zoom 13; falls back to committed public/camera-data.json when the CDN fails
-- **refresh-camera-data.yml → fetch-camera-data.mjs + build-impact-stats.mjs** — one PIP pass regenerates camera-data.json (snapshot), camera-counts.json (per-jurisdiction), and impact-stats.json so the numbers never disagree
+- **refresh-camera-data.yml → fetch-camera-data.ts + build-impact-stats.ts** — validating fetch (all-or-nothing payload gate; non-zero exit + prior snapshot kept on failure) then one PIP pass regenerates camera-data.json (snapshot), camera-counts.json (per-jurisdiction), and impact-stats.json so the numbers never disagree
+- **Live counter: DeFlock CDN → sc-camera-count.ts (shared PIP count + all-or-nothing payload validator) → netlify/functions/sc-camera-count.ts (daily edge-cached `/api/sc-camera-count`, fail-soft) alongside build-time impact-stats.json → live-count.ts (client, fetches once/load, updates Hero/ImpactBand/MapSection, falls back to the SSR'd build-time number on any failure)**
 - **ImpactBand / LegislationAsks / MapSection statline → count-up.ts** — one shared animation; each ships its final value in the DOM for AT + no-JS
 - **LegislationAsks ← homepage-asks.ts + brief-icons.ts** — abridged asks + shared Tabler glyphs; homepage-asks.test.ts guards each ask's `cite` against council-brief.ts (no cite drift)
 - **CouncilBrief.astro renders cityBrief/countyBrief from council-brief.ts, glyphs from brief-icons.ts** — one shared component; @media print hides site chrome and repaints `.leave-behind` as the light sheet
