@@ -1,6 +1,7 @@
 import type { Config, Context } from '@netlify/functions';
-import { readFileSync, readdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   countScCameras,
   keyFromFilename,
@@ -66,9 +67,42 @@ const FETCH_TIMEOUT_MS = 8000;
 
 // state-outline.json + county-*/place-*.json are generated into public/districts
 // by the prebuild (scripts/sync-open-civics.mjs) and bundled into this function
-// via `included_files` in netlify.toml (they are otherwise gitignored). Netlify
-// runs functions with the project root as cwd, so the bundled files resolve here.
-const DISTRICTS_DIR = resolve(process.cwd(), 'public', 'districts');
+// via `included_files` in netlify.toml (they are otherwise gitignored).
+//
+// Where those bundled files land relative to a RUNNING function is not something
+// we can assume: process.cwd() is NOT reliably the project root in the Netlify
+// Functions runtime (with esbuild bundling the function module is nested under a
+// generated directory, and the cwd/base can differ from the repo root that
+// included_files are copied relative to). Assuming `resolve(process.cwd(),
+// 'public','districts')` is why the endpoint silently fell back to {stale:true}:
+// the readFileSync threw and the catch served the stale sentinel.
+//
+// So resolve the districts dir EMPIRICALLY at runtime: probe a list of candidate
+// locations and pick the first that actually contains state-outline.json. We try
+// the cwd-relative path first (correct when cwd IS the site root), then walk up
+// from this module's own location (fileURLToPath(import.meta.url)) checking
+// `<ancestor>/public/districts` at each level — included_files preserve their
+// repo-relative path, so `/var/task/public/districts` is an ancestor of wherever
+// the bundled module ends up. If none contains the boundary bundle we return
+// null and loadBoundaries fails soft (preserving the {stale:true} contract).
+function resolveDistrictsDir(): string | null {
+  const candidates: string[] = [resolve(process.cwd(), 'public', 'districts')];
+  try {
+    let dir = dirname(fileURLToPath(import.meta.url));
+    for (let i = 0; i < 10; i++) {
+      candidates.push(resolve(dir, 'public', 'districts'));
+      const parent = dirname(dir);
+      if (parent === dir) break; // reached filesystem root
+      dir = parent;
+    }
+  } catch {
+    // import.meta.url unavailable (e.g. a CJS bundle) — the cwd candidate stands.
+  }
+  for (const candidate of candidates) {
+    if (existsSync(resolve(candidate, 'state-outline.json'))) return candidate;
+  }
+  return null;
+}
 
 const CDN_CACHE = 'public, durable, s-maxage=86400, stale-while-revalidate=86400';
 
@@ -80,15 +114,21 @@ function loadBoundaries(): {
   stateOutline: FeatureCollection;
   boundaries: Map<string, FeatureCollection>;
 } {
-  const stateOutline = readJson<FeatureCollection>(resolve(DISTRICTS_DIR, 'state-outline.json'));
+  const districtsDir = resolveDistrictsDir();
+  if (!districtsDir) {
+    // No candidate location held the bundled boundary files. Throw so the handler
+    // catch serves the uncached {stale:true} sentinel rather than a bad number.
+    throw new Error('districts boundary bundle not found at any candidate path');
+  }
+  const stateOutline = readJson<FeatureCollection>(resolve(districtsDir, 'state-outline.json'));
   const boundaries = new Map<string, FeatureCollection>();
-  const files = readdirSync(DISTRICTS_DIR)
+  const files = readdirSync(districtsDir)
     .filter((f) => /^(county|place)-.+\.json$/.test(f))
     .sort();
   for (const file of files) {
     const key = keyFromFilename(file);
     if (!key) continue;
-    boundaries.set(key, readJson<FeatureCollection>(resolve(DISTRICTS_DIR, file)));
+    boundaries.set(key, readJson<FeatureCollection>(resolve(districtsDir, file)));
   }
   return { stateOutline, boundaries };
 }

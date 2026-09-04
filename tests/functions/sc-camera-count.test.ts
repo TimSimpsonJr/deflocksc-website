@@ -16,8 +16,11 @@ const scSquare = {
   ],
 };
 
-// Mock the districts files the function reads from disk.
+// Mock the districts files the function reads from disk. existsSync is how the
+// function probes candidate districts dirs at runtime (see resolveDistrictsDir);
+// returning true makes the first candidate resolve to the mocked bundle.
 vi.mock('node:fs', () => ({
+  existsSync: () => true, // state-outline.json is "present" in the first candidate dir
   readFileSync: (p: string) => JSON.stringify(scSquare), // state-outline + county-test both use it
   readdirSync: () => ['state-outline.json', 'county-test.json'],
 }));
