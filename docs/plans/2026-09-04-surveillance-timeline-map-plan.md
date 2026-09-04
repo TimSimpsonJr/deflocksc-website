@@ -20,7 +20,7 @@ A dependency-light Node build script bakes a compact, dated national camera tabl
 
 ## Tech Stack
 
-- **Astro 5** (`.astro` island, blog pipeline), **TypeScript** (client modules), **plain ESM `.mjs`** (build script, dependency-free like `fetch-camera-data.mjs`).
+- **Astro 5** (`.astro` island, blog pipeline), **TypeScript** (client modules **and** the build script — esbuild-bundled and run via `npm run build-timeline-data`, the same idiom as `fetch-camera-data.ts` / `build-impact-stats.ts`, so it can import the shared `src/lib` payload validator).
 - **MapLibre GL 5.x** (`maplibre-gl`) — reused via `src/scripts/map/core.ts`.
 - **DaisyUI 5 `deflock` theme** + **Tailwind 4** for all chrome.
 - **Vitest 4** (`npm test` → `vitest run`) for pure-logic TDD; **`npm run dev`** (`astro dev`, port 4321) for browser verification.
@@ -47,8 +47,8 @@ Every file to create or modify, mapped to its single responsibility (mirrors the
 
 | File | New/Mod | Single responsibility |
 |---|---|---|
-| `scripts/build-timeline-data.mjs` | **New** | Build step + exported pure helpers (`monthInt`, `roundCoord`, `parseDirectionTag`, `sortForDeterminism`, `encodeTable`, `decodeTable`, `chooseOutput`, `serializeTable`). Reads `public/camera-data.json`, resolves OSM first-seen months via ohsome, emits the compact columnar dated table. Guarded `main()` so the test can import helpers without running the fetch. Peer to `fetch-camera-data.mjs`. |
-| `scripts/build-timeline-data.test.mjs` | **New** | Vitest unit tests for the exported pure helpers: month encoding, determinism, round-trip, fallback selection, `parseDirection` parity. |
+| `scripts/build-timeline-data.ts` | **New** | Build step + exported pure helpers (`monthInt`, `roundCoord`, `parseDirectionTag`, `sortForDeterminism`, `encodeTable`, `decodeTable`, `chooseOutput`, `serializeTable`). Reads **and re-validates** `public/camera-data.json` (shared `assertValidCameraPayload`), resolves OSM first-seen months via ohsome, emits the compact columnar dated table. Guarded `main()` so the test can import helpers without running the fetch. esbuild-bundled + run via `npm run build-timeline-data`, exactly like `build-impact-stats.ts`. |
+| `scripts/build-timeline-data.test.ts` | **New** | Vitest unit tests for the exported pure helpers: month encoding, determinism, round-trip, fallback selection, `parseDirection` parity. |
 | `public/timeline-cameras.json` | **New (generated)** | The baked columnar dated dataset: `{ v, lon[], lat[], m[], dir[] }` (national; SC is a client-side filter). |
 | `public/timeline-map-style.json` | **New (generated once)** | Dedicated basemap style derived from `map-style.json`: roads on; road-name + water labels off; city labels gated to high zoom and muted; state/country/other place labels off. |
 | `src/lib/timeline-format.ts` | **New** | Pure client helpers: `cutoffFilter(m)` (MapLibre filter expr), `monthIndex(m)` (YYYYMM -> linear month index), `flareColor(cutoff)` (hot-flare-then-cool paint expr, keyed on the linear index), `formatOsd(m, count)` (`"Mar 2024 · 41,208 documented"`), `introCutoffAt(elapsedMs, months, opts)` (non-uniform easing). |
@@ -59,7 +59,8 @@ Every file to create or modify, mapped to its single responsibility (mirrors the
 | `src/content/blog/surveillance-timeline-map.md` | **New (draft scaffold)** | The host post: `draft: true` scaffold carrying narrative placeholder + honest-methodology paragraph + the `data-timeline-map` marker div. |
 | `src/pages/blog/[...slug].astro` | **Mod** | Conditionally include the timeline island when `post.body.includes('data-timeline-map')`. |
 | `src/styles/global.css` | **Mod** | Small timeline-only chrome tweaks not covered by DaisyUI + `.map-dark` (camera-OSD monospace/tabular readout, intro/live state classes). |
-| `.github/workflows/refresh-camera-data.yml` | **Mod** | Add the timeline-data build step; include `public/timeline-cameras.json` in the commit-if-changed set. **See Coordination note.** |
+| `.github/workflows/refresh-camera-data.yml` | **Mod** | Add the `npm run build-timeline-data` step after `npm run build-impact-stats`; include `public/timeline-cameras.json` in the commit-if-changed set. **See Coordination note.** |
+| `package.json` | **Mod** | Add the `build-timeline-data` npm script (esbuild-bundle `scripts/build-timeline-data.ts` → `node_modules/.cache`, then run), mirroring `fetch-camera-data` / `build-impact-stats`. |
 | `astro.config.mjs` | **No change** | es2022 target already set; dataset is a static `public/` asset (no proxy). |
 | `src/pages/timeline-check.astro` | **Temp (not committed)** | Throwaway Checkpoint-1 placement-gate render; deleted before the checkpoint-1 commit. |
 | `scripts/_gen-timeline-style.mjs` | **Temp (not committed)** | Throwaway one-shot style generator; run once, commit its JSON output, then delete. |
@@ -68,14 +69,14 @@ Every file to create or modify, mapped to its single responsibility (mirrors the
 
 ## Coordination note (READ BEFORE Checkpoint 1's workflow task and before opening the PR)
 
-This work is isolated in the **`dc-timeline-map`** worktree on **`feature/surveillance-timeline-map`**. A **parallel session** in **`dc-live-counter`** on **`feature/live-camera-counter`** has **already rewritten the shared pipeline** on that branch (verified against the common base `6406745`):
+This work is isolated in the **`timeline-map`** worktree on **`feature/surveillance-timeline-map`**, which is branched off **`master` after #118 (`44ca37b`) already merged** — the daily-refreshed SC camera counter that rewrote the shared refresh pipeline into the form this plan targets:
 
-- `.github/workflows/refresh-camera-data.yml`: cron **weekly → daily** (`0 11 * * *`); Node **20 → 22** with `cache: 'npm'`; **adds `npm ci` + `npm run prebuild`**; replaces `node scripts/fetch-camera-data.mjs` / `build-impact-stats.mjs` with `npm run fetch-camera-data` / `npm run build-impact-stats`.
-- `scripts/fetch-camera-data.mjs` → **`.ts`**, `scripts/build-impact-stats.mjs` → **`.ts`** (esbuild-bundled, importing a new `src/lib/sc-camera-count.ts`), plus new npm scripts.
+- `.github/workflows/refresh-camera-data.yml`: cron **daily** (`0 11 * * *`); Node **22** with `cache: 'npm'`; an **`npm ci` + `npm run prebuild`** install; `npm run fetch-camera-data` / `npm run build-impact-stats` (esbuild-bundled `.ts`) in place of the old `node scripts/*.mjs` lines.
+- `scripts/fetch-camera-data.ts` and `scripts/build-impact-stats.ts` are esbuild-bundled TS importing the shared `src/lib/sc-camera-count.ts` (payload validator + count logic), each run through an npm script that bundles into `node_modules/.cache` first.
 
-**Consequence:** this plan writes its workflow edit against the **current base** workflow (still `.mjs`, weekly, Node 20). If `feature/live-camera-counter` lands **first**, the timeline branch **must rebase onto it** and re-express the timeline build step in the **new idiom** (a `npm run build-timeline-data` npm script after `npm run prebuild`, Node 22), not the raw `node scripts/…` line — otherwise the workflow edit conflicts hard.
+**Consequence:** this plan is written **directly in that post-#118 idiom** — there is no earlier base to target and no rebase to defer. Checkpoint 1 adds `scripts/build-timeline-data.ts` (esbuild-bundled, importing the same `src/lib/sc-camera-count.ts` validator), a `build-timeline-data` npm script, and a `npm run build-timeline-data` step in the daily workflow **after `npm run build-impact-stats`**.
 
-**Recommendation:** land one branch's pipeline change first, then rebase the other. If the counter lands first, convert `scripts/build-timeline-data.mjs` invocation to a bundled npm script matching that branch's pattern (the pure-helper module and dataset are unaffected). **Flag the workflow + `public/` artifact changes prominently in this branch's PR description** so the other session can rebase cleanly. The timeline build seeds from `public/camera-data.json` (shared) but writes only `public/timeline-cameras.json` (new, no overlap with the counter's `camera-counts.json`/`impact-stats.json`).
+**Scope of shared surface:** the timeline build seeds from `public/camera-data.json` (shared, read-only here) but writes only `public/timeline-cameras.json` (new, no overlap with the counter's `camera-counts.json` / `impact-stats.json`). It touches `.github/workflows/refresh-camera-data.yml` and `package.json` additively (one workflow step, one npm script). **Flag the workflow + `public/` artifact + `package.json` changes in this branch's PR description** so any concurrent pipeline work can integrate cleanly.
 
 ---
 
@@ -85,9 +86,9 @@ This work is isolated in the **`dc-timeline-map`** worktree on **`feature/survei
 
 ### 1a. TDD the pure build helpers
 
-- [ ] Create `scripts/build-timeline-data.test.mjs` with the failing tests below (imports don't exist yet, so it fails to import):
+- [ ] Create `scripts/build-timeline-data.test.ts` with the failing tests below (imports don't exist yet, so it fails to import):
 
-```js
+```ts
 import { describe, it, expect } from 'vitest';
 import {
   monthInt,
@@ -98,7 +99,7 @@ import {
   decodeTable,
   chooseOutput,
   serializeTable,
-} from './build-timeline-data.mjs';
+} from './build-timeline-data.js';
 
 describe('monthInt', () => {
   it('encodes an ISO timestamp as a YYYYMM integer', () => {
@@ -195,15 +196,15 @@ describe('chooseOutput (graceful fallback)', () => {
 - [ ] Run the test and confirm it **FAILS** (module has no exports yet):
 
 ```
-npx vitest run scripts/build-timeline-data.test.mjs
+npx vitest run scripts/build-timeline-data.test.ts
 ```
-Expected: `FAIL scripts/build-timeline-data.test.mjs` — an import/resolution error such as *"does not provide an export named 'monthInt'"* or *"Failed to load … build-timeline-data.mjs"*.
+Expected: `FAIL scripts/build-timeline-data.test.ts` — an import/resolution error such as *"does not provide an export named 'monthInt'"* or *"Failed to load … build-timeline-data.ts"*.
 
-- [ ] Create `scripts/build-timeline-data.mjs` with the exported pure helpers **and** the guarded build `main()`:
+- [ ] Create `scripts/build-timeline-data.ts` with the exported pure helpers **and** the guarded build `main()`:
 
-```js
+```ts
 /**
- * build-timeline-data.mjs — bakes the compact dated camera table
+ * build-timeline-data.ts — bakes the compact dated camera table
  * (public/timeline-cameras.json) that drives the surveillance timeline map.
  *
  * Placement of WHICH cameras and WHERE is authoritative from the local Deflock
@@ -216,21 +217,31 @@ Expected: `FAIL scripts/build-timeline-data.test.mjs` — an import/resolution e
  * exit 0 so the site build never breaks.
  *
  * The pure helpers below are exported and unit-tested in
- * build-timeline-data.test.mjs; main() is guarded so importing this module for
- * tests never runs the network fetch (same idiom as build-county-shapes.mjs).
+ * build-timeline-data.test.ts; main() is guarded (invokedDirectly) so importing
+ * this module for tests never runs the network fetch.
+ *
+ * Run via `npm run build-timeline-data`, which esbuild-bundles this TS (and the
+ * shared src/lib validator it imports) before executing it — the repo's
+ * fetch-camera-data / build-impact-stats pattern. Because that bundle lands in
+ * node_modules/.cache, EVERY path is resolved from process.cwd() (the repo root),
+ * NOT import.meta.url (which after bundling points into node_modules/.cache and
+ * cannot locate public/). The guard's own import.meta.url compare still holds:
+ * under the bundle it equals process.argv[1]; under vitest it does not.
  *
  * parseDirectionTag mirrors parseDirection in
  * src/scripts/map/layers/cameras.ts — mirror any change there here.
- *
- * Run: node scripts/build-timeline-data.mjs
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertValidCameraPayload, type Camera } from '../src/lib/sc-camera-count.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, '..');
+// esbuild bundles this generator to node_modules/.cache before Node runs it, so
+// import.meta.url resolves INTO node_modules and is useless for finding repo
+// files. Resolve every path from process.cwd(), which npm sets to the repo root —
+// identical to fetch-camera-data.ts / build-impact-stats.ts.
+const ROOT = process.cwd();
 const CAMERA_DATA = resolve(ROOT, 'public', 'camera-data.json');
 const OUT_PATH = resolve(ROOT, 'public', 'timeline-cameras.json');
 // Spec: the timeline UI opens at ~Jan 2020. OSM has ALPR nodes predating 2020,
@@ -239,22 +250,48 @@ const OUT_PATH = resolve(ROOT, 'public', 'timeline-cameras.json');
 // tail (see monthStops() in timeline-controller.ts, which relies on this floor).
 const TIMELINE_START_MONTH = 202001;
 
+// --- Types ---
+
+/** One normalized camera row before columnar encoding. */
+export interface TimelineRow {
+  lon: number;
+  lat: number;
+  m: number;
+  dir: number | null;
+}
+
+/** The compact columnar dated table shipped as public/timeline-cameras.json. */
+export interface TimelineTable {
+  v: number;
+  lon: number[];
+  lat: number[];
+  m: number[];
+  dir: (number | null)[];
+}
+
+/** The snapshot record shape this build reads: a Camera plus its OSM tags. */
+interface SnapshotCamera extends Camera {
+  tags?: Record<string, string> | null;
+}
+
 // --- Pure helpers (exported, unit-tested) ---
 
 /** ISO timestamp -> YYYYMM integer, e.g. "2024-03-15T..." -> 202403. */
-export function monthInt(iso) {
+export function monthInt(iso: string): number {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) throw new Error(`Unparseable date: ${iso}`);
   return d.getUTCFullYear() * 100 + (d.getUTCMonth() + 1);
 }
 
 /** Round a coordinate to 5 decimals (~1.1 m), stable across reruns. */
-export function roundCoord(n) {
+export function roundCoord(n: number): number {
   return Math.round(n * 1e5) / 1e5;
 }
 
 /** Faithful port of parseDirection (cameras.ts). Degrees, or null. */
-export function parseDirectionTag(tags) {
+export function parseDirectionTag(
+  tags: Record<string, string> | null | undefined,
+): number | null {
   if (!tags) return null;
   const raw = tags['direction'] || tags['camera:direction'];
   if (!raw) return null;
@@ -263,7 +300,7 @@ export function parseDirectionTag(tags) {
     const [a, b] = first.split('-').map(Number);
     return (a + b) / 2;
   }
-  const cardinals = {
+  const cardinals: Record<string, number> = {
     N: 0, NNE: 22.5, NE: 45, ENE: 67.5, E: 90, ESE: 112.5, SE: 135, SSE: 157.5,
     S: 180, SSW: 202.5, SW: 225, WSW: 247.5, W: 270, WNW: 292.5, NW: 315, NNW: 337.5,
   };
@@ -274,12 +311,12 @@ export function parseDirectionTag(tags) {
 }
 
 /** Deterministic order (month, then lon, then lat) so reruns are byte-identical. */
-export function sortForDeterminism(rows) {
+export function sortForDeterminism(rows: TimelineRow[]): TimelineRow[] {
   return [...rows].sort((a, b) => a.m - b.m || a.lon - b.lon || a.lat - b.lat);
 }
 
 /** Rows [{lon,lat,m,dir}] -> columnar {v,lon[],lat[],m[],dir[]}, coords rounded. */
-export function encodeTable(rows) {
+export function encodeTable(rows: TimelineRow[]): TimelineTable {
   const norm = sortForDeterminism(
     rows.map((r) => ({
       lon: roundCoord(r.lon),
@@ -298,8 +335,8 @@ export function encodeTable(rows) {
 }
 
 /** Columnar table -> row objects. Inverse of encodeTable. */
-export function decodeTable(table) {
-  const out = [];
+export function decodeTable(table: TimelineTable): TimelineRow[] {
+  const out: TimelineRow[] = [];
   for (let i = 0; i < table.m.length; i++) {
     out.push({ lon: table.lon[i], lat: table.lat[i], m: table.m[i], dir: table.dir[i] });
   }
@@ -307,16 +344,22 @@ export function decodeTable(table) {
 }
 
 /** Graceful fallback selector. Returns { table, reused }. */
-export function chooseOutput(fresh, lastCommitted) {
-  const ok = fresh && Array.isArray(fresh.m) && fresh.m.length > 0;
-  if (ok) return { table: fresh, reused: false };
-  const committedOk = lastCommitted && Array.isArray(lastCommitted.m) && lastCommitted.m.length > 0;
-  if (committedOk) return { table: lastCommitted, reused: true };
+export function chooseOutput(
+  fresh: TimelineTable | null,
+  lastCommitted: TimelineTable | null,
+): { table: TimelineTable; reused: boolean } {
+  // Each `if` narrows its argument to TimelineTable inside the block.
+  if (fresh && Array.isArray(fresh.m) && fresh.m.length > 0) {
+    return { table: fresh, reused: false };
+  }
+  if (lastCommitted && Array.isArray(lastCommitted.m) && lastCommitted.m.length > 0) {
+    return { table: lastCommitted, reused: true };
+  }
   throw new Error('Timeline build produced no rows and no committed table to fall back to');
 }
 
 /** Stable serialization for the shipped artifact (fixed key order, trailing NL). */
-export function serializeTable(table) {
+export function serializeTable(table: TimelineTable): string {
   return JSON.stringify(table) + '\n';
 }
 
@@ -328,7 +371,7 @@ const OHSOME_URL = 'https://api.ohsome.org/v1/elementsFullHistory/centroid';
 const OHSOME_FILTER = 'man_made=surveillance and surveillance:type=ALPR and type:node';
 // Coarse macro-bboxes covering the lower 48 (west,south,east,north). Batching
 // bounds each response and respects ohsome rate limits.
-const REGIONS = [
+const REGIONS: [number, number, number, number][] = [
   [-125.0, 32.0, -114.0, 49.5], // Pacific + Mountain NW
   [-114.0, 31.0, -102.0, 49.5], // Mountain
   [-102.0, 25.0, -90.0, 49.5],  // Plains
@@ -338,7 +381,10 @@ const REGIONS = [
   [-80.0, 40.0, -66.9, 49.5],   // Northeast
 ];
 
-async function fetchRegionEarliest(bbox, earliestById) {
+async function fetchRegionEarliest(
+  bbox: [number, number, number, number],
+  earliestById: Map<number, string>,
+): Promise<void> {
   const today = new Date().toISOString().slice(0, 10);
   const body = new URLSearchParams({
     bboxes: bbox.join(','),
@@ -356,11 +402,11 @@ async function fetchRegionEarliest(bbox, earliestById) {
     body,
   });
   if (!res.ok) throw new Error(`ohsome responded ${res.status} for bbox ${bbox.join(',')}`);
-  const json = await res.json();
+  const json = (await res.json()) as { features?: Array<{ properties?: Record<string, unknown> }> };
   for (const f of json.features ?? []) {
     const osmId = f.properties?.['@osmId']; // e.g. "node/51968727"
     const validFrom = f.properties?.['@validFrom'];
-    if (!osmId || !validFrom) continue;
+    if (!osmId || typeof validFrom !== 'string') continue;
     const id = Number(String(osmId).split('/')[1]);
     if (!Number.isFinite(id)) continue;
     const prev = earliestById.get(id);
@@ -368,29 +414,36 @@ async function fetchRegionEarliest(bbox, earliestById) {
   }
 }
 
-function readCommitted() {
+function readCommitted(): TimelineTable | null {
   if (!existsSync(OUT_PATH)) return null;
   try {
-    return JSON.parse(readFileSync(OUT_PATH, 'utf-8'));
+    return JSON.parse(readFileSync(OUT_PATH, 'utf-8')) as TimelineTable;
   } catch {
     return null;
   }
 }
 
-async function main() {
-  const cameras = JSON.parse(readFileSync(CAMERA_DATA, 'utf-8'));
+async function main(): Promise<void> {
+  const raw = JSON.parse(readFileSync(CAMERA_DATA, 'utf-8')) as unknown;
+  // Defense-in-depth: re-assert the shared ALL-OR-NOTHING validator (the SAME
+  // gate fetch-camera-data.ts applies at the untrusted-input boundary and
+  // build-impact-stats.ts re-asserts) BEFORE building, so a stale or hand-edited
+  // public/camera-data.json can never silently produce a corrupt timeline table.
+  // A throw exits non-zero (via the .catch below) before any writeFileSync.
+  assertValidCameraPayload(raw);
+  const cameras = raw as SnapshotCamera[];
   console.log(`Loaded ${cameras.length} cameras from the snapshot`);
 
-  const earliestById = new Map();
-  let fresh = null;
+  const earliestById = new Map<number, string>();
+  let fresh: TimelineTable | null = null;
   try {
     for (const bbox of REGIONS) {
       await fetchRegionEarliest(bbox, earliestById);
       console.log(`  ohsome ${bbox.join(',')}: ${earliestById.size} ids so far`);
     }
-    const rows = [];
+    const rows: TimelineRow[] = [];
     for (const cam of cameras) {
-      const iso = earliestById.get(cam.id);
+      const iso = earliestById.get(Number(cam.id));
       if (!iso) continue; // undated -> excluded from the timeline
       // Floor to the Jan-2020 timeline start: cameras first documented before
       // 2020 are bucketed into 202001 so the scrubber/intro open there.
@@ -417,22 +470,37 @@ async function main() {
   );
 }
 
+// Guard: run main() only when executed directly (the esbuild bundle in
+// node_modules/.cache), never when vitest imports this module for the pure
+// helpers. A throw (validation failure, or fresh+committed both empty) exits
+// non-zero so the refresh job fails rather than committing a corrupt table.
 const invokedDirectly =
-  process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
-if (invokedDirectly) main();
+  resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+if (invokedDirectly) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
 ```
 
 - [ ] Run the test and confirm it **PASSES**:
 
 ```
-npx vitest run scripts/build-timeline-data.test.mjs
+npx vitest run scripts/build-timeline-data.test.ts
 ```
-Expected: `PASS scripts/build-timeline-data.test.mjs` with all describe blocks green (monthInt, roundCoord, parseDirectionTag, sort/encode determinism, round-trip, chooseOutput).
+Expected: `PASS scripts/build-timeline-data.test.ts` with all describe blocks green (monthInt, roundCoord, parseDirectionTag, sort/encode determinism, round-trip, chooseOutput).
 
-- [ ] Commit the tested build helpers:
+- [ ] Add the `build-timeline-data` npm script to `package.json` so Checkpoint 1b and the daily workflow can invoke the bundled build (esbuild-bundle the TS, then run it — the same idiom as `fetch-camera-data` / `build-impact-stats`). In the `"scripts"` block, right after the `"build-impact-stats"` line:
+
+```json
+    "build-timeline-data": "esbuild scripts/build-timeline-data.ts --bundle --platform=node --format=esm --packages=external --outfile=node_modules/.cache/build-timeline-data.mjs && node node_modules/.cache/build-timeline-data.mjs",
+```
+
+- [ ] Commit the tested build helpers and the npm script:
 
 ```
-git add scripts/build-timeline-data.mjs scripts/build-timeline-data.test.mjs
+git add scripts/build-timeline-data.ts scripts/build-timeline-data.test.ts package.json
 git commit -m "feat(timeline): dated-table build script + tested encode/fallback helpers"
 ```
 
@@ -441,7 +509,7 @@ git commit -m "feat(timeline): dated-table build script + tested encode/fallback
 - [ ] Generate the real dated table (network — hits ohsome):
 
 ```
-node scripts/build-timeline-data.mjs
+npm run build-timeline-data
 ```
 Expected: log lines `Loaded 62438 cameras…`, per-region `ohsome … ids so far`, `Resolved N/62438 camera dates from OSM history` (N in the tens of thousands), and `Wrote …/public/timeline-cameras.json: N rows, months 202001..2026xx` (the first month is `202001` because pre-2020 first-seen dates are floored to the Jan-2020 timeline start). If ohsome is unreachable it logs the fallback warning instead — in that case retry later; the gate needs a real fresh build.
 
@@ -515,15 +583,15 @@ git add public/timeline-cameras.json
 git commit -m "feat(timeline): baked real dated camera dataset (checkpoint-1 gate passed)"
 ```
 
-### 1d. Wire the weekly refresh (piggyback)
+### 1d. Wire the daily refresh (piggyback)
 
-> **Coordination:** apply the edit below to the **current base** workflow. If `feature/live-camera-counter` has already landed, instead add a `build-timeline-data` npm script and invoke it via `npm run build-timeline-data` after `npm run prebuild` (Node 22) — see the Coordination note.
+> **Coordination:** the base already carries #118's post-refactor workflow — daily cron, Node 22, `npm ci` + `npm run prebuild`, bundled-`.ts` npm scripts. The `build-timeline-data` npm script was added in Checkpoint 1a; here you only add its `- run:` step after `npm run build-impact-stats`. See the Coordination note.
 
-- [ ] In `.github/workflows/refresh-camera-data.yml`, add the timeline build step after the `build-impact-stats.mjs` run:
+- [ ] In `.github/workflows/refresh-camera-data.yml`, add the timeline build step after the `npm run build-impact-stats` run:
 
 ```yaml
-      - run: node scripts/build-impact-stats.mjs
-      - run: node scripts/build-timeline-data.mjs
+      - run: npm run build-impact-stats
+      - run: npm run build-timeline-data
 ```
 
 - [ ] In the same file, add `public/timeline-cameras.json` to both the `git diff --quiet` guard and the `git add` in the "Commit if data changed" step:
@@ -541,7 +609,7 @@ git commit -m "feat(timeline): baked real dated camera dataset (checkpoint-1 gat
 - [ ] Confirm the workflow YAML still parses (no tabs, valid structure):
 
 ```
-node -e "const y=require('fs').readFileSync('.github/workflows/refresh-camera-data.yml','utf8'); if(y.includes('\t'))throw new Error('tab in YAML'); console.log('ok, timeline step present:', y.includes('build-timeline-data.mjs'));"
+node -e "const y=require('fs').readFileSync('.github/workflows/refresh-camera-data.yml','utf8'); if(y.includes('\t'))throw new Error('tab in YAML'); console.log('ok, timeline step present:', y.includes('npm run build-timeline-data'));"
 ```
 Expected: `ok, timeline step present: true`.
 
@@ -549,7 +617,7 @@ Expected: `ok, timeline step present: true`.
 
 ```
 git add .github/workflows/refresh-camera-data.yml
-git commit -m "ci(timeline): build the dated table in the weekly camera refresh"
+git commit -m "ci(timeline): build the dated table in the daily camera refresh"
 ```
 
 ---
@@ -1117,7 +1185,7 @@ export interface ControllerDeps {
 
 /**
  * Ordered unique YYYYMM stops present in the dataset. The build script floors
- * every `m` to 202001 (build-timeline-data.mjs, TIMELINE_START_MONTH), so
+ * every `m` to 202001 (build-timeline-data.ts, TIMELINE_START_MONTH), so
  * months[0] is the spec's ~Jan-2020 start and the scrubber/intro open there
  * with no sparse pre-2020 tail — no extra clamp is needed here.
  */
@@ -1412,7 +1480,7 @@ Builds `src/components/TimelineMap.astro` (DaisyUI chrome + load-ahead lazy-impo
       // table.m is sorted ascending (guaranteed by encodeTable/serializeTable in
       // the build), so read the ends by index. Do NOT use Math.max/min(...table.m):
       // spreading a ~62k-and-growing array as call arguments exceeds Safari's
-      // ~65k argument limit and throws RangeError as the dataset grows weekly.
+      // ~65k argument limit and throws RangeError as the dataset grows daily.
       const latest = table.m[table.m.length - 1];
       const earliest = table.m[0];
 
@@ -1670,7 +1738,7 @@ Per the spec, **not built in v1.** No tasks here — this is a documented deferr
 ```
 npm test
 ```
-Expected: `PASS` for `scripts/build-timeline-data.test.mjs` and `src/lib/timeline-format.test.ts` alongside the existing suite; no failures.
+Expected: `PASS` for `scripts/build-timeline-data.test.ts` and `src/lib/timeline-format.test.ts` alongside the existing suite; no failures.
 
 - [ ] Run the project type-check once more:
 
@@ -1679,7 +1747,7 @@ npx astro check --minimumSeverity error
 ```
 Expected: no new errors from any timeline file.
 
-- [ ] Rebase/coordinate check before opening the PR: re-read the **Coordination note**. If `feature/live-camera-counter` has merged to `master`, rebase this branch onto it and re-express the workflow step in the counter branch's npm-script idiom (Node 22, after `npm run prebuild`). Re-run `npm test` after any rebase.
+- [ ] Coordination check before opening the PR: re-read the **Coordination note**. This branch already targets the post-#118 pipeline idiom (daily cron, Node 22, bundled-`.ts` npm scripts) that is live on `master`, so no rebase or workflow-step retarget is pending. Just confirm `.github/workflows/refresh-camera-data.yml` and `package.json` have not drifted from that base since this branch started; if you integrate any such change, re-run `npm test`.
 
 - [ ] Push and open the PR:
 
@@ -1691,12 +1759,13 @@ first-seen month from 2020 to today, guided intro flies national -> South
 Carolina, then unlocks free exploration. Implements
 docs/plans/2026-09-04-surveillance-timeline-map-design.md.
 
-Pipeline change (COORDINATION): adds `public/timeline-cameras.json`, a
-`scripts/build-timeline-data.mjs` step in `.github/workflows/refresh-camera-data.yml`,
-and that file to the commit-if-changed set. The parallel `feature/live-camera-counter`
-branch also rewrites this workflow (cron daily, Node 22, .ts scripts, npm ci +
-prebuild). Land one first and rebase the other; if the counter lands first,
-convert the timeline step to `npm run build-timeline-data` after `npm run prebuild`.
+Pipeline change: adds a `build-timeline-data` npm script and a
+`npm run build-timeline-data` step (after `npm run build-impact-stats`) in
+`.github/workflows/refresh-camera-data.yml`, plus `public/timeline-cameras.json`
+in the commit-if-changed set. The build script is esbuild-bundled TS
+(`scripts/build-timeline-data.ts`) that re-uses #118's shared payload validator
+(`src/lib/sc-camera-count.ts`), matching the existing `fetch-camera-data` /
+`build-impact-stats` scripts on the daily, Node-22 refresh already on `master`.
 
 Host post `src/content/blog/surveillance-timeline-map.md` ships as `draft: true`
 (editorial subject TBD) — finish the narrative before publishing.
