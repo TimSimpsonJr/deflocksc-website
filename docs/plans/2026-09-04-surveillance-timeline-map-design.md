@@ -3,7 +3,8 @@
 **One-line summary:** An animated, interactive MapLibre map embedded in a blog post where red glowing dots — one per ALPR camera — bloom in over time (≈Jan 2020 → present) as a scrubber advances, showing the surveillance network spreading nationally, then zooming into South Carolina.
 
 **Date:** 2026-09-04
-**Status:** Design — approved in brainstorming, pending spec review.
+**Status:** Design — approved in brainstorming; incorporates an accepted
+visual-design review pass (see Appendix).
 **Working title:** "Surveillance Timeline Map."
 
 ---
@@ -24,11 +25,12 @@ the gut-punch; free exploration lets a skeptic verify it.
 
 ## Placement & scope
 
-**Blog-post-embedded feature**, one post to start. The map lives inline in a
-single published blog post (`src/content/blog/*.md`), rendered through the existing
-blog pipeline (`src/pages/blog/[...slug].astro`). The post body carries the
-narrative and the honest-methodology paragraph; the map is an interactive figure
-inside it.
+**Blog-post-embedded feature**, hosted in a **dedicated, newly authored blog
+post** (subject/topic TBD — the *placement* is decided, the post's subject is
+not). The map lives inline in this new published blog post (`src/content/blog/*.md`),
+rendered through the existing blog pipeline (`src/pages/blog/[...slug].astro`). The
+post body carries the narrative and the honest-methodology paragraph; the map is an
+interactive figure inside it.
 
 **Superseded:** an earlier brainstorm idea placed this as a homepage section. That
 is explicitly **superseded** by the blog-embedded decision. A homepage adaptation
@@ -44,19 +46,43 @@ generic reusable Astro component library, not a homepage integration.
 
 ### Hybrid: guided intro → free exploration
 
-On load (unless `prefers-reduced-motion`), the map **autoplays a guided intro**:
+**Trigger = visibility, not island load.** The guided intro fires when the map
+becomes **substantially visible in the viewport** — not merely when the lazy island
+loads. (The island lazy-imports ahead of the viewport via `rootMargin` — see Blog
+embedding — so "loaded" and "on screen" are *different moments*; the intro must wait
+for the latter so the viewer actually sees the map go red from the start rather than
+arriving mid-animation.) Use a separate, tighter IntersectionObserver threshold (the
+map mostly in view) to start playback, distinct from the load-ahead observer.
+
+Once substantially visible (and unless `prefers-reduced-motion`), the map
+**autoplays a guided intro**:
 
 1. Start national, near-empty (early-2020 cutoff), dark.
 2. Advance the timeline — dots bloom in across the US as the cutoff month
    increases. National scale, small dots.
 3. Smoothly fly/ease into South Carolina (`map.flyTo`) while the timeline
    continues, so SC fills in under the viewer's eye.
-4. End at present day, framed on South Carolina, full network shown.
+4. **End on a deliberate held frame** — the map holds, framed on South Carolina with
+   the full network shown; the **counter finishes rolling up** to the present-day
+   total; and the **methodology line fades in beneath it**. This held frame is
+   designed to be the **shareable screenshot**.
+
+**Pacing (shape set; exact durations/easing plan-level).** Keep the full intro
+**under ~25 seconds**, with **non-uniform easing**:
+
+- **Linger 2–3 beats** on the sparse **2020 opening** (the near-empty map is the
+  baseline the viewer measures growth against).
+- **Accelerate through the middle years** as density builds.
+- **Begin the national→SC fly-through in roughly the last ~18 months** of the
+  timeline, so **SC fills in *after* arrival** — the viewer lands on their state and
+  then watches it go red, rather than arriving to a finished map.
 
 When the intro finishes, **unlock free exploration**: the scrubber, pan/zoom, and
 a National ⇄ South Carolina control all become live. The intro can be interrupted
 by any user interaction (scrub, pan, zoom, toggle, or a Skip control), which stops
-autoplay and hands over control immediately.
+autoplay and hands over control immediately. After the intro ends (whether it played
+out or was skipped), offer a **replay affordance** (a themed "Replay intro" control)
+so a viewer can watch the network go red again.
 
 ### Scrubber & readout
 
@@ -86,13 +112,23 @@ way each camera faces — consistent with the homepage camera map. **No clusteri
 at any zoom: clustering would collapse dots and destroy the appear-over-time
 bloom, which is the entire point.
 
+**Cones must not de-escalate the threat.** Keep each cone's **center dot at full dot
+intensity** (bright core + tight glow) when the cone resolves, so zooming into your
+own street does **not** feel *calmer* than the national view. The cone adds
+direction; it must not trade away the menace of the point.
+
 ### Reduced motion
 
 Under `prefers-reduced-motion: reduce`: **no autoplay, no fly-through.** The map
-loads showing the present-day full network (cutoff = latest month), framed on a
-sensible default (SC or national — open question). All controls remain fully
-usable — the user can still scrub back through time manually and pan/zoom. Nothing
-is disabled; only the automatic motion is suppressed.
+loads showing the present-day full network (cutoff = latest month), **framed on
+South Carolina**. All controls remain fully usable — the user can still scrub back
+through time manually and pan/zoom, and National is one toggle away. Nothing is
+disabled; only the automatic motion is suppressed.
+
+**Default framing is South Carolina** for both the reduced-motion static view and
+the **post-intro resting state**: the audience is South Carolina, so the map should
+rest on SC and let a viewer opt into the national view via the toggle, rather than
+the reverse.
 
 ### Mobile
 
@@ -103,6 +139,11 @@ is disabled; only the automatic motion is suppressed.
   viewport with no horizontal page scroll.
 - The guided intro still autoplays on mobile (motion-permitting); it is the
   primary payload for a reader who never touches the controls.
+- **Enforce a minimum dot-radius floor and a slightly stronger glow on small
+  (≤375px) viewports**, so national-zoom dots stay perceptible on a phone screen. On
+  mobile the intro *is* the whole payload — if the national-scale dots shrink below
+  perceptibility, the growth story is lost — so the zoom-interpolated radius (and its
+  glow) must not fall under a floor at small viewport widths.
 
 ---
 
@@ -112,19 +153,37 @@ is disabled; only the automatic motion is suppressed.
 
 - **Basemap:** dark (the site's `#171717` ground), deliberately low-contrast so
   the red reads as the only "live" thing on the map.
-- **Dots:** surveillance **red** — `#dc2626` core, `#ef4444` / `#f87171` accents,
-  with a red **glow** (a larger, blurred, low-opacity circle layer beneath the
-  solid dot, echoing the homepage `cluster-glow` treatment).
+- **Dots:** surveillance **red**, leaned **brighter** (toward `#ef4444`) — a bright
+  red core with `#f87171` accents — over the `#dc2626` end of the palette, with a red
+  **glow** (a larger, blurred, low-opacity circle layer beneath the solid dot,
+  echoing the homepage `cluster-glow` treatment). Crucially, the **glow must carry
+  brightness, not just hue**: the spreading network should read as spreading
+  *luminance* on the dark ground, so the meaning survives for **red-colorblind
+  (protanope) viewers** and on **dim screens** where a hue-only red would wash into
+  the dark basemap.
 - **Radius scales with zoom:** small when zoomed out (to fight national crowding
   where ~62k dots overlap) and larger when zoomed in. Implemented as a
   zoom-interpolated `circle-radius` (and matching glow radius).
-- **Bloom-in:** when a dot first crosses the cutoff it should feel like it
-  *appears* (a brief opacity/scale ramp), not just pop — art direction detail for
-  implementation, kept cheap (see Rendering architecture; a paint-driven approach
-  is preferred over per-dot animation at 62k dots).
+- **Bloom-in — hot flare, then cool:** when a dot first crosses the cutoff month it
+  briefly **flares hot** (a near-white / amber core) and then **cools** to the
+  standard surveillance red over a short ramp, so a new camera *arrives* rather than
+  just popping. **Why this matters:** dense metros saturate solid red early, so a
+  plain appear-ramp makes the animation stop visibly changing exactly where
+  surveillance is worst — while the running counter keeps climbing. This was the
+  review's **top concern**; the hot flare keeps growth legible even inside already-red
+  clusters, because each new arrival flashes bright before settling into the field.
+  Implementation technique (a paint expression keyed off how recently `m` crossed
+  the cutoff) is a detail only — see Rendering architecture; a paint-driven approach
+  is preferred over per-dot animation at 62k dots.
 - **Cones:** at high zoom, the existing red directional cone (`createConeImage`,
   an 80×80 canvas wedge in `rgba(239,68,68,0.45)` with an `#ef4444` center dot)
   replaces the dot, date-filtered the same way.
+
+**Restraint is what makes it read as threat, not decoration.** The threat register
+depends on discipline: **hard, small dot cores**; a **tight** glow (not a soft,
+nebulous halo); and **dead-dark everything else**. The brightness spreads, but each
+camera stays a sharp point — a pretty, diffuse glow-scape would read as ambience, not
+surveillance. When in doubt, tighten and darken.
 
 ### Branded chrome (DaisyUI, `deflock` theme)
 
@@ -139,20 +198,37 @@ No hand-rolled pills.
 | Play / pause | `btn` (icon button) |
 | Monthly scrubber | `range` (themed to primary) |
 | Date · count readout | `badge` / `stat`-style text, tabular-nums |
-| Guided-intro indicator | **a proper branded element** (see below) |
+| Guided-intro indicator | **camera-OSD readout** (amber, monospaced/tabular) + scrubber-thumb progress + `btn` "Skip →" (see below) |
 
-**Guided-intro indicator — redesigned.** The brainstorm mockup used a floating
-chip that read as generic/AI-ish; it is **rejected**. The intro state must be
-communicated with a branded, on-theme element — e.g. a DaisyUI `badge`/`btn`
-"Skip intro →" control plus the live readout doubling as the progress signal, or
-an unobtrusive themed progress affordance on the scrubber itself. Final art
-direction is an open question, but "generic floating chip" is ruled out.
+**Guided-intro indicator — a camera-OSD treatment.** The brainstorm mockup used a
+floating chip that read as generic/AI-ish; it is **rejected**. In its place, the
+intro state is communicated with a surveillance-flavored **camera on-screen-display
+(OSD)** treatment:
+
+- The **live-advancing scrubber thumb doubles as the progress signal** — as the
+  intro plays, the thumb visibly travels the timeline, so the scrubber itself shows
+  how far along the intro is (no separate progress widget needed).
+- An **amber, camera-OSD-style readout** (monospaced, tabular-nums, terse) shows
+  the current **date and running count** during the intro — styled like the burned-in
+  status text of a security-camera feed rather than a UI label.
+- A themed DaisyUI **"Skip →" button** lets the viewer hand themselves control
+  immediately.
+
+**On intro end**, the readout **shifts from amber to neutral** and the controls'
+**active states light up** (the scrubber, play/pause, and National ⇄ SC toggle
+read as "now live"), signalling the handover to free exploration.
+
+**Rejected:** a pulsing red dot / "REC" idiom was considered and ruled out as too
+on-the-nose. The OSD readout carries the surveillance flavor without the cliché.
+
+This resolves the **indicator** half of the guided-intro open question (pacing/art
+direction otherwise; see Open questions).
 
 MapLibre's own control chrome (nav control, any popups) is styled globally under
 `.map-dark` in `src/styles/global.css`; the timeline map container reuses that
 class so its controls are not left with default styling.
 
-### Dedicated basemap style (roads on, labels off)
+### Dedicated basemap style (roads on, labels mostly off; city labels gated to high zoom)
 
 A **dedicated timeline map style**, derived from `public/map-style.json`
 (OpenFreeMap dark), tuned so the red is the only thing competing for attention:
@@ -163,11 +239,24 @@ A **dedicated timeline map style**, derived from `public/map-style.json`
   (`highway_motorway_subtle` at low zoom + the motorway casing/inner layers,
   which already run from `minzoom: 6`). Roads give the dots geographic anchoring —
   the user must see the network trace real corridors.
-- **Hide ALL place/city/state labels** at both levels. Remove the symbol layers:
-  `place_other`, `place_suburb`, `place_village`, `place_town`, `place_city`,
-  `place_city_large`, `place_state`, `place_country_*`, plus `highway_name_other`,
-  `highway_name_motorway`, and `water_name`. The map is a field of red over a road
-  skeleton, not a labeled reference map.
+- **Labels: off during the intro and at national/mid zoom; faint city labels only
+  when zoomed in.** Place/city/state labels stay **off** through the guided intro
+  and at national and mid zoom. **Faint, muted city labels fade in *only* at
+  high/local zoom during free exploration** (around or just before the cone-resolve
+  threshold), so a viewer can locate their own town once they've zoomed in. State
+  and place labels stay **off at national scale**. Concretely: rather than removing
+  the place-label symbol layers outright, **gate the city labels (`place_city`,
+  `place_city_large`, and the smaller `place_town`/`place_village`/`place_suburb`
+  tiers as appropriate) to high zoom with a muted style** (low-opacity, desaturated
+  text, minimal halo); keep `place_state`, `place_country_*`, and `place_other` off.
+  **Keep the other label removals**: road-name labels off (`highway_name_other`,
+  `highway_name_motorway`) and water labels off (`water_name`). The map stays a
+  field of red over a road skeleton at every scale that matters for the argument,
+  gaining just enough labeling to be self-locating up close.
+
+  > **Revision:** this reverses the initial "hide *all* place/city/state labels
+  > everywhere" call, per user decision — the only change is that muted city labels
+  > are now allowed at high/local zoom.
 - Keep `background`, `water`, `waterway`, boundaries (`boundary_state`,
   `boundary_country_*`) — the coastline and state outlines aid orientation without
   text.
@@ -289,10 +378,13 @@ paint expression). This is a **cheap filter/paint update — no per-frame refetc
 no `setData`** on tick; the full dataset is loaded once via `setData` at init, and
 playback only changes the cutoff. This is what makes 62k dots animate smoothly.
 
-For the **bloom-in** effect, prefer a paint-expression approach (e.g. a short
-opacity ramp keyed off how recently `m` crossed the cutoff) over per-dot JS
-animation, to stay performant at national scale. Exact technique is an
-implementation detail.
+For the **bloom-in** effect — a **hot flare that cools to red** (see Visual design)
+— prefer a **paint-expression approach** (e.g. an interpolation keyed off how
+recently `m` crossed the cutoff, ramping the fill/glow color from a near-white/amber
+core down to the standard red, alongside a short opacity/scale ramp) over per-dot JS
+animation, to stay performant at national scale. Driving color-through-time this way
+is what keeps new arrivals visible inside already-saturated metros without touching
+`setData` per frame. Exact technique is an implementation detail.
 
 ### Guided intro drives camera + cutoff
 
@@ -371,11 +463,11 @@ blog bundle. Keep the specifiers identical to preserve this.
 |---|---|---|
 | `scripts/build-timeline-data.mjs` | **New** | Build step: resolve OSM v1 first-seen month per node, emit the compact dated table. Peer to `fetch-camera-data.mjs`. |
 | `public/timeline-cameras.json` (+ optional `timeline-cameras-sc.json`) | **New** | The baked dated dataset artifact(s): `{lon,lat,m}` rows (national; optional SC subset for faster first paint). |
-| `public/timeline-map-style.json` | **New** | Dedicated basemap style derived from `map-style.json`: roads on, all place/road-name labels off. |
+| `public/timeline-map-style.json` | **New** | Dedicated basemap style derived from `map-style.json`: roads on; road-name/water labels off; city labels gated to high zoom, muted; state/country labels off. |
 | `src/scripts/map/layers/timeline-cameras.ts` | **New** | Unclustered dated layer module: GeoJSON source + glow/dot layers (zoom-scaled radius, `m`≤cutoff filter) + high-zoom cone layer; `setCutoff`/`fitTo` API. |
 | `src/scripts/map/timeline-controller.ts` (name TBD) | **New** | Orchestration: scrubber state, play/pause timer, guided intro (cutoff + camera moves), reduced-motion branch, wiring to DaisyUI chrome. |
 | `src/components/TimelineMap.astro` (or an inline island in `[...slug].astro`) | **New** | The blog island: DaisyUI-branded chrome markup (`join`/`btn`/`range`/`badge`) + IntersectionObserver lazy-import + dataset fetch. Renders where `[data-timeline-map]` is present. |
-| `src/content/blog/<host-post>.md` | **New/Mod** | The host post: narrative + honest-methodology paragraph + the `data-timeline-map` marker div. (New post vs. existing post is an open question.) |
+| `src/content/blog/<host-post>.md` | **New** | The host post: a newly authored, dedicated post (subject TBD) carrying the narrative + honest-methodology paragraph + the `data-timeline-map` marker div. |
 | `src/pages/blog/[...slug].astro` | **Mod** | Conditionally include the timeline island (frontmatter flag or `post.body.includes` gate). |
 | `src/content.config.ts` | **Mod (if flag chosen)** | Add optional `timelineMap` boolean to the blog schema. |
 | `src/styles/global.css` | **Mod (if needed)** | Any timeline-specific chrome tweaks not covered by DaisyUI + `.map-dark`. |
@@ -416,7 +508,7 @@ still damning — the growth is real even if the dates are approximate.
    seeing the real data — do not pre-optimize against the mockup's fiction.
 2. **Rendering layer** — the unclustered dated layer module: glow/dot layers,
    zoom-scaled radius, `m`≤cutoff filter, high-zoom cone resolve.
-3. **Dedicated basemap style** — `timeline-map-style.json` (roads on, labels off).
+3. **Dedicated basemap style** — `timeline-map-style.json` (roads on, labels off except muted high-zoom city labels).
 4. **Hybrid guided intro + DaisyUI scrubber/chrome** — controller, play/pause,
    monthly range, readout, national⇄SC toggle, intro fly-through, interrupt.
 5. **Blog embedding** — marker div, gated lazy island, chunk-reuse verification.
@@ -448,6 +540,10 @@ doesn't tell the story, the rest is premature.
 - **Placement sanity vs. real data** — the checkpoint-1 truth check: dots follow
   road corridors, SC density matches known deployment (Upstate-heavy), no obvious
   geocoding artifacts.
+- **Grayscale + squint (colorblind/contrast) test** — with color removed
+  (grayscale) and/or eyes squinted, the map must still read as **spreading
+  brightness** as the timeline advances. If the growth is only legible in full color,
+  the glow isn't carrying enough luminance (see Visual design) and must be brightened.
 
 ---
 
@@ -471,16 +567,21 @@ doesn't tell the story, the rest is premature.
 
 1. **Exact OSM extraction method** — osmium history extract vs. ohsome API vs.
    node history API (with a documented fallback). Output is identical regardless.
-2. **Which post hosts it** — a new dedicated post vs. an existing post.
+2. **Post subject/topic** — TBD (placement as a standalone new post is decided).
 3. **SC-subset artifact** — ship a separate `timeline-cameras-sc.json` for a
    faster first paint, or filter the one national table client-side?
 4. **Final dataset encoding/size** — object rows vs. compact tuples/columnar;
    coordinate precision; measure gzipped size.
-5. **Guided-intro pacing & art direction** — duration, easing, where the
-   national→SC transition lands in the timeline, and the exact branded intro
-   indicator (the generic floating chip is rejected).
-6. **Reduced-motion default framing** — SC or national for the static present-day
-   view.
+5. **Guided-intro pacing (durations/easing only)** — the intro's **shape is set**
+   (under ~25s total; non-uniform easing that lingers on the sparse 2020 opening,
+   accelerates through the middle years, and begins the national→SC fly-through in
+   roughly the last ~18 months of the timeline; a replay affordance after it ends).
+   Only the **exact durations and easing curves** remain plan-level. The intro
+   **indicator is resolved** (camera-OSD readout + scrubber-thumb progress + "Skip →";
+   see Visual design).
+6. **Reduced-motion default framing** — **resolved: South Carolina** (also the
+   post-intro resting-state framing; national is one toggle away). See Reduced
+   motion.
 
 ---
 
@@ -517,3 +618,9 @@ with the **real dated dataset** (checkpoint 1). Treat the mockup as a mood/inter
 reference for the *feel* (dark map going red, scrubber + readout, national→SC
 zoom), not as a source of truth for data placement or the intro indicator (the
 mockup's floating chip is explicitly rejected).
+
+**Visual-design review pass.** This spec incorporates the changes from a subsequent
+visual-design review that the user accepted — notably the hot-flare temporal
+encoding, the camera-OSD intro indicator, the colorblind/brightness and restraint
+guidance, the visibility-triggered intro with a held final frame, the high-zoom
+muted city labels, and the South Carolina default framing.
