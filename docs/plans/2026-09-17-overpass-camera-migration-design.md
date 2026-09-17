@@ -1,3 +1,9 @@
+---
+codex_design_review_status: approved
+codex_design_review_approved_hash: 91f67c8309c7e308d9c6633ae0bfbce0f646e0e96ca5f49d94eeb49fb912f364
+codex_thread_id: 01a04de7-361b-7653-bcab-4cb0bf9714fd
+---
+
 # Overpass camera-data migration + map declustering — design
 
 Date: 2026-09-17
