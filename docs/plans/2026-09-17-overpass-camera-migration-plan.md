@@ -484,7 +484,7 @@ describe('assertNoRegression', () => {
 });
 ```
 
-- [ ] **Step 14: Run** — expect the 9 `assertNoRegression` tests to FAIL with `TypeError: (0 , __vite_ssr_import_0__.assertNoRegression) is not a function` (the "is skipped when there is no prior snapshot" case fails the same way, since the call itself throws); 21 still green.
+- [ ] **Step 14: Run** — expect the 8 `assertNoRegression` tests to FAIL with `TypeError: (0 , __vite_ssr_import_0__.assertNoRegression) is not a function` (the "is skipped when there is no prior snapshot" case fails the same way, since the call itself throws); 21 still green.
 
 - [ ] **Step 15: Append `assertNoRegression` to `src/lib/overpass.ts`:**
 
@@ -541,9 +541,9 @@ npx vitest run src/lib/overpass.test.ts
 Expected:
 
 ```
- ✓ src/lib/overpass.test.ts (30 tests) 12ms
+ ✓ src/lib/overpass.test.ts (29 tests) 12ms
  Test Files  1 passed (1)
-      Tests  30 passed (30)
+      Tests  29 passed (29)
 ```
 
 - [ ] **Step 17: Commit**
@@ -636,19 +636,22 @@ const FETCH_TIMEOUT_MS = 150_000;
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 /**
- * The committed snapshot, or null when absent/unreadable (the regression check
- * is skipped only in that case, and says so).
+ * The committed snapshot, or null ONLY when the file is absent (the one case
+ * the design lets the regression check skip). A snapshot that EXISTS but does
+ * not parse or fails assertValidCameraPayload is NOT swallowed: the throw
+ * propagates out of main() -> non-zero exit BEFORE any mirror fetch or write,
+ * so the corrupt file and the derived artifacts are left exactly as they are
+ * for manual intervention. Returning null here instead would bypass both the
+ * regression check and the absolute floor (assertNoRegression returns early on
+ * a null prior) and let a tiny valid candidate overwrite the snapshot. There is
+ * deliberately no ALLOW_CAMERA_DROP path for this — a corrupt prior is not a
+ * data regression, it is a broken repo state.
  */
 function readPriorSnapshot(): Camera[] | null {
   if (!existsSync(OUT_PATH)) return null;
-  try {
-    const raw = JSON.parse(readFileSync(OUT_PATH, 'utf-8')) as unknown;
-    assertValidCameraPayload(raw);
-    return raw;
-  } catch (err) {
-    console.warn(`Prior snapshot at ${OUT_PATH} is unreadable; regression check will be skipped:`, err);
-    return null;
-  }
+  const raw = JSON.parse(readFileSync(OUT_PATH, 'utf-8')) as unknown;
+  assertValidCameraPayload(raw);
+  return raw;
 }
 
 /** POST the query to one mirror, retrying transient network/HTTP failures. */
@@ -1004,6 +1007,31 @@ describe('implausible-regression guard (like-scope compare)', () => {
   });
 });
 
+describe('prior-snapshot integrity (a corrupt committed prior must fail-red, not bypass the floor)', () => {
+  // readPriorSnapshot returns null ONLY when the file is absent. A present but
+  // unreadable/invalid prior must throw BEFORE any mirror is queried, otherwise a
+  // null prior would skip assertNoRegression (regression check AND floor) and let
+  // this otherwise-acceptable 1200-camera envelope overwrite the corrupt file.
+  const MALFORMED_JSON = '[{"id":1,"lat":34,"lon":-81}'; // truncated -> JSON.parse throws
+  const INVALID_ARRAY = JSON.stringify([{ id: 1, lat: 34, lon: -81 }, { id: 2, lat: 'x', lon: 'y' }]); // parses, fails assertValidCameraPayload
+
+  it('FAILS non-zero when the committed prior is not valid JSON, touching nothing', () => {
+    seedFixture(MALFORMED_JSON);
+    expect(runBundle(everyMirror({ status: 200, body: envelope(scNodes(1200)) }))).toBe(false);
+    expect(readFileSync(cameraData, 'utf8')).toBe(MALFORMED_JSON);
+    expectUntouched();
+    rmSync(fixtureRoot, { recursive: true, force: true });
+  });
+
+  it('FAILS non-zero when the committed prior is a structurally invalid array, touching nothing', () => {
+    seedFixture(INVALID_ARRAY);
+    expect(runBundle(everyMirror({ status: 200, body: envelope(scNodes(1200)) }))).toBe(false);
+    expect(readFileSync(cameraData, 'utf8')).toBe(INVALID_ARRAY);
+    expectUntouched();
+    rmSync(fixtureRoot, { recursive: true, force: true });
+  });
+});
+
 describe('mirror fallback + fail-red', () => {
   it('advances to the next mirror on a network error and writes the second mirror\'s good envelope', () => {
     seedFixture();
@@ -1061,12 +1089,12 @@ npx vitest run tests/fetch-camera-data.exec.test.ts
 Expected:
 
 ```
- ✓ tests/fetch-camera-data.exec.test.ts (12 tests) 2.1s
+ ✓ tests/fetch-camera-data.exec.test.ts (14 tests) 2.4s
  Test Files  1 passed (1)
-      Tests  12 passed (12)
+      Tests  14 passed (14)
 ```
 
-(Each case spawns a Node process; 12 cases at ~150-250 ms each is normal. If a failing case takes >4 s, `OVERPASS_RETRY_DELAY_MS: '0'` is not reaching the child — check the `env` spread in `runBundle`.)
+(Each case spawns a Node process; 14 cases at ~150-250 ms each is normal. If a failing case takes >4 s, `OVERPASS_RETRY_DELAY_MS: '0'` is not reaching the child — check the `env` spread in `runBundle`.)
 
 - [ ] **Step 3: Sanity-check a mutation** — temporarily comment out the `assertFresh(...)` line in `tryMirror`, re-run, and confirm exactly the two timestamp tests fail. Restore the line. (Proves the harness can see each check, not just the exit code path.)
 
@@ -1199,7 +1227,7 @@ name: Refresh Camera Data
 # refresh on master, then is retired (design §2, rollout).
 on:
   schedule:
-    - cron: '0 11 * * *' # daily 6am ET
+    - cron: '0 11 * * *' # 11:00 UTC — 6am ET (winter) / 7am (summer)
   workflow_dispatch: # manual trigger
 
 permissions:
@@ -1668,7 +1696,7 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 
 ## Finishing the branch (before PR)
 
-- [ ] Full suite green: `npm test` → all files pass (expect roughly: previous ~890 + 30 overpass unit + 9 net-new exec + 5 camera guard + 4 net-new copy/workflow guard).
+- [ ] Full suite green: `npm test` → all files pass (expect roughly: previous ~890 + 29 overpass unit + 11 net-new exec + 5 camera guard + 4 net-new copy/workflow guard).
 - [ ] **Rewrite `MANIFEST.md` from scratch to budget** (repo rule; owned repo). Lines that must change: `src/lib/` entry gains `overpass.ts` (Overpass envelope/freshness/regression rules); `map/layers/cameras.ts` description `popups/clusters` → `popups, unclustered dots + zoom-faded cones`; `scripts/` line 82 `validating CDN fetch` → `validating Overpass fetch (envelope + freshness + like-scope regression + all-or-nothing gate; 3 mirrors)`; line 83 (`refresh-camera-data.local.ps1`) noted as *pending retirement after first successful CI run*; Key Relationships line 104 rewritten: MapSection clips to SC_BOUNDS, `declustering at zoom 13` removed, refresh path is `refresh-camera-data.yml (daily cron) → fetch-camera-data.ts (Overpass)`.
 - [ ] Run `cross-model-review:codex-impl-review` against this plan (repo uses the cross-model-review plugin).
 - [ ] Open the PR: `gh pr create --base master --title "Overpass camera-data migration + map declustering (fixes #125)"`, body summarizing the four pipeline tasks + three map/copy tasks, the regenerated snapshot (1,700 → ~2,084), and the Task 8 rollout gate. End the body with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
