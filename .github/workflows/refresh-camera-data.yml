@@ -1,9 +1,15 @@
 name: Refresh Camera Data
 
+# Manual-only. DeFlock's Cloudflare CDN returns 403 to datacenter egress
+# (GitHub Actions runners, Netlify), so this job cannot fetch the data and the
+# daily schedule failed every run. The refresh now runs from a residential IP
+# via a Windows Scheduled Task on the maintainer's machine
+# (scripts/refresh-camera-data.local.ps1). This workflow_dispatch trigger is
+# kept as a fallback for if/when DeFlock allowlists a datacenter path, at which
+# point the `schedule:` block below can be restored.
+#   schedule:
+#     - cron: '0 11 * * *'  # daily 6am ET
 on:
-  schedule:
-    # Daily at 6am ET (offset from bill scraper)
-    - cron: '0 11 * * *'
   workflow_dispatch: # manual trigger
 
 permissions:
