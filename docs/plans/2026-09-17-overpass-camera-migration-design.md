@@ -26,7 +26,9 @@ Two problems, fixed together because they share the camera dataset:
    | DeFlock-only (Overpass missing) | 0 |
 
    DeFlock's set is a perfect subset of OSM, so Overpass is DeFlock's own upstream
-   with no divergence. The true SC total is **2,084**.
+   with no divergence. The current SC total is **~2,084** — a measured snapshot
+   that drifts day to day as OSM is edited, not a fixed "true" number — up from the
+   committed 1,700.
 
 2. **The refresh can't run from CI.** DeFlock's Cloudflare CDN returns 403 to all
    datacenter egress (GitHub Actions, Netlify). The daily workflow was moved to a
@@ -74,15 +76,33 @@ out body;
   `https://overpass.kumi.systems/api/interpreter`,
   `https://lz4.overpass-api.de/api/interpreter`.
   Send a descriptive `User-Agent` (`deflocksc-website/1.0 (+repo url)`).
-- Map each element with `type === 'node'` to the existing camera shape
+- **Overpass envelope validation (new, runs per mirror BEFORE mapping).** An
+  HTTP 200 from Overpass does not mean a complete result: on a server-side abort
+  it returns 200 with a `remark` field and a partial or empty `elements` array,
+  and mirrors can serve stale replicas. A partial array would pass the existing
+  structural validator and silently overwrite the snapshot with an undercount. So
+  a response is accepted only if ALL hold:
+  - no top-level `remark` and no error envelope;
+  - `osm3s.timestamp_osm_base` is present (freshness marker);
+  - the mapped SC-node count is **not an implausible regression** vs the committed
+    `public/camera-data.json` — reject if it drops below `max(floor, prior * (1 -
+    maxDrop))` (starting values: `floor = 1000`, `maxDrop = 0.25`; the empty/first-
+    run case skips the regression check).
+
+  A response failing any check is treated as a mirror failure: advance to the next
+  mirror. A write happens only when a mirror passes every check.
+- Map each accepted element with `type === 'node'` to the existing camera shape
   `{ id, lat, lon, tags }`. **Preserve `tags`** — the map reads `direction` /
   `camera:direction`, `manufacturer`, `operator`, `wikimedia_commons` from them
   for popups and the `hasDirection` split. OSM uses the same tag keys the map
   already parses, so no map-side parsing change is needed.
-- Run the existing `assertValidCameraPayload` gate (all-or-nothing) before writing
-  `public/camera-data.json`, unchanged in format `JSON.stringify(array)`.
-- On total fetch failure (all mirrors, after retries): throw → non-zero exit → the
-  prior committed snapshot is untouched (existing fail-safe). No partial writes.
+- Re-run the existing `assertValidCameraPayload` gate (all-or-nothing) on the
+  mapped array before writing `public/camera-data.json` (format unchanged,
+  `JSON.stringify(array)`).
+- On total failure (all mirrors fail the fetch OR the envelope/regression checks,
+  after retries): throw → non-zero exit → the prior committed snapshot is
+  untouched (fail-red). No partial writes. This is what makes "fail-red" real: a
+  200-with-`remark` undercount can no longer be committed.
 
 `build-impact-stats.ts` and `sc-camera-count.ts` are unchanged: same clip, same
 `camera-counts.json` / `impact-stats.json` outputs. `scTotal` becomes ~2,084;
@@ -94,18 +114,45 @@ already dynamic, no copy edits.
 - `.github/workflows/refresh-camera-data.yml`: restore the daily `schedule:` cron
   (uncomment the block preserved in the prior change); keep `workflow_dispatch`.
   The commit/derive steps are unchanged; only the fetch source moved.
-- Retire the local task: unregister the `DeflockSC-RefreshCameraData` Windows
-  Scheduled Task and delete `scripts/refresh-camera-data.local.ps1` (its reason
-  for existing — the datacenter 403 — is gone). Update MANIFEST + memory.
-- Attribution: add `© OpenStreetMap contributors` (ODbL) as data credit near the
-  map, consistent with the existing OSM tile attribution on EventsMap.
+- Retire the local task **only after CI proves out**: keep the
+  `DeflockSC-RefreshCameraData` Windows Scheduled Task and
+  `scripts/refresh-camera-data.local.ps1` running until the restored CI workflow
+  has completed **at least one successful Overpass refresh on `master`**. That
+  preserves an easy rollback path if Overpass proves unreliable in CI. Once
+  confirmed, unregister the task, delete the local script, and update MANIFEST +
+  memory. (This staging is a rollout step, not a code dependency; the two refresh
+  paths are idempotent and commit-if-changed, so briefly running both is safe.)
+- **Provenance / copy truth-up.** The migration + declustering invalidate existing
+  public copy; fix all of it in this change:
+  - Add a linked `© OpenStreetMap contributors` (ODbL) **data** credit near the
+    camera map (distinct from the existing basemap-tile attribution), describing
+    the dataset honestly: cameras come from OpenStreetMap (the same crowdsourced
+    dataset DeFlock renders), refreshed **daily**.
+  - `src/content/blog/building-deflocksc.md` (~L55): "A weekly script grabs the
+    latest data" → daily; reconcile the DeFlock framing with the OSM source.
+  - `src/content/blog/how-to-fight-alpr-surveillance-sc.md` (~L20, L107): "updates
+    hourly" → daily; **remove the "clusters are dense deployments" sentence**
+    (clustering is gone); reconcile "sourced from Deflock.org" with the OSM
+    provenance.
+  - This copy is reader-facing, so the blog edits go through the `copydesk:write`
+    gate at implementation time (the attribution/label strings are mechanical).
 
-### 3. Map rendering (`src/scripts/map/layers/cameras.ts`)
+### 3. Map rendering (`src/scripts/map/layers/cameras.ts`, `src/components/MapSection.astro`)
 
 - Source `cameras`: set `cluster: false` (drop `clusterMaxZoom` / `clusterRadius`).
 - Remove layers `cluster-glow`, `clusters`, `cluster-count`; remove the cluster
   click handler (`getClusterExpansionZoom` path) and the cluster hover handlers;
   update `CAMERA_LAYER_IDS` and the teardown.
+- **Bound the rendered set to SC (required by declustering).** The map still runs
+  the live DeFlock tile loader first (`MapSection.astro` `onUpdate → setData`),
+  which accumulates loaded tiles without eviction — a working proxy or a partial
+  live load can feed the whole ~64k-record regional tile into the now-unclustered
+  source. So clip cameras to `SC_BOUNDS` (reuse `inScBounds` from
+  `sc-camera-count.ts`) in `onUpdate` before `toGeoJSON`, so the unclustered
+  source only ever holds the ~6,500 SC-area cameras regardless of how many tiles
+  the loader has accumulated or which source (live vs. fallback) supplied them.
+  The SC snapshot is thus the effective authority for what renders; the fix does
+  not depend on DeFlock continuing to 403.
 - `camera-dots`: **remove the filter entirely** so every camera gets a dot. Today
   it is `['all', ['!', ['has', 'point_count']], ['!', ['get', 'hasDirection']]]`
   (non-clustered, non-directional only); with `cluster: false` the `point_count`
@@ -118,19 +165,34 @@ already dynamic, no copy edits.
   `['interpolate', ['linear'], ['zoom'], 9, 0, 10, 1]`. Optionally scale
   `icon-size` with zoom to match the dots. Net effect: zoomed out = uniform small
   dots (cones invisible); zoomed in ≥10 = facing cones over their dots.
+- **One interaction owner per camera.** Because every camera now also has a
+  `camera-dots` feature, binding click/hover to BOTH layers would fire twice for a
+  directional camera (duplicate popup + double analytics), and a zero-opacity cone
+  is still hit-queryable in MapLibre. So `camera-dots` becomes the **sole
+  interactive layer**: bind click/hover only to `camera-dots`, and make
+  `camera-cones` purely decorative (no click/hover handlers). Every camera —
+  directional or not — is clicked through its dot, at every zoom.
 
 ### 4. Testing / verification
 
-- Unit (vitest): add coverage for the Overpass element→`Camera[]` mapping
-  (node filter, tag preservation) and the mirror-fallback (first mirror fails →
-  second succeeds). Existing `sc-camera-count` and payload-validator tests hold.
+- Unit (vitest): Overpass element→`Camera[]` mapping (node filter, tag
+  preservation); **envelope validation** (a 200 with a `remark`, a missing
+  `timestamp_osm_base`, or an implausible-regression count is rejected and advances
+  to the next mirror); mirror-fallback (first mirror fails → second succeeds);
+  total-failure → throw (no write). Existing `sc-camera-count` and payload-
+  validator tests hold.
 - Browser (dev preview): no cluster bubbles at any zoom; dots scale with zoom;
-  cones fade out below ~zoom 10 and directional cameras remain as dots; popups and
-  OSM links still work; homepage shows 2,000 / 2,084.
+  cones fade out below ~zoom 10 and directional cameras remain as dots; **a
+  directional camera opens exactly one popup on click (no duplicate)**; the
+  rendered set stays SC-bounded even when live tiles load; popups and OSM links
+  still work; homepage shows 2,000 / 2,084.
 
 ## Out of scope
 
-- Repointing the map's *live* per-viewport tile-loader off the DeFlock CDN. It
-  still 403s in prod and falls back to `camera-data.json` (now the SC set), which
-  is acceptable. A separate, larger change.
+- Repointing the map's *live* per-viewport tile-loader source off the DeFlock CDN
+  (it still fetches DeFlock tiles when reachable, with the `camera-data.json`
+  fallback). We do NOT change where it fetches — but its rendered output is now
+  clipped to `SC_BOUNDS` at the `onUpdate` boundary (§3), so capacity is bounded
+  regardless of the CDN's 403 behavior. Fully replacing the live loader with the
+  static SC snapshot is a separate, larger change.
 - Any change to the count methodology or the SC boundary polygon.
