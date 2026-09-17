@@ -82,12 +82,25 @@ out body;
   and mirrors can serve stale replicas. A partial array would pass the existing
   structural validator and silently overwrite the snapshot with an undercount. So
   a response is accepted only if ALL hold:
-  - no top-level `remark` and no error envelope;
-  - `osm3s.timestamp_osm_base` is present (freshness marker);
-  - the mapped SC-node count is **not an implausible regression** vs the committed
-    `public/camera-data.json` — reject if it drops below `max(floor, prior * (1 -
-    maxDrop))` (starting values: `floor = 1000`, `maxDrop = 0.25`; the empty/first-
-    run case skips the regression check).
+  - **No error envelope:** no top-level `remark` (Overpass writes the abort reason
+    there) and a present `elements` array.
+  - **Fresh, not just present:** parse `osm3s.timestamp_osm_base` and reject if it
+    is older than `maxAgeHours` (start: 48) or more than `maxFutureSkewHours`
+    (start: 2) in the future. Presence alone does not prove a mirror isn't serving
+    a stale replica.
+  - **No implausible regression, compared like-scope to like-scope:** project BOTH
+    the candidate AND the prior committed `public/camera-data.json` through the
+    SAME geographic scope (`filterToScBounds`) before counting. This is essential
+    for the FIRST migration run, where the prior snapshot is the old ~64,826-record
+    regional tile and the candidate is the ~6,500 SC-bbox set — a raw-length
+    compare would wrongly reject it, but `filterToScBounds(prior)` (~5,700) vs the
+    candidate (~6,500) is a valid comparison. Reject if the projected candidate
+    count drops below `max(floor, priorProjected * (1 - maxDrop))` — start
+    `floor = 1000`, `maxDrop = 0.10` (deliberately tighter than the ~18% undercount
+    this migration fixes, so a comparable regression can't slip through). Skipped
+    only when there is no prior snapshot. A genuine large removal is allowed
+    through an explicit, logged `ALLOW_CAMERA_DROP=1` env override — never by
+    loosening the default threshold.
 
   A response failing any check is treated as a mirror failure: advance to the next
   mirror. A write happens only when a mirror passes every check.
