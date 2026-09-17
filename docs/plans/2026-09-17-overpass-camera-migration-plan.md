@@ -1,3 +1,9 @@
+---
+codex_plan_review_status: approved
+codex_plan_review_approved_hash: adb08a86f4a2b4b2ce774d5b3e5a440eda6e584868798fa4fdaa16bf87970f49
+codex_thread_id: 01a04de7-361b-7653-bcab-4cb0bf9714fd
+---
+
 # Overpass Camera-Data Migration + Map Declustering Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -1707,7 +1713,7 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 
 ## Task 8: Local-task retirement (post-merge rollout step — NOT part of this PR)
 
-**Gate:** proceed only after the restored `Refresh Camera Data` workflow has completed **at least one successful Overpass refresh on `master`** (Actions tab → green run with either a `chore: refresh camera data + impact stats` commit or the "No meaningful data changes" log line). Trigger one manually via `workflow_dispatch` right after merge rather than waiting for 06:00 ET. Until then the Windows Scheduled Task keeps running as the rollback path; both paths are idempotent and commit-if-changed, so briefly running both is safe.
+**Gate:** proceed only after the restored `Refresh Camera Data` workflow has completed **at least one successful Overpass refresh on `master`** (Actions tab → green run with either a `chore: refresh camera data + impact stats` commit or the "No meaningful data changes" log line). Trigger one manually via `workflow_dispatch` right after merge rather than waiting for the daily 11:00 UTC (6am ET winter / 7am summer) run. Until then the Windows Scheduled Task keeps running as the rollback path; both paths are idempotent and commit-if-changed, so briefly running both is safe.
 
 **Files (on `master`, after the gate):**
 - Delete: `scripts/refresh-camera-data.local.ps1`
