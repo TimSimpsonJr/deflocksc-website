@@ -9,6 +9,8 @@ tags:
   - alpr
   - sc
 draft: true
+featuredImage: /blog/no-safe-setting-police-alert.png
+featuredImageAlt: "A rugged police in-car laptop glowing red in a dark patrol car, its screen showing a warning-triangle alert"
 ---
 
 In Mauldin, Officer Ellie Anna Hammond [ran a former partner's license plate through Flock's camera network 166 times](https://www.fitsnews.com/2026/08/10/mauldin-police-officer-used-flock-to-track-ex-lover-166-times-separation-papers-say/) over 4 months, logging each search as a welfare check, a warrant check, or a traffic infraction. None of it was true. Mauldin fired Hammond in August, one of [at least 8 South Carolina law-enforcement employees fired across 6 agencies](https://www.fitsnews.com/2026/08/31/flock-abuse-scandals-more-s-c-officers-terminated/) since June for using Flock to track people in their personal lives.
