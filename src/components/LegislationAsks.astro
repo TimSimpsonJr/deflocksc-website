@@ -32,33 +32,15 @@ import { homepageAsks, askFrameStats } from '../data/homepage-asks';
       </h2>
     </div>
 
-    {/* Oconee callout — PRE-VOTE variant (in use until the Sept 15, 2026 vote). */}
+    {/* Oconee callout — POST-VOTE (adopted on final reading Sept 15, 2026). */}
     <div class="oconee" data-reveal="up" data-reveal-delay="1">
       <span class="k-badge">First in SC</span>
       <p>
-        Oconee County is advancing South Carolina's first ordinance of its kind: "Protection from
-        Mass Surveillance." It cleared its first reading 4&ndash;1 on Aug 18, 2026, with the final
-        vote set for Sept 15. Here are the provisions we've modeled on it for every SC council, two
-        of them tailored to city or county authority.
+        Oconee County passed the first ordinance of its kind in South Carolina, "Protection from
+        Mass Surveillance," on Sept 15, 2026. Here are the key provisions we've pulled from it for
+        every SC council, one of them tailored to county authority.
       </p>
     </div>
-    {/*
-      POST-VOTE variant (OQ#7) — swap the paragraph above for the matching
-      outcome the day after the Sept 15, 2026 final reading:
-
-      IF ADOPTED:
-        Oconee County has adopted South Carolina's first ordinance of its kind:
-        "Protection from Mass Surveillance," passing it on final reading Sept 15,
-        2026. Here are the provisions we've modeled on it for every SC council,
-        two of them tailored to city or county authority.
-
-      IF REJECTED OR DEFERRED (also change the "First in SC" badge, since the
-      first-in-state framing no longer holds):
-        Oconee County came within one vote of South Carolina's first ordinance of
-        its kind: "Protection from Mass Surveillance," and the fight there is not
-        over. Here are the provisions we've modeled on it for every SC council,
-        two of them tailored to city or county authority.
-    */}
 
     <ul class="demands">
       {
@@ -82,7 +64,7 @@ import { homepageAsks, askFrameStats } from '../data/homepage-asks';
               {ask.scope && <span class="scope-badge">{ask.scope}</span>}
             </div>
             <p class="ddesc">{ask.body}</p>
-            <div class="dcite">{ask.cite + (ask.displaySuffix ?? '')}</div>
+            {ask.cite && <div class="dcite">{ask.cite + (ask.displaySuffix ?? '')}</div>}
           </li>
         ))
       }

@@ -7,11 +7,12 @@
 // ask-frame stats. Glyphs come from ./brief-icons.ts. See the design doc
 // docs/plans/2026-08-30-homepage-rebuild-design.md §2.5.
 //
-// Cite-drift guard: each ask carries a CANONICAL `cite` that must exactly match
-// a `cite` present on a city or county brief card (the union is exported below
-// as `briefCites`). Any homepage-only trailing text (e.g. ", beyond Oconee")
-// goes in `displaySuffix`, which is excluded from the guard. The rendered cite
-// line is always `cite + (displaySuffix ?? '')`.
+// Cite-drift guard: when an ask carries a CANONICAL `cite`, it must exactly
+// match a `cite` present on a city or county brief card (the union is exported
+// below as `briefCites`). A general ask may omit `cite` entirely (no section
+// citation renders). Any homepage-only trailing text goes in `displaySuffix`,
+// which is excluded from the guard. The rendered cite line, when a cite is
+// present, is always `cite + (displaySuffix ?? '')`.
 
 import { cityBrief, countyBrief } from './council-brief';
 
@@ -22,10 +23,11 @@ export interface HomepageAsk {
   /** Homepage-abridged body; the canonical long-form lives in council-brief.ts. */
   body: string;
   /**
-   * Canonical section cite. MUST be a member of `briefCites` (the guard checks
-   * this field only). Homepage-only trailing text belongs in `displaySuffix`.
+   * Canonical section cite. When present it MUST be a member of `briefCites`
+   * (the guard checks this field only). Omitted on a general ask that carries
+   * no section citation. Homepage-only trailing text belongs in `displaySuffix`.
    */
-  cite: string;
+  cite?: string;
   /** Homepage-only suffix appended after `cite` when rendering (guard ignores it). */
   displaySuffix?: string;
   /** Scope badge for the two authority-specific asks. */
@@ -73,9 +75,6 @@ export const homepageAsks: HomepageAsk[] = [
     icon: 'file-search',
     title: 'Publish the audit logs',
     body: 'Post a plain public record of every search on a regular schedule, who ran it, when, and the reason they gave, so audits catch misuse without waiting for a complaint.',
-    cite: 'A city addition',
-    displaySuffix: ', beyond Oconee',
-    scope: 'City',
   },
   {
     icon: 'building-off',

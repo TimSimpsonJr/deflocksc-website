@@ -14,9 +14,13 @@ const briefCites = new Set<string>(
     .filter((cite): cite is string => typeof cite === 'string'),
 );
 
-/** The cite line as rendered on the homepage: canonical cite + optional suffix. */
+/**
+ * The cite line as rendered on the homepage: canonical cite + optional suffix,
+ * or nothing at all when a general ask carries no cite (LegislationAsks.astro
+ * only renders the `.dcite` node when `ask.cite` is present).
+ */
 function citeLine(ask: (typeof homepageAsks)[number]): string {
-  return ask.cite + (ask.displaySuffix ?? '');
+  return ask.cite ? ask.cite + (ask.displaySuffix ?? '') : '';
 }
 
 describe('homepageAsks', () => {
@@ -24,8 +28,9 @@ describe('homepageAsks', () => {
     expect(homepageAsks).toHaveLength(6);
   });
 
-  it('every canonical cite exactly matches a cite in council-brief.ts', () => {
+  it('every canonical cite present exactly matches a cite in council-brief.ts', () => {
     for (const ask of homepageAsks) {
+      if (ask.cite === undefined) continue;
       expect(briefCites).toContain(ask.cite);
     }
   });
@@ -36,28 +41,30 @@ describe('homepageAsks', () => {
     }
   });
 
-  it('renders card 5 as "A city addition, beyond Oconee" while the canonical cite stays brief-matchable', () => {
+  it('renders the audit-logs ask as a general ask: no cite line and no scope', () => {
     const auditLogs = homepageAsks.find((a) => a.title === 'Publish the audit logs');
     expect(auditLogs).toBeDefined();
-    expect(auditLogs!.cite).toBe('A city addition');
-    expect(briefCites).toContain(auditLogs!.cite);
-    expect(citeLine(auditLogs!)).toBe('A city addition, beyond Oconee');
+    expect(auditLogs!.cite).toBeUndefined();
+    expect(auditLogs!.displaySuffix).toBeUndefined();
+    expect(auditLogs!.scope).toBeUndefined();
+    expect(citeLine(auditLogs!)).toBe('');
   });
 
-  it('renders the cite line as cite + displaySuffix (suffix optional)', () => {
+  it('renders the cite line as cite + displaySuffix when a cite is present, else nothing', () => {
     for (const ask of homepageAsks) {
-      expect(citeLine(ask)).toBe(ask.cite + (ask.displaySuffix ?? ''));
+      if (ask.cite === undefined) {
+        expect(citeLine(ask)).toBe('');
+      } else {
+        expect(citeLine(ask)).toBe(ask.cite + (ask.displaySuffix ?? ''));
+      }
     }
   });
 
-  it('scopes only the city- and county-specific asks', () => {
+  it('scopes only the county-specific ask', () => {
     const scoped = homepageAsks
       .filter((a) => a.scope)
       .map((a) => [a.title, a.scope]);
-    expect(scoped).toEqual([
-      ['Publish the audit logs', 'City'],
-      ['Close the side doors', 'County'],
-    ]);
+    expect(scoped).toEqual([['Close the side doors', 'County']]);
   });
 });
 
