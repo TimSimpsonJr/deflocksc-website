@@ -212,12 +212,20 @@ describe('repo config', () => {
   });
 });
 
-describe('refresh-camera-data workflow (design §3.4)', () => {
+describe('refresh-camera-data workflow (design 2026-09-17 §2)', () => {
   const wf = read('.github/workflows/refresh-camera-data.yml');
 
-  it('runs daily, not weekly', () => {
-    expect(wf).toMatch(/cron:\s*'0 11 \* \* \*'/);
-    expect(wf).not.toMatch(/cron:\s*'0 11 \* \* 3'/);
+  it('has a LIVE daily schedule nested under on: (not a commented-out block)', () => {
+    // Anchored at `on:` so a cron that only appears in a comment above it cannot
+    // satisfy this — the 2026-09-04 stopgap commented the block out and the old
+    // /cron:.../ guard kept passing.
+    expect(wf).toMatch(/^on:\r?\n(?:[ \t]+.*\r?\n)*?[ \t]+schedule:\r?\n[ \t]+- cron: '0 11 \* \* \*'/m);
+    expect(wf).not.toMatch(/^\s*#\s*schedule:/m);
+    expect(wf).not.toMatch(/cron:\s*'0 11 \* \* 3'/); // never back to weekly
+  });
+
+  it('keeps the manual trigger', () => {
+    expect(wf).toMatch(/^[ \t]+workflow_dispatch:/m);
   });
 
   it('installs deps and runs the prebuild before deriving figures', () => {
