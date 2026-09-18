@@ -10,6 +10,8 @@ tags:
   - sc
   - oconee
 draft: true
+featuredImage: /blog/oconee-camera-bagged.png
+featuredImageAlt: "A minimalist red-on-black illustration of a pole-mounted Flock license plate camera with a trash bag tied over it"
 ---
 
 On the morning of September 16, 2026, the day after Oconee County voted to run mass surveillance off its property, county council members walked up to the Flock cameras on county roads and [pulled trash bags down over them, one by one](https://www.foxcarolina.com/2026/09/17/bagged-banned-oconee-county-covers-flock-cameras-after-surveillance-ban/). Five cameras, about $60,000 over four years, a network that logged nearly every plate that passed, and the county gave Flock [14 days to come take them down](https://www.foxcarolina.com/2026/09/17/termination-letter-oconee-co-flock-cameras-describes-termination-fee-removal-timeline/). That is what a win looks like.
