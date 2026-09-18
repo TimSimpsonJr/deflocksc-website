@@ -241,3 +241,27 @@ describe('refresh-camera-data workflow (design 2026-09-17 §2)', () => {
     expect(wf).not.toContain('node scripts/fetch-camera-data.mjs');
   });
 });
+
+describe('provenance copy truth-up (design 2026-09-17 §2)', () => {
+  // The migration made OpenStreetMap the camera-data source (daily via Overpass)
+  // and removed map clustering; the reader-facing copy must not drift back to the
+  // stale DeFlock-CDN / hourly-weekly / clusters framing.
+  const buildingBlog = read('src/content/blog/building-deflocksc.md');
+  const fightBlog = read('src/content/blog/how-to-fight-alpr-surveillance-sc.md');
+  const mapSection = read('src/components/MapSection.astro');
+
+  it('no longer claims an hourly or weekly camera-data cadence', () => {
+    expect(buildingBlog).not.toMatch(/weekly script/i);
+    expect(fightBlog).not.toMatch(/updat(?:ed|es) hourly/i);
+  });
+
+  it('no longer describes map clusters (the map is declustered)', () => {
+    expect(fightBlog).not.toMatch(/clusters are dense deployments/i);
+  });
+
+  it('credits OpenStreetMap as the camera-data source', () => {
+    expect(mapSection).toMatch(/OpenStreetMap contributors/);
+    expect(fightBlog).toMatch(/OpenStreetMap/);
+    expect(buildingBlog).toMatch(/OpenStreetMap/);
+  });
+});
