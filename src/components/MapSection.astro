@@ -230,6 +230,7 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
   import type { GeoJSONSource } from 'maplibre-gl';
   import type { DeflockCamera } from '../scripts/map/tile-loader.js';
   import { observeCountUps } from '../scripts/count-up.js';
+  import { inScBounds } from '../lib/sc-camera-count.js';
 
   // Open on Greenville (the Upstate has the densest deployment); users pan and
   // zoom out from there to explore the rest of the state.
@@ -282,8 +283,14 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
 
       const loader = createTileLoader({
         onUpdate(cameras) {
+          // Bound the rendered set to SC (design 2026-09-17 §3). The loader
+          // accumulates every tile it has ever loaded, so without this clip a
+          // working proxy could feed the whole ~64k-record regional tile into
+          // the unclustered source. Clipping here keeps the source SC-bounded
+          // whichever source (live tiles or the committed snapshot) supplied
+          // the records.
           const source = handle.map.getSource('cameras') as GeoJSONSource | undefined;
-          source?.setData(toGeoJSON(cameras));
+          source?.setData(toGeoJSON(cameras.filter(inScBounds)));
         },
       });
 
