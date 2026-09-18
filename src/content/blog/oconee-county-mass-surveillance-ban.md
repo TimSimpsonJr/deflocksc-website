@@ -1,0 +1,61 @@
+---
+title: "How Oconee Took the Cameras Down"
+subtitle: "A county can't order its elected sheriff to stop using Flock, so Oconee cut off the money and the county rights-of-way the cameras run on, and became the first in South Carolina to force them off county property. Any SC county or city can copy the model, and the coalition that pushed it crossed party lines."
+date: 2026-09-17T00:00:00.000Z
+summary: "Oconee County became the first in South Carolina to force Flock mass-surveillance cameras off county property, by cutting off the county money and rights-of-way the system runs on. It's a model any SC county or city can copy, and proof that opposition to mass surveillance crosses party lines."
+tags:
+  - surveillance
+  - privacy
+  - alpr
+  - sc
+  - oconee
+draft: true
+---
+
+On the morning of September 16, 2026, the day after Oconee County, South Carolina voted to pull mass surveillance off its books, county council members walked up to the Flock cameras standing on county roads and [covered them, one by one, with plastic trash bags](https://www.foxcarolina.com/2026/09/17/bagged-banned-oconee-county-covers-flock-cameras-after-surveillance-ban/). The county emailed Flock the same morning: [14 days to take them down](https://www.foxcarolina.com/2026/09/17/termination-letter-oconee-co-flock-cameras-describes-termination-fee-removal-timeline/). Five cameras, about $60,000 over four years, a network that logged nearly every plate that passed. Gone, by order of the county.
+
+Build a system to watch everyone, and there's no safe setting for it: sooner or later it gets turned on the people it was pointed at, and the only honest move is to stop building these systems and dismantle the ones already standing. Oconee just did the second part, and it became [the first county in South Carolina to do it](https://www.southcarolinapublicradio.org/sc-news/2026-09-16/oconee-county-becomes-scs-first-to-ban-alpr-cameras).
+
+A county council [can't order an independently elected sheriff how to run his office](https://www.postandcourier.com/greenville/news/oconee-county-flock-cameras-defund/article_2ea48241-4795-454f-9468-98c887f060c5.html), and Oconee's council never tried. What a county controls is the money and the property: its own funds, the electricity and network connections the cameras run on, its buildings, and the road rights-of-way where most of these cameras actually sit. So the ordinance cuts all of that off from any system that qualifies as mass surveillance, and it conditions the discretionary county money that flows to the towns inside the county on the same rule. Refuse the dollars, deny the poles, and the cameras have NOWHERE left to stand.
+
+The ordinance is [written by capability](https://www.fitsnews.com/2026/08/11/south-carolina-county-takes-aim-at-flock-surveillance-network/). It covers any system that logs people or vehicles in public and can do one of a handful of things: build a searchable history of everywhere you've been, follow you across locations, run facial recognition or AI analysis, pour what it collects into an outside network, etc. A plain check of a plate against a specific, lawful hot list is carved out; the dragnet is not. It gets there without ever printing the word Flock, so a vendor can swap the brand and the rule still bites.
+
+This started with residents, months before it reached a council chamber. DeFlock Oconee County, the local group working alongside our statewide campaign, spent months turning private worry into public pressure, showing up, testifying, and [calling and messaging the chairman until, by his own account, he was fielding five or six contacts a day by July](https://www.foxcarolina.com/2026/09/17/bagged-banned-oconee-county-covers-flock-cameras-after-surveillance-ban/). The people who built that pressure came from across the political spectrum, left and right together in a county that went 76% for Trump, which tells you how thin the "this is just a liberal privacy issue" story really is.
+
+The sheriff, in a way, helped. Mike Crenshaw, [a past president of the state Sheriffs' Association](https://www.sheriffsc.org/past-presidents) and one of South Carolina's loudest Flock defenders, [gave the council a July briefing](https://upstatetoday.com/news/oconee-county-sheriff-explains-license-plate-reading-flock-cameras/article_b07eead2-b788-4df0-ab29-090da321dc0b.html) meant to put everyone at ease: the data auto-deletes, only some deputies can run searches, every search needs a case number. Councilman Tommy James pushed back in the room, asking whether the system was really about catching crime or about collecting data, and asked to see the contract and the list of outside agencies with access. Crenshaw allowed that his own office had [already disciplined an employee for misusing the system](https://www.fitsnews.com/2026/08/25/south-carolina-county-escalates-fight-over-flock-cameras/), and the briefing that was supposed to settle the matter is what put the ordinance in motion.
+
+The sponsor, council chairman Matthew Durham, [kept the argument on the ground of freedom and constitutional limits](https://www.postandcourier.com/greenville/news/oconee-county-flock-cameras-defund/article_2ea48241-4795-454f-9468-98c887f060c5.html). "We have the Constitution to limit government for a reason," he said. "The effectiveness of the tool doesn't outweigh the citizens' right to privacy, to constitutional protections." When it passed 4 to 1, [Crenshaw said he would comply](https://www.live5news.com/2026/09/16/oconee-county-council-passes-ban-flock-cameras-countywide/): "We respect council's decision."
+
+Now notice who was arguing with whom. The fight in Oconee ran inside a single party. Limited-government conservatives lined up against law-and-order conservatives, the sheriff and the lone dissenting councilman among them, and the limited-government side won going away. That's the crack in the wall we've been pointing at for a year: the story that law enforcement speaks with one voice on Flock, and that questioning it is a partisan pose. Neither one holds up when a county this red pulls the plug on the cameras of a sheriff who once led the state Sheriffs' Association.
+
+Zoom out and the same split shows up everywhere. [Republican governors in Florida and Texas have yanked state support](https://www.eff.org/deeplinks/2026/09/texas-and-florida-step-back-alprs) for these cameras this year, [a Democratic governor in Pennsylvania has moved against them, and Glenn Beck and the ACLU have landed on the same side for once](https://www.npr.org/2026/09/05/nx-s1-5955778/flock-surveillance-camera-opposition-politics), etc. Deep-blue Santa Cruz and deep-red towns in Arkansas got to the same place by different roads. In our own statehouse, [the toughest bill to rein these systems in came from the Freedom Caucus](/blog/h4675-strongest-alpr-bill-in-sc), and Democrats have carried plate-reader limits too.
+
+So how do you do this where you live? South Carolina's [Home Rule Act](https://www.scstatehouse.gov/code/t04c009.php) hands counties broad control over their own budgets, property, and roads, and [there's no state plate-reader law standing in the way](/blog/sc-has-no-license-plate-camera-law), so the Oconee path is open in all 46 counties. A county follows [the same four moves](/blog/how-to-fight-alpr-surveillance-sc): define the problem by capability, keep county money and property out of it, close the side doors like town funding and festival committees and nonprofits, and set a firm clock for removal. A city can go further, because a city police department answers to its council, so a city can regulate its own cameras head-on, require a documented reason for every search, cap how long the data is kept, and publish the audit logs so misuse gets caught in daylight instead of a year later.
+
+We've already turned the Oconee ordinance into two ready-to-hand briefs, [one for counties](/toolkit/speaking/county-council-brief) and [one for cities](/toolkit/speaking/city-council-brief), keyed to the exact language that passed. Your council's staff and attorney can shape it from there.
+
+It isn't over. Crenshaw has signaled he'll go [looking for relief at the state level](/blog/s447-time-is-running-out), and a future state law could try to preempt what Oconee did. [Greer, just up the road, suspended its own Flock program for 90 days](https://www.postandcourier.com/greenville/news/greer-south-carolina-flock-cameras-suspended/article_63442586-c542-45cd-9d4e-5fbf02fc6e74.html) back in August and hasn't said what happens when that clock runs out.
+
+We keep a [running map](/) of every Flock camera we can find in South Carolina, county by county. Oconee just proved a county can take its own off the board. If you'd rather yours do the same, tell the people who hold the purse strings.
+
+<div class="not-prose my-10 border border-[rgba(255,255,255,0.07)] bg-[#1a1a1a] px-8 py-8 text-center">
+  <p class="label-mono-heading mb-3">Take Action</p>
+  <p class="text-[#a3a3a3] text-sm mb-5">Oconee showed a county can do this. Tell your county council, city council, and state legislators to keep South Carolina's money and property out of mass surveillance, and take down what's already up.</p>
+  <button type="button" data-open-action class="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold text-sm uppercase tracking-[0.05em] px-8 py-4 transition-colors cursor-pointer">Find Your Rep</button>
+</div>
+
+## Sources
+
+- [Fox Carolina: "Bagged & banned" — Oconee covers Flock cameras after surveillance ban (Sept 17, 2026)](https://www.foxcarolina.com/2026/09/17/bagged-banned-oconee-county-covers-flock-cameras-after-surveillance-ban/)
+- [Fox Carolina: Oconee's Flock termination letter — removal timeline and fee (Sept 17, 2026)](https://www.foxcarolina.com/2026/09/17/termination-letter-oconee-co-flock-cameras-describes-termination-fee-removal-timeline/)
+- [South Carolina Public Radio: Oconee County becomes SC's first to ban ALPR cameras (Sept 16, 2026)](https://www.southcarolinapublicradio.org/sc-news/2026-09-16/oconee-county-becomes-scs-first-to-ban-alpr-cameras)
+- [Live5News: Oconee County Council passes ban on Flock cameras countywide (Sept 16, 2026)](https://www.live5news.com/2026/09/16/oconee-county-council-passes-ban-flock-cameras-countywide/)
+- [Post and Courier: SC county votes to defund Flock cameras, a potential first for the state (Aug 2026)](https://www.postandcourier.com/greenville/news/oconee-county-flock-cameras-defund/article_2ea48241-4795-454f-9468-98c887f060c5.html)
+- [FITSNews: South Carolina county takes aim at Flock surveillance network (Aug 11, 2026)](https://www.fitsnews.com/2026/08/11/south-carolina-county-takes-aim-at-flock-surveillance-network/)
+- [FITSNews: South Carolina county escalates fight over Flock cameras (Aug 25, 2026)](https://www.fitsnews.com/2026/08/25/south-carolina-county-escalates-fight-over-flock-cameras/)
+- [Upstate Today: Oconee County sheriff explains license-plate-reading Flock cameras (Jul/Aug 2026)](https://upstatetoday.com/news/oconee-county-sheriff-explains-license-plate-reading-flock-cameras/article_b07eead2-b788-4df0-ab29-090da321dc0b.html)
+- [South Carolina Sheriffs' Association: Past Presidents (Crenshaw, 2020-2021)](https://www.sheriffsc.org/past-presidents)
+- [NPR: Democrats and Republicans united in opposition to Flock surveillance cameras (Sept 5, 2026)](https://www.npr.org/2026/09/05/nx-s1-5955778/flock-surveillance-camera-opposition-politics)
+- [EFF: Texas and Florida step back from ALPRs (Sept 2026)](https://www.eff.org/deeplinks/2026/09/texas-and-florida-step-back-alprs)
+- [SC Statehouse: Home Rule, county powers (Title 4, Chapter 9)](https://www.scstatehouse.gov/code/t04c009.php)
+- [Post and Courier: Greer suspends its Flock program for 90 days (Aug 2026)](https://www.postandcourier.com/greenville/news/greer-south-carolina-flock-cameras-suspended/article_63442586-c542-45cd-9d4e-5fbf02fc6e74.html)
