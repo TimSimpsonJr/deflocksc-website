@@ -2,11 +2,10 @@ name: Refresh Camera Data
 
 # Daily refresh of public/camera-data.json from OpenStreetMap via the Overpass
 # API (docs/plans/2026-09-17-overpass-camera-migration-design.md). Overpass
-# serves datacenter egress, so this runs in CI again. The previous source
-# (DeFlock's Cloudflare CDN) 403'd GitHub runners, which forced a local
-# Windows Scheduled Task stopgap (scripts/refresh-camera-data.local.ps1); that
-# stays registered until this schedule has produced at least one successful
-# refresh on master, then is retired (design §2, rollout).
+# serves datacenter egress, so this runs in CI. (The previous source, DeFlock's
+# Cloudflare CDN, 403'd GitHub runners, which forced a temporary local Windows
+# Scheduled Task; that stopgap was retired once this schedule produced a green
+# refresh on master. The history is in the design doc.)
 on:
   schedule:
     - cron: '0 11 * * *' # 11:00 UTC — 6am ET (winter) / 7am (summer)
