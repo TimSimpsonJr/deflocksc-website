@@ -3,7 +3,7 @@
  *
  * Everything Deflock-camera-specific: vendor reference images, the
  * directional cone icon, direction parsing, the camera popup, and the
- * cluster / dot / cone layers with their event handlers.
+ * dot / cone layers with their event handlers.
  */
 
 import maplibregl from 'maplibre-gl';
@@ -164,7 +164,8 @@ function showCameraPopup(map: maplibregl.Map, e: maplibregl.MapLayerMouseEvent):
 
 // --- Layers ---
 
-const CAMERA_LAYER_IDS = ['cluster-glow', 'clusters', 'cluster-count', 'camera-dots', 'camera-cones'];
+/** Add/teardown order. Exported so the declustering guard test can assert the contract. */
+export const CAMERA_LAYER_IDS = ['camera-dots', 'camera-cones'];
 
 /** Per-map event teardown, so removeCameraLayers can unbind what it bound. */
 const cameraTeardowns = new WeakMap<maplibregl.Map, () => void>();
@@ -173,82 +174,26 @@ export function addCameraLayers(map: maplibregl.Map, geojson: GeoJSON.FeatureCol
   // Popups read this lazily on click, so there is no need to block setup on it.
   void loadVendorImages();
 
+  // Unclustered (design 2026-09-17 §3). MapSection clips the fed set to
+  // SC_BOUNDS before setData, so this source only ever holds the ~6,500
+  // SC-area cameras, which draw individually without clustering.
   map.addSource('cameras', {
     type: 'geojson',
     data: geojson,
-    cluster: true,
-    clusterMaxZoom: 9, // individual dots/cones from zoom 10 (was 15 -> 12 -> 10 -> 9)
-    clusterRadius: 30,
+    cluster: false,
   });
 
-  // Cluster glow (much larger blurred circle behind)
-  map.addLayer({
-    id: 'cluster-glow',
-    type: 'circle',
-    source: 'cameras',
-    filter: ['has', 'point_count'],
-    paint: {
-      'circle-color': [
-        'interpolate', ['linear'], ['get', 'point_count'],
-        2, 'rgba(255,255,255,0.6)',
-        10, 'rgba(200,200,200,0.5)',
-        25, 'rgba(239,68,68,0.5)',
-        50, 'rgba(220,38,38,0.5)',
-      ],
-      'circle-radius': ['step', ['get', 'point_count'], 28, 10, 36, 50, 48],
-      'circle-opacity': 0.4,
-      'circle-blur': 1,
-    },
-  });
-
-  // Cluster circles
-  map.addLayer({
-    id: 'clusters',
-    type: 'circle',
-    source: 'cameras',
-    filter: ['has', 'point_count'],
-    paint: {
-      'circle-color': [
-        'interpolate', ['linear'], ['get', 'point_count'],
-        2, '#dc2626',
-        15, '#b91c1c',
-        50, '#991b1b',
-      ],
-      'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 50, 24],
-      'circle-opacity': 0.95,
-      'circle-stroke-width': 2,
-      'circle-stroke-color': [
-        'interpolate', ['linear'], ['get', 'point_count'],
-        2, 'rgba(255,255,255,0.7)',
-        15, 'rgba(200,200,200,0.6)',
-        50, 'rgba(239,68,68,0.8)',
-      ],
-      'circle-stroke-opacity': 0.9,
-    },
-  });
-
-  map.addLayer({
-    id: 'cluster-count',
-    type: 'symbol',
-    source: 'cameras',
-    filter: ['has', 'point_count'],
-    layout: {
-      'text-field': '{point_count_abbreviated}',
-      'text-size': 13,
-      'text-font': ['Noto Sans Regular'],
-      'text-allow-overlap': true,
-    },
-    paint: { 'text-color': '#ffffff' },
-  });
-
+  // A dot under EVERY camera — directional ones included — so a camera whose
+  // cone fades on zoom-out is still visible as a dot, never nothing. Radius
+  // scales with zoom (starting point; tune live). This is the SOLE interactive
+  // layer: every camera is clicked/hovered through its dot at every zoom.
   map.addLayer({
     id: 'camera-dots',
     type: 'circle',
     source: 'cameras',
-    filter: ['all', ['!', ['has', 'point_count']], ['!', ['get', 'hasDirection']]],
     paint: {
       'circle-color': '#ef4444',
-      'circle-radius': 5,
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 2, 10, 4, 14, 6],
       'circle-stroke-width': 1,
       'circle-stroke-color': '#991b1b',
     },
@@ -257,17 +202,25 @@ export function addCameraLayers(map: maplibregl.Map, geojson: GeoJSON.FeatureCol
   // Directional cone icon
   map.addImage('cone', createConeImage());
 
+  // Decorative overlay for directional cameras: fades in across zoom 9 -> 10,
+  // the old cluster-expansion boundary where individual features used to appear.
+  // NO click/hover handlers here — a zero-opacity symbol is still
+  // hit-queryable in MapLibre, and every directional camera also has a dot, so
+  // binding both layers would open two popups (and fire analytics twice).
   map.addLayer({
     id: 'camera-cones',
     type: 'symbol',
     source: 'cameras',
-    filter: ['all', ['!', ['has', 'point_count']], ['get', 'hasDirection']],
+    filter: ['get', 'hasDirection'],
     layout: {
       'icon-image': 'cone',
       'icon-size': 1.0,
       'icon-rotate': ['get', 'direction'],
       'icon-allow-overlap': true,
       'icon-rotation-alignment': 'map',
+    },
+    paint: {
+      'icon-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0, 10, 1],
     },
   });
 
@@ -288,46 +241,20 @@ export function removeCameraLayers(map: maplibregl.Map): void {
 // --- Map event handlers ---
 
 function bindCameraEvents(map: maplibregl.Map): void {
-  // Cluster click -> zoom in
-  const onClusterClick = (e: maplibregl.MapLayerMouseEvent) => {
-    const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
-    if (!features.length) return;
-    const clusterId = features[0].properties.cluster_id;
-    const source = map.getSource('cameras') as maplibregl.GeoJSONSource;
-    source.getClusterExpansionZoom(clusterId).then((zoom) => {
-      map.easeTo({
-        center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number],
-        zoom,
-      });
-    });
-  };
-
-  // Camera dot and cone clicks -> popup
+  // Camera dot click -> popup (dots are the one interaction owner per camera)
   const onCameraClick = (e: maplibregl.MapLayerMouseEvent) => showCameraPopup(map, e);
 
-  // Pointer cursors on interactive features
+  // Pointer cursor on interactive features
   const onEnter = () => { map.getCanvas().style.cursor = 'pointer'; };
   const onLeave = () => { map.getCanvas().style.cursor = ''; };
 
-  map.on('click', 'clusters', onClusterClick);
-  map.on('mouseenter', 'clusters', onEnter);
-  map.on('mouseleave', 'clusters', onLeave);
   map.on('click', 'camera-dots', onCameraClick);
-  map.on('click', 'camera-cones', onCameraClick);
   map.on('mouseenter', 'camera-dots', onEnter);
   map.on('mouseleave', 'camera-dots', onLeave);
-  map.on('mouseenter', 'camera-cones', onEnter);
-  map.on('mouseleave', 'camera-cones', onLeave);
 
   cameraTeardowns.set(map, () => {
-    map.off('click', 'clusters', onClusterClick);
-    map.off('mouseenter', 'clusters', onEnter);
-    map.off('mouseleave', 'clusters', onLeave);
     map.off('click', 'camera-dots', onCameraClick);
-    map.off('click', 'camera-cones', onCameraClick);
     map.off('mouseenter', 'camera-dots', onEnter);
     map.off('mouseleave', 'camera-dots', onLeave);
-    map.off('mouseenter', 'camera-cones', onEnter);
-    map.off('mouseleave', 'camera-cones', onLeave);
   });
 }
