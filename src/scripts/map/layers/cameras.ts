@@ -202,13 +202,11 @@ export function addCameraLayers(map: maplibregl.Map, geojson: GeoJSON.FeatureCol
   // Directional cone icon
   map.addImage('cone', createConeImage());
 
-  // Decorative overlay for directional cameras: fades in across zoom 12 -> 13.5,
-  // the point where a cone (~36px wedge) stops overlapping its neighbors and so
-  // starts being legible instead of clutter. Derived from the SC data: the
-  // median camera's nearest neighbor is ~200m away, which clears the cone
-  // footprint around zoom 13.5 (closer than the old ~zoom-10 fade, where cones
-  // still piled onto each other in the dense metros). Below ~12 the cones would
-  // just overlap surrounding dots, so they fade to plain dots there.
+  // Decorative overlay for directional cameras: fades in across zoom 11 -> 12.
+  // Tuned by eye on the Greenville metro: at zoom 11 (the default statewide-ish
+  // view) the cones pile onto neighboring dots and read as clutter, so they fade
+  // to plain dots; by zoom 12 (panned into a town) they have room to breathe and
+  // the facing direction becomes legible.
   // NO click/hover handlers here — a zero-opacity symbol is still
   // hit-queryable in MapLibre, and every directional camera also has a dot, so
   // binding both layers would open two popups (and fire analytics twice).
@@ -225,7 +223,7 @@ export function addCameraLayers(map: maplibregl.Map, geojson: GeoJSON.FeatureCol
       'icon-rotation-alignment': 'map',
     },
     paint: {
-      'icon-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0, 13.5, 1],
+      'icon-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 12, 1],
     },
   });
 

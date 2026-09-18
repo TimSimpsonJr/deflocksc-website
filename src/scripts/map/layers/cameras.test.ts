@@ -248,10 +248,10 @@ describe('declustered camera layers (design 2026-09-17 §3)', () => {
     expect(dots).toContain("'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 2, 10, 4, 14, 6]");
   });
 
-  it('fades cones in across the overlap-onset zoom band (12 -> 13.5)', () => {
-    // Cones become legible (stop overlapping neighbors) around zoom 13.5 for the
-    // median SC camera; below ~12 they just clutter, so they fade to plain dots.
-    expect(source).toContain("'icon-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0, 13.5, 1]");
+  it('fades cones in across the overlap-onset zoom band (11 -> 12)', () => {
+    // Cones clutter the dense metros at the default ~zoom-11 view, so they fade to
+    // plain dots there and become legible once panned in to ~zoom 12.
+    expect(source).toContain("'icon-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 12, 1]");
   });
 
   it('binds click/hover to camera-dots only — cones are decorative (one popup per directional camera)', () => {
