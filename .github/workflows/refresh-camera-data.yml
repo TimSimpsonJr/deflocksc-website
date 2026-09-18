@@ -1,15 +1,15 @@
 name: Refresh Camera Data
 
-# Manual-only. DeFlock's Cloudflare CDN returns 403 to datacenter egress
-# (GitHub Actions runners, Netlify), so this job cannot fetch the data and the
-# daily schedule failed every run. The refresh now runs from a residential IP
-# via a Windows Scheduled Task on the maintainer's machine
-# (scripts/refresh-camera-data.local.ps1). This workflow_dispatch trigger is
-# kept as a fallback for if/when DeFlock allowlists a datacenter path, at which
-# point the `schedule:` block below can be restored.
-#   schedule:
-#     - cron: '0 11 * * *'  # daily 6am ET
+# Daily refresh of public/camera-data.json from OpenStreetMap via the Overpass
+# API (docs/plans/2026-09-17-overpass-camera-migration-design.md). Overpass
+# serves datacenter egress, so this runs in CI again. The previous source
+# (DeFlock's Cloudflare CDN) 403'd GitHub runners, which forced a local
+# Windows Scheduled Task stopgap (scripts/refresh-camera-data.local.ps1); that
+# stays registered until this schedule has produced at least one successful
+# refresh on master, then is retired (design §2, rollout).
 on:
+  schedule:
+    - cron: '0 11 * * *' # 11:00 UTC — 6am ET (winter) / 7am (summer)
   workflow_dispatch: # manual trigger
 
 permissions:
@@ -24,22 +24,23 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-      # fetch-camera-data and build-impact-stats are now esbuild-bundled TS that
+      # fetch-camera-data and build-impact-stats are esbuild-bundled TS that
       # import the shared count module (src/lib/sc-camera-count.ts), and
       # build-impact-stats reads the SC boundary GeoJSON the prebuild copies into
       # public/districts from the open-civics-boundaries package — so this job
       # installs deps and runs the prebuild before deriving figures.
       - run: npm ci
       - run: npm run prebuild
-      # Atomic refresh (design §4.1): fetch + VALIDATE the CDN snapshot, then derive
-      # the SC total + per-jurisdiction counts + impact stats from that one snapshot
-      # so the artifacts agree. fetch-camera-data validates the payload
-      # ALL-OR-NOTHING with the shared validator BEFORE writing
-      # public/camera-data.json; a malformed/empty/mixed response throws -> non-zero
-      # exit, which fails this step and the whole job (GitHub Actions stops on the
-      # first non-zero step), so build-impact-stats and the commit step below never
-      # run and no corrupt snapshot or count is ever committed. The prior committed
-      # snapshot is left untouched.
+      # Atomic refresh: fetch + VALIDATE the Overpass response, then derive the
+      # SC total + per-jurisdiction counts + impact stats from that one snapshot
+      # so the artifacts agree. fetch-camera-data accepts a mirror's response only
+      # after the envelope (no `remark`), freshness (timestamp_osm_base), like-scope
+      # regression, and shared ALL-OR-NOTHING payload checks pass; it tries the
+      # next mirror on any failure and exits non-zero if every mirror fails. A
+      # non-zero exit fails this step and the whole job (GitHub Actions stops on
+      # the first non-zero step), so build-impact-stats and the commit step below
+      # never run and no corrupt or partial snapshot is ever committed. The prior
+      # committed snapshot is left untouched.
       - run: npm run fetch-camera-data
       - run: npm run build-impact-stats
       - name: Commit if data changed

@@ -52,7 +52,7 @@ Adding a new jurisdiction is mostly a config change. We want to make it easy for
 
 ### Keeping the map free
 
-We started with Mapbox for the camera map, but that came with API keys and usage limits. We switched to OpenFreeMap, which is free and open. Camera locations come from Deflock.org, which already tracks ALPR cameras nationwide. A weekly script grabs the latest data so the map stays current.
+We started with Mapbox for the camera map, but that came with API keys and usage limits. We switched to OpenFreeMap, which is free and open. Camera locations come from OpenStreetMap, the crowdsourced dataset that also feeds DeFlock's national ALPR map, and a daily script pulls the latest so ours stays current.
 
 ### Letters that actually say something
 

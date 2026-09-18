@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { parseDirection, wikimediaThumbnailUrl, createConeImage } from './cameras.js';
+import { readFileSync } from 'node:fs';
+import { CAMERA_LAYER_IDS, parseDirection, wikimediaThumbnailUrl, createConeImage } from './cameras.js';
 
 describe('parseDirection', () => {
   it('returns null for undefined tags', () => {
@@ -221,5 +222,42 @@ describe('createConeImage', () => {
     expect(cy + radius).toBeLessThanOrEqual(img.height);
     expect(cx - radius).toBeGreaterThanOrEqual(0);
     expect(cy - radius).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('declustered camera layers (design 2026-09-17 §3)', () => {
+  const source = readFileSync(new URL('./cameras.ts', import.meta.url), 'utf8');
+
+  it('registers exactly the dot and cone layers, dots first', () => {
+    expect(CAMERA_LAYER_IDS).toEqual(['camera-dots', 'camera-cones']);
+  });
+
+  it('does not cluster the source', () => {
+    expect(source).toContain('cluster: false');
+    expect(source).not.toContain('clusterMaxZoom');
+    expect(source).not.toContain('clusterRadius');
+    expect(source).not.toContain('getClusterExpansionZoom');
+    expect(source).not.toContain("'cluster-glow'");
+    expect(source).not.toContain("'cluster-count'");
+  });
+
+  it('puts a dot under EVERY camera (no hasDirection / point_count filter on camera-dots)', () => {
+    // The dots layer definition must not carry a filter at all.
+    const dots = source.slice(source.indexOf("id: 'camera-dots'"), source.indexOf("id: 'camera-cones'"));
+    expect(dots).not.toContain('filter:');
+    expect(dots).toContain("'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 2, 10, 4, 14, 6]");
+  });
+
+  it('fades cones in across the overlap-onset zoom band (11 -> 12)', () => {
+    // Cones clutter the dense metros at the default ~zoom-11 view, so they fade to
+    // plain dots there and become legible once panned in to ~zoom 12.
+    expect(source).toContain("'icon-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 12, 1]");
+  });
+
+  it('binds click/hover to camera-dots only — cones are decorative (one popup per directional camera)', () => {
+    expect(source).toMatch(/map\.on\(\s*'click',\s*'camera-dots'/);
+    expect(source).toMatch(/map\.on\(\s*'mouseenter',\s*'camera-dots'/);
+    expect(source).not.toMatch(/map\.on\(\s*'(click|mouseenter|mouseleave)',\s*'camera-cones'/);
+    expect(source).not.toMatch(/map\.on\(\s*'(click|mouseenter|mouseleave)',\s*'clusters'/);
   });
 });

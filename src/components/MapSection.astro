@@ -69,7 +69,7 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
         Map tiles by <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &middot; <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a> &middot; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>
       </p>
       <p class="text-[#9a9a9a] text-xs mt-1">
-        Camera data from <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">Deflock.org</a>, a community-sourced map of Flock Safety camera locations. Help keep it updated by reporting cameras you find.
+        Camera locations come from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">OpenStreetMap</a> (&copy; OpenStreetMap contributors, ODbL), the open dataset DeFlock draws on, refreshed daily. Spot one we're missing? Report it at <a href="https://deflock.org" target="_blank" rel="noopener" class="text-[#fbbf24] hover:text-[#fcd34d] transition-colors">DeFlock.org</a>.
       </p>
     </div>
 
@@ -230,6 +230,8 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
   import type { GeoJSONSource } from 'maplibre-gl';
   import type { DeflockCamera } from '../scripts/map/tile-loader.js';
   import { observeCountUps } from '../scripts/count-up.js';
+  import { inScBounds, pointInFeatureCollection } from '../lib/sc-camera-count.js';
+  import type { FeatureCollection } from '../lib/geo-utils.js';
 
   // Open on Greenville (the Upstate has the densest deployment); users pan and
   // zoom out from there to explore the rest of the state.
@@ -280,10 +282,43 @@ const jurisdictions = impactStats.jurisdictions.toLocaleString('en-US');
       // through source.setData() below — never re-add the source or layers.
       addCameraLayers(handle.map, { type: 'FeatureCollection', features: [] });
 
+      // Clip the rendered set to SC (design 2026-09-17 §3, refined). The loader
+      // accumulates every tile it has ever loaded, so without a clip a working
+      // proxy could feed the whole ~64k-record regional tile into the
+      // unclustered source. We clip to the SC OUTLINE polygon (not just the
+      // bounding box) so the map shows exactly the ~2,085 SC cameras the statline
+      // counts, and its edge follows the state border instead of a rectangle that
+      // cut off mid-Georgia. Until the outline finishes loading (or if it fails),
+      // fall back to the cheap SC bounding box so the map is never empty; the bbox
+      // pre-filter also keeps the polygon test to a few thousand candidates.
+      let scOutline: FeatureCollection | null = null;
+      let lastCameras: DeflockCamera[] = [];
+      const render = () => {
+        const source = handle.map.getSource('cameras') as GeoJSONSource | undefined;
+        if (!source) return;
+        const inBox = lastCameras.filter(inScBounds);
+        const clipped = scOutline
+          ? inBox.filter((c) => pointInFeatureCollection(c.lat, c.lon, scOutline as FeatureCollection))
+          : inBox;
+        source.setData(toGeoJSON(clipped));
+      };
+
+      void fetch('/districts/state-outline.json')
+        .then((r) => (r.ok ? r.json() : null))
+        .then((json) => {
+          if (json) {
+            scOutline = json as FeatureCollection;
+            render(); // re-clip whatever is already loaded, now against the polygon
+          }
+        })
+        .catch(() => {
+          /* keep the bbox fallback */
+        });
+
       const loader = createTileLoader({
         onUpdate(cameras) {
-          const source = handle.map.getSource('cameras') as GeoJSONSource | undefined;
-          source?.setData(toGeoJSON(cameras));
+          lastCameras = cameras;
+          render();
         },
       });
 

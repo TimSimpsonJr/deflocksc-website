@@ -4,10 +4,12 @@
 
 Astro 5 + Tailwind CSS 4 (+ daisyUI `deflock` theme, dark-only) advocacy site against ALPR
 surveillance in South Carolina. MapLibre GL JS drives the homepage camera map (live per-viewport
-Deflock CDN tiles) and the events map. Self-hosted Instrument Sans Variable via @fontsource (DM Mono
-removed site-wide). Rep/boundary data from the `open-civics` npm packages. Community events + council
-meetings stored via Netlify Blobs, served through Netlify Functions. Vitest unit suite (co-located
-`*.test.ts`). Deployed on Netlify (auto-deploy from `master`); Umami analytics proxied through `/u`.
+Deflock CDN tiles, SC-clipped) and the events map. The committed camera snapshot + per-jurisdiction
+counts are sourced from OpenStreetMap via the Overpass API (© OpenStreetMap contributors, ODbL).
+Self-hosted Instrument Sans Variable via @fontsource (DM Mono removed site-wide). Rep/boundary data
+from the `open-civics` npm packages. Community events + council meetings stored via Netlify Blobs,
+served through Netlify Functions. Vitest unit suite (co-located `*.test.ts`). Deployed on Netlify
+(auto-deploy from `master`); Umami analytics proxied through `/u`.
 
 ## Structure
 
@@ -18,7 +20,7 @@ src/
     Hero.astro                  # Full-bleed hero — camera PNG + animated SVG light cones
     BlogCarousel.astro          # Latest-5-posts CSS scroll-snap carousel (no JS, keyboard-scrollable)
     ImpactBand.astro            # Three-stat scale band with count-up (SC camera total ← impact-stats.json)
-    MapSection.astro            # MapLibre camera map: live CDN tiles, clustering, popups, statline
+    MapSection.astro            # MapLibre camera map: CDN tiles clipped to SC_BOUNDS before setData, unclustered dots, popups, statline; OSM/ODbL credit
     LegislationAsks.astro       # Oconee-model ordinance asks (6 cards + ask-frame stats); keeps legacy #bill-tracker anchor
     TakeActionZone.astro        # Primary CTA band (speak at council) → ActionModal; embeds ToolkitCards
     ToolkitCards.astro          # Shared 4-card /toolkit/* row (homepage + toolkit index)
@@ -40,18 +42,20 @@ src/
     rss.xml.ts                  # RSS feed
   lib/                          # Pure, Vitest-covered modules (most have a co-located *.test.ts)
     district-matcher.ts, geo-utils.ts, sc-camera-count.ts   # District matching + geometry (rep lookup) + shared SC camera count/payload validator
+    overpass.ts                 # Pure Overpass rules: mirrors, query builder, envelope/freshness/like-scope-regression asserts, element mapping
     blog-utils.ts, og-image.ts          # Read-time/related posts + Satori OG image
     event-schema.ts, public-event.ts    # Submitted-event validation + public (private-field-stripped) projection
     recurrence.ts, fold-events.ts       # Recurring-series rule expansion + folding into dated instances
     events-view.ts, council-events.ts   # Calendar view filtering + council-meeting-derived events
     jurisdictions.ts, city-label.ts     # SC jurisdiction lookup + city-name normalization
-    organizer-code.ts, organizer-cli.ts # Organizer access codes + local CLI
+    organizer-code.ts, organizer-cli.ts, organizer-ops.ts # Organizer access codes + local CLI + issue/list/revoke ops
+    codes-ui-server.ts, codes-ui-guard.ts # Local codes admin HTTP server + DNS-rebinding Host allowlist guard
     rate-limit.ts, sanitize-text.ts, escape-html.ts, signal-url.ts, wordlist-file.ts  # Abuse controls + safe input/links
     json-island.ts, text-result.ts, blob-stores.ts  # Data-island (de)serialize, Result type, Netlify Blobs store
   scripts/                      # Client-side entry points (progressive enhancement)
     action-modal/               # ActionModal logic: index, group-builder, results-renderer, modal-controller, manual-dropdowns, types
     map/core.ts, map/tile-loader.ts     # MapLibre init/chrome + per-viewport CDN tile fetch/dedupe/fallback (+ tile-loader.test.ts)
-    map/layers/cameras.ts, events.ts    # Camera layer (popups/clusters, +test) + event-location layer (+ events-constants.ts)
+    map/layers/cameras.ts, events.ts    # Camera layer: unclustered zoom-scaled dots + zoom-faded cones, sole interactive layer (+test); event-location layer (+ events-constants.ts)
     events-page.ts              # Events calendar view interactivity (list/month/map, filters)
     count-up.ts, signal-cta.ts  # Shared count-up animation; scraper-hidden Signal redirect (decodes go.ts "intake")
     tab-rail.ts, toast.ts       # Master-detail toolkit tabs; site-wide copy-feedback toast (daisyUI alert)
@@ -72,18 +76,19 @@ src/
 public/
   _headers, robots.txt          # Netlify security headers (CSP, X-Frame-Options) + crawl directives/sitemap
   districts/sc-counties.json    # County boundary GeoJSON (synced from open-civics)
-  camera-data.json, camera-counts.json, map-style.json  # Committed camera snapshot (map fallback), per-jurisdiction counts, OpenFreeMap dark style
+  camera-data.json, camera-counts.json, map-style.json  # OSM/Overpass SC-bbox camera snapshot (~6,500 recs; map fallback), per-jurisdiction counts, OpenFreeMap dark style
   hero-cameras*.{png,webp}, og-image.png, favicon.svg  # Responsive hero variants (650w–2600w) + default OG + favicon
   blog/, docs/, toolkit/, uploads/  # Post images/county map; public FOIA PDFs; toolkit downloads; submitted-event images
 
 scripts/                        # Node/Python build + data tooling
   scraper.py, validate-bills.py # SC statehouse bill scraper → bills.json (+ CI schema check)
   sync-open-civics.mjs          # Prebuild: sync npm package data into project
-  build-map-style.mjs, fetch-camera-data.ts, build-impact-stats.ts  # Map style + validating CDN fetch (all-or-nothing payload gate) + one PIP pass → camera-counts.json/impact-stats.json (esbuild-bundled TS, shared src/lib/sc-camera-count.ts)
-  refresh-camera-data.local.ps1 # Local residential-IP refresh (fetch+build+commit) via Windows Scheduled Task; CDN 403s datacenter egress so CI can't
-  build-camera-counts.py, build-city-centroids.py, build-county-map-{iso,svg}.py, build-county-shapes.mjs  # Legacy/count + centroid + SC county map builders
-  generate-business-cards.js, generate-toolkit-pdfs.js  # Outreach card + FOIA template PDF generators
+  build-map-style.mjs, fetch-camera-data.ts, build-impact-stats.ts  # Map style + OSM/Overpass fetch (3 mirrors, envelope+freshness+regression all-or-nothing gate, fail-red) + one PIP pass → camera-counts.json/impact-stats.json (esbuild-bundled TS, shared src/lib/sc-camera-count.ts + overpass.ts)
+  refresh-camera-data.local.ps1 # Legacy local residential-IP refresh (fetch+build+commit); PENDING RETIREMENT after the first successful CI Overpass refresh on master
+  codes-ui.html, codes-ui.ts    # Local `npm run codes:ui` organizer-codes admin (issue/list/revoke + copy) reusing the CLI mint logic
   organizer-codes.ts, build-wordlist.ts, update-letters-s447.py  # Organizer code CLI, EFF wordlist build, one-off letter patch
+  build-camera-counts.py, build-city-centroids.py, build-county-map-{iso,svg}.py, build-county-shapes.mjs  # Legacy/count + centroid + SC county map builders (+ build-county-shapes.test.mjs)
+  generate-business-cards.js, generate-toolkit-pdfs.js  # Outreach card + FOIA template PDF generators
   publish.py, data/             # Obsidian → blog publisher; EFF wordlist + centroid overrides + SOURCES.md
 
 netlify/functions/              # Runtime endpoints (Netlify Blobs backed)
@@ -91,8 +96,8 @@ netlify/functions/              # Runtime endpoints (Netlify Blobs backed)
   go.ts, address-suggest.ts     # Keyed redirect resolver (Signal "intake") + address autocomplete proxy
 tina/config.ts, tina-lock.json  # TinaCMS config for blog editing
 
-tests/                          # config-guards + tile-loader invariants; functions/*.test.ts (Netlify function tests)
-.github/                        # workflows: scrape-bills, refresh-camera-data, fold-events, lighthouse; dependabot; PR template
+tests/                          # config-guards + tile-loader invariants; fetch-camera-data/build-impact-stats exec tests; functions/*.test.ts (Netlify function tests)
+.github/                        # workflows: scrape-bills, refresh-camera-data (daily Overpass), fold-events, lighthouse; dependabot; PR template
 docs/                           # architecture/deployment/maintainability/*.md; plans/ (design+impl pairs), research/, handoffs/, reviews/
 ```
 
@@ -100,8 +105,9 @@ docs/                           # architecture/deployment/maintainability/*.md; 
 
 - **sync-open-civics.mjs (prebuild) → data + public/districts/** — assembles npm package data into project formats
 - **index.astro → Hero · BlogCarousel · ImpactBand · MapSection · LegislationAsks · TakeActionZone · EventsStrip · SignalCta** — rebuilt single-page homepage; TakeActionZone embeds ToolkitCards
-- **MapSection + map/core.ts + map/tile-loader.ts** — live per-viewport camera tiles via the same-origin `/deflock-tiles/*` proxy (netlify.toml in prod, astro.config.mjs dev proxy), declustering at zoom 13; falls back to committed public/camera-data.json when the CDN fails
-- **refresh-camera-data.local.ps1 (Windows Scheduled Task) → fetch-camera-data.ts + build-impact-stats.ts (shared src/lib/sc-camera-count.ts)** — validating fetch (all-or-nothing payload gate; non-zero exit + prior snapshot kept on failure) then one PIP pass regenerates camera-data.json (snapshot), camera-counts.json (per-jurisdiction), and impact-stats.json so the numbers never disagree; the build-time SC total in impact-stats.json is what Hero/ImpactBand/MapSection render (SSR, no live endpoint). Runs on a residential IP because DeFlock's Cloudflare CDN 403s datacenter egress; refresh-camera-data.yml is the same steps kept as a manual (workflow_dispatch) fallback for if/when a datacenter path is allowlisted
+- **MapSection + map/core.ts + map/tile-loader.ts** — live per-viewport camera tiles via the same-origin `/deflock-tiles/*` proxy (netlify.toml in prod, astro.config.mjs dev proxy); MapSection clips the accumulated set to SC_BOUNDS before each setData; cameras.ts renders unclustered zoom-scaled dots + zoom-faded cones (no clustering); falls back to committed public/camera-data.json when the CDN fails
+- **fetch-camera-data.ts (via overpass.ts) → build-impact-stats.ts (shared src/lib/sc-camera-count.ts)** — daily Overpass/OSM fetch across 3 mirrors, validated all-or-nothing (SC-bbox envelope + freshness + like-scope regression; non-zero exit + prior snapshot kept on failure), then one PIP pass regenerates camera-data.json (snapshot), camera-counts.json (per-jurisdiction), and impact-stats.json so the numbers never disagree; the build-time SC total in impact-stats.json is what Hero/ImpactBand/MapSection render (SSR, no live endpoint)
+- **refresh-camera-data.yml (daily cron) → fetch-camera-data.ts + build-impact-stats.ts** — Overpass serves CI egress, so the refresh runs on GitHub Actions; the residential-IP refresh-camera-data.local.ps1 is the legacy fallback, pending retirement after the first green CI run on master
 - **ImpactBand / LegislationAsks / MapSection statline → count-up.ts** — one shared animation; each ships its final value in the DOM for AT + no-JS
 - **LegislationAsks ← homepage-asks.ts + brief-icons.ts** — abridged asks + shared Tabler glyphs; homepage-asks.test.ts guards each ask's `cite` against council-brief.ts (no cite drift)
 - **CouncilBrief.astro renders cityBrief/countyBrief from council-brief.ts, glyphs from brief-icons.ts** — one shared component; @media print hides site chrome and repaints `.leave-behind` as the light sheet

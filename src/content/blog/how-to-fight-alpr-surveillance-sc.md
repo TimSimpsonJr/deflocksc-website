@@ -17,7 +17,7 @@ This is the playbook. 5 concrete steps to push back against ALPRs in South Carol
 
 ## Find out what's in your area
 
-The [camera map](/#camera-map) on this site shows every known ALPR camera in South Carolina, sourced from [Deflock.org](https://deflock.org), a community-reported database that updates hourly. Individual dots are single cameras; clusters are dense deployments. Zoom in on your neighborhood and see what's there.
+Our [camera map](/#camera-map) shows every known ALPR camera in South Carolina, drawn from [OpenStreetMap](https://www.openstreetmap.org/copyright) (the crowdsourced dataset behind [DeFlock](https://deflock.org)) and refreshed daily. Every dot is one camera; the closer you zoom, the more they spread out. Zoom in on your neighborhood and see what's there.
 
 The scale is bigger than most people expect. Over 110 South Carolina law enforcement agencies use Flock Safety cameras, adding up to more than 1,000 cameras statewide, all funneling data into a SLED-run central database that has logged <strong class="red">422 million plate reads</strong> retained for 3 years. [That database is the subject of a lawsuit right now](/blog/scpif-v-sled-explainer), on the grounds that 99.8% of the plates it holds have no connection to any crime.
 
@@ -104,7 +104,7 @@ The camera on the pole is still there. Pick a step and start.
 
 ### Can I find out if there are surveillance cameras in my area?
 
-Yes. The [camera map](/#camera-map) shows every known ALPR camera in South Carolina, sourced from Deflock.org. It's community-reported and updated hourly.
+Yes. Our [camera map](/#camera-map) shows every known ALPR camera in South Carolina, drawn from OpenStreetMap (the same data DeFlock uses) and refreshed daily.
 
 ### How do I file a FOIA request for ALPR data in South Carolina?
 
