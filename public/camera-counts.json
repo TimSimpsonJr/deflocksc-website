@@ -18,13 +18,13 @@
   "county:fairfield": 7,
   "county:florence": 68,
   "county:georgetown": 33,
-  "county:greenville": 207,
+  "county:greenville": 209,
   "county:greenwood": 72,
   "county:hampton": 2,
   "county:horry": 128,
   "county:jasper": 26,
   "county:kershaw": 31,
-  "county:lancaster": 92,
+  "county:lancaster": 93,
   "county:laurens": 37,
   "county:lee": 8,
   "county:lexington": 83,
@@ -40,5 +40,5 @@
   "county:union": 17,
   "county:york": 127,
   "place:charleston": 50,
-  "place:greenville": 86
+  "place:greenville": 88
 }
