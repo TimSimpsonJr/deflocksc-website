@@ -19,7 +19,7 @@
   "county:florence": 68,
   "county:georgetown": 33,
   "county:greenville": 209,
-  "county:greenwood": 72,
+  "county:greenwood": 78,
   "county:hampton": 2,
   "county:horry": 128,
   "county:jasper": 26,
@@ -35,10 +35,10 @@
   "county:pickens": 64,
   "county:richland": 167,
   "county:saluda": 9,
-  "county:spartanburg": 87,
+  "county:spartanburg": 89,
   "county:sumter": 107,
   "county:union": 17,
-  "county:york": 127,
+  "county:york": 128,
   "place:charleston": 50,
   "place:greenville": 88
 }
