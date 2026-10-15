@@ -1,12 +1,12 @@
 {
   "county:abbeville": 5,
   "county:aiken": 32,
-  "county:anderson": 33,
+  "county:anderson": 34,
   "county:barnwell": 5,
-  "county:beaufort": 100,
+  "county:beaufort": 99,
   "county:berkeley": 119,
   "county:calhoun": 19,
-  "county:charleston": 128,
+  "county:charleston": 129,
   "county:cherokee": 11,
   "county:chester": 51,
   "county:chesterfield": 38,
@@ -18,7 +18,7 @@
   "county:fairfield": 7,
   "county:florence": 70,
   "county:georgetown": 33,
-  "county:greenville": 196,
+  "county:greenville": 198,
   "county:greenwood": 79,
   "county:hampton": 2,
   "county:horry": 128,
@@ -39,6 +39,6 @@
   "county:sumter": 107,
   "county:union": 18,
   "county:york": 130,
-  "place:charleston": 50,
+  "place:charleston": 51,
   "place:greenville": 81
 }
