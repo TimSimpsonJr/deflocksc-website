@@ -1,9 +1,9 @@
 {
   "county:abbeville": 5,
   "county:aiken": 32,
-  "county:anderson": 34,
+  "county:anderson": 35,
   "county:barnwell": 5,
-  "county:beaufort": 98,
+  "county:beaufort": 97,
   "county:berkeley": 119,
   "county:calhoun": 19,
   "county:charleston": 129,
@@ -14,7 +14,7 @@
   "county:colleton": 20,
   "county:darlington": 55,
   "county:dillon": 10,
-  "county:dorchester": 33,
+  "county:dorchester": 32,
   "county:fairfield": 7,
   "county:florence": 71,
   "county:georgetown": 33,
@@ -22,7 +22,7 @@
   "county:greenwood": 79,
   "county:hampton": 2,
   "county:horry": 128,
-  "county:jasper": 26,
+  "county:jasper": 29,
   "county:kershaw": 32,
   "county:lancaster": 97,
   "county:laurens": 36,
@@ -38,7 +38,7 @@
   "county:spartanburg": 90,
   "county:sumter": 107,
   "county:union": 18,
-  "county:york": 130,
+  "county:york": 131,
   "place:charleston": 51,
   "place:greenville": 81
 }
