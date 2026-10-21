@@ -6,7 +6,7 @@
   "county:beaufort": 96,
   "county:berkeley": 119,
   "county:calhoun": 19,
-  "county:charleston": 129,
+  "county:charleston": 130,
   "county:cherokee": 11,
   "county:chester": 51,
   "county:chesterfield": 38,
@@ -18,11 +18,11 @@
   "county:fairfield": 7,
   "county:florence": 72,
   "county:georgetown": 33,
-  "county:greenville": 199,
-  "county:greenwood": 79,
+  "county:greenville": 200,
+  "county:greenwood": 78,
   "county:hampton": 2,
-  "county:horry": 128,
-  "county:jasper": 29,
+  "county:horry": 129,
+  "county:jasper": 28,
   "county:kershaw": 32,
   "county:lancaster": 97,
   "county:laurens": 36,
@@ -40,5 +40,5 @@
   "county:union": 18,
   "county:york": 144,
   "place:charleston": 51,
-  "place:greenville": 81
+  "place:greenville": 82
 }
