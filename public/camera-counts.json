@@ -1,6 +1,6 @@
 {
   "county:abbeville": 5,
-  "county:aiken": 33,
+  "county:aiken": 34,
   "county:anderson": 33,
   "county:barnwell": 5,
   "county:beaufort": 96,
@@ -16,9 +16,9 @@
   "county:dillon": 10,
   "county:dorchester": 33,
   "county:fairfield": 7,
-  "county:florence": 71,
+  "county:florence": 72,
   "county:georgetown": 33,
-  "county:greenville": 190,
+  "county:greenville": 193,
   "county:greenwood": 79,
   "county:hampton": 2,
   "county:horry": 130,
@@ -38,7 +38,7 @@
   "county:spartanburg": 92,
   "county:sumter": 109,
   "county:union": 19,
-  "county:york": 142,
+  "county:york": 129,
   "place:charleston": 51,
   "place:greenville": 78
 }
